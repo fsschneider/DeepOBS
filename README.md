@@ -1,7 +1,7 @@
 # Quick Start Guide
 
 ## Install Deep OBS
-	pip install git+URL
+	pip install git+https://github.com/anonymousICLR2019submitter/DeepOBS.git
 
 ## Download the data
 	deepobs_prepare_data.sh
@@ -21,7 +21,7 @@ Of course, the real value of a benchmark lies in evaluating new optimizers:
 ## Download and edit a run script
 You can download a template run script from there
 
-INSERT URL!
+https://github.com/anonymousICLR2019submitter/DeepOBS/blob/master/scripts/deepobs_run_sgd.py
 
 Now you have a deepobs_run_script.py script in your folder. In order to run your optimizer, you need to change a few things in this script.
 The script takes take of the training, evaluation and logging.
