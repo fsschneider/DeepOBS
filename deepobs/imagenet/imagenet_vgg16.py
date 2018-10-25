@@ -8,7 +8,34 @@ import imagenet_input
 
 
 class set_up:
+    """Class providing the functionality for the VGG 16 architecture on `ImageNet`.
+
+    Details about the architecture can be found in the `original paper`_. VGG 16 consists of 16 weight layers, of mostly convolutions. The model uses cross-entroy loss. A weight decay is used on the weights (but not the biases) which defaults to ``5e-4``.
+
+    Basis data augmentation (random crop, left-right flip, lighting augmentation) is done on the training images.
+
+    Args:
+        batch_size (int): Batch size of the data points. Defaults to ``128``.
+        weight_decay (float): Weight decay factor. In this model weight decay is applied to the weights, but not the biases. Defaults to ``5e-4``.
+
+    Attributes:
+        data_loading (deepobs.data_loading): Data loading class for `ImageNet`, :class:`.iamgenet_input.data_loading`.
+        losses (tf.Tensor): Tensor of size ``batch_size`` containing the individual losses per data point.
+        accuracy (tf.Tensor): Tensor containing the accuracy of the model.
+        train_init_op (tf.Operation): A TensorFlow operation to be performed before starting every training epoch.
+        train_eval_init_op (tf.Operation): A TensorFlow operation to be performed before starting every training eval epoch.
+        test_init_op (tf.Operation): A TensorFlow operation to be performed before starting every test evaluation phase.
+
+    .. _original paper: https://arxiv.org/abs/1409.1556
+    """
     def __init__(self, batch_size=128, weight_decay=5e-4):
+        """Initializes the problem set_up class.
+
+        Args:
+            batch_size (int): Batch size of the data points. Defaults to ``128``.
+            weight_decay (float): Weight decay factor. In this model weight decay is applied to the weights, but not the biases. Defaults to ``5e-4``.
+
+        """
         self.data_loading = imagenet_input.data_loading(batch_size=batch_size)
         self.losses, self.accuracy = self.set_up(weight_decay)
 
@@ -18,9 +45,24 @@ class set_up:
         self.test_init_op = tf.group([self.data_loading.test_init_op])
 
     def get(self):
+        """Returns the losses and the accuray of the model.
+
+        Returns:
+            tupel: Tupel consisting of the losses and the accuracy.
+
+        """
         return self.losses, self.accuracy
 
     def set_up(self, weight_decay):
+        """Sets up the test problem.
+
+        Args:
+            weight_decay (float): Weight decay factor, which is only applied to the weights and not the biases.
+
+        Returns:
+            tupel: Tupel consisting of the losses and the accuracy.
+
+        """
         X, y, phase = self.data_loading.load()
         num_classes = 1000
 

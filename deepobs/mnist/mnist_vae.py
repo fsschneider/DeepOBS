@@ -10,7 +10,32 @@ import mnist_input
 
 
 class set_up:
+    """Class providing the functionality for a Variational Autoencoder (VAE) adapted from `here`_ on `MNIST`.
+
+    Args:
+        batch_size (int): Batch size of the data points. Defaults to ``64``.
+        n_latent (int): Size of the latent space of the encoder. Defaults to ``8``.
+        weight_decay (float): Weight decay factor. In this model there is no weight decay implemented. Defaults to ``None``.
+
+    Attributes:
+        data_loading (deepobs.data_loading): Data loading class for `MNIST`, :class:`.mnist_input.data_loading`.
+        losses (tf.Tensor): Tensor of size ``batch_size`` containing the individual losses per data point.
+        accuracy (tf.Tensor): Tensor containing the accuracy of the model. As there is no accuracy when the loss function is given directly, we set it to ``0``.
+        train_init_op (tf.Operation): A TensorFlow operation to be performed before starting every training epoch.
+        train_eval_init_op (tf.Operation): A TensorFlow operation to be performed before starting every training eval epoch.
+        test_init_op (tf.Operation): A TensorFlow operation to be performed before starting every test evaluation phase.
+
+    .. _here: https://towardsdatascience.com/teaching-a-variational-autoencoder-vae-to-draw-mnist-characters-978675c95776
+    """
     def __init__(self, batch_size=64, n_latent=8, weight_decay=None):
+        """Initializes the problem set_up class.
+
+        Args:
+            batch_size (int): Batch size of the data points. Defaults to ``64``.
+            n_latent (int): Size of the latent space of the encoder. Defaults to ``8``.
+            weight_decay (float): Weight decay factor. In this model there is no weight decay implemented. Defaults to ``None``.
+
+        """
         self.data_loading = mnist_input.data_loading(batch_size=batch_size)
         self.losses, self.accuracy = self.set_up(
             weight_decay=weight_decay, n_latent=n_latent)
@@ -22,9 +47,25 @@ class set_up:
         self.test_init_op = tf.group([self.data_loading.test_init_op])
 
     def get(self):
+        """Returns the losses and the accuray of the model.
+
+        Returns:
+            tupel: Tupel consisting of the losses and the accuracy.
+
+        """
         return self.losses, self.accuracy
 
     def set_up(self, weight_decay=None, n_latent=8):
+        """Sets up the test problem.
+
+        Args:
+            weight_decay (float): Weight decay factor. In this model there is no weight decay implemented. Defaults to ``None``.
+            n_latent (int): Size of the latent space of the encoder. Defaults to ``8``.
+
+        Returns:
+            tupel: Tupel consisting of the losses and the accuracy.
+
+        """
         if weight_decay is not None:
             print(
                 "WARNING: Weight decay is non-zero but no weight decay is used for this model.")
@@ -49,9 +90,30 @@ class set_up:
         return losses, accuracy
 
     def lrelu(self, x, alpha=0.3):
+        """Leaky ReLU activation function.
+
+        Args:
+            x (tf.Variable): Input to the activation function.
+            alpha (float): Factor of the leaky ReLU. Defines how `leaky` it is. Defauylts to ``0.3``.
+
+        Returns:
+            tf.Variable: Output after the activation function.
+
+        """
         return tf.maximum(x, tf.multiply(x, alpha))
 
     def encoder(self, X, phase, n_latent):
+        """Encoder of the VAE. It consists of three convolutional and one dense layers. The convolutional layers use the leaky ReLU activation function. After each convolutional layer dropout is appleid with a keep probability of ``0.8``.
+
+        Args:
+            X (tf.Variable): Input to the encoder.
+            phase (tf.Variable): Phase variable, determining if we are in training or evaluation mode.
+            n_latent (int): Size of the latent space of the encoder. Defaults to ``8``.
+
+        Returns:
+            tupel: Output of the encoder, ``z``, the mean and the standard deviation.
+
+        """
         cond_keep_prob_1 = tf.cond(tf.equal(phase, tf.constant("train")),
                                    lambda: tf.constant(0.8),
                                    lambda: tf.constant(1.0))
@@ -76,6 +138,17 @@ class set_up:
             return z, mn, sd
 
     def decoder(self, sampled_z, phase, n_latent):
+        """The decoder for the VAE. It uses two dense layers, followed by three deconvolutional layers (each with dropout= ``0.8``) a final dense layer. The dense layers use the leaky ReLU activation (except the last one, which uses softmax), while the deconvolutional ones use regular ReLU.
+
+        Args:
+            sampled_z (tf.Variable): Sampled ``z`` from the encoder of the size ``n_latent``.
+            phase (tf.Variable): Phase variable, determining if we are in training or evaluation mode.
+            n_latent (int): Size of the latent space of the encoder. Defaults to ``8``.
+
+        Returns:
+            tf.Variable: A tensor of the same size as the original images (``28`` by ``28``).
+
+        """
         cond_keep_prob_1 = tf.cond(tf.equal(phase, tf.constant("train")),
                                    lambda: tf.constant(0.8),
                                    lambda: tf.constant(1.0))
@@ -97,7 +170,16 @@ class set_up:
             img = tf.reshape(x, shape=[-1, 28, 28], name="decoder_op")
             return img
 
-    def generate(self, sess, sampled_z=[np.random.normal(0, 1, 8) for _ in range(5)]):
+    def generate(self, sess, sampled_z=None):
+        """Function to generate images using the decoder. Images are ploted directly.
+
+        Args:
+            sess (tf.Session): A TensorFlow session.
+            sampled_z (tf.Variable): Sampled ``z`` with dimensions ``latent size`` times ``number of examples``. Defaults to ``None`` which uses five randomly sampled ``z`` from a normal with stddev = ``1.0``.
+
+        """
+        if sampled_z is None:
+            sampled_z = [np.random.normal(0, 1, 8) for _ in range(5)]
         z = tf.get_default_graph().get_tensor_by_name("encoder/z:0")
 
         dec = tf.get_default_graph().get_tensor_by_name("decoder/decoder_op:0")

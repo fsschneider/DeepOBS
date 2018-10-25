@@ -6,5 +6,5 @@ import cifar100_vgg16
 import cifar100_vgg19
 import cifar100_allcnnc
 
-import _cifar100_wrn
+import cifar100_wrn
 import cifar100_wrn404

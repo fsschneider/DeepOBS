@@ -18,7 +18,36 @@ import imagenet_input
 
 
 class set_up:
+    """Class providing the functionality for the Inception v3 architecture on `ImagNet`.
+
+    Details about the architecture can be found in the `original paper`_.
+
+    There are many changes from the paper to the "official" `TensorFlow implementation`_ as well as the model.txt that can be found in the sources of the `original paper`_.
+    We chose to implement the version from Tensorflow (with possibly some minor changes)
+
+    Args:
+        batch_size (int): Batch size of the data points. Defaults to ``128``.
+        weight_decay (float): Weight decay factor. In this model weight decay is applied to the weights, but not the biases. Defaults to ``4e-5``.
+
+    Attributes:
+        data_loading (deepobs.data_loading): Data loading class for `ImageNet`, :class:`.imagenet_input.data_loading`.
+        losses (tf.Tensor): Tensor of size ``batch_size`` containing the individual losses per data point.
+        accuracy (tf.Tensor): Tensor containing the accuracy of the model.
+        train_init_op (tf.Operation): A TensorFlow operation to be performed before starting every training epoch.
+        train_eval_init_op (tf.Operation): A TensorFlow operation to be performed before starting every training eval epoch.
+        test_init_op (tf.Operation): A TensorFlow operation to be performed before starting every test evaluation phase.
+
+    .. _original paper: https://arxiv.org/abs/1512.00567
+    .. _TensorFlow implementation: https://github.com/tensorflow/models/blob/master/research/inception/inception/slim/inception_model.py
+    """
     def __init__(self, batch_size=128, weight_decay=4e-5):
+        """Initializes the problem set_up class.
+
+        Args:
+            batch_size (int): Batch size of the data points. Defaults to ``128``.
+            weight_decay (float): Weight decay factor. In this model weight decay is applied to the weights, but not the biases. Defaults to ``4e-5``.
+
+        """
         self.data_loading = imagenet_input.data_loading(batch_size=batch_size)
         self.losses, self.accuracy = self.set_up(weight_decay)
 
@@ -28,9 +57,24 @@ class set_up:
         self.test_init_op = tf.group([self.data_loading.test_init_op])
 
     def get(self):
+        """Returns the losses and the accuray of the model.
+
+        Returns:
+            tupel: Tupel consisting of the losses and the accuracy.
+
+        """
         return self.losses, self.accuracy
 
     def set_up(self, weight_decay):
+        """Sets up the test problem.
+
+        Args:
+            weight_decay (float): Weight decay factor, which is only applied to the weights and not the biases.
+
+        Returns:
+            tupel: Tupel consisting of the losses and the accuracy.
+
+        """
         X, y, phase = self.data_loading.load()
         num_classes = 1000
 
@@ -129,6 +173,21 @@ class set_up:
         return losses, accuracy
 
     def conv2d_BN(self, inputs, filters, kernel_size, strides, padding, training, name="conv2d_BN"):
+        """Creates a convolutional layer, followed by a batch normalization layer and a ReLU activation.
+
+        Args:
+            inputs (tf.Tensor): Input tensor to the layer.
+            filters (int): Number of filters for the conv layer. No default value specified.
+            kernel_size (int): Size of the conv filter. No default value specified.
+            strides (int): Stride for the convolutions. No default value specified.
+            padding (str): Padding of the convolutional layers. Can be ``SAME`` or ``VALID``. No default value specified.
+            training (bool): Switch to determine if we are in training (or evaluation) mode.
+            name (str): Name of the layer. Defaults to ``conv2d_BN``.
+
+        Returns:
+            tf.Tenors: Output after the conv and batch norm layer.
+
+        """
         # We use the fixed set up described in the github implementation https://github.com/tensorflow/models/blob/master/research/inception/inception/slim/inception_model.py which uses the non-default batch norm momentum of 0.9997
         with tf.variable_scope(name):
             conv = tf.layers.conv2d(inputs=inputs, filters=filters, kernel_size=kernel_size, strides=strides, padding=padding, activation=None, use_bias=False, name="conv")
@@ -136,7 +195,19 @@ class set_up:
             relu = tf.nn.relu(bn, name="relu")
         return relu
 
-    def inception_block5(self, input_layer, variant, training, name="incpetion_block5"):
+    def inception_block5(self, input_layer, variant, training, name="inception_block5"):
+        """Defines the Inception block 5.
+
+        Args:
+            input_layer (tf.Tensor): Input to the inception block.
+            variant (str): Describes which variant of the inception block 5 to use. Can be ``a`` or ``b``.
+            training (bool): Switch to determine if we are in training (or evaluation) mode.
+            name (str): Name of the block. Defaults to ``inception_block5``.
+
+        Returns:
+            tf.Tenors: Output after the inception block.
+
+        """
         # Switch between the two versions
         if variant == 'a':
             num_filters = 32
@@ -161,7 +232,18 @@ class set_up:
             output = tf.concat(axis=3, values=[branch0_1x1, branch1_1x1, branch2_5x5, branch3_3x3_1])
         return output
 
-    def inception_block10(self, input_layer, training, name="incpetion_block10"):
+    def inception_block10(self, input_layer, training, name="inception_block10"):
+        """Defines the Inception block 10.
+
+        Args:
+            input_layer (tf.Tensor): Input to the inception block.
+            training (bool): Switch to determine if we are in training (or evaluation) mode.
+            name (str): Name of the block. Defaults to ``inception_block10``.
+
+        Returns:
+            tf.Tenors: Output after the inception block.
+
+        """
         # Build block
         with tf.variable_scope(name):
             with tf.variable_scope("branch0"):
@@ -175,7 +257,19 @@ class set_up:
             output = tf.concat(axis=3, values=[branch0_pool, branch1_3x3, branch2_3x3_1])
         return output
 
-    def inception_block6(self, input_layer, variant, training, name="incpetion_block6"):
+    def inception_block6(self, input_layer, variant, training, name="inception_block6"):
+        """Defines the Inception block 6.
+
+        Args:
+            input_layer (tf.Tensor): Input to the inception block.
+            variant (str): Describes which variant of the inception block 6 to use. Can be ``a``, ``b`` or ``c``.
+            training (bool): Switch to determine if we are in training (or evaluation) mode.
+            name (str): Name of the block. Defaults to ``inception_block6``.
+
+        Returns:
+            tf.Tenors: Output after the inception block.
+
+        """
         # Switch between the two versions
         if variant == 'a':
             num_filters = 128
@@ -205,7 +299,18 @@ class set_up:
             output = tf.concat(axis=3, values=[branch0_1x1, branch1_1x1, branch2_7x1, branch3_1x7_1])
         return output
 
-    def inception_blockD(self, input_layer, training, name="incpetion_blockD"):
+    def inception_blockD(self, input_layer, training, name="inception_blockD"):
+        """Defines the Inception block D.
+
+        Args:
+            input_layer (tf.Tensor): Input to the inception block.
+            training (bool): Switch to determine if we are in training (or evaluation) mode.
+            name (str): Name of the block. Defaults to ``inception_blockD``.
+
+        Returns:
+            tf.Tenors: Output after the inception block.
+
+        """
         # Build block
         with tf.variable_scope(name):
             with tf.variable_scope("branch0"):
@@ -221,7 +326,18 @@ class set_up:
             output = tf.concat(axis=3, values=[branch0_pool, branch1_3x3, branch2_3x3])
         return output
 
-    def inception_block7(self, input_layer, training, name="incpetion_block7"):
+    def inception_block7(self, input_layer, training, name="inception_block7"):
+        """Defines the Inception block 7.
+
+        Args:
+            input_layer (tf.Tensor): Input to the inception block.
+            training (bool): Switch to determine if we are in training (or evaluation) mode.
+            name (str): Name of the block. Defaults to ``inception_block7``.
+
+        Returns:
+            tf.Tenors: Output after the inception block.
+
+        """
         # Build block
         with tf.variable_scope(name):
             with tf.variable_scope("branch0"):

@@ -12,7 +12,33 @@ from .. import dataset_utils
 
 
 class data_loading:
+    """Class providing the data loading functionality for the MNIST data set.
+
+    Args:
+        batch_size (int): Batch size of the input-output pairs. No default value is given.
+
+    Attributes:
+        batch_size (int): Batch size of the input-output pairs.
+        train_eval_size (int): Number of data points to evaluate during the `train eval` phase. Currently set to ``10000`` the size of the test set.
+        D_train (tf.data.Dataset): The training data set.
+        D_train_eval (tf.data.Dataset): The training evaluation data set. It is the same data as `D_train` but we go through it separately.
+        D_test (tf.data.Dataset): The test data set.
+        phase (tf.Variable): Variable to describe which phase we are currently in. Can be "train", "train_eval" or "test". The phase variable can determine the behaviour of the network, for example deactivate dropout during evaluation.
+        iterator (tf.data.Iterator): A single iterator for all three data sets. We us the initialization operators (see below) to switch this iterator to the data sets.
+        X (tf.Tensor): Tensor holding the MNIST images. It has dimension `batch_size` x ``28`` (image size) x ``28`` (image size) x ``1`` (rgb).
+        y (tf.Tensor): Label of the MNIST images. It has dimension `batch_size` x ``10`` (number of classes).
+        train_init_op (tf.Operation): A TensorFlow operation to be performed before starting every training epoch. It sets the `phase` variable to "train" and initializes the iterator to the training data set.
+        train_eval_init_op (tf.Operation): A TensorFlow operation to be performed before starting every training eval phase. It sets the `phase` variable to "train_eval" and initializes the iterator to the training eval data set.
+        test_init_op (tf.Operation): A TensorFlow operation to be performed before starting every test evaluation phase. It sets the `phase` variable to "test" and initializes the iterator to the test data set.
+
+    """
     def __init__(self, batch_size):
+        """Initializes the data loading class.
+
+        Args:
+            batch_size (int): Batch size of the input-output pairs. No default value is given.
+
+        """
         self.train_eval_size = 10000  # The size of the test set
         self.batch_size = batch_size
         self.D_train = self.train_dataset(batch_size)
@@ -34,41 +60,83 @@ class data_loading:
             self.D_test), tf.assign(self.phase, "test")], name="test_init_op")
 
     def load(self):
+        """Returns the data (`X` (images) and `y` (labels)) and the phase variable.
+
+        Returns:
+            tupel: Tupel consisting of the images (`X`), the label (`y`) and the phase variable (`phase`).
+
+        """
         return self.X, self.y, self.phase
 
     def train_dataset(self, batch_size):
+        """Creates the training data set.
+
+        Args:
+            batch_size (int): Batch size of the input-output pairs.
+
+        Returns:
+            tf.data.Dataset: The training data set.
+
+        """
         data_dir = dataset_utils.get_data_dir()
         train_images_file = os.path.join(
             data_dir, "mnist", "train-images-idx3-ubyte.gz")
         train_labels_file = os.path.join(
             data_dir, "mnist", "train-labels-idx1-ubyte.gz")
-        return self._make_dataset(train_images_file, train_labels_file, batch_size,
-                                  one_hot=True, shuffle=True, shuffle_buffer_size=10000,
-                                  num_prefetched_batches=10)
+        return self.make_dataset(train_images_file, train_labels_file, batch_size, one_hot=True, shuffle=True, shuffle_buffer_size=10000, num_prefetched_batches=10)
 
     def train_eval_dataset(self, batch_size):
+        """Creates the train eval data set.
+
+        Args:
+            batch_size (int): Batch size of the input-output pairs.
+
+        Returns:
+            tf.data.Dataset: The train eval data set.
+
+        """
         data_dir = dataset_utils.get_data_dir()
         train_images_file = os.path.join(
             data_dir, "mnist", "train-images-idx3-ubyte.gz")
         train_labels_file = os.path.join(
             data_dir, "mnist", "train-labels-idx1-ubyte.gz")
-        return self._make_dataset(train_images_file, train_labels_file, batch_size,
-                                  one_hot=True, shuffle=True, shuffle_buffer_size=60000,
-                                  num_prefetched_batches=5, data_set_size=self.train_eval_size)
+        return self.make_dataset(train_images_file, train_labels_file, batch_size, one_hot=True, shuffle=True, shuffle_buffer_size=60000, num_prefetched_batches=5, data_set_size=self.train_eval_size)
 
     def test_dataset(self, batch_size):
+        """Creates the test data set.
+
+        Args:
+            batch_size (int): Batch size of the input-output pairs.
+
+        Returns:
+            tf.data.Dataset: The test data set.
+
+        """
         data_dir = dataset_utils.get_data_dir()
         test_images_file = os.path.join(
             data_dir, "mnist", "t10k-images-idx3-ubyte.gz")
         test_labels_file = os.path.join(
             data_dir, "mnist", "t10k-labels-idx1-ubyte.gz")
-        return self._make_dataset(test_images_file, test_labels_file, batch_size,
-                                  one_hot=True, shuffle=False, shuffle_buffer_size=-1,
-                                  num_prefetched_batches=5)
+        return self.make_dataset(test_images_file, test_labels_file, batch_size, one_hot=True, shuffle=False, shuffle_buffer_size=-1, num_prefetched_batches=5)
 
-    def _make_dataset(self, images_file, labels_file, batch_size, one_hot=True, shuffle=True, shuffle_buffer_size=10000, num_prefetched_batches=10, data_set_size=-1):
-        """Produce MNIST dataset."""
-        X, y = self._read_mnist_data(images_file, labels_file, one_hot)
+    def make_dataset(self, images_file, labels_file, batch_size, one_hot=True, shuffle=True, shuffle_buffer_size=10000, num_prefetched_batches=10, data_set_size=-1):
+        """Creates a data set from given images and label files.
+
+        Args:
+            images_file (str): Path to the images in compressed ``.gz`` files.
+            labels_file (str): Path to the labels in compressed ``.gz`` files.
+            batch_size (int): Batch size of the input-output pairs.
+            one_hot (bool): Switch to turn on or off one-hot encoding of the labels. Defaults to ``True``.
+            shuffle (bool):  Switch to turn on or off shuffling of the data set. Defaults to ``True``.
+            shuffle_buffer_size (int): Size of the shuffle buffer. Defaults to ``10000`` the size of the `test` and `train eval` data set, meaning that they will be completely shuffled.
+            num_prefetched_batches (int): Number of prefeteched batches, defaults to ``10``.
+            data_set_size (int): Size of the data set to extract from the images and label files. Defaults to ``-1`` meaning that the full data set is used.
+
+        Returns:
+            tf.data.Dataset: Data set object created from the images and label files.
+
+        """
+        X, y = self.read_mnist_data(images_file, labels_file, one_hot)
         with tf.name_scope("mnist"):
             with tf.device('/cpu:0'):
                 D = tf.data.Dataset.from_tensor_slices((X, y))
@@ -79,34 +147,42 @@ class data_loading:
                 D = D.prefetch(buffer_size=num_prefetched_batches)
                 return D
 
-    def _read32(self, bytestream):
+    def read32(self, bytestream):
+        """Helper function to read a bytestream.
+
+        Args:
+            bytestream (bytestream): Input bytestream.
+
+        Returns:
+            np.array: Bytestream as a np array.
+
+        """
         dt = np.dtype(np.uint32).newbyteorder('>')
         return np.frombuffer(bytestream.read(4), dtype=dt)[0]
 
-    def _read_mnist_data(self, images_file, labels_file, one_hot=True):
-        """Extract MNIST data from the provided .gz files for images and labels.
+    def read_mnist_data(self, images_file, labels_file, one_hot=True):
+        """Read the MNIST images and labels from the downloaded files.
 
-        Arguments:
-        :images_file: Path to the .gz file containing MNIST images.
-        :labels_file: Path to the .gz file containing corresponding labels.
-        :one_hot: Boolean. If True, the labels are returned as one-hot vectors.
+        Args:
+            images_file (str): Path to the images in compressed ``.gz`` files.
+            labels_file (str): Path to the labels in compressed ``.gz`` files.
+            one_hot (bool): Switch to turn on or off one-hot encoding of the labels. Defaults to ``True``.
 
         Returns:
-        :X: Numpy array of shape [num_images, 28, 28, 1] containing MNIST images.
-        :y: Numpy array containing corresponding labels. If ``one_hot=True``, its
-            shape is [num_images, 10], otherwise [num_images]."""
+            tupel: Tupel consisting of all the images (`X`) and the labels (`y`).
 
+        """
         # Load images from images_file
         with tf.gfile.Open(images_file, 'rb') as f:
             print('Extracting %s' % f.name)
             with gzip.GzipFile(fileobj=f) as bytestream:
-                magic = self._read32(bytestream)
+                magic = self.read32(bytestream)
                 if magic != 2051:
                     raise ValueError('Invalid magic number %d in MNIST image file: %s' %
                                      (magic, f.name))
-                num_images = self._read32(bytestream)
-                rows = self._read32(bytestream)
-                cols = self._read32(bytestream)
+                num_images = self.read32(bytestream)
+                rows = self.read32(bytestream)
+                cols = self.read32(bytestream)
                 buf = bytestream.read(rows * cols * num_images)
                 data = np.frombuffer(buf, dtype=np.uint8)
                 X = data.reshape(num_images, rows, cols, 1)
@@ -115,11 +191,11 @@ class data_loading:
         with tf.gfile.Open(labels_file, 'rb') as f:
             print('Extracting %s' % f.name)
             with gzip.GzipFile(fileobj=f) as bytestream:
-                magic = self._read32(bytestream)
+                magic = self.read32(bytestream)
                 if magic != 2049:
                     raise ValueError('Invalid magic number %d in MNIST label file: %s' %
                                      (magic, f.name))
-                num_items = self._read32(bytestream)
+                num_items = self.read32(bytestream)
                 buf = bytestream.read(num_items)
                 y = np.frombuffer(buf, dtype=np.uint8)
                 if one_hot:
