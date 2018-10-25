@@ -14,7 +14,7 @@ prepare_tolstoi=true
 for i in "$@"
 do
 case $i in
-    -d=*|--dir=*)
+    -d=*|--data_dir=*)
     DATA_FOLDER="${i#*=}"
     shift # past argument=value
     ;;

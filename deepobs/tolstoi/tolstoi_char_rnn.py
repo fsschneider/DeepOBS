@@ -9,8 +9,7 @@ Some characteristics:
 - cell state is automatically stored in variables between subsequent steps
 - when the phase placeholder swithches its value from one step to the next,
   the cell state is set to its zero value (meaning that we set to zero state
-  after each round of evaluation, it is therefore important to set the evaluation
-  interval such that we evaluate after a full epoch.)
+  after each round of evaluation, it is therefore important to set the evaluation interval such that we evaluate after a full epoch.)
 
 Training parameters:
 - batch size 50 (yields 1045 batches in train set and 261 in test set)
@@ -26,7 +25,37 @@ import tolstoi_input
 
 
 class set_up:
+    """Class providing the functionality for recurrent neural network providing character-level language modelling on the data set `Tolstoi`.
+
+    The network has two LSTM layers, each with ``128`` hidden units. We use a sequence length of ``50`` for the data set. The cell state is automatically stored in variables between subsequent steps and reset after each epoch (or when switching the ``phase``).
+
+    Large parts of this code are adapted from `here`_.
+
+    Suggested training settings are: Batch size of ``50`` and training for a total of ``200`` epochs.
+
+    Args:
+        batch_size (int): Batch size of the data points. No default value is specified.
+        weight_decay (float): Weight decay factor. In this model there is no weight decay implemented. Defaults to ``None``.
+
+    Attributes:
+        seq_length (int): Sequence lenght, defined as the number of characters. Defaults to ``50``.
+        data_loading (deepobs.data_loading): Data loading class for tolstoi data set, :class:`.tolstoi_input.data_loading`.
+        losses (tf.Tensor): Tensor of size ``batch_size`` containing the individual losses per data point.
+        accuracy (tf.Tensor): Tensor containing the accuracy of the model.
+        train_init_op (tf.Operation): A TensorFlow operation to be performed before starting every training epoch. Among other things, it sets the state variables to the zero state.
+        train_eval_init_op (tf.Operation): A TensorFlow operation to be performed before starting every training eval epoch. Among other things, it sets the state variables to the zero state.
+        test_init_op (tf.Operation): A TensorFlow operation to be performed before starting every test evaluation phase. Among other things, it sets the state variables to the zero state.
+
+    .. _here:  github.com/sherjilozair/char-rnn-tensorflow.
+    """
     def __init__(self, batch_size, weight_decay=None):
+        """Initializes the problem set_up class.
+
+        Args:
+            batch_size (int): Batch size of the data points. No default value is specified.
+            weight_decay (float): Weight decay factor. In this model there is no weight decay implemented. Defaults to ``None``.
+
+        """
         self.seq_length = 50
         self.batch_size = batch_size
         self.data_loading = tolstoi_input.data_loading(batch_size=self.batch_size, seq_length=self.seq_length)
@@ -38,9 +67,24 @@ class set_up:
         self.test_init_op = tf.group([self.data_loading.test_init_op, self.get_state_update_op(self.state_variables, self.zero_states)])
 
     def get(self):
+        """Returns the losses and the accuray of the model.
+
+        Returns:
+            tupel: Tupel consisting of the losses and the accuracy.
+
+        """
         return self.losses, self.accuracy
 
     def set_up(self, weight_decay):
+        """Sets up the test problem.
+
+        Args:
+            weight_decay (float): Weight decay factor. In this model there is no weight decay implemented.
+
+        Returns:
+            tupel: Tupel consisting of the losses and the accuracy.
+
+        """
         if weight_decay is not None:
             print "WARNING: Weight decay is non-zero but no weight decay is used for this model."
 
@@ -122,6 +166,16 @@ class set_up:
         return losses, accuracy
 
     def get_state_variables(self, batch_size, cell):
+        """For each layer, get the initial state and make a variable out of it to enable updating its value.
+
+        Args:
+            batch_size (int): Batch size.
+            cell (tf.BasicLSTMCell): LSTM cell to get the initial state for.
+
+        Returns:
+            tupel: Tupel of the state variables and there zero states.
+
+        """
         # For each layer, get the initial state and make a variable out of it
         # to enable updating its value.
         zero_state = cell.zero_state(batch_size, tf.float32)
@@ -134,6 +188,16 @@ class set_up:
         return tuple(state_variables), zero_state
 
     def get_state_update_op(self, state_variables, new_states):
+        """Add an operation to update the train states with the last state tensors
+
+        Args:
+            state_variables (tf.Variable): State variables to be updated
+            new_states (tf.Variable): New state of the state variable.
+
+        Returns:
+            tf.Operation: Return a tuple in order to combine all update_ops into a single operation. The tuple's actual value should not be used.
+
+        """
         # Add an operation to update the train states with the last state tensors
         update_ops = []
         for state_variable, new_state in zip(state_variables, new_states):

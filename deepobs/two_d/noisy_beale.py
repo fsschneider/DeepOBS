@@ -15,7 +15,39 @@ import two_d_input
 
 
 class set_up:
+    """Simple 2D Noisy Beale Loss Function:
+
+        :math:`((1.5 - u + u \cdot v)^2 + X \cdot (2.25 - u + u \cdot v ^ 2) ^ 2 + y \cdot (2.625 - u + u \cdot v ^ 3) ^ 2)`
+
+    where X and Y are normally distributed with mean 1.0 and sigma given by the noise_level.
+
+    Args:
+        batch_size (int): Batch size of the data points. Defaults to ``128``.
+        size (int): Size of the training set. Defaults to ``1000``.
+        noise_level (float): Noise level of the training set. All training points are sampled from a gaussian distribution with the noise level as the standard deviation. Defaults to ``6.0``.
+        starting_point (list): Coordinates of the starting point of the optimization process. Defaults to ``[-4.5, 4.5]``.
+        weight_decay (float): Weight decay factor. In this model there is no weight decay implemented. Defaults to ``None``.
+
+    Attributes:
+        data_loading (deepobs.data_loading): Data loading class for 2D functions, :class:`.two_d_input.data_loading`.
+        losses (tf.Tensor): Tensor of size ``batch_size`` containing the individual losses per data point.
+        accuracy (tf.Tensor): Tensor containing the accuracy of the model. As there is no accuracy when the loss function is given directly, we set it to ``0``.
+        train_init_op (tf.Operation): A TensorFlow operation to be performed before starting every training epoch.
+        train_eval_init_op (tf.Operation): A TensorFlow operation to be performed before starting every training eval epoch.
+        test_init_op (tf.Operation): A TensorFlow operation to be performed before starting every test evaluation phase.
+
+    """
     def __init__(self, batch_size=128, size=1000, noise_level=6, starting_point=[-4.5, 4.5], weight_decay=None):
+        """Initializes the problem set_up class.
+
+        Args:
+            batch_size (int): Batch size of the data points. Defaults to ``128``.
+            size (int): Size of the training set. Defaults to ``1000``.
+            noise_level (float): Noise level of the training set. All training points are sampled from a gaussian distribution with the noise level as the standard deviation. Defaults to ``6``.
+            starting_point (list): Coordinates of the starting point of the optimization process. Defaults to ``[-4.5, 4.5]``.
+            weight_decay (float): Weight decay factor. In this model there is no weight decay implemented. Defaults to ``None``.
+
+        """
         self.data_loading = two_d_input.data_loading(batch_size=batch_size, train_size=size, noise_level=noise_level)
         self.losses, self.accuracy = self.set_up(starting_point=starting_point, weight_decay=weight_decay)
 
@@ -25,9 +57,25 @@ class set_up:
         self.test_init_op = tf.group([self.data_loading.test_init_op])
 
     def get(self):
+        """Returns the losses and the accuray of the model.
+
+        Returns:
+            tupel: Tupel consisting of the losses and the accuracy.
+
+        """
         return self.losses, self.accuracy
 
     def set_up(self, starting_point=[-4.5, 4.5], weight_decay=None):
+        """Sets up the test problem.
+
+        Args:
+            starting_point (list): Coordinates of the starting point of the optimization process. Defaults to ``[-4.5, 4.5]``.
+            weight_decay (float): Weight decay factor. In this model there is no weight decay implemented. Defaults to ``None``.
+
+        Returns:
+            tupel: Tupel consisting of the losses and the accuracy.
+
+        """
         if weight_decay is not None:
             print "WARNING: Weight decay is non-zero but no weight decay is used for this model."
         X, y, phase = self.data_loading.load()
@@ -44,11 +92,30 @@ class set_up:
         return losses, accuracy
 
     def beale(self, u, v):
-        """Deterministic version of beale function."""
+        """Deterministic version of Beale function.
+
+        Args:
+            u (float): Coordinate of the first parameter.
+            v (float): Coordinate of the second parameter.
+
+        Returns:
+            float: Function value of the deterministic Beale function at ``(u,v)``.
+
+        """
         return ((1.5 - u + u * v) ** 2 + (2.25 - u + u * v ** 2) ** 2 + (2.625 - u + u * v ** 3) ** 2)
 
     def plot_run(self, u_history, v_history, loss_history):
-        """Plot the history of weights (u, v) and the corresponding loss of a optimizer. Plot the Deterministic Beale as well."""
+        """Plot the history of weights (u, v) and the corresponding loss of an optimizer. Plot the Deterministic Beale as well.
+
+        Args:
+            u_history (list): List of ``u`` values (first parameter) as passed by the optimizer.
+            v_history (list): List of ``v`` values (second parameter) as passed by the optimizer.
+            loss_history (list): List of ``loss`` values as passed by the optimizer. Could be train or test loss.
+
+        Returns:
+            fig: Plot with the deterministic beale and the optimizers trajectory.
+
+        """
         # meshgrid
         traj_box = [[min(u_history), max(u_history)], [
             min(v_history), max(v_history)]]
@@ -83,7 +150,18 @@ class set_up:
         return fig
 
     def anim_run(self, u_history, v_history, loss_history, name="Optimizer Trajectory"):
-        """Animate the history of weights (u, v) and the corresponding loss of a optimizer. Plot the Deterministic Beale as well."""
+        """Animate the history of weights (u, v) and the corresponding loss of an optimizer. Plot the deterministic Beale as well.
+
+        Args:
+            u_history (list): List of ``u`` values (first parameter) as passed by the optimizer.
+            v_history (list): List of ``v`` values (second parameter) as passed by the optimizer.
+            loss_history (list): List of ``loss`` values as passed by the optimizer. Could be train or test loss.
+            name (str): Name of the optimizer. Defaults to "Optimizer Trajectory".
+
+        Returns:
+            matplotlib.animation.FuncAnimation: Animation object showing the optimizer's trajectory per iteration.
+
+        """
         # meshgrid
         traj_box = [[min(u_history), max(u_history)], [
             min(v_history), max(v_history)]]

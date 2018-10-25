@@ -16,9 +16,23 @@ Training parameters according to the paper:
 [1]: https://arxiv.org/abs/1605.07146
 """
 
-import _cifar100_wrn
+import cifar100_wrn
 
 
 def set_up(batch_size, weight_decay=0.0005):
-    return _cifar100_wrn.set_up(batch_size, num_residual_units=6, k=4,
-                                weight_decay=weight_decay, bn_decay=0.9)
+    """Function providing the functionality for the `WideResNet`_ 40-4 architecture on `CIFAR-100`.
+
+    This function is a wrapper for the :class:`.cifar100_wrn.set_up` to create the 40-4 variant of the WideResNet.
+
+    The training setting in the paper were: Batch size of ``128``, weight decay of ``0.0005``, total training time of ``200`` epochs, with a learning rate schedule of ``0.1``, ``0.02`` after ``60`` epochs, ``0.004`` after ``120`` epochs and ``0.0008`` after ``160`` epochs. Training was done using `Nesterov momentum` with a momentum parameter of ``0.9``.
+
+    Args:
+        batch_size (int): Batch size of the data points.
+        weight_decay (float): Weight decay factor. Defaults to ``0.0005``.
+
+    Returns:
+        cifar100_wrn.set_up: Setup class for WideResNets on `CIFAR-100`, :class:`.cifar100_wrn.set_up`.
+
+    .. _WideResNet: https://arxiv.org/abs/1605.07146
+    """
+    return cifar100_wrn.set_up(batch_size, num_residual_units=6, k=4, weight_decay=weight_decay, bn_decay=0.9)
