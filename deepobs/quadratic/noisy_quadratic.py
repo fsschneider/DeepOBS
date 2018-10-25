@@ -13,7 +13,41 @@ import quadratic_input
 
 
 class set_up:
-    def __init__(self, batch_size=128, size=1000, Q=np.concatenate((np.random.uniform(0., 1., 90), np.random.uniform(30., 60., 10)), axis=0), noise_level=3.0, weight_decay=None):
+    """Simple N-Dimensional Noisy Quadratic Problem
+
+            :math:`0.5* (theta - x)^T * Q * (theta - x)`
+
+    where x is normally distributed with mean 0.0 and sigma given by the noise_level (default is 3.0).
+
+    Args:
+        batch_size (int): Batch size of the data points. Defaults to ``128``.
+        size (int): Size of the training set. Defaults to ``1000``.
+        Q (np.array): Matrix defining the quadratic problem. Input can either be a matrix or a vector (eigenvalues). If a vector is given, we use the randomly rotated matrix with those eigenvalues. Defaults to ``None``, which uses a vector with ``90`` values drawn uniform at random from ``(0,1)`` and ``10`` drawn uniformly from ``(30, 60)``.
+        noise_level (float): Noise level of the training set. All training points are sampled from a gaussian distribution with the noise level as the standard deviation. Defaults to ``3.0``.
+        weight_decay (float): Weight decay factor. In this model there is no weight decay implemented. Defaults to ``None``.
+
+    Attributes:
+        data_loading (deepobs.data_loading): Data loading class for quadratic problems, :class:`.quadratic_input.data_loading`.
+        losses (tf.Tensor): Tensor of size ``batch_size`` containing the individual losses per data point.
+        accuracy (tf.Tensor): Tensor containing the accuracy of the model. As there is no accuracy when the loss function is given directly, we set it to ``0``.
+        train_init_op (tf.Operation): A TensorFlow operation to be performed before starting every training epoch.
+        train_eval_init_op (tf.Operation): A TensorFlow operation to be performed before starting every training eval epoch.
+        test_init_op (tf.Operation): A TensorFlow operation to be performed before starting every test evaluation phase.
+
+    """
+    def __init__(self, batch_size=128, size=1000, Q=None, noise_level=3.0, weight_decay=None):
+        """Initializes the problem set_up class.
+
+        Args:
+            batch_size (int): Batch size of the data points. Defaults to ``128``.
+            size (int): Size of the training set. Defaults to ``1000``.
+            Q (np.array): Matrix defining the quadratic problem. Input can either be a  matrix or a vector (eigenvalues). If a vector is given, we use the randomly rotated matrix with those eigenvalues. Defaults to ``None``, which uses a vector with ``90`` values drawn uniform at random from ``(0,1)`` and ``10`` drawn uniformly from ``(30, 60)``.
+            noise_level (float): Noise level of the training set. All training points are sampled from a gaussian distribution with the noise level as the standard deviation. Defaults to ``3.0``.
+            weight_decay (float): Weight decay factor. In this model there is no weight decay implemented. Defaults to ``None``.
+
+        """
+        if Q is None:
+            Q = np.concatenate((np.random.uniform(0., 1., 90), np.random.uniform(30., 60., 10)), axis=0)
         self.data_loading = quadratic_input.data_loading(batch_size=batch_size, dim=Q.shape[0], train_size=size, noise_level=noise_level)
         self.losses, self.accuracy = self.set_up(Q=Q, weight_decay=weight_decay)
 
@@ -23,9 +57,25 @@ class set_up:
         self.test_init_op = tf.group([self.data_loading.test_init_op])
 
     def get(self):
+        """Returns the losses and the accuray of the model.
+
+        Returns:
+            tupel: Tupel consisting of the losses and the accuracy.
+
+        """
         return self.losses, self.accuracy
 
     def set_up(self, Q, weight_decay=None):
+        """Sets up the test problem.
+
+        Args:
+            Q (np.array): Matrix defining the quadratic problem. Input can either be a matrix or a vector (eigenvalues). If a vector is given, we use the randomly rotated matrix with those eigenvalues. Defaults to ``None``, which uses a vector with ``90`` values drawn uniform at random from ``(0,1)`` and ``10`` drawn uniformly from ``(30, 60)``.
+            weight_decay (float): Weight decay factor. In this model there is no weight decay implemented. Defaults to ``None``.
+
+        Returns:
+            tupel: Tupel consisting of the losses and the accuracy.
+
+        """
         if weight_decay is not None:
             print "WARNING: Weight decay is non-zero but no weight decay is used for this model."
         Q = np.array(Q)
@@ -49,15 +99,17 @@ class set_up:
         return losses, accuracy
 
     def random_rotation(self, D):
-        # produces a rotation matrix R in SO(D) (the special orthogonal
-        # group SO(D), or orthogonal matrices with unit determinant, drawn
-        # uniformly from the Haar measure.
-        #
-        # The algorithm used is the subgroup algorithm as originally proposed by
-        #
-        # P. Diaconis & M. Shahshahani, "The subgroup algorithm for generating
-        # uniform random variables". Probability in the Engineering and
-        # Informational Sciences 1: 15?32 (1987)
+        """Produces a rotation matrix R in SO(D) (the special orthogonal group SO(D), or orthogonal matrices with unit determinant, drawn uniformly from the Haar measure.
+        The algorithm used is the subgroup algorithm as originally proposed by
+        P. Diaconis & M. Shahshahani, "The subgroup algorithm for generating uniform random variables". Probability in the Engineering and Informational Sciences 1: 15?32 (1987)
+
+        Args:
+            D (int): Dimensionality of the matrix.
+
+        Returns:
+            np.array: Random rotation matrix ``R``.
+
+        """
         assert D >= 2
         D = int(D)  # make sure that the dimension is an integer
 

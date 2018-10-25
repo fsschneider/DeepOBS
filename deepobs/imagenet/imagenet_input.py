@@ -9,7 +9,34 @@ from .. import dataset_utils
 
 
 class data_loading:
+    """Class providing the data loading functionality for the ImageNet data set.
+
+    Args:
+        batch_size (int): Batch size of the input-output pairs. No default value is given.
+
+    Attributes:
+        batch_size (int): Batch size of the input-output pairs.
+        train_eval_size (int): Number of data points to evaluate during the `train eval` phase. Currently set to ``50000`` the size of the test set.
+        D_train (tf.data.Dataset): The training data set.
+        D_train_eval (tf.data.Dataset): The training evaluation data set. It is the same data as `D_train` but we go through it separately.
+        D_test (tf.data.Dataset): The test data set.
+        phase (tf.Variable): Variable to describe which phase we are currently in. Can be "train", "train_eval" or "test". The phase variable can determine the behaviour of the network, for example deactivate dropout during evaluation.
+        iterator (tf.data.Iterator): A single iterator for all three data sets. We us the initialization operators (see below) to switch this iterator to the data sets.
+        X (tf.Tensor): Tensor holding the ImageNet images. It has dimension `batch_size` x ``224`` (image size) x ``224`` (image size) x ``3`` (rgb).
+        y (tf.Tensor): Label of the ImageNet images. It has dimension `batch_size` x ``10`` (number of classes).
+        train_init_op (tf.Operation): A TensorFlow operation to be performed before starting every training epoch. It sets the `phase` variable to "train" and initializes the iterator to the training data set.
+        train_eval_init_op (tf.Operation): A TensorFlow operation to be performed before starting every training eval phase. It sets the `phase` variable to "train_eval" and initializes the iterator to the training eval data set.
+        test_init_op (tf.Operation): A TensorFlow operation to be performed before starting every test evaluation phase. It sets the `phase` variable to "test" and initializes the iterator to the test data set.
+
+    """
+
     def __init__(self, batch_size):
+        """Initializes the data loading class.
+
+        Args:
+            batch_size (int): Batch size of the input-output pairs. No default value is given.
+
+        """
         self.train_eval_size = 50000  # The size of the test set
         self.batch_size = batch_size
         self.D_train = self.train_dataset(batch_size)
@@ -31,16 +58,31 @@ class data_loading:
             self.D_test), tf.assign(self.phase, "test")], name="test_init_op")
 
     def load(self):
+        """Returns the data (`X` (images) and `y` (labels)) and the phase variable.
+
+        Returns:
+            tupel: Tupel consisting of the images (`X`), the label (`y`) and the phase variable (`phase`).
+
+        """
         return self.X, self.y, self.phase
 
     def train_dataset(self, batch_size, data_augmentation=True):
-        """Create a ``tf.data.Dataset`` for the Imagenet training data."""
+        """Creates the training data set.
+
+        Args:
+            batch_size (int): Batch size of the input-output pairs.
+            data_augmentation (bool): Switch to turn basic data augmentation on or off while training. Defaults to ``true``.
+
+        Returns:
+            tf.data.Dataset: The training data set.
+
+        """
 
         filenames = [os.path.join(dataset_utils.get_data_dir(),
                                   "imagenet", "train-" + str(i).zfill(5) + "-of-01024")
                      for i in range(1024)]
         if data_augmentation:
-            D = self._make_dataset(
+            D = self.make_dataset(
                 filenames,
                 batch_size,
                 per_image_standardization=True,
@@ -53,7 +95,7 @@ class data_loading:
                 num_prefetched_batches=8,
                 num_preprocessing_threads=16)
         else:
-            D = self._make_dataset(
+            D = self.make_dataset(
                 filenames,
                 batch_size,
                 per_image_standardization=True,
@@ -68,13 +110,22 @@ class data_loading:
         return D
 
     def train_eval_dataset(self, batch_size, data_augmentation=True):
-        """Create a ``tf.data.Dataset`` for the Imagenet training evaluation data."""
+        """Creates the train eval data set.
+
+        Args:
+            batch_size (int): Batch size of the input-output pairs.
+            data_augmentation (bool): Switch to turn basic data augmentation on or off while evaluating the training data set. Defaults to ``true``.
+
+        Returns:
+            tf.data.Dataset: The train eval data set.
+
+        """
 
         filenames = [os.path.join(dataset_utils.get_data_dir(),
                                   "imagenet", "train-" + str(i).zfill(5) + "-of-01024")
                      for i in range(1024)]
         if data_augmentation:
-            D = self._make_dataset(
+            D = self.make_dataset(
                 filenames,
                 batch_size,
                 per_image_standardization=True,
@@ -87,7 +138,7 @@ class data_loading:
                 num_prefetched_batches=4,
                 num_preprocessing_threads=8, data_set_size=self.train_eval_size)
         else:
-            D = self._make_dataset(
+            D = self.make_dataset(
                 filenames,
                 batch_size,
                 per_image_standardization=True,
@@ -102,12 +153,20 @@ class data_loading:
         return D
 
     def test_dataset(self, batch_size):
-        """Create a ``tf.data.Dataset`` for the Imagenet test data."""
+        """Creates the test data set.
+
+        Args:
+            batch_size (int): Batch size of the input-output pairs.
+
+        Returns:
+            tf.data.Dataset: The test data set.
+
+        """
 
         filenames = [os.path.join(dataset_utils.get_data_dir(),
                                   "imagenet", "validation-" + str(i).zfill(5) + "-of-00128")
                      for i in range(128)]
-        return self._make_dataset(
+        return self.make_dataset(
             filenames,
             batch_size,
             per_image_standardization=True,
@@ -120,31 +179,38 @@ class data_loading:
             num_prefetched_batches=4,
             num_preprocessing_threads=8)
 
-    def _make_dataset(self,
-                      filenames,
-                      batch_size,
-                      per_image_standardization=True,
-                      crop_size=224,
-                      random_crop=False,
-                      random_flip_left_right=False,
-                      distort_color=False,
-                      shuffle=True,
-                      shuffle_buffer_size=15000,
-                      one_hot=True,
-                      num_prefetched_batches=8,
-                      num_preprocessing_threads=16,
-                      data_set_size=-1):
+    def make_dataset(self, filenames, batch_size, per_image_standardization=True, crop_size=224, random_crop=False, random_flip_left_right=False, distort_color=False, shuffle=True, shuffle_buffer_size=15000, one_hot=True, num_prefetched_batches=8, num_preprocessing_threads=16, data_set_size=-1):
+        """Creates a data set from filenames of the images and label files.
 
+        Args:
+            filenames (str): (List of) paths to the ``.bin`` files containing the images and labels.
+            batch_size (int): Batch size of the input-output pairs.
+            crop_size (int): Crop size of each image. Defaults to ``224``.
+            per_image_standardization (bool): Switch to standardize each image to have zero mean and unit norm. Defaults to ``True``.
+            random_crop (bool): Switch if random crops should be used. Defaults to ``False``.
+            random_flip_left_right (bool): Switch to randomly flip the images horizontally. Defaults to ``False``.
+            distort_color (bool): Switch to use random brightness, saturation, hue and contrast on each image. Defaults to ``False``.
+            shuffle (bool):  Switch to turn on or off shuffling of the data set. Defaults to ``True``.
+            shuffle_buffer_size (int): Size of the shuffle buffer. Defaults to ``15000``.
+            one_hot (bool): Switch to turn on or off one-hot encoding of the labels. Defaults to ``True``.
+            num_prefetched_batches (int): Number of prefeteched batches, defaults to ``8``.
+            num_preprocessing_threads (int): The number of elements to process in parallel while applying the image transformations. Defaults to ``16``.
+            data_set_size (int): Size of the data set to extract from the images and label files. Defaults to ``-1`` meaning that the full data set is used.
+
+        Returns:
+            tf.data.Dataset: Data set object created from the images and label files.
+
+        """
         num_classes = 1000
 
         # Define parse function depending on the above arguments and map the dataset
         # through it
         def _parse_func(example_serialized):
             # Parse example proto, decode image and resize while preserving aspect
-            image_buffer, label, _ = self._parse_example_proto(
+            image_buffer, label, _ = self.parse_example_proto(
                 example_serialized)
-            image = self._decode_jpeg(image_buffer)
-            image = self._aspect_preserving_resize(
+            image = self.decode_jpeg(image_buffer)
+            image = self.aspect_preserving_resize(
                 image, target_smaller_side=256)
 
             # Crop to 224x224, either randomly or centered according to arguments
@@ -160,7 +226,7 @@ class data_loading:
 
             # Optionally distort color
             if distort_color:
-                image = self._color_distortion(image)
+                image = self.color_distortion(image)
 
             # Normalize
             if per_image_standardization:
@@ -188,28 +254,24 @@ class data_loading:
                 D = D.prefetch(buffer_size=num_prefetched_batches)
                 return D
 
-    def _parse_example_proto(self, example_serialized):
-        """Parses an Example proto containing a training example of an image.
-        The output of the build_image_data.py image preprocessing script is a dataset
-        containing serialized Example protocol buffers. Each Example proto contains
-        the following fields:
-          image/height: 462
-          image/width: 581
-          image/colorspace: 'RGB'
-          image/channels: 3
-          image/class/label: 615
-          image/class/synset: 'n03623198'
-          image/class/text: 'knee pad'
-          image/format: 'JPEG'
-          image/filename: 'ILSVRC2012_val_00041207.JPEG'
-          image/encoded: <JPEG encoded string>
+    def parse_example_proto(self, example_serialized):
+        """Parses an Example proto containing a training example of an image. The output of the build_image_data.py image preprocessing script is a dataset containing serialized Example protocol buffers. Each Example proto contains the following fields:
+        image/height: 462
+        image/width: 581
+        image/colorspace: 'RGB'
+        image/channels: 3
+        image/class/label: 615
+        image/class/synset: 'n03623198'
+        image/class/text: 'knee pad'
+        image/format: 'JPEG'
+        image/filename: 'ILSVRC2012_val_00041207.JPEG'
+        image/encoded: <JPEG encoded string>
+
         Args:
-          example_serialized: scalar Tensor tf.string containing a serialized
-            Example protocol buffer.
+          example_serialized (tf.string): Scalar Tensor tf.string containing a serialized Example protocol buffer.
+
         Returns:
-          image_buffer: Tensor tf.string containing the contents of a JPEG file.
-          label: Tensor tf.int32 containing the label.
-          text: Tensor tf.string containing the human-readable label.
+          tupel: Tupel of image_buffer (tf.string) containing the contents of a JPEG file, the label (tf.int32) containing the label and text (tf.string) containing the human-readable label.
         """
         # Dense features in Example proto.
         feature_map = {
@@ -226,13 +288,14 @@ class data_loading:
 
         return features['image/encoded'], label, features['image/class/text']
 
-    def _decode_jpeg(self, image_buffer, scope=None):
+    def decode_jpeg(self, image_buffer, scope=None):
         """Decode a JPEG string into one 3-D float image Tensor.
+
         Args:
-          image_buffer: scalar string Tensor.
-          scope: Optional scope for name_scope.
+          image_buffer (tf.string): scalar string Tensor.
+          scope (str): Optional scope for name_scope.
         Returns:
-          3-D float Tensor with values ranging from [0, 1).
+          tf.Tensor: 3-D float Tensor with values ranging from [0, 1).
         """
         with tf.name_scope(values=[image_buffer], name=scope,
                            default_name='decode_jpeg'):
@@ -248,9 +311,17 @@ class data_loading:
             image = tf.image.convert_image_dtype(image, dtype=tf.float32)
             return image
 
-    def _aspect_preserving_resize(self, image, target_smaller_side):
-        """Resize image such that the smaller size has size ``target_smaller_sider``
-        while preserving the aspect ratio."""
+    def aspect_preserving_resize(self, image, target_smaller_side):
+        """"Resize image such that the smaller size has size ``target_smaller_sider`` while preserving the aspect ratio.
+
+        Args:
+            image (tf.Tensor): Tensor containing the image to resize.
+            target_smaller_side (int): Target size for the smaller side in pixel.
+
+        Returns:
+            tf.Tensor: The resized image, with the same aspect ratio as the input.
+
+        """
 
         shape = tf.shape(image)
         height = tf.to_float(shape[0])
@@ -264,14 +335,15 @@ class data_loading:
 
         return resized_image
 
-    def _color_distortion(self, image, scope=None):
+    def color_distortion(self, image, scope=None):
         """Distort the color of the image.
 
         Args:
-          image: Tensor containing single image.
-          scope: Optional scope for name_scope.
+          image (tf.Tensor): Tensor containing single image.
+          scope (str): Optional scope for name_scope.
+
         Returns:
-          color-distorted image
+          tf.Tensor: The color-distorted image.
         """
         with tf.name_scope(values=[image], name=scope, default_name='distort_color'):
             image = tf.image.random_brightness(image, max_delta=32. / 255.)

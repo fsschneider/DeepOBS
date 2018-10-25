@@ -10,7 +10,36 @@ from .. import dataset_utils
 
 
 class data_loading:
+    """Class providing the data loading functionality for the CIFAR-100 data set.
+
+    Args:
+        batch_size (int): Batch size of the input-output pairs. No default value is given.
+        data_augmentation (bool): Switch to turn basic data augmentation on or off while training. Defaults to ``true``.
+
+    Attributes:
+        batch_size (int): Batch size of the input-output pairs.
+        data_augmentation (bool): Switch to turn basic data augmentation on or off while training.
+        train_eval_size (int): Number of data points to evaluate during the `train eval` phase. Currently set to ``10000`` the size of the test set.
+        D_train (tf.data.Dataset): The training data set.
+        D_train_eval (tf.data.Dataset): The training evaluation data set. It is the same data as `D_train` but we go through it separately.
+        D_test (tf.data.Dataset): The test data set.
+        phase (tf.Variable): Variable to describe which phase we are currently in. Can be "train", "train_eval" or "test". The phase variable can determine the behaviour of the network, for example deactivate dropout during evaluation.
+        iterator (tf.data.Iterator): A single iterator for all three data sets. We us the initialization operators (see below) to switch this iterator to the data sets.
+        X (tf.Tensor): Tensor holding the CIFAR-100 images. It has dimension `batch_size` x ``32`` (image size) x ``32`` (image size) x ``3`` (rgb).
+        y (tf.Tensor): Label of the CIFAR-100 images. It has dimension `batch_size` x ``10`` (number of classes).
+        train_init_op (tf.Operation): A TensorFlow operation to be performed before starting every training epoch. It sets the `phase` variable to "train" and initializes the iterator to the training data set.
+        train_eval_init_op (tf.Operation): A TensorFlow operation to be performed before starting every training eval phase. It sets the `phase` variable to "train_eval" and initializes the iterator to the training eval data set.
+        test_init_op (tf.Operation): A TensorFlow operation to be performed before starting every test evaluation phase. It sets the `phase` variable to "test" and initializes the iterator to the test data set.
+
+    """
     def __init__(self, batch_size, data_augmentation=True):
+        """Initializes the data loading class.
+
+        Args:
+            batch_size (int): Batch size of the input-output pairs. No default value is given.
+            data_augmentation (bool): Switch to turn basic data augmentation on or off while training. Defaults to ``true``.
+
+        """
         self.train_eval_size = 10000  # The size of the test set
         self.batch_size = batch_size
         self.data_augmentation = data_augmentation
@@ -34,15 +63,30 @@ class data_loading:
             self.D_test), tf.assign(self.phase, "test")], name="test_init_op")
 
     def load(self):
+        """Returns the data (`X` and `y` ) and the phase variable.
+
+        Returns:
+            tupel: Tupel consisting of the data points (`X`), (`y`) and the phase variable (`phase`).
+
+        """
         return self.X, self.y, self.phase
 
     def train_dataset(self, batch_size, data_augmentation=True):
-        """Create a ``tf.data.Dataset`` for the CIFAR-100 training data."""
+        """Creates the training data set.
+
+        Args:
+            batch_size (int): Batch size of the input-output pairs.
+            data_augmentation (bool): Switch to turn basic data augmentation on or off while training. Defaults to ``true``.
+
+        Returns:
+            tf.data.Dataset: The training data set.
+
+        """
 
         pattern = os.path.join(dataset_utils.get_data_dir(),
                                "cifar-100", "train.bin")
         if data_augmentation:
-            D = self._make_dataset(
+            D = self.make_dataset(
                 binaries_fname_pattern=pattern,
                 batch_size=batch_size,
                 crop_size=32,
@@ -57,7 +101,7 @@ class data_loading:
                 num_prefetched_batches=3,
                 num_preprocessing_threads=8)
         else:
-            D = self._make_dataset(
+            D = self.make_dataset(
                 binaries_fname_pattern=pattern,
                 batch_size=batch_size,
                 crop_size=32,
@@ -74,12 +118,20 @@ class data_loading:
         return D
 
     def train_eval_dataset(self, batch_size, data_augmentation=True):
-        """Create a ``tf.data.Dataset`` for the CIFAR-100 training evaluation data."""
+        """Creates the train eval data set.
 
+        Args:
+            batch_size (int): Batch size of the input-output pairs.
+            data_augmentation (bool): Switch to turn basic data augmentation on or off while evaluating the training data set. Defaults to ``true``.
+
+        Returns:
+            tf.data.Dataset: The train eval data set.
+
+        """
         pattern = os.path.join(dataset_utils.get_data_dir(),
                                "cifar-100", "train.bin")
         if data_augmentation:
-            D = self._make_dataset(
+            D = self.make_dataset(
                 binaries_fname_pattern=pattern,
                 batch_size=batch_size,
                 crop_size=32,
@@ -95,7 +147,7 @@ class data_loading:
                 num_preprocessing_threads=8,
                 data_set_size=self.train_eval_size)
         else:
-            D = self._make_dataset(
+            D = self.make_dataset(
                 binaries_fname_pattern=pattern,
                 batch_size=batch_size,
                 crop_size=32,
@@ -113,11 +165,18 @@ class data_loading:
         return D
 
     def test_dataset(self, batch_size):
-        """Create a ``tf.data.Dataset`` for the CIFAR-100 test data."""
+        """Creates the test data set.
 
+        Args:
+            batch_size (int): Batch size of the input-output pairs.
+
+        Returns:
+            tf.data.Dataset: The test data set.
+
+        """
         pattern = os.path.join(dataset_utils.get_data_dir(),
                                "cifar-100", "test.bin")
-        return self._make_dataset(
+        return self.make_dataset(
             binaries_fname_pattern=pattern,
             batch_size=batch_size,
             crop_size=32,
@@ -132,22 +191,29 @@ class data_loading:
             num_prefetched_batches=3,
             num_preprocessing_threads=4)
 
-    def _make_dataset(self,
-                      binaries_fname_pattern,
-                      batch_size,
-                      crop_size=32,
-                      per_image_standardization=True,
-                      random_crop=False,
-                      pad_before_random_crop=0,
-                      random_flip_left_right=False,
-                      lighting_augmentation=False,
-                      one_hot=True,
-                      shuffle=True,
-                      shuffle_buffer_size=10000,
-                      num_prefetched_batches=3,
-                      num_preprocessing_threads=8,
-                      data_set_size=-1):
-        """Produce CIFAR-100 dataset."""
+    def make_dataset(self, binaries_fname_pattern, batch_size, crop_size=32, per_image_standardization=True, random_crop=False, pad_before_random_crop=0, random_flip_left_right=False, lighting_augmentation=False, one_hot=True, shuffle=True, shuffle_buffer_size=10000, num_prefetched_batches=3, num_preprocessing_threads=8, data_set_size=-1):
+        """Creates a data set from a pattern of the images and label files.
+
+        Args:
+            binaries_fname_pattern (str): Pattern of the ``,bin`` files containing the images and labels.
+            batch_size (int): Batch size of the input-output pairs.
+            crop_size (int): Crop size of each image. Defaults to ``32``.
+            per_image_standardization (bool): Switch to standardize each image to have zero mean and unit norm. Defaults to ``True``.
+            random_crop (bool): Switch if random crops should be used. Defaults to ``False``.
+            pad_before_random_crop (int): Defines the added padding before a random crop is applied. Defaults to ``0``.
+            random_flip_left_right (bool): Switch to randomly flip the images horizontally. Defaults to ``False``.
+            lighting_augmentation (bool): Switch to use random brightness, saturation and contrast on each image. Defaults to ``False``.
+            one_hot (bool): Switch to turn on or off one-hot encoding of the labels. Defaults to ``True``.
+            shuffle (bool):  Switch to turn on or off shuffling of the data set. Defaults to ``True``.
+            shuffle_buffer_size (int): Size of the shuffle buffer. Defaults to ``10000`` the size of the `test` and `train eval` data set, meaning that they will be completely shuffled.
+            num_prefetched_batches (int): Number of prefeteched batches, defaults to ``3``.
+            num_preprocessing_threads (int): The number of elements to process in parallel while applying the image transformations. Defaults to ``8``.
+            data_set_size (int): Size of the data set to extract from the images and label files. Defaults to ``-1`` meaning that the full data set is used.
+
+        Returns:
+            tf.data.Dataset: Data set object created from the images and label files.
+
+        """
 
         # Set number of bytes to read
         label_bytes = 1

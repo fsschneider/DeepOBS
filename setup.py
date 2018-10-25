@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='deepobs',
-      version='1.0.0',
+      version='1.0.1',
       description='Deep Optimization Benchmark Suite',
       url='https://github.com/anonymousICLR2019submitter/DeepOBS',
       author='Anonymous ICLR 2019 Submitter',

@@ -4,6 +4,6 @@ import svhn_input
 import svhn_3c3d
 import svhn_wrn164
 
-import _svhn_wrn
+import svhn_wrn
 
 import svhn_preprocess
