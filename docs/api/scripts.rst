@@ -3,7 +3,7 @@ Scripts
 ============
 
 .. toctree::
-  :maxdepth: 2
+  :maxdepth: 1
   :caption: Scripts
 
   scripts/prepare_data
