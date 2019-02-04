@@ -4,15 +4,15 @@ DeepOBS is a benchmarking suite that drastically simplifies, automates and impro
 
 It can evaluate the performance of new optimizers on a variety of **real-world test problems** and automatically compare them with **realistic baselines**.
 
-The full documentation is available on readthedocs: https://deepobs-iclr.readthedocs.io/
+The full documentation is available on readthedocs: https://deepobs.readthedocs.io/
 
-The paper describing DeepOBS is currently under review for ICLR 2019:
+The paper describing DeepOBS has been accepted for ICLR 2019 and can be found here:
 https://openreview.net/forum?id=rJg6ssC5Y7
 
 ##  Quick Start Guide
 
 ### Install Deep OBS
-	pip install git+https://github.com/anonymousICLR2019submitter/DeepOBS.git
+	pip install git+https://github.com/fsschneider/DeepOBS.git
 
 ### Download the data
 	deepobs_prepare_data.sh
@@ -32,7 +32,7 @@ Of course, the real value of a benchmark lies in evaluating new optimizers:
 ### Download and edit a run script
 You can download a template run script from there
 
-https://github.com/anonymousICLR2019submitter/DeepOBS/blob/master/scripts/deepobs_run_sgd.py
+https://github.com/fsschneider/DeepOBS/blob/master/scripts/deepobs_run_sgd.py
 
 Now you have a deepobs_run_script.py script in your folder. In order to run your optimizer, you need to change a few things in this script.
 The script takes take of the training, evaluation and logging.
