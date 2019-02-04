@@ -173,4 +173,4 @@ which will produce an animation like this
 
       Trajectory of *SGD* on the stochastic Branin function. The blue function is the non-stochastic version, while the z-value is given by the (observed) stochastic function value.
 
-.. _GitHub: https://github.com/anonymousICLR2019submitter/DeepOBS/blob/master/scripts/deepobs_run_sgd.py
+.. _GitHub: https://github.com/fsschneider/DeepOBS/blob/master/scripts/deepobs_run_sgd.py
