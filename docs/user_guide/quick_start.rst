@@ -13,7 +13,7 @@ You can install the latest stable release of DeepOBS using `pip`:
 
 .. code-block:: bash
 
-   pip install git+https://github.com/anonymousICLR2019submitter/DeepOBS.git
+   pip install git+https://github.com/fsschneider/DeepOBS.git
 
 .. NOTE::
   The package requires the following packages:

@@ -37,4 +37,4 @@ Indices and tables
 * :ref:`search`
 
 
-.. _GitHub: https://github.com/anonymousICLR2019submitter/DeepOBS
+.. _GitHub: https://github.com/fsschneider/DeepOBS

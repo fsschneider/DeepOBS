@@ -3,9 +3,9 @@ from setuptools import setup, find_packages
 setup(name='deepobs',
       version='1.0.1',
       description='Deep Optimization Benchmark Suite',
-      url='https://github.com/anonymousICLR2019submitter/DeepOBS',
-      author='Anonymous ICLR 2019 Submitter',
-      author_email='anonymousiclr2019submitter@gmail.com',
+      url='https://github.com/fsschneider/DeepOBS',
+      author='Frank Schneider, Lukas Balles',
+      author_email='frank.schneider@tuebingen.mpg.de',
       license='MIT',
       packages=find_packages(),
       install_requires=[

@@ -20,8 +20,8 @@ sys.path.insert(0, os.path.abspath('../'))
 # -- Project information -----------------------------------------------------
 
 project = u'DeepOBS'
-copyright = u'2018, Anonymous ICLR 2019 Submitter'
-author = u'Anonymous ICLR 2019 Submitter'
+copyright = u'2019, Frank Schneider'
+author = u'Frank Schneider'
 
 # The short X.Y version
 version = u'1.0'
@@ -136,7 +136,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'DeepOBS.tex', u'DeepOBS Documentation',
-     u'Anonymous ICLR 2019 Submitter', 'manual'),
+     u'Frank Schneider', 'manual'),
 ]
 
 
