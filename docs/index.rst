@@ -11,6 +11,7 @@ DeepOBS is a benchmarking suite that drastically simplifies, automates and impro
 It can evaluate the performance of new optimizers on a variety of **real-world test problems** and automatically compare them with **realistic baselines**.
 
 The code for the current implementation in TensorFlow can be found on `GitHub`_.
+We plan also provide a DeepOBS implementation in PyTorch soon. In the meantime, PyTorch users can still use parts of DeepOBS such as the data preprocessing scripts or the visualization features.
 
 .. toctree::
   :maxdepth: 2

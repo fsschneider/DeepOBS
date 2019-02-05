@@ -12,6 +12,8 @@ The full documentation is available on readthedocs: https://deepobs.readthedocs.
 The paper describing DeepOBS has been accepted for ICLR 2019 and can be found here:
 https://openreview.net/forum?id=rJg6ssC5Y7
 
+Currently we provide DeepOBS only for TensorFlow, but plan to provide a PyTorch version soon. In the meantime, PyTorch users can still use parts of DeepOBS such as the data preprocessing scripts or the visualization features.
+
 ##  Quick Start Guide
 
 ### Install Deep OBS
