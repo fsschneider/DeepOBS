@@ -1,0 +1,14 @@
+language: python
+python:
+  - "3.6"
+cache: pip
+install:
+  - pip install argparse
+  - pip install numpy
+  - pip install pandas
+  - pip install matplotlib
+  - pip install matplotlib2tikz
+  - pip install seaborn
+  - pip install tensorflow==1.12.0
+script:
+  - python -m unittest discover test/datasets/
