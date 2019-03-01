@@ -32,9 +32,8 @@ class QuadraticTest(unittest.TestCase):
                     self.quadratic.train_eval_init_op
             ]:
                 sess.run(init_op)
-                x_, y_ = sess.run(self.quadratic.batch)
+                x_ = sess.run(self.quadratic.batch)
                 self.assertEqual(x_.shape, (self.batch_size, self.quadratic._dim))
-                self.assertEqual(y_.shape, (self.batch_size, self.quadratic._dim))
 
 
 if __name__ == "__main__":
