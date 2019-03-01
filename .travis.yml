@@ -11,4 +11,4 @@ install:
   - pip install seaborn
   - pip install tensorflow==1.12.0
 script:
-  - python -m unittest discover test/datasets/
+  - python -m unittest discover
