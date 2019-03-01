@@ -2,6 +2,8 @@
 
 ![DeepOBS](docs/deepobs_banner.png "DeepOBS")
 
+[![Documentation Status](https://readthedocs.org/projects/deepobs/badge/?version=latest)](https://deepobs.readthedocs.io/en/latest/?badge=latest)
+
 **DeepOBS** is a benchmarking suite that drastically simplifies, automates and
 improves the evaluation of deep learning optimizers.
 
