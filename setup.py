@@ -22,6 +22,9 @@ def package_files(directory):
                 paths.append(os.path.join('..', path, filename))
     return paths
 
+def readme():
+    with open('README.md') as f:
+        return f.read()
 
 BASELINE_FILES = package_files('deepobs/baselines/')
 
@@ -29,11 +32,19 @@ setuptools.setup(
     name='deepobs',
     version='1.1.0',
     description='Deep Learning Optimizer Benchmark Suite',
-    author='Frank Schneider, Lukas Balles and Philipp Hennig,'
-    'University of Tuebingen, Methods of Machine Learning',
+    long_description=readme(),
+    author='Frank Schneider, Lukas Balles and Philipp Hennig,',
     author_email='frank.schneider@tue.mpg.de',
     license='MIT',
     packages=setuptools.find_packages(),
+    classifiers=[
+        "Programming Language :: Python :: 3.6",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    ],
     install_requires=[
         'argparse', 'numpy', 'pandas', 'matplotlib', 'matplotlib2tikz',
         'seaborn'
