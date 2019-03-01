@@ -1,13 +1,5 @@
-import cifar100
-import cifar10
-import mnist
-import fmnist
-import tolstoi
-import imagenet
-import svhn
-import two_d
-import quadratic
+# -*- coding: utf-8 -*-
 
-import dataset_utils
-import run_utils
-import plot_utils
+from . import tensorflow
+from . import analyzer
+from . import scripts
