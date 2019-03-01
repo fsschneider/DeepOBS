@@ -21,12 +21,12 @@ sys.path.insert(0, os.path.abspath('../'))
 
 project = u'DeepOBS'
 copyright = u'2019, Frank Schneider'
-author = u'Frank Schneider'
+author = u'Frank Schneider, Lukas Balles & Philipp Hennig'
 
 # The short X.Y version
-version = u'1.0'
+version = u'1.1'
 # The full version, including alpha/beta/rc tags
-release = u'1.0.1'
+release = u'1.1.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -81,7 +81,10 @@ html_theme = 'sphinx_rtd_theme'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+# Theme options
+html_theme_options = {
+    'collapse_navigation': False,  # Collapse navigation
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -157,8 +160,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'DeepOBS', u'DeepOBS Documentation',
-     author, 'DeepOBS', 'One line description of project.',
-     'Miscellaneous'),
+     author, 'DeepOBS', 'Documentation for the DeepOBS package.',
+     'Frank Schneider'),
 ]
 
 

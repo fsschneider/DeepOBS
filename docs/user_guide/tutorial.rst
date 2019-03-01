@@ -1,176 +1,123 @@
-========
-Tutorial
-========
-
-This tutorial will show you an example of how DeepOBS can be used to benchmark the performance of a new optimization method for deep learning.
-
-In the simple example, we will create a run script for a new optimzier, but editing just a single line. We will then test this new optimizer with two hyperparameter settings and compare its performance on two test problems with the most popular deep learning optimizers, *SGD*, *Momentum*, and *Adam*.
-
-The advanced example will use lower level modules from DeepOBS to test an optimizer on a stochastic 2-dimensional test function. The path of the optimizer can be illustrated in an animation.
-
+==============
 Simple Example
 ==============
 
-Download and Edit a Run Script
-------------------------------
+This tutorial will show you an example of how DeepOBS can be used to benchmark
+the performance of a new optimization method for deep learning.
 
-You can download a template run script from `GitHub`_. This script takes care of applying the optimizer to a test problem of choice. It also automatically logs all the relevant performance statistics and other values of choice during the training process.
+This simple example aims to show you some basic functions of DeepOBS, by
+creating a run script for a new optimizer (we will use the Momentum optimizer
+as an example here) and running it on a very simple test problem.
 
-In order to run your optimizer, you need to change a few things in this script. Let's assume that we want to benchmark the *RMSProp* optimizer. Then we only have to change the line
+Create new Run Script
+=====================
 
-.. code-block:: Python
+The easiest way to use DeepOBS with a new optimizer is to write a run script for
+it. This run script will import the optimizer and list its hyperparameters
+(other than the ``learning rate``). For the Momentum optimizer this is simply
 
-  opt = tf.train.GradientDescentOptimizer(lr)
+.. code-block:: python3
+  :linenos:
+  :name: momentum_runner.py
+  :caption: momentum_runner.py
 
-to
+  import tensorflow as tf
+  import deepobs.tensorflow as tfobs
 
-.. code-block:: Python
+  optimizer_class = tf.train.MomentumOptimizer
+  hyperparams = [{"name": "momentum", "type": float},
+                 {"name": "use_nesterov", "type": bool, "default": False }]
+  runner = tfobs.runners.StandardRunner(optimizer_class, hyperparams)
 
-  opt = tf.train.RMSPropOptimizer(lr)
+  # The run method accepts all the relevant inputs, all arguments that are not
+  # provided will automatically be grabbed from the command line.
+  runner.run(train_log_interval=10)
 
-This is currently line 129 in the run script.
+You can download this :download:`example run script\
+<../../example_momentum_runner.py>` and use it as a template.
 
-Usually the hyperparameters of the optimizers need to be included as well, but for now let's only take the learning rate as a hyperparameter for *RMSProp* (and if you want change all the 'sgd's in the comments to 'rmsprop'). Let's name this run script now ``deepobs_run_rmsprop.py``.
+The DeepOBS runner (Line 7) needs access to an optimizer class with the same API
+as the TensorFlow optimizers and a list of additional hyperparameters for this
+new optimizers.
 
-Run your Optimizer
-------------------
+This run script is now fully command line based and is able to access all the
+test problems (and other options) of DeepOBS while also allowing to specify the
+new optimizers hyperparameters.
 
-You can now run your optimizer on a test problem. Let's try it on a noisy quadratic problem:
 
-.. code-block:: bash
+Run new Optimizer
+=================
 
-  python deepobs_run_rmsprop.py quadratic.noisy_quadratic --num_epochs=100 --lr=1e-1 --bs=128 --pickle --run_name=RMSProp_1e-1/
-
-(we can repeat this a couple of times with different random seeds. This way, we will get a measure of uncertainty in the benchmark plots)
-
-.. code-block:: bash
-
-  python deepobs_run_rmsprop.py quadratic.noisy_quadratic --num_epochs=100 --lr=1e-1 --bs=128 --pickle --run_name=RMSProp_1e-1/ --random_seed=43
-  python deepobs_run_rmsprop.py quadratic.noisy_quadratic --num_epochs=100 --lr=1e-1 --bs=128 --pickle --run_name=RMSProp_1e-1/ --random_seed=44
-
-You can monitor the training in real-time using Tensorboard
-
-.. code-block:: bash
-
-  tensorboard --logdir=results
-
-For this example, we will run the above code again, but with a different learning rate. We will call this "second optimizer" *RMRProp_1e-2*
-
-.. code-block:: bash
-
-  python deepobs_run_rmsprop.py quadratic.noisy_quadratic --num_epochs=100 --lr=1e-2 --bs=128 --pickle --run_name=RMSProp_1e-2/
-  python deepobs_run_rmsprop.py quadratic.noisy_quadratic --num_epochs=100 --lr=1e-2 --bs=128 --pickle --run_name=RMSProp_1e-2/ --random_seed=43
-  python deepobs_run_rmsprop.py quadratic.noisy_quadratic --num_epochs=100 --lr=1e-2 --bs=128 --pickle --run_name=RMSProp_1e-2/ --random_seed=44
-
-If you want to you can quickly run both optimizers on another problem
+Assuming the run script (from the previous section) is called
+``momentum_runner.py`` we can use it to run the Momentum optimizer on one of the
+test problems on DeepOBS:
 
 .. code-block:: bash
 
-  python deepobs_run_rmsprop.py mnist.mnist_mlp --num_epochs=5 --lr=1e-1 --bs=128 --pickle --run_name=RMSProp_1e-1/
-  python deepobs_run_rmsprop.py mnist.mnist_mlp --num_epochs=5 --lr=1e-1 --bs=128 --pickle --run_name=RMSProp_1e-1/ --random_seed=43
-  python deepobs_run_rmsprop.py mnist.mnist_mlp --num_epochs=5 --lr=1e-1 --bs=128 --pickle --run_name=RMSProp_1e-1/ --random_seed=44
+  python momentum_runner.py quadratic_deep --bs 128 --lr 1e-2 --momentum 0.99 --num_epochs 10
 
-  python deepobs_run_rmsprop.py mnist.mnist_mlp --num_epochs=5 --lr=1e-2 --bs=128 --pickle --run_name=RMSProp_1e-2/
-  python deepobs_run_rmsprop.py mnist.mnist_mlp --num_epochs=5 --lr=1e-2 --bs=128 --pickle --run_name=RMSProp_1e-2/ --random_seed=43
-  python deepobs_run_rmsprop.py mnist.mnist_mlp --num_epochs=5 --lr=1e-2 --bs=128 --pickle --run_name=RMSProp_1e-2/ --random_seed=44
+We will run it a couple times more this time with different ``learning_rates``
+
+.. code-block:: bash
+
+  python momentum_runner.py quadratic_deep --bs 128 --lr 1e-3 --momentum 0.99 --num_epochs 10
+  python momentum_runner.py quadratic_deep --bs 128 --lr 1e-4 --momentum 0.99 --num_epochs 10
+  python momentum_runner.py quadratic_deep --bs 128 --lr 1e-5 --momentum 0.99 --num_epochs 10
+
+
+Get best Run
+============
+
+We can use DeepOBS to automatically find the best of the hyperparameter
+settings.
+
+In this example we will directly access the (lower-level) functions of DeepOBS.
+In the section :doc:`suggested_protocol` we show you how to use the convenience
+scripts to do the following steps automatically.
+
+.. code-block:: python3
+
+  import deepobs
+
+  analyzer = deepobs.analyzer.analyze_utils.Analyzer("results")
+  deepobs.analyzer.analyze.get_best_run(analyzer)
+
+Since all of our results from the previous section are stored in the ``results``
+folder, we pass this path to the DeepOBS :doc:`../api/analyzer/analyzer`. Next,
+we can call the ``get_best_run`` function with this analyzer and get an output
+like this
+
+.. code-block:: console
+
+  ***********************
+  Analyzing quadratic_deep
+  ***********************
+  Checked 4 settings for MomentumOptimizer and found the following
+  Best Setting (Final Value) num_epochs__10__batch_size__10__momentum__9.9e-01__use_nesterov__False__lr__1.e-04 with final performance of 115.23509434291294
+  Best Setting (Best Value) num_epochs__10__batch_size__10__momentum__9.9e-01__use_nesterov__False__lr__1.e-03 with best performance of 111.36394282749721
 
 
 Plot Results
-------------
+============
 
-Now we can plot the results of those two "new" optimizers *RMSProp_1e-1* and *RMSProp_1e-2*. Since the performance is always relative, we automatically plot the performance against the most popular optimizers (*SGD*, *Momentum*, *Adam*) with the best settings we found after tuning their hyperparameters. Try out:
+Similarly, we can plot the sensitivity of the (final) performance with regard to
+the ``learning rate`` by calling the appropriate DeepOBS function
 
-.. code-block:: bash
+.. code-block:: python3
 
-  deepobs_plot_results.py --results_dir=results
+  deepobs.analyzer.analyze.plot_lr_sensitivity(analyzer)
 
-which shows you the learning curves (loss and accuracy for both test and train dataset, but in the case of optimizing a quadratic, there is no accuracy). Additionally it will print out a table summarizing the performances over all test problems (here we only have one or two). If you add the option ``--saveto=save_dir`` the plots and a color coded table are saved as ``.png`` and ready-to-include ``.tex``-files!
+and getting a plot like this
 
+.. image:: plot_lr_sensitivity.png
+    :scale: 20%
 
-Estimate Runtime Overhead
--------------------------
+And most importantly, a performance plot of the best performing hyperparameter
+setting (when looking at the final performance)
 
-You can estimate the runtime overhead of the new optimizer compared to *SGD* like this:
+.. code-block:: python3
 
-.. code-block:: bash
+  deepobs.analyzer.analyze.plot_performance(analyzer, mode='final')
 
-  deepobs_estimate_runtime.py deepobs_run_rmsprop.py --optimizer_arguments=--lr=1e-2
-
-It will return an estimate of the overhead of the new optimizer compared to *SGD*. In our case it should be quite close to 1.0, as *RMSProp* costs roughly the same as *SGD*.
-
-
-Advanced Example
-================
-
-In this example we are going to use some lower-level modules of the DeepOBS package, to set up a two dimensional stochastic problem, run *SGD* on it and then plot the optimizers path.
-
-Loading the Packages
---------------------
-
-We start by loading the necessary packages (mainly tensorflow and DeepOBS, the rest is for plotting).
-
-.. code-block:: Python
-
-  import tensorflow as tf
-  import deepobs
-
-  import matplotlib.pyplot as plt
-  from mpl_toolkits.mplot3d import Axes3D
-
-Setting-Up the Problem
-----------------------
-
-Next, we reset any existing graphs, and let Deep OBS set up the test_problem. In our case it is a stochastic version of the two dimensional Branin function. We use the default settings for this test problem. Then, we get the losses (vector of individual loss per example in batch) and the accuracy, and take the mean of the losses as our objective function.
-
-.. code-block:: Python
-
-  tf.reset_default_graph()
-  test_problem = deepobs.two_d.noisy_branin.set_up()
-  losses, accuracy = test_problem.get()
-  loss = tf.reduce_mean(losses)
-
-Running the Optimizer
----------------------
-
-The rest is standard Tensorflow code, setting up the optimizer, and running it for ten epochs, while tracking the optimizer's trajectory.
-
-.. code-block:: Python
-
-  step = tf.train.GradientDescentOptimizer(1e-2).minimize(loss)
-  sess = tf.Session()
-  sess.run(tf.global_variables_initializer())
-
-  u, v = tf.trainable_variables()
-  u_history, v_history, loss_history = [], [], []
-
-  num_epochs = 10
-  for i in range(num_epochs):
-      sess.run(test_problem.train_init_op)
-      print("epoch", i)
-      while True:
-          try:
-              _, loss_, u_, v_ = sess.run([step, loss, u, v])
-              u_history.append(u_); v_history.append(v_); loss_history.append(loss_);
-          except tf.errors.OutOfRangeError:
-                  break
-
-
-Plotting the Trajectory
------------------------
-
-We can use DeepOBS to plot the optimizer's trajectory
-
-.. code-block:: Python
-
-  animation = test_problem.anim_run(u_history, v_history, loss_history)
-  plt.show()
-
-which will produce an animation like this
-
-.. only:: html
-
-   .. figure:: animation.gif
-
-      Trajectory of *SGD* on the stochastic Branin function. The blue function is the non-stochastic version, while the z-value is given by the (observed) stochastic function value.
-
-.. _GitHub: https://github.com/fsschneider/DeepOBS/blob/master/scripts/deepobs_run_sgd.py
+.. image:: plot_performance.png
+    :scale: 30%

@@ -6,27 +6,51 @@
 Welcome to DeepOBS
 ===================
 
-DeepOBS is a benchmarking suite that drastically simplifies, automates and improves the evaluation of deep learning optimizers.
+.. figure:: deepobs_banner.png
 
-It can evaluate the performance of new optimizers on a variety of **real-world test problems** and automatically compare them with **realistic baselines**.
+**DeepOBS** is a benchmarking suite that drastically simplifies, automates and
+improves the evaluation of deep learning optimizers.
 
-The code for the current implementation in TensorFlow can be found on `GitHub`_.
-We plan also provide a DeepOBS implementation in PyTorch soon. In the meantime, PyTorch users can still use parts of DeepOBS such as the data preprocessing scripts or the visualization features.
+It can evaluate the performance of new optimizers on a variety of
+**real-world test problems** and automatically compare them with
+**realistic baselines**.
+
+DeepOBS automates several steps when benchmarking deep learning optimizers:
+
+  - Downloading and preparing data sets.
+  - Setting up test problems consisting of contemporary data sets and realistic
+    deep learning architectures.
+  - Running the optimizers on multiple test problems and logging relevant
+    metrics.
+  - Reporting and visualization the results of the optimizer benchmark.
+
+.. figure:: deepobs.jpg
+    :scale: 40%
+
+The code for the current implementation working with **TensorFlow** can be found
+on `GitHub`_.
+
+We are actively working on a **PyTorch** version and will be releasing it in the
+next months. In the meantime, PyTorch users can still use parts of DeepOBS such
+as the data preprocessing scripts or the visualization features.
 
 .. toctree::
   :maxdepth: 2
   :caption: User Guide
 
   user_guide/quick_start
-  user_guide/tutorial
   user_guide/overview
+  user_guide/tutorial
+  user_guide/suggested_protocol
 
 .. toctree::
   :maxdepth: 2
   :caption: API Reference
 
-  api/data_loading
-  api/models
+  api/datasets
+  api/testproblems
+  api/runner
+  api/analyzer
   api/scripts
 
 
