@@ -1,8 +1,10 @@
+sudo: required
 language: python
 python:
   - "3.6"
 cache: pip
 install:
+  - sudo bash deepobs/scripts/deepobs_prepare_data.sh
   - pip install argparse
   - pip install numpy
   - pip install pandas
