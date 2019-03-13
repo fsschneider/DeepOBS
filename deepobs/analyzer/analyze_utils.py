@@ -110,11 +110,11 @@ class TestProblemAnalyzer:
 
         """
         try:
-            with open(os.path.join(tensorflow.config.get_baseline_path(),
+            with open(os.path.join(tensorflow.config.get_baseline_dir(),
                          "convergence_performance.json"), "r") as f:
                 return json.load(f)[self.name]
         except IOError:
-            print("Warning: Could not fing a convergence performance file.")
+            print("Warning: Could not find a convergence performance file.")
             return 0.0
 
 
