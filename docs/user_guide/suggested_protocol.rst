@@ -85,5 +85,8 @@ and the overall performance table
 .. image:: performance_table.png
     :scale: 40%
 
+If the path to the baseline folder is given, DeepOBS will automatically compare
+the results with the baselines for ``SGD``, ``Momentum``, and ``Adam``.
+
 For all plots, ``.tex`` files will be generated with pgfplots-code for direct
 inclusion in academic publications.

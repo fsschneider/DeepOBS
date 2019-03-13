@@ -3,6 +3,9 @@
 ![DeepOBS](docs/deepobs_banner.png "DeepOBS")
 
 [![Documentation Status](https://readthedocs.org/projects/deepobs/badge/?version=latest)](https://deepobs.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.com/fsschneider/deepobs.svg?branch=master)](https://travis-ci.com/username/projectname)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 
 **DeepOBS** is a benchmarking suite that drastically simplifies, automates and
 improves the evaluation of deep learning optimizers.
@@ -39,10 +42,7 @@ as the data preprocessing scripts or the visualization features.
 
 ## Installation
 
-	pip install git+https://github.com/fsschneider/DeepOBS.git
-
-Note, that the installation process can take a while as it will also
-automatically download all baseline results.
+	pip install deepobs
 
 We tested the package with Python 3.6 and TensorFlow version 1.12. Other
 versions of Python and TensorFlow (>= 1.4.0) might work, and we plan to expand

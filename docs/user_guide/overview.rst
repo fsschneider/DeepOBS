@@ -119,6 +119,15 @@ optimizer’s code, assuming the method perform competitively. Currently,
 baselines are available for all test problems in the small and large benchmark
 set.
 
+The baselines can be downloaded automatically by running
+
+.. code-block:: bash
+
+  deepobs_get_baselines.sh
+
+and the script is described in the API section under
+:doc:`../api/scripts/deepobs_get_baselines`.
+
 
 Runtime Estimation
 ==================
