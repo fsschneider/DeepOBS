@@ -1,36 +1,16 @@
 # -*- coding: utf-8 -*-
 """Setup for the DeepOBS package"""
 
-import os
 import setuptools
 
-
-def package_files(directory):
-    """Get all json files.
-
-    Args:
-        directory (str): Path to parent dir.
-
-    Returns:
-        list: List of all json files.
-
-    """
-    paths = []
-    for (path, _, filenames) in os.walk(directory):
-        for filename in filenames:
-            if filename.endswith('.json'):
-                paths.append(os.path.join('..', path, filename))
-    return paths
 
 def readme():
     with open('README.md') as f:
         return f.read()
 
-BASELINE_FILES = package_files('deepobs/baselines/')
-
 setuptools.setup(
     name='deepobs',
-    version='1.1.0',
+    version='1.1.1',
     description='Deep Learning Optimizer Benchmark Suite',
     long_description=readme(),
     author='Frank Schneider, Lukas Balles and Philipp Hennig,',
@@ -51,8 +31,8 @@ setuptools.setup(
     ],
     scripts=[
         'deepobs/scripts/deepobs_prepare_data.sh',
+        'deepobs/scripts/deepobs_get_baselines.sh',
         'deepobs/scripts/deepobs_plot_results.py',
         'deepobs/scripts/deepobs_estimate_runtime.py'
     ],
-    package_data={'': BASELINE_FILES},
     zip_safe=False)

@@ -42,11 +42,10 @@ def parse_args():
         default=False,
         help="Run a full analysis and plot all figures.")
     parser.add_argument(
-        "--ignore_baselines",
-        action="store_const",
-        const=True,
-        default=False,
-        help="Ignore baselines and just plot from results folder.")
+        "--baseline_path",
+        type=str,
+        default="baselines_deepobs",
+        help="Path to baseline folder.")
     return parser
 
 
@@ -57,16 +56,16 @@ def read_args():
 
 
 def main(path, get_best_run, plot_lr_sensitivity, plot_performance, plot_table,
-         full, ignore_baselines):
+         full, baseline_path):
     # Put all input arguments back into an args variable, so I can use it as
     # before (without the main function)
     args = argparse.Namespace(**locals())
     # Parse whole baseline folder
-    if not args.ignore_baselines:
+    if args.baseline_path:
         print("Parsing baseline folder")
-        baseline_path = deepobs.analyzer.analyze_utils.get_baseline_path()
+        deepobs.tensorflow.config.set_baseline_dir(args.baseline_path)
         baseline_parser = deepobs.analyzer.analyze_utils.Analyzer(
-            baseline_path)
+            deepobs.tensorflow.config.get_baseline_dir())
     else:
         baseline_parser = None
 

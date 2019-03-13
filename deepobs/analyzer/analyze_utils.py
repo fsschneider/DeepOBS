@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib2tikz import save as tikz_save
 from matplotlib2tikz import get_tikz_code
+from .. import tensorflow
 
 
 class Analyzer:
@@ -108,10 +109,13 @@ class TestProblemAnalyzer:
             float: Convergence performance for this test problem
 
         """
-        with open(
-                os.path.join(get_baseline_path(),
-                             "convergence_performance.json"), "r") as f:
-            return json.load(f)[self.name]
+        try:
+            with open(os.path.join(tensorflow.config.get_baseline_dir(),
+                         "convergence_performance.json"), "r") as f:
+                return json.load(f)[self.name]
+        except IOError:
+            print("Warning: Could not find a convergence performance file.")
+            return 0.0
 
 
 class OptimizerAnalyzer:
@@ -993,14 +997,3 @@ def add_color_coding_tex(input):
         return "\cca{" + str(int(input)) + "}"
     else:
         return ""
-
-
-def get_baseline_path():
-    """Returns the path to the baseline results of DeepOBS.
-
-    Returns:
-        str: Path to the baselines of DeepOBS.
-
-    """
-    this_dir, this_filename = os.path.split(__file__)
-    return os.path.join((os.path.dirname(this_dir)), "baselines/")
