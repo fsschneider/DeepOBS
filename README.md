@@ -42,10 +42,7 @@ as the data preprocessing scripts or the visualization features.
 
 ## Installation
 
-	pip install git+https://github.com/fsschneider/DeepOBS.git
-
-Note, that the installation process can take a while as it will also
-automatically download all baseline results.
+	pip install deepobs
 
 We tested the package with Python 3.6 and TensorFlow version 1.12. Other
 versions of Python and TensorFlow (>= 1.4.0) might work, and we plan to expand

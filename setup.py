@@ -10,7 +10,7 @@ def readme():
 
 setuptools.setup(
     name='deepobs',
-    version='1.1.1-rc-3',
+    version='1.1.1',
     description='Deep Learning Optimizer Benchmark Suite',
     long_description=readme(),
     author='Frank Schneider, Lukas Balles and Philipp Hennig,',
