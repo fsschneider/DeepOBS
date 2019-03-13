@@ -10,7 +10,7 @@ def readme():
 
 setuptools.setup(
     name='deepobs',
-    version='1.1.1',
+    version='1.1.1-rc-3',
     description='Deep Learning Optimizer Benchmark Suite',
     long_description=readme(),
     author='Frank Schneider, Lukas Balles and Philipp Hennig,',
@@ -31,6 +31,7 @@ setuptools.setup(
     ],
     scripts=[
         'deepobs/scripts/deepobs_prepare_data.sh',
+        'deepobs/scripts/deepobs_get_baselines.sh',
         'deepobs/scripts/deepobs_plot_results.py',
         'deepobs/scripts/deepobs_estimate_runtime.py'
     ],

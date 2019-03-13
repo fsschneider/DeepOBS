@@ -19,8 +19,8 @@ This script can return one or all of the below information:
     ``large`` benchmark set including metrics for the performance, speed and
     tuneability of each optimizer on each test problem.
 
-By default this script also plots the baseline results for `SGD`, `Momentum`
-and `Adam`, but this can be turned off.
+If the path to the baseline folder is given, this script will also plot the
+performances of `SGD`, `Momentum` and `Adam`.
 
 **Usage:**
 

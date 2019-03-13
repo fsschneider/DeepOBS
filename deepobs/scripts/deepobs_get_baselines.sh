@@ -18,7 +18,7 @@ done
 mkdir -p $DATA_FOLDER
 
 echo "Downloading Baselines..."
-wget https://github.com/fsschneider/DeepOBS_Baselines/archive/v1.0.tar.gz -O $DATA_FOLDER/baselines.tar.gz
+wget https://github.com/fsschneider/DeepOBS_Baselines/archive/v1.1.tar.gz -O $DATA_FOLDER/baselines.tar.gz
 echo "Extracting Baselines..."
 tar -xvf $DATA_FOLDER/baselines.tar.gz -C $DATA_FOLDER/ --strip-components=1
 rm -f $DATA_FOLDER/baselines.tar.gz
