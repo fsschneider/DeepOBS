@@ -43,9 +43,8 @@ def parse_args():
         help="Run a full analysis and plot all figures.")
     parser.add_argument(
         "--baseline_path",
-        action="store_const",
-        const=True,
-        default=False,
+        type=str,
+        default="baselines_deepobs",
         help="Path to baseline folder.")
     return parser
 
@@ -62,7 +61,7 @@ def main(path, get_best_run, plot_lr_sensitivity, plot_performance, plot_table,
     # before (without the main function)
     args = argparse.Namespace(**locals())
     # Parse whole baseline folder
-    if not args.baseline_path:
+    if args.baseline_path:
         print("Parsing baseline folder")
         deepobs.tensorflow.config.set_baseline_dir(args.baseline_path)
         baseline_parser = deepobs.analyzer.analyze_utils.Analyzer(
