@@ -16,6 +16,9 @@ class cifar10_vgg16(TestProblem):
         self.data = cifar10(self._batch_size)
         self.loss_function = nn.CrossEntropyLoss()
         self.net = net_vgg(num_outputs = 10, variant = 16)
+        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.net.to(self._device)
+
     def get_regularization_loss(self):
         # iterate through all layers
         layer_norms = []
@@ -28,26 +31,3 @@ class cifar10_vgg16(TestProblem):
         regularization_loss = 0.5 * sum(layer_norms)
 
         return self._weight_decay * regularization_loss
-
-    def get_batch_loss_and_accuracy(self):
-        inputs, labels = self._get_next_batch()
-        correct = 0.0
-        total = 0.0
-
-        # in evaluation phase is no gradient needed
-        if self.phase in ["train_eval", "test"]:
-            with torch.no_grad():
-                outputs = self.net(inputs)
-                labels = labels.long()
-                loss = self.loss_function(outputs, labels)
-        else:
-            outputs = self.net(inputs)
-            labels = labels.long()
-            loss = self.loss_function(outputs, labels)
-
-        _, predicted = torch.max(outputs.data, 1)
-        total += labels.size(0)
-        correct += (predicted == labels).sum().item()
-
-        accuracy = correct/total
-        return loss, accuracy
