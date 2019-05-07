@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 """CIFAR-10 DeepOBS dataset."""
 
-import os
-import numpy as np
 from . import dataset
 from .. import config
 from torch.utils import data as dat
 from torchvision import datasets
 from torchvision import transforms
-
+from .datasets_utils import train_eval_sampler
 
 class cifar10(dataset.DataSet):
     """DeepOBS data set class for the `CIFAR-10\
@@ -24,20 +22,8 @@ class cifar10(dataset.DataSet):
     train_eval_size (int): Size of the train eval data set.
         Defaults to ``10 000`` the size of the test set.
 
-  Attributes:
-    batch: A tuple ``(x, y)`` of tensors, yielding batches of CIFAR-10 images
-        (``x`` with shape ``(batch_size, 32, 32, 3)``) and corresponding one-hot
-        label vectors (``y`` with shape ``(batch_size, 10)``). Executing these
-        tensors raises a ``tf.errors.OutOfRangeError`` after one epoch.
-    train_init_op: A tensorflow operation initializing the dataset for the
-        training phase.
-    train_eval_init_op: A tensorflow operation initializing the testproblem for
-        evaluating on training data.
-    test_init_op: A tensorflow operation initializing the testproblem for
-        evaluating on test data.
-    phase: A string-value tf.Variable that is set to ``train``, ``train_eval``
-        or ``test``, depending on the current phase. This can be used by testproblems
-        to adapt their behavior to this phase.
+  Methods:
+      _make_dataloader: A helper that is shared by all three data loader methods.
   """
 
     def __init__(self,
@@ -67,7 +53,7 @@ class cifar10(dataset.DataSet):
                     transforms.Pad(padding=2),
                     transforms.RandomCrop(size=(32,32)),
                     transforms.RandomHorizontalFlip(),
-                    transforms.ColorJitter(brightness=63. / 255.,saturation=[0.5,1.5], contrast=[0.2,1.8]),
+                    transforms.ColorJitter(brightness=63. / 255., saturation=[0.5,1.5], contrast=[0.2,1.8]),
                     transforms.ToTensor(),
                     transforms.Normalize((0.49139968, 0.48215841, 0.44653091),(0.24703223, 0.24348513, 0.26158784))
                     ])
@@ -87,6 +73,6 @@ class cifar10(dataset.DataSet):
         return self._make_dataloader(train=False, shuffle = False, data_augmentation = False, sampler=None)
 
     def _make_train_eval_dataloader(self):
-        indices = np.random.choice(len(self._train_dataloader.dataset), size= self._train_eval_size, replace=False)
-        sampler = dat.SubsetRandomSampler(indices)
-        return self._make_dataloader(train=True, shuffle=False, data_augmentation=False, sampler=sampler)
+        size = len(self._train_dataloader.dataset)
+        sampler = train_eval_sampler(size, self._train_eval_size)
+        return self._make_dataloader(train=True, shuffle=False, data_augmentation=self._data_augmentation, sampler=sampler)

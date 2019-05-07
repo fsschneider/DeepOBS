@@ -7,3 +7,4 @@ from .cifar100 import cifar100
 from .fmnist import fmnist
 from .svhn import svhn
 from .tolstoi import tolstoi
+from .quadratic import quadratic

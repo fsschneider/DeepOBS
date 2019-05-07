@@ -3,12 +3,12 @@
 
 from __future__ import print_function
 
-import numpy as np
 from . import dataset
 from .. import config
 from torch.utils import data as dat
 from torchvision import datasets
 from torchvision import transforms
+from .datasets_utils import train_eval_sampler
 
 class fmnist(dataset.DataSet):
     """DeepOBS data set class for the `MNIST\
@@ -21,20 +21,8 @@ class fmnist(dataset.DataSet):
     train_eval_size (int): Size of the train eval data set.
         Defaults to ``10 000`` the size of the test set.
 
-  Attributes:
-    batch: A tuple ``(x, y)`` of tensors, yielding batches of MNIST images
-        (``x`` with shape ``(batch_size, 28, 28, 1)``) and corresponding one-hot
-        label vectors (``y`` with shape ``(batch_size, 10)``). Executing these
-        tensors raises a ``tf.errors.OutOfRangeError`` after one epoch.
-    train_init_op: A tensorflow operation initializing the dataset for the
-        training phase.
-    train_eval_init_op: A tensorflow operation initializing the testproblem for
-        evaluating on training data.
-    test_init_op: A tensorflow operation initializing the testproblem for
-        evaluating on test data.
-    phase: A string-value tf.Variable that is set to ``train``, ``train_eval``
-        or ``test``, depending on the current phase. This can be used by testproblems
-        to adapt their behavior to this phase.
+  Methods:
+      _make_dataloader: A helper that is shared by all three data loader methods.
   """
 
     def __init__(self,
@@ -68,6 +56,6 @@ class fmnist(dataset.DataSet):
         return self._make_dataloader(train=False, shuffle = False, data_augmentation = False, sampler=None)
 
     def _make_train_eval_dataloader(self):
-        indices = np.random.choice(len(self._train_dataloader.dataset), size= self._train_eval_size, replace=False)
-        sampler = dat.SubsetRandomSampler(indices)
+        size = len(self._train_dataloader.dataset)
+        sampler = train_eval_sampler(size, self._train_eval_size)
         return self._make_dataloader(train=True, shuffle=False, data_augmentation=False, sampler=sampler)
