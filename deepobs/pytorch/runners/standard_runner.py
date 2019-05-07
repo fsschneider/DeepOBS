@@ -3,7 +3,6 @@
 from __future__ import print_function
 
 import torch
-import argparse
 import os
 import json
 import importlib
@@ -18,7 +17,7 @@ class StandardRunner(object):
 
     Args:
       optimizer_class: Optimizer class, which should inherit from
-          tf.train.Optimizer and/or obey the same interface for ``.minimize()``.
+          torch.optim.Optimizer.
       hyperparams: A list describing the optimizer's hyperparameters other
           than learning rate. Each entry of the list is a dictionary describing
           one of the hyperparameters. This dictionary is expected to have the
@@ -35,10 +34,10 @@ class StandardRunner(object):
 
     Example
     --------
-    >>> optimizer_class = tf.train.MomentumOptimizer
+    >>> optimizer_class = torch.optim.SGD
     >>> hyperparams = [
             {"name": "momentum", "type": float},
-            {"name": "use_nesterov", "type": bool, "default": False}]
+            {"name": "nesterov", "type": bool, "default": False}]
     >>> runner = StandardRunner(optimizer_class, hyperparms)
 
     """
@@ -48,7 +47,7 @@ class StandardRunner(object):
 
     Args:
       optimizer_class: Optimizer class, which should inherit from
-          tf.train.Optimizer and/or obey the same interface for ``.minimize()``.
+          torch.optim..Optimizer.
       hyperparams: A list describing the optimizer's hyperparameters other
           than learning rate. Each entry of the list is a dictionary describing
           one of the hyperparameters. This dictionary is expected to have the
@@ -62,10 +61,10 @@ class StandardRunner(object):
           "default", which specifies a default value for the hyperparameter.
 
     Example:
-        optimizer_class = tf.train.MomentumOptimizer
+        optimizer_class = torch.optim.SGD
         hyperparams = [
             {"name": "momentum", "type": float},
-            {"name": "use_nesterov", "type": bool, "default": False}]
+            {"name": "nesterov", "type": bool, "default": False}]
         runner = StandardRunner(optimizer_class, hyperparms)
     """
         self._optimizer_class = optimizer_class
@@ -103,9 +102,7 @@ class StandardRunner(object):
     to see a description of the command line interface.)
 
     Training statistics (train/test loss/accuracy) are collected and will be
-    saved to a ``JSON`` output file, together with metadata. The training
-    statistics can optionally also be saved in TensorFlow output files and read
-    during training using `Tensorboard`.
+    saved to a ``JSON`` output file, together with metadata.
 
     Args:
       testproblem (str): Name of a DeepOBS test problem.
@@ -144,211 +141,37 @@ class StandardRunner(object):
           If unspecified it defaults to ``10``.
       print_train_iter (bool): If ``True``, training loss is printed to screen.
           If unspecified it defaults to ``False``.
-      tf_logging (bool): If ``True`` log all statistics with tensorflow summaries,
-          which can be viewed in real time with tensorboard. If unspecified it
-          defaults to ``False``.
       no_logs (bool): If ``True`` no ``JSON`` files are created. If unspecified
           it defaults to ``False``.
       optimizer_hyperparams (dict): Keyword arguments for the hyperparameters of
           the optimizer. These are the ones specified in the ``hyperparams``
           dictionary passed to the ``__init__``.
     """
-        # We will go through all the arguments, check whether they have been passed
-        # to this function. If yes, we collect the (name, value) pairs  in ``args``.
-        # If not, we add corresponding command line arguments.
-        args = {}
-        parser = argparse.ArgumentParser(
-            description="Run {0:s} on a DeepOBS test problem.".format(
-                self._optimizer_name))
 
-        if testproblem is None:
-            parser.add_argument(
-                "testproblem",
-                help="""Name of the DeepOBS testproblem
-          (e.g. 'cifar10_3c3d'""")
-        else:
-            args["testproblem"] = testproblem
-
-        if weight_decay is None:
-            parser.add_argument(
-                "--weight_decay",
-                "--wd",
-                type=float,
-                help="""Factor
-          used for the weight_deacy. If not given, the default weight decay for
-          this model is used. Note that not all models use weight decay and this
-          value will be ignored in such a case.""")
-        else:
-            args["weight_decay"] = weight_decay
-
-        if batch_size is None:
-            parser.add_argument(
-                "--batch_size",
-                "--bs",
-                required=True,
-                type=int,
-                help="The batch size (positive integer).")
-        else:
-            args["batch_size"] = batch_size
-
-        if num_epochs is None:
-            parser.add_argument(
-                "-N",
-                "--num_epochs",
-                required=True,
-                type=int,
-                help="Total number of training epochs.")
-        else:
-            args["num_epochs"] = num_epochs
-
-        if learning_rate is None:
-            parser.add_argument(
-                "--learning_rate",
-                "--lr",
-                required=True,
-                type=float,
-                help=
-                """Learning rate (positive float) to use. Can be used as the base
-          of a learning rate schedule when used in conjunction with
-          --lr_sched_epochs and --lr_sched_factors.""")
-        else:
-            args["learning_rate"] = learning_rate
-
-        if lr_sched_epochs is None:
-            parser.add_argument(
-                "--lr_sched_epochs",
-                nargs="+",
-                type=int,
-                help="""One or more epoch numbers (positive integers) that mark
-          learning rate changes. The base learning rate has to be passed via
-          '--learing_rate' and the factors by which to change have to be passed
-          via '--lr_sched_factors'. Example: '--lr 0.3 --lr_sched_epochs 50 100
-          --lr_sched_factors 0.1 0.01' will start with a learning rate of 0.3,
-          then decrease to 0.1*0.3=0.03 after training for 50 epochs, and
-          decrease to 0.01*0.3=0.003' after training for 100 epochs.""")
-        else:
-            args["lr_sched_epochs"] = lr_sched_epochs
-
-        if lr_sched_factors is None:
-            parser.add_argument(
-                "--lr_sched_factors",
-                nargs="+",
-                type=float,
-                help=
-                """One or more factors (floats) by which to change the learning
-          rate. The base learning rate has to be passed via '--learing_rate' and
-          the epochs at which to change the learning rate have to be passed via
-          '--lr_sched_factors'. Example: '--lr 0.3 --lr_sched_epochs 50 100
-          --lr_sched_factors 0.1 0.01' will start with a learning rate of 0.3,
-          then decrease to 0.1*0.3=0.03 after training for 50 epochs, and
-          decrease to 0.01*0.3=0.003' after training for 100 epochs.""")
-        else:
-            args["lr_sched_factors"] = lr_sched_factors
-
-        if random_seed is None:
-            parser.add_argument(
-                "-r",
-                "--random_seed",
-                type=int,
-                default=42,
-                help="An integer to set as tensorflow's random seed.")
-        else:
-            args["random_seed"] = random_seed
-
-        if data_dir is None:
-            parser.add_argument(
-                "--data_dir",
-                help="""Path to the base data dir. If
-      not specified, DeepOBS uses its default.""")
-        else:
-            args["data_dir"] = data_dir
-
-        if output_dir is None:
-            parser.add_argument(
-                "--output_dir",
-                type=str,
-                default="results",
-                help="""Path to the base directory in which output files will be
-          stored. Results will automatically be sorted into subdirectories of
-          the form 'testproblem/optimizer'.""")
-        else:
-            args["output_dir"] = output_dir
-
-        if train_log_interval is None:
-            parser.add_argument(
-                "--train_log_interval",
-                type=int,
-                default=10,
-                help="Interval of steps at which training loss is logged.")
-        else:
-            args["train_log_interval"] = train_log_interval
-
-        if print_train_iter is None:
-            parser.add_argument(
-                "--print_train_iter",
-                action="store_const",
-                const=True,
-                default=False,
-                help="""Add this flag to print mini-batch training loss to
-          stdout on each (logged) interation.""")
-        else:
-            args["print_train_iter"] = print_train_iter
-
-        if tf_logging is None:
-            parser.add_argument(
-                "--tf_logging",
-                action="store_const",
-                const=True,
-                default=False,
-                help="""Add this flag to log statistics using tensorflow
-          (to view in tensorboard).""")
-        else:
-            args["tf_logging"] = tf_logging
-
-        if no_logs is None:
-            parser.add_argument(
-                "--no_logs",
-                action="store_const",
-                const=True,
-                default=False,
-                help="""Add this flag to not save any json logging files.""")
-        else:
-            args["no_logs"] = no_logs
-
-        # Optimizer hyperparams
-        for hp in self._hyperparams:
-            hp_name = hp["name"]
-            if hp_name in optimizer_hyperparams:
-                args[hp_name] = optimizer_hyperparams[hp_name]
-            else:  # hp_name not in optimizer_hyperparams
-                hp_type = hp["type"]
-                if "default" in hp:
-                    hp_default = hp["default"]
-                    parser.add_argument(
-                        "--{0:s}".format(hp_name),
-                        type=hp_type,
-                        default=hp_default,
-                        help="""Hyperparameter {0:s} of {1:s} ({2:s};
-              defaults to {3:s}).""".format(hp_name, self._optimizer_name,
-                                            str(hp_type), str(hp_default)))
-                else:
-                    parser.add_argument(
-                        "--{0:s}".format(hp_name),
-                        type=hp_type,
-                        required=True,
-                        help="Hyperparameter {0:s} of {1:s} ({2:s}).".format(
-                            hp_name, self._optimizer_name, str(hp_type)))
-
-        # Get the command line arguments and add them to the ``args`` dict. Then
-        # call the _run function with those arguments.
-        cmdline_args = vars(parser.parse_args())
-        args.update(cmdline_args)
+        args = runner_utils.get_arguments(
+                self._optimizer_class,
+                self._optimizer_name,
+                self._hyperparams,
+                testproblem,
+                weight_decay,
+                batch_size,
+                num_epochs,
+                learning_rate,
+                lr_sched_epochs,
+                lr_sched_factors,
+                random_seed,
+                data_dir,
+                output_dir,
+                train_log_interval,
+                print_train_iter,
+                no_logs,
+                **optimizer_hyperparams)
         self._run(**args)
 
     def _run(self, testproblem, weight_decay, batch_size, num_epochs,
              learning_rate, lr_sched_epochs, lr_sched_factors, random_seed,
              data_dir, output_dir, train_log_interval, print_train_iter,
-             tf_logging, no_logs, **optimizer_hyperparams):
+             no_logs, **optimizer_hyperparams):
         """Performs the actual run, given all the arguments."""
 
         # Set data directory of DeepOBS.
@@ -421,7 +244,6 @@ class StandardRunner(object):
             accuracy /= batchCount
 
             # if the testproblem has a regularization, add the regularization loss of the current network parameters.
-            # TODO is regular. loss added in evaluation phase? if yes, is it really not averaged across the batch_count?
             if hasattr(tproblem, 'get_regularization_loss'):
                 loss += tproblem.get_regularization_loss().item()
 
@@ -435,7 +257,10 @@ class StandardRunner(object):
 
         # Start of training loop.
         for epoch_count in range(num_epochs + 1):
+
+            # get the next learning rate
             lr_schedule.step()
+
             # Evaluate at beginning of epoch.
             print("********************************")
             print("Evaluating after {0:d} of {1:d} epochs...".format(
@@ -449,7 +274,6 @@ class StandardRunner(object):
                 break
 
             # Training
-            print("remove me, lr: {0}".format(lr_schedule.get_lr()))
             if lr_sched_epochs is not None:
                 if epoch_count in lr_sched_epochs:
                     print("Setting learning rate to {0}".format(lr_schedule.get_lr()))
@@ -462,7 +286,6 @@ class StandardRunner(object):
                     batch_loss, _ = tproblem.get_batch_loss_and_accuracy()
 
                     # if the testproblem has a regularization, add the regularization loss.
-                    # TODO the regularization loss is added to every batch loss! correct?
                     if hasattr(tproblem, 'get_regularization_loss'):
                         regularizer_loss = tproblem.get_regularization_loss()
                         batch_loss += regularizer_loss
@@ -475,35 +298,29 @@ class StandardRunner(object):
                     batch_count += 1
                 except StopIteration:
                     break
-
-            # for testing, after every epoch, save the model:
-            torch.save(tproblem.net.state_dict(), '/home/isenach/Desktop/Project/models/epoch' + str(epoch_count) + '.pt')
-
+            # save the model state for sampling
+#            if epoch_count % 25 == 0:
+#                torch.save(tproblem.net.state_dict(), '/home/isenach/Desktop/Project/models/epoch_' + str(epoch_count))
         # --- End of training loop.
 
         # Put results into output dictionary.
         output = {
             "train_losses": train_losses,
             "test_losses": test_losses,
-            "minibatch_train_losses": minibatch_train_losses
+            "minibatch_train_losses": minibatch_train_losses,
+            "train_accuracies": train_accuracies,
+            "test_accuracies": test_accuracies,
+            "optimizer": self._optimizer_name,
+            'testproblem': testproblem,
+            'weight_decay': weight_decay,
+            'batch_size': batch_size,
+            'learning_rate': learning_rate,
+            'lr_sched_epochs': lr_sched_epochs,
+            'lr_sched_factors': lr_sched_factors,
+            'random_seed': random_seed,
+            'train_log_interval': train_log_interval,
+            'hyperparams': optimizer_hyperparams
         }
-        output["train_accuracies"] = train_accuracies
-        output["test_accuracies"] = test_accuracies
-
-        # Put all run parameters into output dictionary.
-        output["optimizer"] = self._optimizer_name
-        output["testproblem"] = testproblem
-        output["weight_decay"] = weight_decay
-        output["batch_size"] = batch_size
-        output["num_epochs"] = num_epochs
-        output["learning_rate"] = learning_rate
-        output["lr_sched_epochs"] = lr_sched_epochs
-        output["lr_sched_factors"] = lr_sched_factors
-        output["random_seed"] = random_seed
-        output["train_log_interval"] = train_log_interval
-
-        # Add optimizer hyperparameters as a sub-dictionary.
-        output["hyperparams"] = optimizer_hyperparams
 
         # Dump output into json file.
         if not no_logs:
