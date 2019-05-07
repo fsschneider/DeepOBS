@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import torch
 """Base class for DeepOBS test problems."""
 
 class TestProblem(object):
@@ -68,11 +69,31 @@ class TestProblem(object):
         return next(self._iterator)
 
     def get_batch_loss_and_accuracy(self):
-        """ Gets a new mini batch from the iterator and returns loss and accuracy on it
-        """
-        raise NotImplementedError(
-            """'TestProblem' is an abstract base class, please
-        use one of the sub-classes.""")
+        """Gets a new batch and calculates the loss and accuracy (if available)
+        on that batch. This is a default implementation for image classification.
+        Testproblems with different calculation routines (e.g. RNNs) overwrite this method accordingly."""
+
+        inputs, labels = self._get_next_batch()
+        inputs = inputs.to(self._device)
+        labels = labels.to(self._device)
+        correct = 0.0
+        total = 0.0
+
+        # in evaluation phase is no gradient needed
+        if self.phase in ["train_eval", "test"]:
+            with torch.no_grad():
+                outputs = self.net(inputs)
+                loss = self.loss_function(outputs, labels)
+        else:
+            outputs = self.net(inputs)
+            loss = self.loss_function(outputs, labels)
+
+        _, predicted = torch.max(outputs.data, 1)
+        total += labels.size(0)
+        correct += (predicted == labels).sum().item()
+
+        accuracy = correct/total
+        return loss, accuracy
 
     def set_up(self):
         """Sets up the test problem.
