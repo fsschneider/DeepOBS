@@ -1,18 +1,30 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 """SVHN DeepOBS dataset."""
 
-import numpy as np
 from . import dataset
 from .. import config
 from torch.utils import data as dat
 from torchvision import datasets
 from torchvision import transforms
-
+from .datasets_utils import train_eval_sampler
 
 class svhn(dataset.DataSet):
+    """DeepOBS data set class for the `Street View House Numbers (SVHN)\
+    <http://ufldl.stanford.edu/housenumbers/>`_ data set.
 
+  Args:
+    batch_size (int): The mini-batch size to use. Note that, if ``batch_size``
+        is not a divider of the dataset size (``73 000`` for train, ``26 000``
+        for test) the remainder is dropped in each epoch (after shuffling).
+    data_augmentation (bool): If ``True`` some data augmentation operations
+        (random crop window, lighting augmentation) are applied to the
+        training data (but not the test data).
+    train_eval_size (int): Size of the train eval dataset.
+        Defaults to ``26 000`` the size of the test set.
 
+  Methods:
+      _make_dataloader: A helper that is shared by all three data loader methods.
+  """
     def __init__(self,
                  batch_size,
                  data_augmentation=True,
@@ -49,6 +61,6 @@ class svhn(dataset.DataSet):
         return self._make_dataloader(split='test', shuffle = False, data_augmentation = False, sampler=None)
 
     def _make_train_eval_dataloader(self):
-        indices = np.random.choice(len(self._train_dataloader.dataset), size= self._train_eval_size, replace=False)
-        sampler = dat.SubsetRandomSampler(indices)
-        return self._make_dataloader(split='train', shuffle=False, data_augmentation=False, sampler=sampler)
+        size = len(self._train_dataloader.dataset)
+        sampler = train_eval_sampler(size, self._train_eval_size)
+        return self._make_dataloader(split='train', shuffle=False, data_augmentation=self._data_augmentation, sampler=sampler)

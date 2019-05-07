@@ -21,21 +21,8 @@ class tolstoi(dataset.DataSet):
     train_eval_size (int): Size of the train eval dataset.
         Defaults to ``653 237``, the size of the test set.
 
-  Attributes:
-    batch: A tuple ``(x, y)`` of tensors, yielding batches of tolstoi data
-        (``x`` with shape ``(batch_size, seq_length)``) and (``y`` with shape
-        ``(batch_size, seq_length)`` which is ``x`` shifted by one).
-        Executing these tensors raises a ``tf.errors.OutOfRangeError`` after one
-        epoch.
-    train_init_op: A tensorflow operation initializing the dataset for the
-        training phase.
-    train_eval_init_op: A tensorflow operation initializing the testproblem for
-        evaluating on training data.
-    test_init_op: A tensorflow operation initializing the testproblem for
-        evaluating on test data.
-    phase: A string-value tf.Variable that is set to ``train``, ``train_eval``
-        or ``test``, depending on the current phase. This can be used by
-        testproblems to adapt their behavior to this phase.
+  Methods:
+      _make_dataloader: A helper that is shared by all three data loader methods.
   """
 
     def __init__(self, batch_size, seq_length=50, train_eval_size=653237):
@@ -55,14 +42,14 @@ class tolstoi(dataset.DataSet):
         self._train_eval_size = train_eval_size
         super(tolstoi, self).__init__(batch_size)
 
-    def _make_dataloader(self, filepath, sampler = None):
+    def _make_dataloader(self, filepath):
         """Creates a Tolstoi data set (helper used by ``.make_*_datset`` below).
 
     Args:
         filepath (str): Filepath to the .npy file containing the data set.
 
     Returns:
-        A tf.data.Dataset yielding batches of Tolstoi data.
+        A torch.utils.data.DataLoader yielding batches of Tolstoi data.
     """
         # Load the array of character ids, determine the number of batches that
         # can be produced, given batch size and sequence lengh
@@ -80,19 +67,28 @@ class tolstoi(dataset.DataSet):
         x = arr[:num_batches * self._batch_size * self._seq_length]
         y = arr[1:num_batches * self._batch_size * self._seq_length + 1]
 
-        x_sequences = x.reshape((self._batch_size  * num_batches, -1))
-        y_sequences = y.reshape((self._batch_size  * num_batches, -1))
+#        x_sequences = x.reshape((self._batch_size  * num_batches, -1))
+#        y_sequences = y.reshape((self._batch_size  * num_batches, -1))
+#        dataset = dat.TensorDataset(torch.from_numpy(x_sequences), torch.from_numpy(y_sequences))
+#        loader = dat.DataLoader(dataset=dataset, batch_size=self._batch_size, shuffle=False, sampler = sampler)
 
-        dataset = dat.TensorDataset(torch.from_numpy(x_sequences), torch.from_numpy(y_sequences))
-        loader = dat.DataLoader(dataset=dataset, batch_size=self._batch_size, shuffle=False, sampler = sampler)
+        # Split into batches and put into arrays X, Y, such that X[i,:] is the
+        # i-th batch
+        x_batches = np.split(x.reshape(self._batch_size, -1), num_batches, 1)
+        y_batches = np.split(y.reshape(self._batch_size, -1), num_batches, 1)
 
-        return loader
+        X = np.array(x_batches)
+        Y = np.array(y_batches)
+
+        dataset = dat.TensorDataset(torch.from_numpy(X), torch.from_numpy(Y))
+
+        return dataset
 
     def _make_train_dataloader(self):
         """Creates the Tolstoi training dataset.
 
     Returns:
-      A tf.data.Dataset instance with batches of training data.
+      A torch.utils.data.DataLoader instance with batches of training data.
     """
         filepath = os.path.join(config.get_data_dir(), "tolstoi", "train.npy")
         return self._make_dataloader(filepath)
@@ -101,18 +97,17 @@ class tolstoi(dataset.DataSet):
         """Creates the Tolstoi train eval dataset.
 
     Returns:
-      A tf.data.Dataset instance with batches of training eval data.
+      A torch.utils.data.DataLoader instance with batches of training eval data.
     """
-        indices = np.random.choice(len(self._train_dataloader.dataset), size= self._train_eval_size // self._seq_length, replace=False)
-        sampler = dat.SubsetRandomSampler(indices)
-        filepath = os.path.join(config.get_data_dir(), "tolstoi", "train.npy")
-        return self._make_dataloader(filepath=filepath, sampler=sampler)
+        indices = np.arange(self._train_eval_size // (self._batch_size*self._seq_length))
+        train_eval_set = self._train_dataloader[indices]
+        return dat.TensorDataset(train_eval_set[0], train_eval_set[1])
 
     def _make_test_dataloader(self):
         """Creates the Tolstoi test dataset.
 
     Returns:
-      A tf.data.Dataset instance with batches of test data.
+      A torch.utils.data.DataLoader instance with batches of test data.
     """
         filepath = os.path.join(config.get_data_dir(), "tolstoi", "test.npy")
         return self._make_dataloader(filepath)

@@ -8,19 +8,11 @@ class DataSet(object):
   Args:
     batch_size (int): The mini-batch size to use.
 
-  Attributes:
-    batch: A tuple of tensors, yielding batches of data from the dataset.
-        Executing these tensors raises a ``tf.errors.OutOfRangeError`` after one
-        epoch.
-    train_init_op: A tensorflow operation initializing the dataset for the
-        training phase.
-    train_eval_init_op: A tensorflow operation initializing the testproblem for
-        evaluating on training data.
-    test_init_op: A tensorflow operation initializing the testproblem for
-        evaluating on test data.
-    phase: A string-value tf.Variable that is set to ``train``, ``train_eval``
-        or ``test``, depending on the current phase. This can be used by testproblems
-        to adapt their behavior to this phase.
+  Methods:
+     _make_train_dataloader: Creates a torch data loader for the training data with batches of size batch_size.
+     _make_train_eval_dataloader: Creates a torch data loader for the training evaluation data with batches of size batch_size.
+     _make_test_dataloader: Creates a torch data loader for the test data with batches of size batch_size.
+
   """
 
     def __init__(self, batch_size):
@@ -35,30 +27,30 @@ class DataSet(object):
         self._test_dataloader = self._make_test_dataloader()
 
     def _make_train_dataloader(self):
-        """Creates the training dataset.
+        """Creates the training data loader.
 
     Returns:
-      A tf.data.Dataset instance with batches of training data.
+      A torch.utils.data.DataLoader instance with batches of training data.
     """
         raise NotImplementedError(
             """'DataSet' is an abstract base class, please use
         one of the sub-classes.""")
 
     def _make_train_eval_dataloader(self):
-        """Creates the train eval dataset.
+        """Creates the train eval data loader.
 
     Returns:
-      A tf.data.Dataset instance with batches of training eval data.
+      A torch.utils.data.DataLoader instance with batches of training eval data.
     """
         raise NotImplementedError(
             """'DataSet' is an abstract base class, please use
         one of the sub-classes.""")
 
     def _make_test_dataloader(self):
-        """Creates the test dataset.
+        """Creates the test data loader.
 
     Returns:
-      A tf.data.Dataset instance with batches of test data.
+      A torch.utils.data.DataLoader instance with batches of test data.
     """
         raise NotImplementedError(
             """'DataSet' is an abstract base class, please use
