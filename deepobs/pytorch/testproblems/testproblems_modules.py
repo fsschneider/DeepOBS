@@ -1,5 +1,6 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""All nework architectures that are used by the testproblems"""
+
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -15,11 +16,11 @@ class net_cifar10_3c3d(nn.Sequential):
     def __init__(self, num_outputs):
         super(net_cifar10_3c3d, self).__init__()
 
-        self.add_module('conv1', nn.Conv2d(in_channels = 3, out_channels = 64, kernel_size = 5))
+        self.add_module('conv1', tfconv2d(in_channels = 3, out_channels = 64, kernel_size = 5))
         self.add_module('relu1', nn.ReLU())
         self.add_module('maxpool1', tfmaxpool2d(kernel_size = 3, stride = 2, tf_padding_type = 'same'))
 
-        self.add_module('conv2', nn.Conv2d(in_channels = 64, out_channels = 96, kernel_size = 3))
+        self.add_module('conv2', tfconv2d(in_channels = 64, out_channels = 96, kernel_size = 3))
         self.add_module('relu2', nn.ReLU())
         self.add_module('maxpool2', tfmaxpool2d(kernel_size = 3, stride = 2, tf_padding_type = 'same'))
 
@@ -35,24 +36,15 @@ class net_cifar10_3c3d(nn.Sequential):
         self.add_module('relu5', nn.ReLU())
         self.add_module('dense3', nn.Linear(in_features = 256, out_features = num_outputs))
 
-        # initialization
-        nn.init.xavier_normal_(self.conv1.weight)
-        nn.init.constant_(self.conv1.bias, 0.0)
+        # init the layers
+        for module in self.modules():
+            if isinstance(module, tfconv2d):
+                nn.init.constant_(module.bias, 0.0)
+                nn.init.xavier_normal_(module.weight)
 
-        nn.init.xavier_normal_(self.conv2.weight)
-        nn.init.constant_(self.conv2.bias, 0.0)
-
-        nn.init.xavier_normal_(self.conv3.weight)
-        nn.init.constant_(self.conv3.bias, 0.0)
-
-        nn.init.xavier_uniform_(self.dense1.weight)
-        nn.init.constant_(self.dense1.bias, 0.0)
-
-        nn.init.xavier_uniform_(self.dense2.weight)
-        nn.init.constant_(self.dense2.bias, 0.0)
-
-        nn.init.xavier_uniform_(self.dense3.weight)
-        nn.init.constant_(self.dense3.bias, 0.0)
+            if isinstance(module, nn.Linear):
+                nn.init.constant_(module.bias, 0.0)
+                nn.init.xavier_uniform_(module.weight)
 
 
 class net_mnist_2c2d(nn.Sequential):
@@ -73,17 +65,15 @@ class net_mnist_2c2d(nn.Sequential):
 
             self.add_module('dense2', nn.Linear(in_features = 1024, out_features = num_outputs))
 
-            # initialization
-            # biases
-            nn.init.constant_(self.conv1.bias, 0.05)
-            nn.init.constant_(self.conv2.bias, 0.05)
-            nn.init.constant_(self.dense1.bias, 0.05)
-            nn.init.constant_(self.dense2.bias, 0.05)
-            # weights
-            self.conv1.weight.data = _truncated_normal_init(self.conv1.weight.data, mean = 0, stddev=0.05)
-            self.conv2.weight.data = _truncated_normal_init(self.conv2.weight.data, mean = 0, stddev=0.05)
-            self.dense1.weight.data = _truncated_normal_init(self.dense1.weight.data, mean = 0, stddev=0.05)
-            self.dense2.weight.data = _truncated_normal_init(self.dense2.weight.data, mean = 0, stddev=0.05)
+            # init the layers
+            for module in self.modules():
+                if isinstance(module, tfconv2d):
+                    nn.init.constant_(module.bias, 0.05)
+                    module.weight.data = _truncated_normal_init(module.weight.data, mean = 0, stddev=0.05)
+
+                if isinstance(module, nn.Linear):
+                    nn.init.constant_(module.bias, 0.05)
+                    module.weight.data = _truncated_normal_init(module.weight.data, mean = 0, stddev=0.05)
 
 class net_vae(nn.Module):
     def __init__(self, n_latent):
@@ -101,10 +91,11 @@ class net_vae(nn.Module):
         self.dropout3 = nn.Dropout(p = 0.2)
 
         self.dense1 = nn.Linear(in_features = 7 * 7 * 64, out_features = self.n_latent)
+        self.dense2 = nn.Linear(in_features = 7 * 7 * 64, out_features = self.n_latent)
 
         # decoding layers
-        self.dense2 = nn.Linear(in_features = 8, out_features = 24)
-        self.dense3 = nn.Linear(in_features = 24, out_features = 24*2 + 1)
+        self.dense3 = nn.Linear(in_features = 8, out_features = 24)
+        self.dense4 = nn.Linear(in_features = 24, out_features = 24*2 + 1)
 
         self.deconv1 = tfconv2d_transpose(in_channels = 1, out_channels = 64, kernel_size = 4, stride = 2, tf_padding_type = 'same')
 #        self.deconv1 = nn.ConvTranspose2d(in_channels=1, out_channels=64, kernel_size=4, stride=2,)
@@ -116,7 +107,19 @@ class net_vae(nn.Module):
         self.deconv3 = tfconv2d_transpose(in_channels = 64, out_channels = 64, kernel_size = 4, stride = 1, tf_padding_type = 'same')
         self.dropout6 = nn.Dropout(p = 0.2)
 
-        self.dense4 = nn.Linear(in_features = 14 * 14 * 64, out_features = 28 * 28)
+        self.dense5 = nn.Linear(in_features = 14 * 14 * 64, out_features = 28 * 28)
+
+        # init the layers
+        for module in self.modules():
+            if isinstance(module, tfconv2d):
+                nn.init.constant_(module.bias, 0.0)
+                nn.init.xavier_uniform_(module.weight)
+            if isinstance(module, tfconv2d_transpose):
+                nn.init.constant_(module.bias, 0.0)
+                nn.init.xavier_uniform_(module.weight)
+            if isinstance(module, nn.Linear):
+                nn.init.constant_(module.bias, 0.0)
+                nn.init.xavier_uniform_(module.weight)
 
     def encode(self, x):
         x = F.leaky_relu(self.conv1(x), negative_slope = 0.3)
@@ -131,15 +134,15 @@ class net_vae(nn.Module):
         x = x.view(-1, 7*7*64)
 
         mean = self.dense1(x)
-        std_dev = torch.exp(0.5*self.dense1(x))
+        std_dev = 0.5*self.dense2(x)
         eps = torch.randn_like(std_dev)
-        z = mean + eps * std_dev
+        z = mean + eps * torch.exp(std_dev)
 
         return z, mean, std_dev
 
     def decode(self, z):
-        x = F.leaky_relu(self.dense2(z), negative_slope = 0.3)
-        x = F.leaky_relu(self.dense3(x), negative_slope = 0.3)
+        x = F.leaky_relu(self.dense3(z), negative_slope = 0.3)
+        x = F.leaky_relu(self.dense4(x), negative_slope = 0.3)
 
         x = x.view(-1, 1, 7, 7)
 
@@ -154,7 +157,7 @@ class net_vae(nn.Module):
 
         x = x.view(-1, 14 * 14 * 64, )
 
-        x = F.sigmoid(self.dense4(x))
+        x = F.sigmoid(self.dense5(x))
 
         images = x.view(-1, 1, 28, 28)
 
@@ -230,64 +233,15 @@ class net_vgg(nn.Sequential):
 
         self.add_module('dense3', nn.Linear(in_features = 4096, out_features = num_outputs))
 
-        # initialization
-        # biases
-        nn.init.constant_(self.conv11.bias, 0.0)
-        nn.init.constant_(self.conv12.bias, 0.0)
+        # init the layers
+        for module in self.modules():
+            if isinstance(module, tfconv2d):
+                nn.init.constant_(module.bias, 0.0)
+                nn.init.xavier_normal_(module.weight)
 
-        nn.init.constant_(self.conv21.bias, 0.0)
-        nn.init.constant_(self.conv22.bias, 0.0)
-
-        nn.init.constant_(self.conv31.bias, 0.0)
-        nn.init.constant_(self.conv32.bias, 0.0)
-        nn.init.constant_(self.conv33.bias, 0.0)
-        if variant == 19:
-            nn.init.constant_(self.conv34.bias, 0.0)
-
-        nn.init.constant_(self.conv41.bias, 0.0)
-        nn.init.constant_(self.conv42.bias, 0.0)
-        nn.init.constant_(self.conv43.bias, 0.0)
-        if variant == 19:
-            nn.init.constant_(self.conv44.bias, 0.0)
-
-        nn.init.constant_(self.conv51.bias, 0.0)
-        nn.init.constant_(self.conv52.bias, 0.0)
-        nn.init.constant_(self.conv53.bias, 0.0)
-        if variant == 19:
-            nn.init.constant_(self.conv54.bias, 0.0)
-
-        nn.init.constant_(self.dense1.bias, 0.0)
-        nn.init.constant_(self.dense2.bias, 0.0)
-        nn.init.constant_(self.dense3.bias, 0.0)
-
-        #weights
-        nn.init.xavier_normal_(self.conv11.weight)
-        nn.init.xavier_normal_(self.conv12.weight)
-
-        nn.init.xavier_normal_(self.conv21.weight)
-        nn.init.xavier_normal_(self.conv22.weight)
-
-        nn.init.xavier_normal_(self.conv31.weight)
-        nn.init.xavier_normal_(self.conv32.weight)
-        nn.init.xavier_normal_(self.conv33.weight)
-        if variant == 19:
-            nn.init.xavier_normal_(self.conv34.weight)
-
-        nn.init.xavier_normal_(self.conv41.weight)
-        nn.init.xavier_normal_(self.conv42.weight)
-        nn.init.xavier_normal_(self.conv43.weight)
-        if variant == 19:
-            nn.init.xavier_normal_(self.conv44.weight)
-
-        nn.init.xavier_normal_(self.conv51.weight)
-        nn.init.xavier_normal_(self.conv52.weight)
-        nn.init.xavier_normal_(self.conv53.weight)
-        if variant == 19:
-            nn.init.xavier_normal_(self.conv54.weight)
-
-        nn.init.xavier_uniform_(self.dense1.weight)
-        nn.init.xavier_uniform_(self.dense2.weight)
-        nn.init.xavier_uniform_(self.dense3.weight)
+            if isinstance(module, nn.Linear):
+                nn.init.constant_(module.bias, 0.0)
+                nn.init.xavier_uniform_(module.weight)
 
 class net_cifar100_allcnnc(nn.Sequential):
     def __init__(self):
@@ -313,7 +267,7 @@ class net_cifar100_allcnnc(nn.Sequential):
 
         self.add_module('dropout3', nn.Dropout(p = 0.5))
 
-        self.add_module('conv7', nn.Conv2d(in_channels = 192, out_channels = 192, kernel_size = 3))
+        self.add_module('conv7', tfconv2d(in_channels = 192, out_channels = 192, kernel_size = 3))
         self.add_module('relu7', nn.ReLU())
         self.add_module('conv8', tfconv2d(in_channels = 192, out_channels = 192, kernel_size = 1, tf_padding_type='same'))
         self.add_module('relu8', nn.ReLU())
@@ -322,27 +276,11 @@ class net_cifar100_allcnnc(nn.Sequential):
 
         self.add_module('mean', mean_allcnnc())
 
-        # initialization
-        # weights
-        nn.init.xavier_normal_(self.conv1.weight)
-        nn.init.xavier_normal_(self.conv2.weight)
-        nn.init.xavier_normal_(self.conv3.weight)
-        nn.init.xavier_normal_(self.conv4.weight)
-        nn.init.xavier_normal_(self.conv5.weight)
-        nn.init.xavier_normal_(self.conv6.weight)
-        nn.init.xavier_normal_(self.conv7.weight)
-        nn.init.xavier_normal_(self.conv8.weight)
-        nn.init.xavier_normal_(self.conv9.weight)
-        # biases
-        nn.init.constant_(self.conv1.bias, 0.1)
-        nn.init.constant_(self.conv2.bias, 0.1)
-        nn.init.constant_(self.conv3.bias, 0.1)
-        nn.init.constant_(self.conv4.bias, 0.1)
-        nn.init.constant_(self.conv5.bias, 0.1)
-        nn.init.constant_(self.conv6.bias, 0.1)
-        nn.init.constant_(self.conv7.bias, 0.1)
-        nn.init.constant_(self.conv8.bias, 0.1)
-        nn.init.constant_(self.conv9.bias, 0.1)
+        # init the layers
+        for module in self.modules():
+            if isinstance(module, tfconv2d):
+                nn.init.constant_(module.bias, 0.1)
+                nn.init.xavier_normal_(module.weight)
 
 class net_wrn(nn.Sequential):
     def __init__(self, num_residual_blocks, widening_factor, num_outputs, bn_momentum=0.9):
@@ -391,26 +329,40 @@ class net_wrn(nn.Sequential):
                 nn.init.xavier_uniform_(module.weight)
                 nn.init.constant_(module.bias, 0.0)
 
-class net_char_rnn_test(nn.Sequential):
-    def __init__(self, seq_len, hidden_dim, vocab_size, num_layers):
-        super(net_char_rnn, self).__init__()
-#        self.hidden_dim = hidden_dim
-#        self.seq_len = seq_len
-#        self.vocab_size = vocab_size
-        self.add_module('embedding', nn.Embedding(num_embeddings=vocab_size, embedding_dim=hidden_dim))
-        self.add_module('LSTM', nn.LSTM(input_size = hidden_dim, hidden_size = hidden_dim, num_layers=num_layers, dropout=0.8, batch_first = True))
-        self.add_module('dense', nn.Linear(in_features=hidden_dim, out_features=vocab_size))
-
 class net_char_rnn(nn.Module):
     def __init__(self, seq_len, hidden_dim, vocab_size, num_layers):
         super(net_char_rnn, self).__init__()
 
         self.embedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=hidden_dim)
-        self.lstm = nn.LSTM(input_size = hidden_dim, hidden_size = hidden_dim, num_layers=num_layers, dropout=0.8, batch_first = True)
+        self.lstm = nn.LSTM(input_size = hidden_dim, hidden_size = hidden_dim, num_layers=num_layers, dropout=0.2, batch_first = True)
         self.dense = nn.Linear(in_features=hidden_dim, out_features=vocab_size)
 
-    def forward(self, x):
+    def forward(self, x, state = None):
+        """state is a tuple for hidden and cell state for initialisation of the lstm"""
         x = self.embedding(x)
-        x, hidden = self.lstm(x)
+        # if no state is provided, default the state to zeros
+        if state is None:
+            x, new_state = self.lstm(x)
+        else:
+            x, new_state = self.lstm(x, state)
         x = self.dense(x)
-        return x
+        return x, new_state
+
+class net_quadratic_deep(nn.Module):
+    def __init__(self, dim, Hessian):
+        super(net_quadratic_deep, self).__init__()
+        self.theta = nn.Parameter(torch.ones(dim, requires_grad = True))
+        self.Hessian = torch.from_numpy(Hessian).to(torch.float32)
+
+    def forward(self, x):
+        q = self.theta - x
+
+        z = torch.mm(q, self.Hessian)
+
+        # prepare for batched matmul
+        qt = q.unsqueeze(1)
+        z = z.unsqueeze(2)
+
+        out_batched = 0.5*torch.bmm(qt, z)
+
+        return out_batched.mean()

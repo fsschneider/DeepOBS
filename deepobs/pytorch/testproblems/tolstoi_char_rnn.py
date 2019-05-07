@@ -17,38 +17,37 @@ class tolstoi_char_rnn(TestProblem):
 #        self._device = torch.device('cpu')
         self.net.to(self._device)
 
-#    def get_regularization_loss(self):
-#        # iterate through all layers
-#        layer_norms = []
-#        for parameters_name, parameters in self.net.named_parameters():
-#            # penalize only the non bias layer parameters
-#            if ('weight' in parameters_name) and (('dense' in parameters_name) or ('conv' in parameters_name)):
-#                # L2 regularization
-#                layer_norms.append(parameters.norm(2)**2)
-#
-#        regularization_loss = 0.5 * sum(layer_norms)
-#
-#        return self._weight_decay * regularization_loss
+    # override the init operation for training to reset the hidden states and cell states after every epoch
+    def train_init_op(self):
+        self._iterator = iter(self.data._train_dataloader)
+        self.phase = "train"
+        self.net.train()
+        self._reset_state()
+
+    def _reset_state(self):
+        hidden_state = torch.zeros((2, self._batch_size, 128)).to(self._device)
+        cell_state = torch.zeros((2, self._batch_size, 128)).to(self._device)
+        self.state = (hidden_state, cell_state)
 
     def get_batch_loss_and_accuracy(self):
         inputs, labels = self._get_next_batch()
-#        inputs.unsqueeze_(2)
-#        labels.unsqueeze_(2)
         inputs = inputs.to(self._device)
         labels = labels.to(self._device)
         correct = 0.0
         total = 0.0
 
-        # in evaluation phase is no gradient needed
+        # in evaluation phase is no gradient needed. cell states default to zero if not provided
         if self.phase in ["train_eval", "test"]:
             with torch.no_grad():
-                outputs = self.net(inputs)
+                outputs, _ = self.net(inputs)
                 # reshape for loss
                 outputs = outputs.view(-1, outputs.size(2))
                 labels = labels.view(-1)
                 loss = self.loss_function(outputs, labels)
         else:
-            outputs = self.net(inputs)
+            outputs, (hidden_state, cell_state) = self.net(inputs, self.state)
+            # detach state from backpropagation
+            self.state = (hidden_state.detach(), cell_state.detach())
             outputs = outputs.view(-1, outputs.size(2))
             labels = labels.view(-1)
             loss = self.loss_function(outputs, labels)

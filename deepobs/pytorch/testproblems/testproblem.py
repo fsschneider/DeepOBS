@@ -12,18 +12,22 @@ class TestProblem(object):
         be ignored in such a case.
 
   Attributes:
-    dataset: The dataset used by the test problem (datasets.DataSet instance).
-    train_init_op: A tensorflow operation initializing the test problem for the
+    _batch_size: Batch_size for the data of this test problem.
+    _weight_decay: The regularization factor for this test problem
+    data: The dataset used by the test problem (datasets.DataSet instance).
+    loss_function: The loss function for this test problem.
+    net: The torch module (the neural network) that is trained.
+
+  Methods:
+    train_init_op: Initializes the test problem for the
         training phase.
-    train_eval_init_op: A tensorflow operation initializing the test problem for
+    train_eval_init_op: Initializes the test problem for
         evaluating on training data.
-    test_init_op: A tensorflow operation initializing the test problem for
+    test_init_op: Initializes the test problem for
         evaluating on test data.
-    losses: A tf.Tensor of shape (batch_size, ) containing the per-example loss
-        values.
-    regularizer: A scalar tf.Tensor containing a regularization term (might be
-        a constant 0.0 for test problems that do not use regularization).
-    accuracy: A scalar tf.Tensor containing the mini-batch mean accuracy.
+    _get_next_batch: Returns the next batch of data of the current phase.
+    get_batch_loss_and_accuracy: Calculates the loss and accuracy of net on the next batch of the current phase.
+    set_up: Sets all public attributes.
   """
 
     def __init__(self, batch_size, weight_decay=None):
@@ -72,11 +76,8 @@ class TestProblem(object):
 
     def set_up(self):
         """Sets up the test problem.
+        """
 
-    This includes setting up the data loading pipeline for the data set and
-    creating the tensorflow computation graph for this test problem
-    (e.g. creating the neural network).
-    """
         raise NotImplementedError(
             """'TestProblem' is an abstract base class, please
         use one of the sub-classes.""")

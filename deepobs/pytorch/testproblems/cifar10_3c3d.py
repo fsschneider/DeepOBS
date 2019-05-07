@@ -26,7 +26,7 @@ class cifar10_3c3d(TestProblem):
             # penalize only the non bias layer parameters
             if 'bias' not in parameters_name:
                 # L2 regularization
-                layer_norms.append(parameters.norm(2)**2)
+                layer_norms.append(parameters.pow(2).sum())
 
         regularization_loss = 0.5 * sum(layer_norms)
 
