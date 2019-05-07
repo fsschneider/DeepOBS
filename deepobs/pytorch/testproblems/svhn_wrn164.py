@@ -13,8 +13,8 @@ class svhn_wrn164(TestProblem):
         self.data = svhn(self._batch_size, data_augmentation=True)
         self.loss_function = nn.CrossEntropyLoss()
         self.net = net_wrn(num_outputs=10, num_residual_blocks=2, widening_factor=4)
-        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#        self._device = torch.device('cpu')
+#        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self._device = torch.device('cpu')
         self.net.to(self._device)
 
     def get_regularization_loss(self):
@@ -24,7 +24,7 @@ class svhn_wrn164(TestProblem):
             # penalize only the non bias layer parameters
             if ('weight' in parameters_name) and (('dense' in parameters_name) or ('conv' in parameters_name)):
                 # L2 regularization
-                layer_norms.append(parameters.norm(2)**2)
+                layer_norms.append(parameters.pow(2).sum())
 
         regularization_loss = 0.5 * sum(layer_norms)
 

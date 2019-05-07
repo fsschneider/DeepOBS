@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""A vanilla CNN architecture for CIFAR-10."""
+"""VGG16 CNN architecture for CIFAR-10."""
 
 import torch
 from torch import nn
@@ -23,15 +23,13 @@ class cifar10_vgg16(TestProblem):
             # penalize only the non bias layer parameters
             if 'bias' not in parameters_name:
                 # L2 regularization
-                layer_norms.append(parameters.norm(2)**2)
+                layer_norms.append(parameters.pow(2).sum())
 
         regularization_loss = 0.5 * sum(layer_norms)
 
         return self._weight_decay * regularization_loss
 
     def get_batch_loss_and_accuracy(self):
-        # Attention: loss is a tensor, accuracy a scalar
-        # TODO in training phase the accuracy is calculated although not needed
         inputs, labels = self._get_next_batch()
         correct = 0.0
         total = 0.0

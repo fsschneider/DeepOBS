@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""A vanilla CNN architecture for CIFAR-10."""
+"""The all CNN-C architecture for CIFAR-100."""
 
 import torch
 from torch import nn
@@ -16,7 +16,6 @@ class cifar100_allcnnc(TestProblem):
         self.data = cifar100(self._batch_size)
         self.loss_function = nn.CrossEntropyLoss()
         self.net = net_cifar100_allcnnc()
-        # for now run on cpu due to a lack of vram. but at least use more threads
 #        self._device = 'cpu'
 #        torch.set_num_threads(12)
         self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -29,7 +28,7 @@ class cifar100_allcnnc(TestProblem):
             # penalize only the non bias layer parameters
             if 'bias' not in parameters_name:
                 # L2 regularization
-                layer_norms.append(parameters.norm(2)**2)
+                layer_norms.append(parameters.pow(2).sum())
 
         regularization_loss = 0.5 * sum(layer_norms)
 

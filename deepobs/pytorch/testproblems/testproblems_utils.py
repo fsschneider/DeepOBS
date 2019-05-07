@@ -1,5 +1,5 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 import torch
 from scipy.stats import truncnorm as tn
 from math import ceil
@@ -7,7 +7,7 @@ from torch import nn
 from torch.nn import functional as F
 
 def _determine_inverse_padding_from_tf_same(input_dimensions, kernel_dimensions, stride_dimensions):
-    # implements tf's padding 'same'
+    # implements tf's padding 'same' for inverse processses such as transpose convolution
     # input: dimensions are tuple (height, width) or ints for quadratic dimensions
     # output: a padding 4-tuple for padding layer creation that mimics tf's padding 'same'
 
@@ -79,6 +79,7 @@ def _determine_padding_from_tf_same(input_dimensions, kernel_dimensions, stride_
     return (pad_left, pad_right, pad_top, pad_bottom)
 
 def _truncated_normal_init(tensor, mean=0, stddev=1):
+    # implements tf's truncated normal initialisation method
     total_size = tensor.numel()
     # truncates 2 std from mean, since rescaling: a = ((mean-2std)-mean)/std = -2
     samples = tn.rvs(a = -2, b = 2, loc = mean, scale = stddev, size = total_size)
@@ -87,6 +88,7 @@ def _truncated_normal_init(tensor, mean=0, stddev=1):
     return init_tensor
 
 class tfmaxpool2d(nn.MaxPool2d):
+    # implements tf's padding 'same' for maxpooling
     def __init__(self,
                  kernel_size,
                  stride=None,
@@ -115,6 +117,7 @@ class tfmaxpool2d(nn.MaxPool2d):
 
 
 class tfconv2d(nn.Conv2d):
+    # implements tf's padding 'same' for convolutions
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -146,6 +149,7 @@ class tfconv2d(nn.Conv2d):
         return F.conv2d(x, self.weight, self.bias, self.stride, self.padding, self.dilation, self.groups)
 
 class tfconv2d_transpose(nn.ConvTranspose2d):
+    # implements tf's padding 'same' for transpose convolution
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -200,25 +204,32 @@ class residual_block(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size = 3, first_stride=1, is_first_block = False, bn_momentum = 0.9):
         super(residual_block, self).__init__()
 
+        self.is_first_block = is_first_block
+
         self.bn1 = nn.BatchNorm2d(in_channels, momentum = bn_momentum)
         self.relu1 = nn.ReLU()
+
+        if self.is_first_block:
+            self.convFirstBlock = tfconv2d(in_channels = in_channels, out_channels=out_channels, kernel_size=1, stride = first_stride, tf_padding_type='same', bias=False)
+
         self.conv1 = tfconv2d(in_channels = in_channels, out_channels=out_channels, kernel_size=kernel_size, stride = first_stride, tf_padding_type='same', bias=False)
 
         self.bn2 = nn.BatchNorm2d(out_channels, momentum=bn_momentum)
         self.relu2 = nn.ReLU()
         self.conv2 = tfconv2d(in_channels = out_channels, out_channels=out_channels, kernel_size=kernel_size, stride = 1, tf_padding_type='same', bias=False)
 
-        self.is_first_block = is_first_block
+
 
     def forward(self, x):
 
+        x = self.bn1(x)
+        x = self.relu1(x)
+
         if self.is_first_block:
-            identity = self.conv1(x)
+            identity = self.convFirstBlock(x)
         else:
             identity = x
 
-        x = self.bn1(x)
-        x = self.relu1(x)
         x = self.conv1(x)
 
         x = self.bn2(x)

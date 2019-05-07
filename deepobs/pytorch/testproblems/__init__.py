@@ -17,3 +17,5 @@ from .fmnist_vae import fmnist_vae
 from .svhn_wrn164 import svhn_wrn164
 
 from .tolstoi_char_rnn import tolstoi_char_rnn
+
+from .quadratic_deep import quadratic_deep
