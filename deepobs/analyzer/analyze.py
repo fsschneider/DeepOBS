@@ -25,14 +25,14 @@ def get_best_run(folder_pars):
             #         print("Analyzing", opt.name)
             print("Checked", opt.num_settings, "settings for", opt.name,
                   "and found the following")
-            setting_final = opt.get_best_setting_final()
-            setting_best = opt.get_best_setting_best()
+            setting_final = opt.best_setting_final
+            setting_best = opt.best_setting_best
             print("Best Setting (Final Value)", setting_final.name,
                   "with final performance of",
-                  setting_final.aggregate.final_value)
+                  setting_final.final_value)
             print("Best Setting (Best Value)", setting_best.name,
                   "with best performance of",
-                  setting_best.aggregate.best_value)
+                  setting_best.best_value)
 
 
 def plot_lr_sensitivity(folder_pars, baseline_pars=None, mode='final'):
