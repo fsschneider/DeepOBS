@@ -20,14 +20,14 @@ class Analyzer:
             name of a test problem (e.g. ``cifar10_3c3d``) and the value is an
             instance of the TestProblemAnalyzer class (see below).
     """
-    def __init__(self, path):
+    def __init__(self, results_path):
         """Initializes a new Analyzer instance.
 
         Args:
             path (str): Path to the results folder. This folder should contain one
                 or multiple testproblem folders.
         """
-        self.path = path
+        self.path = results_path
         self.testproblems = self._read_testproblems()
 
     def _read_testproblems(self):
@@ -81,6 +81,7 @@ class TestProblemAnalyzer:
         self.name = tp
         print("Setting up", self.name)
         self.conv_perf = self._get_conv_perf()
+        # TODO make the metrices attributes of the testproblem class?
         if tp == 'quadratic_deep' or tp == 'mnist_vae' or tp == 'fmnist_vae':
             self.metric = "test_losses"
         else:
@@ -97,8 +98,7 @@ class TestProblemAnalyzer:
         """
         optimizers = dict()
         for opt in os.listdir(self._path):
-            optimizers[opt] = OptimizerAnalyzer(self._path, opt, self.metric,
-                                              self.name, self.conv_perf)
+            optimizers[opt] = OptimizerAnalyzer(self._path, opt, self.metric, self.name, self.conv_perf)
         return optimizers
 
     def _get_conv_perf(self):
@@ -109,6 +109,7 @@ class TestProblemAnalyzer:
             float: Convergence performance for this test problem
 
         """
+        # TODO here is tf used!! This will not work for the pytorch version. Make the baseline dir a general config !
         try:
             with open(os.path.join(tensorflow.config.get_baseline_dir(),
                          "convergence_performance.json"), "r") as f:
@@ -170,12 +171,13 @@ class OptimizerAnalyzer:
         self.metric = metric
         self.testproblem = testproblem
         self.conv_perf = conv_perf
-        self.settings = self._read_settings()
-        self.num_settings = len(self.settings)
-        self._best_setting_final = None
-        self._best_setting_best = None
+        self.setting_analyzers = self._read_setting_analyzers()
+        self.num_settings = len(self.setting_analyzers)
+        self.best_setting_final = self._get_best_setting_final()
+        self.best_setting_best = self._get_best_setting_best()
+        self.most_run_setting = self._get_setting_most_runs()
 
-    def _read_settings(self):
+    def _read_setting_analyzers(self):
         """Read all settings (folders) in a optimizer (folder).
 
         Returns:
@@ -189,7 +191,7 @@ class OptimizerAnalyzer:
                                            self.testproblem, self.conv_perf)
         return settings
 
-    def get_best_setting_final(self):
+    def _get_best_setting_final(self):
         """Returns the setting for this optimizer that has the best final
         performance using the metric (``test_losses`` or ``test_accuracies``)
         defined for this test problem.
@@ -199,27 +201,23 @@ class OptimizerAnalyzer:
             final performance
 
         """
-        if self._best_setting_final is not None:
-            return self._best_setting_final
+        if self.metric == 'test_losses' or self.metric == 'train_losses':
+            current_best = np.inf
+            better = lambda x, y: x < y
+        elif self.metric == 'test_accuracies' or self.metric == 'train_accuracies':
+            current_best = -np.inf
+            better = lambda x, y: x > y
         else:
-            if self.metric == 'test_losses' or self.metric == 'train_losses':
-                current_best = np.inf
-                better = lambda x, y: x < y
-            elif self.metric == 'test_accuracies' or self.metric == 'train_accuracies':
-                current_best = -np.inf
-                better = lambda x, y: x > y
-            else:
-                raise RuntimeError("Metric unknown")
-            best_sett = None
-            for _, sett in self.settings.items():
-                val = sett.aggregate.final_value
-                if better(val, current_best):
-                    current_best = val
-                    best_ind = sett
-            self._best_setting_final = best_ind
-            return best_ind
+            raise RuntimeError("Metric unknown")
 
-    def get_best_setting_best(self):
+        for _, sett in self.setting_analyzers.items():
+            val = sett.final_value
+            if better(val, current_best):
+                current_best = val
+                best_ind = sett
+        return best_ind
+
+    def _get_best_setting_best(self):
         """Returns the setting for this optimizer that has the best overall
         performance using the metric (``test_losses`` or ``test_accuracies``)
         defined for this test problem. In contrast to ``get_best_setting_final``
@@ -231,27 +229,22 @@ class OptimizerAnalyzer:
             overall performance
 
         """
-        if self._best_setting_best is not None:
-            return self._best_setting_best
+        if self.metric == 'test_losses' or self.metric == 'train_losses':
+            current_best = np.inf
+            better = lambda x, y: x < y
+        elif self.metric == 'test_accuracies' or self.metric == 'train_accuracies':
+            current_best = -np.inf
+            better = lambda x, y: x > y
         else:
-            if self.metric == 'test_losses' or self.metric == 'train_losses':
-                current_best = np.inf
-                better = lambda x, y: x < y
-            elif self.metric == 'test_accuracies' or self.metric == 'train_accuracies':
-                current_best = -np.inf
-                better = lambda x, y: x > y
-            else:
-                raise RuntimeError("Metric unknown")
-            best_sett = None
-            for _, sett in self.settings.items():
-                val = sett.aggregate.best_value
-                if better(val, current_best):
-                    current_best = val
-                    best_ind = sett
-            self._best_setting_best = best_ind
-            return best_ind
+            raise RuntimeError("Metric unknown")
+        for _, sett in self.setting_analyzers.items():
+            val = sett.best_value
+            if better(val, current_best):
+                current_best = val
+                best_ind = sett
+        return best_ind
 
-    def get_setting_most_runs(self):
+    def _get_setting_most_runs(self):
         """Returns the setting with the most repeated runs (with the same
         setting, but probably different seeds).
 
@@ -261,9 +254,9 @@ class OptimizerAnalyzer:
 
         """
         most_runs = 0
-        for _, sett in self.settings.items():
-            if sett.aggregate.num_runs > most_runs:
-                most_runs = sett.aggregate.num_runs
+        for _, sett in self.setting_analyzers.items():
+            if sett.num_runs > most_runs:
+                most_runs = sett.num_runs
                 most_run_setting = sett
         return most_run_setting
 
@@ -285,21 +278,25 @@ class OptimizerAnalyzer:
         rel_perf = []
         lr = []
         for _, sett in self.settings.items():
+
             if mode == 'final':
-                val = sett.aggregate.final_value
-                best = self.get_best_setting_final().aggregate.final_value
+                val = sett.final_value
+                best = self.best_setting_final.final_value
             elif mode == 'best':
-                val = sett.aggregate.best_value
-                best = self.get_best_setting_best().aggregate.best_value
+                val = sett.best_value
+                best = self.best_setting_best.best_value
             else:
                 raise RuntimeError("Mode unknown")
+
             if self.metric == 'test_losses' or self.metric == 'train_losses':
                 rel_perf.append(best / val)
             elif self.metric == 'test_accuracies' or self.metric == 'train_accuracies':
                 rel_perf.append(val / best)
             else:
                 raise RuntimeError("Metric unknown")
-            lr.append(sett.aggregate.output['learning_rate'])
+
+            lr.append(sett.aggregate['learning_rate'])
+        # TODO understand this piece
         rel_perf = np.nan_to_num(rel_perf)  # replace NaN with zero
         rel_perf = np.array(np.vstack((rel_perf, lr))).transpose()
         rel_perf = rel_perf[rel_perf[:, 1].argsort()]
@@ -329,33 +326,34 @@ class OptimizerAnalyzer:
 
         """
         if mode == 'final':
-            run = self.get_best_setting_final()
+            sett = self.best_setting_final
         elif mode == 'best':
-            run = self.get_best_setting_best()
+            sett = self.best_setting_best
         elif mode == 'most':
-            run = self.get_setting_most_runs()
-            print("Plotting", run.aggregate.num_runs, "runs for ", self.name,
-                  "on", run.aggregate.output['testproblem'])
+            sett = self.setting_most_runs
+            print("Plotting", sett.num_runs, "runs for ", self.name,
+                  "on", sett.aggregate['testproblem'])
         else:
             raise RuntimeError("Mode unknown")
+
         for idx, metric in enumerate([
                 'test_losses', 'train_losses', 'test_accuracies',
                 'train_accuracies'
         ]):
             ax[idx].plot(
-                run.aggregate.output[metric]['mean'],
-                label=run.aggregate.output['optimizer'])
+                sett.aggregate[metric]['mean'],
+                label=sett.aggregate['optimizer'])
             ax[idx].fill_between(
-                range(run.aggregate.output[metric]['mean'].size),
-                run.aggregate.output[metric]['mean'] -
-                run.aggregate.output[metric]['std'],
-                run.aggregate.output[metric]['mean'] +
-                run.aggregate.output[metric]['std'],
+                range(sett.aggregate[metric]['mean'].size),
+                sett.aggregate[metric]['mean'] -
+                sett.aggregate[metric]['std'],
+                sett.aggregate[metric]['mean'] +
+                sett.aggregate[metric]['std'],
                 color=ax[idx].get_lines()[-1].get_color(),
                 alpha=0.2)
 
-    def get_bm_table(self, perf_table, mode='most'):
-        """Generates the overall performance table for this optimizer.
+    def get_performance_dictionary(self, mode='most'):
+        """Generates the overall performance overview for this optimizer.
 
         This includes metrics for the performance, speed and tuneability of this
         optimizer (on this test problem).
@@ -374,21 +372,25 @@ class OptimizerAnalyzer:
 
         """
         if mode == 'final':
-            run = self.get_best_setting_final()
+            sett = self.best_setting_final
         elif mode == 'best':
-            run = self.get_best_setting_best()
+            sett = self.best_setting_best
         elif mode == 'most':
-            run = self.get_setting_most_runs()
-        perf_table['Performance'][self.name] = run.aggregate.output[
+            sett = self.setting_most_runs
+        else:
+            raise RuntimeError("Mode unknown")
+
+        perf_dict = dict()
+        perf_dict['Performance'][self.name] = sett.aggregate[
             self.metric]['mean'][-1]
-        perf_table['Speed'][self.name] = run.aggregate.output['speed']
-        perf_table['Tuneability'][self.name] = {
+        perf_dict['Speed'][self.name] = sett.aggregate['speed']
+        perf_dict['Tuneability'][self.name] = {
             **{
-                'lr': '{:0.2e}'.format(run.aggregate.output['learning_rate'])
+                'lr': '{:0.2e}'.format(sett.aggregate['learning_rate'])
             },
-            **run.aggregate.output['hyperparams']
+            **sett.aggregate['hyperparams']
         }
-        return perf_table
+        return perf_dict
 
 
 class SettingAnalyzer:
@@ -412,8 +414,10 @@ class SettingAnalyzer:
         testproblem (str): Name of the test problem this setting (folder)
             belongs to.
         conv_perf (float): Convergence performance for this test problem.
-        aggregate (AggregateRun): Instance of the AggregateRun class for all
-            runs with this setting.
+        aggregate (dictionary): Contains the mean and std of the runs for the given metric.
+        runs (list): A list of all .json files for this setting, i.e. a list of all run results.
+        settings (dictionary): Contains all settings that were relevant for the runs (batch size, learning rate, hyperparameters of the optimizer, etc). Random seed is not included.
+        num_runs (int): The number of runs or this setting (most likely because of different random seeds)
     """
     def __init__(self, path, sett, metric, testproblem, conv_perf):
         """Initializes a new SettingAnalyzer instance.
@@ -434,135 +438,76 @@ class SettingAnalyzer:
         self.metric = metric
         self.testproblem = testproblem
         self.conv_perf = conv_perf
-        self.aggregate = self._get_aggregate()
-
-    def _get_aggregate(self):
-        """Create aggregate run for all runs in this setting folder.
-
-        Returns:
-            AggregateRun: Instance of the AggregateRun class holding the
-            aggregate information of all runs with these settings.
-
-        """
-        runs = []
-        for r in os.listdir(self._path):
-            if r.endswith(".json"):
-                runs.append(r)
-        return AggregateRun(self._path, runs, self.name, self.metric,
-                            self.testproblem, self.conv_perf)
-
-
-class AggregateRun:
-    """DeepOBS class for a group of runs witht the same settings (but possibly
-    different seeds).
-
-    Args:
-        path (str): Path to the parent folder of the aggregate run folder (i.e.
-            the settings folder).
-        runs (list): List of run names all with the same setting.
-        name (str): Name of the aggregate run (folder).
-        metric (str): Metric to use for this test problem. If available this
-            will be ``test_accuracies``, otherwise ``test_losses``.
-        testproblem (str): Name of the test problem this aggregate run (folder)
-            belongs to.
-        conv_perf (float): Convergence performance of the test problem this
-            aggregate run (folder) belongs to.
-
-    Attributes:
-        name: Name of the aggregate run (folder).
-        testproblem: Name of the test problem this aggregate run (folder)
-            belongs to.
-        conv_perf: Convergence performance for this test problem.
-        runs: List of run names all with the same setting.
-        num_runs: Number of runs (with the same setting).
-        metric: Metric to use for this test problem. If available this
-            will be ``test_accuracies``, otherwise ``test_losses``.
-        output: Dictionary including all aggregate information of the
-            runs with this setting. All performance metrics have a mean and a
-            standard deviation (can be zero if there is only one run with this
-            setting).
-        final_value: Final (mean) value of the test problem's metric
-        best_value: Best (mean) value of the test problem's metric
-    """
-    def __init__(self, path, runs, name, metric, testproblem, conv_perf):
-        """Initializes a new AggregateRun class.
-
-        Args:
-            path (str): Path to the parent folder of the aggregate run folder (i.e.
-                the settings folder).
-            runs (list): List of run names all with the same setting.
-            name (str): Name of the aggregate run (folder).
-            metric (str): Metric to use for this test problem. If available this
-                will be ``test_accuracies``, otherwise ``test_losses``.
-            testproblem (str): Name of the test problem this aggregate run (folder)
-                belongs to.
-            conv_perf (float): Convergence performance of the test problem this
-                aggregate run (folder) belongs to.
-        """
-        self._path = path
-        self.name = name
-        self.testproblem = testproblem
-        self.conv_perf = conv_perf
-        self.runs = runs
-        self.num_runs = len(runs)
-        self.metric = metric
-        self.output = self._aggregate()
+        self.runs = self._get_all_runs()
+        self.num_runs = len(self.runs)
+        self.aggregate = self._determine_aggregate_from_runs()
         self.final_value = self._get_final_value()
         self.best_value = self._get_best_value()
 
-    def _aggregate(self):
-        """Aggregate performance data over all runs.
-
+    def _get_final_value(self):
+        """Get final (mean) value of the metric used in this test problem.
         Returns:
-            dict: Dictionary including all aggregate information of the
-            runs with this setting. All performance metrics have a mean and a
-            standard deviation (can be zero if there is only one run with this
-            setting).
-
+            float: Final (mean) value of the test problem's metric.
         """
+        return self.aggregate[self.metric]['mean'][-1]
+
+    def _get_best_value(self):
+        """Get best (mean) value of the metric used in this test problem.
+        Returns:
+            float: Best (mean) value of the test problem's metric.
+        """
+        if self.metric == 'test_losses' or self.metric == 'train_losses':
+            return min(self.aggregate[self.metric]['mean'])
+        elif self.metric == 'test_accuracies' or self.metric == 'train_accuracies':
+            return max(self.aggregate[self.metric]['mean'])
+        else:
+            raise RuntimeError("Metric unknown")
+
+    def _determine_aggregate_from_runs(self):
+        # metrices
         train_losses = []
         train_accuracies = []
         test_losses = []
         test_accuracies = []
+
         meta_loaded = False
         for run in self.runs:
-            output = self._load_json(os.path.join(self._path, run))
-            # Get meta data from first run
+            json_data = self._load_json(os.path.join(self._path, run))
             if not meta_loaded:
-                meta = output
+                meta = json_data
                 meta_loaded = True
-            train_losses.append(output['train_losses'])
-            test_losses.append(output['test_losses'])
-            if 'train_accuracies' in output:
-                train_accuracies.append(output['train_accuracies'])
-                test_accuracies.append(output['test_accuracies'])
+            train_losses.append(json_data['train_losses'])
+            test_losses.append(json_data['test_losses'])
+            if 'train_accuracies' in json_data:
+                train_accuracies.append(json_data['train_accuracies'])
+                test_accuracies.append(json_data['test_accuracies'])
+
         aggregate = dict()
         # compute speed
-        perf = np.array(eval(self.metric))
-        if self.metric == "test_losses" or self.metric == "train_losses":
-            # average over first time they reach conv perf (use num_epochs if conv perf is not reached)
-            aggregate['speed'] = np.mean(
-                np.argmax(perf <= self.conv_perf, axis=1) +
-                np.invert(np.max(perf <= self.conv_perf, axis=1)) *
-                perf.shape[1])
-        elif self.metric == "test_accuracies" or self.metric == "train_accuracies":
-            aggregate['speed'] = np.mean(
-                np.argmax(perf >= self.conv_perf, axis=1) +
-                np.invert(np.max(perf >= self.conv_perf, axis=1)) *
-                perf.shape[1])
-        # build dict
-        for m in [
-                'train_losses', 'test_losses', 'train_accuracies',
-                'test_accuracies'
-        ]:
-            aggregate[m] = {
-                'mean': np.mean(eval(m), axis=0),
-                'std': np.std(eval(m), axis=0)
+#        perf = np.array(eval(self.metric))
+#        if self.metric == "test_losses" or self.metric == "train_losses":
+#            # average over first time they reach conv perf (use num_epochs if conv perf is not reached)
+#            aggregate['speed'] = np.mean(
+#                np.argmax(perf <= self.conv_perf, axis=1) +
+#                np.invert(np.max(perf <= self.conv_perf, axis=1)) *
+#                perf.shape[1])
+#        elif self.metric == "test_accuracies" or self.metric == "train_accuracies":
+#            aggregate['speed'] = np.mean(
+#                np.argmax(perf >= self.conv_perf, axis=1) +
+#                np.invert(np.max(perf >= self.conv_perf, axis=1)) *
+#                perf.shape[1])
+        for metrics in ['train_losses', 'test_losses', 'train_accuracies', 'test_accuracies']:
+            aggregate[metrics] = {
+                'mean': np.mean(eval(metrics), axis=0),
+                'std': np.std(eval(metrics), axis=0)
             }
-        # merge meta and aggregate (aggregate replaces)
+#         merge meta and aggregate. replace the metrics by mean and std
         aggregate = {**meta, **aggregate}
-        aggregate.pop('minibatch_train_losses', None)
         return aggregate
+
+    def _get_all_runs(self):
+        runs = [run for run in os.listdir(self._path) if run.endswith(".json")]
+        return runs
 
     def _load_json(self, path):
         """Load the ``JSON`` file of the given path.
@@ -576,29 +521,6 @@ class AggregateRun:
         """
         with open(path, "r") as f:
             return json.load(f)
-
-    def _get_final_value(self):
-        """Get final (mean) value of the metric used in this test problem.
-
-        Returns:
-            float: Final (mean) value of the test problem's metric.
-
-        """
-        return self.output[self.metric]['mean'][-1]
-
-    def _get_best_value(self):
-        """Get best (mean) value of the metric used in this test problem.
-
-        Returns:
-            float: Best (mean) value of the test problem's metric.
-
-        """
-        if self.metric == 'test_losses' or self.metric == 'train_losses':
-            return min(self.output[self.metric]['mean'])
-        elif self.metric == 'test_accuracies' or self.metric == 'train_accuracies':
-            return max(self.output[self.metric]['mean'])
-        else:
-            raise RuntimeError("Metric unknown")
 
 
 def beautify_lr_sensitivity(fig, ax):
@@ -842,7 +764,7 @@ def texify_plot_performance(fig, ax, problem_set):
     """
     file_name = 'benchmark_' + str(problem_set) + '.tex'
     tikz_code = get_tikz_code(
-        file_name, figureheight='\\figureheight', figurewidth='\\figurewidth')
+        fig, figureheight='\\figureheight', figurewidth='\\figurewidth')
 
     tikz_code = r"\pgfplotsset{every axis/.append style={label style={font=\tiny}, tick label style={font=\tiny}, legend style={font=\tiny, line width=1pt}}}" + tikz_code
     tikz_code = tikz_code.replace('minor', '%minor')  # comment minor tick
