@@ -303,6 +303,12 @@ class StandardRunner(object):
 #                torch.save(tproblem.net.state_dict(), '/home/isenach/Desktop/Project/models/epoch_' + str(epoch_count))
         # --- End of training loop.
 
+        # Write the setting dict for this run. It contains all settings that the Analyzer is interested in.
+#        settings_dict = {
+#                    'batch_size': batch_size,
+#                    'learning_rate': learning_rate,
+#                    'hyperparams': optimizer_hyperparams
+#                    }
         # Put results into output dictionary.
         output = {
             "train_losses": train_losses,
@@ -311,15 +317,15 @@ class StandardRunner(object):
             "train_accuracies": train_accuracies,
             "test_accuracies": test_accuracies,
             "optimizer": self._optimizer_name,
-            'testproblem': testproblem,
-            'weight_decay': weight_decay,
             'batch_size': batch_size,
             'learning_rate': learning_rate,
+            'hyperparams': optimizer_hyperparams,
+            'testproblem': testproblem,
+            'weight_decay': weight_decay,
             'lr_sched_epochs': lr_sched_epochs,
             'lr_sched_factors': lr_sched_factors,
             'random_seed': random_seed,
             'train_log_interval': train_log_interval,
-            'hyperparams': optimizer_hyperparams
         }
 
         # Dump output into json file.
