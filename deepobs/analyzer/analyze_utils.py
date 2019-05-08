@@ -44,18 +44,46 @@ class Analyzer:
                 testproblems[tp] = TestProblemAnalyzer(self.path, tp)
         return testproblems
 
+    def print_best_runs(self):
+        runs_dict = self.get_best_runs()
+        for _, testproblem in self.testproblems.items():
+            print('********************')
+            print('Settings for ' + testproblem.name + ':')
+            print('------------------')
+            for _ , opt in testproblem.optimizers.items():
+                print('\n' + opt.name + ':')
+                print(pd.DataFrame(runs_dict[testproblem.name][opt.name]))
+            print('********************')
+
     def get_best_runs(self):
+        # TODO rename since most does not neccessarily mean best run
+        """Iterates through all testproblems and optimizers to get the setting for each mode (best, final, most).
+        Returns a nested dict structured as follows:
+             {
+             testproblem:{
+                 optimizer: {
+                     final: <a dict that contains the settings that led to the best final performance>,
+                     best: <a dict that contains the settings that led to the best performance>
+                     most: <a dict that contains the settings that hold the most runs>
+                     }
+                 ... <more optimizer>
+                 }
+            ...<more testproblems>
+            }
+        """
         best_runs = dict()
         for _, testproblem in self.testproblems.items():
+            opt_dic = dict()
             for _, opt in testproblem.optimizers.items():
                 best_setting_final = opt.best_SettingAnalyzer_final.settings
                 best_setting_best = opt.best_SettingAnalyzer_best.settings
-                best_runs[testproblem.name] = {
-                        opt.name : {
+                setting_most = opt.most_run_SettingAnalyzer.settings
+                opt_dic[opt.name] = {
                                 'best' :  best_setting_best,
-                                'final':  best_setting_final
+                                'final':  best_setting_final,
+                                'most': setting_most
                                 }
-                        }
+            best_runs[testproblem.name] = opt_dic
         return best_runs
     # TODO print the best runs
     def plot_lr_sensitivity(self, baseline_pars=None, mode='final'):
@@ -173,6 +201,52 @@ class Analyzer:
         texify_plot_performance(fig, axis, "large")
         plt.show()
 
+    def plot_table(self, baseline_pars=None):
+        print("Plot overall performance table")
+
+        bm_table_small = dict()
+        for testprob in [
+                "quadratic_deep", "mnist_vae", "fmnist_2c2d", "cifar10_3c3d"
+        ]:
+            bm_table_small[testprob] = dict()
+            bm_table_small[testprob]['Performance'] = dict()
+            bm_table_small[testprob]['Speed'] = dict()
+            bm_table_small[testprob]['Tuneability'] = dict()
+            if testprob in self.testproblems:
+                for _, opt in self.testproblems[testprob].optimizers.items():
+                    bm_table_small[testprob] = opt.get_bm_table(
+                        bm_table_small[testprob])
+
+            if baseline_pars is not None:
+                if testprob in baseline_pars.testproblems:
+                    for _, opt in baseline_pars.testproblems[
+                            testprob].optimizers.items():
+                        bm_table_small[testprob] = opt.get_bm_table(
+                            bm_table_small[testprob])
+        bm_table_small_pd = beautify_plot_table(
+            bm_table_small)
+        texify_plot_table(bm_table_small_pd, "small")
+
+        bm_table_large = dict()
+        for testprob in [
+                "fmnist_vae", "cifar100_allcnnc", "svhn_wrn164", "tolstoi_char_rnn"
+        ]:
+            bm_table_large[testprob] = dict()
+            bm_table_large[testprob]['Performance'] = dict()
+            bm_table_large[testprob]['Speed'] = dict()
+            bm_table_large[testprob]['Tuneability'] = dict()
+            if testprob in self.testproblems:
+                for _, opt in self.testproblems[testprob].optimizers.items():
+                    bm_table_large[testprob] = opt.get_bm_table(
+                        bm_table_large[testprob])
+            if baseline_pars is not None:
+                if testprob in baseline_pars.testproblems:
+                    for _, opt in baseline_pars.testproblems[
+                            testprob].optimizers.items():
+                        bm_table_large[testprob] = opt.get_bm_table(
+                            bm_table_large[testprob])
+        bm_table_large_pd = beautify_plot_table(bm_table_large)
+        texify_plot_table(bm_table_large_pd,"large")
 
 class TestProblemAnalyzer:
     """DeepOBS analyzer class for a specific test problem.
@@ -480,6 +554,40 @@ class OptimizerAnalyzer:
                 color=ax[idx].get_lines()[-1].get_color(),
                 alpha=0.2)
 
+    def get_bm_table(self, perf_table, mode='most'):
+        """Generates the overall performance table for this optimizer.
+        This includes metrics for the performance, speed and tuneability of this
+        optimizer (on this test problem).
+        Args:
+            perf_table (dict): A dictionary with three keys: ``Performance``,
+                ``Speed`` and ``Tuneability``.
+            mode (str): Whether to use the setting with the best final
+                (``final``) performance, the best overall (``best``) performance
+                or the setting with the most runs (``most``).
+                Defaults to ``most``.
+        Returns:
+            dict: Dictionary with holding the performance, speed and tuneability
+            measure for this optimizer.
+        """
+        if mode == 'final':
+            sett = self.best_SettingAnalyzer_final
+        elif mode == 'best':
+            sett = self.best_SettingAnalyzer_best
+        elif mode == 'most':
+            sett = self.most_run_SettingAnalyzer
+
+        perf_table['Performance'][self.name] = sett.aggregate[
+            self.metric]['mean'][-1]
+        # TODO include speed
+#        perf_table['Speed'][self.name] = sett.aggregate['speed']
+        perf_table['Tuneability'][self.name] = {
+            **{
+                'lr': '{:0.2e}'.format(sett.settings['learning_rate'])
+            },
+            **sett.settings['hyperparams']
+        }
+        return perf_table
+
     def get_performance_dictionary(self, mode='most'):
         """Generates the overall performance overview for this optimizer.
 
@@ -596,8 +704,9 @@ class SettingAnalyzer:
     def _get_settings(self):
         # all runs have the same setting, so just take the first run.
         # TODO should not raise an error if no run is available for this setting (i.e. folder is empty).
+        # make the interested settings a config global variable?
         json_data = self._load_json(os.path.join(self._path, self.runs[0]))
-        settings = json_data['settings']
+        settings = {k: json_data[k] for k in ['learning_rate']}
         return settings
 
     def _determine_aggregate_from_runs(self):
