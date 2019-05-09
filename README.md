@@ -39,6 +39,8 @@ We are actively working on a **PyTorch** version and will be releasing it in the
 next months. In the meantime, PyTorch users can still use parts of DeepOBS such
 as the data preprocessing scripts or the visualization features.
 
+**If you find any bugs in DeepOBS, or find it hard to use, please let us know.
+We are always interested in feedback and ways to improve DeepOBS.**
 
 ## Installation
 
