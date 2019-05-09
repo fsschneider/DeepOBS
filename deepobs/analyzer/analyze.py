@@ -15,6 +15,10 @@ from .analyze_utils import beautify_lr_sensitivity
 from .analyze_utils import beautify_plot_performance
 from .analyze_utils import beautify_plot_table
 
+from .analyze_utils import texify_lr_sensitivity
+from .analyze_utils import texify_plot_performance
+from . analyze_utils import texify_plot_table
+
 # TODO do I really need seaborn?
 sns.set()
 sns.set_style("whitegrid", {

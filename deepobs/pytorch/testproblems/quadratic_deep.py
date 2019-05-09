@@ -84,7 +84,7 @@ class quadratic_deep(TestProblem):
 
         self.net = net_quadratic_deep(100, Hessian)
         self.data = quadratic(self._batch_size)
-        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self._device = torch.device("cpu")
         self.net.to(self._device)
 
     def get_batch_loss_and_accuracy(self):
