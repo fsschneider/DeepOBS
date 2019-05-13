@@ -3,9 +3,11 @@
 """Module implementing the abstract Runner."""
 import os
 import json
-from . import abstract_runner_utils
+from .abstract_runner_utils import float2str
+import time
+import abc
 
-class Runner(object):
+class Runner(abc.ABC):
     """Captures everything that is common to both frameworks and every runner type.
     This includes folder creation amd writing of the output to the folder"""
 
@@ -13,40 +15,59 @@ class Runner(object):
 
         self._optimizer_class = optimizer_class
         self._optimizer_name = optimizer_class.__name__
-        self._hyperparams = hyperparams
+        self._optimizer_hyperparams = hyperparams
 
+    @abc.abstractmethod
     def run(self):
-        raise NotImplementedError(
-            """'Runner' is an abstract base class, please use
-        one of the sub-classes.""")
+        pass
 
     # creates the output folder structure depending on the settings of interest
-    def create_output_folder(self,
-                             hyperparams,
-                             testproblem,
-                             output_dir,
-                             weight_decay,
-                             batch_size,
-                             num_epochs,
-                             learning_rate,
-                             lr_sched_epochs,
-                             lr_sched_factors,
-                             random_seed):
+    # TODO this would also become way easier if I wrapp the 'importance settings dict'
+    def create_output_directory(self,
+                                testproblem,
+                                num_epochs,
+                                batch_size,
+                                weight_decay,
+                                random_seed,
+                                output_dir,
+                                **training_params):
 
-        run_folder_name, file_name = abstract_runner_utils.make_run_name(
-            weight_decay, batch_size, num_epochs, learning_rate,
-            lr_sched_epochs, lr_sched_factors, random_seed,
-            **hyperparams)
-        directory = os.path.join(output_dir, testproblem, self._optimizer_name,
-                                 run_folder_name)
+        run_folder_name = "num_epochs__" + str(
+        num_epochs) + "__batch_size__" + str(batch_size) + "__"
+        if weight_decay is not None:
+            run_folder_name += "weight_decay__{0:s}".format(
+                float2str(weight_decay))
 
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        # Add all hyperparameters to the name (sorted alphabetically).
+        # TODO what happens if a value is neither string nor float?
+        for hp_name, hp_value in sorted(self._optimizer_hyperparams.items()):
+            run_folder_name += "__{0:s}".format(hp_name)
+            run_folder_name += "__{0:s}".format(
+                float2str(hp_value) if isinstance(hp_value, float)
+                                    else str(hp_value)
+                                    )
 
-        return directory, file_name
+        # Add training parameters to the name (sorted alphabetically)
+        # TODO what happens if a value is neither string nor float?
+        for tp_name, tp_value in sorted(training_params.items()):
+            run_folder_name += "__{0:s}".format(tp_name)
+            run_folder_name += "__{0:s}".format(
+                float2str(hp_value) if isinstance(tp_value, float)
+                                    else str(tp_value)
+                                    )
 
-    # writes the output, given a dictionary determined by the individual runner.
-    def write_output(self, output, directory, file_name):
+        file_name = "random_seed__{0:d}__".format(random_seed)
+        file_name += time.strftime("%Y-%m-%d-%H-%M-%S")
+
+        run_directory = os.path.join(output_dir, testproblem, self._optimizer_name,
+                                     run_folder_name)
+        if not os.path.exists(run_directory):
+            os.makedirs(run_directory)
+
+        return run_directory, file_name
+
+    @staticmethod
+    def write_output(output, run_folder_name, file_name):
         # Dump output into json file.
-        with open(os.path.join(directory, file_name + ".json"), "w") as f:
+        with open(os.path.join(run_folder_name, file_name + ".json"), "w") as f:
                 json.dump(output, f)
