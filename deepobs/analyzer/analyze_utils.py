@@ -1,11 +1,7 @@
-import os
-import json
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib2tikz import save as tikz_save
 from matplotlib2tikz import get_tikz_code
-from .. import tensorflow
 
 def beautify_lr_sensitivity(fig, ax):
     """Beautify a learning rate sensitivity plot.
