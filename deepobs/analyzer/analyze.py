@@ -1,34 +1,18 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-import seaborn as sns
 import os
 import json
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-
-from matplotlib2tikz import save as tikz_save
-from matplotlib2tikz import get_tikz_code
-
-from .analyze_utils import beautify_lr_sensitivity
-from .analyze_utils import beautify_plot_performance
-from .analyze_utils import beautify_plot_table
-
-from .analyze_utils import texify_lr_sensitivity
-from .analyze_utils import texify_plot_performance
-from . analyze_utils import texify_plot_table
-
-# TODO do I really need seaborn?
-sns.set()
-sns.set_style("whitegrid", {
-    'axes.grid': False,
-    'axes.spines.top': False,
-    'axes.spines.right': False
-})
-
-
+from matplotlib import pyplot as plt
 class Analyzer:
+    def __init__(self, settings_of_interest, metric, path):
+        self.settings_of_interest = settings_of_interest
+        self.metric = metric
+        self.path = path
+
+class TestSetAnalyzer:
     """DeepOBS analyzer class to generate result plots or get other summaries.
 
     Args:
@@ -40,13 +24,14 @@ class Analyzer:
             name of a test problem (e.g. ``cifar10_3c3d``) and the value is an
             instance of the TestProblemAnalyzer class (see below).
     """
-    def __init__(self, results_path):
+    def __init__(self, results_path, metric):
         """Initializes a new Analyzer instance.
 
         Args:
             path (str): Path to the results folder. This folder should contain one
                 or multiple testproblem folders.
         """
+        self.metric = metric
         self.path = results_path
         self.testproblems = self._read_testproblems()
 
@@ -61,21 +46,135 @@ class Analyzer:
         """
         testproblems = dict()
         for tp in os.listdir(self.path):
-            if os.path.isdir(os.path.join(self.path, tp)):
-                testproblems[tp] = TestProblemAnalyzer(self.path, tp)
+            # TODO how to make sure that these do not allow for accuracie metric?
+#            if tp == 'quadratic_deep' or tp == 'mnist_vae' or tp == 'fmnist_vae':
+#                metric = "test_losses"
+#            else:
+#                metric = "test_accuracies"
+
+            path = os.path.join(self.path, tp)
+            if os.path.isdir(path):
+                print('Analyzing', tp)
+                testproblems[tp] = TestProblemAnalyzer(path, self.metric)
         return testproblems
 
     def print_best_runs(self):
         runs_dict = self.get_best_runs()
-        for _, testproblem in self.testproblems.items():
+        for tp_name, testproblem in self.testproblems.items():
             print('********************')
-            print('Settings for ' + testproblem.name + ':')
+            print('Settings for ' + tp_name + ':')
             print('------------------')
-            for _ , opt in testproblem.optimizers.items():
-                print('\n' + opt.name + ':')
+            for opt_name , opt in testproblem.optimizers.items():
+                print('\n' + opt_name + ':')
                 # TODO flatten the dict of hyperparams for nice displayment
-                print(pd.DataFrame(runs_dict[testproblem.name][opt.name]))
+                print(pd.DataFrame(runs_dict[tp_name][opt_name]))
             print('********************')
+
+#    def plot_lr_sensitivity(self, baseline_pars=None, mode='final'):
+#        print("Plot learning rate sensitivity plot")
+#        # TODO make the plotting abstract for every testproblem and not only the fixed ones.
+#        fig, axis = plt.subplots(2, 4, figsize=(35, 4))
+#
+#        # small testproblem set
+#        ax_col = 0
+#        for testprob in [
+#                "quadratic_deep", "mnist_vae", "fmnist_2c2d", "cifar10_3c3d"
+#        ]:
+#            if testprob in self.testproblems:
+#                for _, opt in self.testproblems[testprob].optimizers.items(
+#                ):
+#                    opt.plot_lr_sensitivity(axis[0][ax_col], mode=mode)
+#                ax_col += 1
+#
+#        # TODO wrap the baseline plotting somewhere else
+#        if baseline_pars is not None:
+#            ax_col = 0
+#            for testprob in [
+#                    "quadratic_deep", "mnist_vae", "fmnist_2c2d", "cifar10_3c3d"
+#            ]:
+#                if testprob in baseline_pars.testproblems:
+#                    for _, opt in baseline_pars.testproblems[
+#                            testprob].optimizers.items():
+#                        opt.plot_lr_sensitivity(axis[0][ax_col], mode=mode)
+#                    ax_col += 1
+#
+#        # large testproblem set
+#        ax_col = 0
+#        for testprob in [
+#                "fmnist_vae", "cifar100_allcnnc", "svhn_wrn164", "tolstoi_char_rnn"
+#        ]:
+#            if testprob in self.testproblems:
+#                for _, opt in self.testproblems[testprob].optimizers.items(
+#                ):
+#                    opt.plot_lr_sensitivity(axis[1][ax_col], mode=mode)
+#                ax_col += 1
+#
+#        # TODO same as above for baseline parser
+#        if baseline_pars is not None:
+#            ax_col = 0
+#            for testprob in [
+#                    "fmnist_vae", "cifar100_allcnnc", "svhn_wrn164",
+#                    "tolstoi_char_rnn"
+#            ]:
+#                if testprob in baseline_pars.testproblems:
+#                    for _, opt in baseline_pars.testproblems[
+#                            testprob].optimizers.items():
+#                        opt.plot_lr_sensitivity(axis[1][ax_col], mode=mode)
+#                    ax_col += 1
+#
+#        fig, axis = beautify_lr_sensitivity(
+#            fig, axis)
+#
+#        # TODO implement textification
+##        texify_lr_sensitivity(fig, axis)
+#        plt.show()
+#
+#    def plot_table(self, baseline_pars=None):
+#        print("Plot overall performance table")
+#
+#        bm_table_small = dict()
+#        for testprob in [
+#                "quadratic_deep", "mnist_vae", "fmnist_2c2d", "cifar10_3c3d"
+#        ]:
+#            bm_table_small[testprob] = dict()
+#            bm_table_small[testprob]['Performance'] = dict()
+#            bm_table_small[testprob]['Speed'] = dict()
+#            bm_table_small[testprob]['Tuneability'] = dict()
+#            if testprob in self.testproblems:
+#                for _, opt in self.testproblems[testprob].optimizers.items():
+#                    bm_table_small[testprob] = opt.get_bm_table(
+#                        bm_table_small[testprob])
+#
+#            if baseline_pars is not None:
+#                if testprob in baseline_pars.testproblems:
+#                    for _, opt in baseline_pars.testproblems[
+#                            testprob].optimizers.items():
+#                        bm_table_small[testprob] = opt.get_bm_table(
+#                            bm_table_small[testprob])
+#        bm_table_small_pd = beautify_plot_table(
+#            bm_table_small)
+#        texify_plot_table(bm_table_small_pd, "small")
+#
+#        bm_table_large = dict()
+#        for testprob in [
+#                "fmnist_vae", "cifar100_allcnnc", "svhn_wrn164", "tolstoi_char_rnn"
+#        ]:
+#            bm_table_large[testprob] = dict()
+#            bm_table_large[testprob]['Performance'] = dict()
+#            bm_table_large[testprob]['Speed'] = dict()
+#            bm_table_large[testprob]['Tuneability'] = dict()
+#            if testprob in self.testproblems:
+#                for _, opt in self.testproblems[testprob].optimizers.items():
+#                    bm_table_large[testprob] = opt.get_bm_table(
+#                        bm_table_large[testprob])
+#            if baseline_pars is not None:
+#                if testprob in baseline_pars.testproblems:
+#                    for _, opt in baseline_pars.testproblems[
+#                            testprob].optimizers.items():
+#                        bm_table_large[testprob] = opt.get_bm_table(
+#                            bm_table_large[testprob])
+#        bm_table_large_pd = beautify_plot_table(bm_table_large)
+#        texify_plot_table(bm_table_large_pd,"large")
 
     def get_best_runs(self):
         # TODO rename since most does not neccessarily mean best run
@@ -94,182 +193,45 @@ class Analyzer:
             }
         """
         best_runs = dict()
-        for _, testproblem in self.testproblems.items():
+        for tp_name, testproblem in self.testproblems.items():
             opt_dic = dict()
-            for _, opt in testproblem.optimizers.items():
+            for opt_name, opt in testproblem.optimizers.items():
                 best_setting_final = opt.best_SettingAnalyzer_final.settings
                 best_setting_best = opt.best_SettingAnalyzer_best.settings
                 setting_most = opt.most_run_SettingAnalyzer.settings
-                opt_dic[opt.name] = {
+                opt_dic[opt_name] = {
                                 'best' :  best_setting_best,
                                 'final':  best_setting_final,
                                 'most': setting_most
                                 }
-            best_runs[testproblem.name] = opt_dic
+            best_runs[tp_name] = opt_dic
         return best_runs
-    # TODO print the best runs
-    def plot_lr_sensitivity(self, baseline_pars=None, mode='final'):
-        print("Plot learning rate sensitivity plot")
-        # TODO make the plotting abstract for every testproblem and not only the fixed ones.
-        fig, axis = plt.subplots(2, 4, figsize=(35, 4))
 
-        # small testproblem set
+    def plot_performance(self, mode='final'):
+        num_testproblems = len(self.testproblems)
+        fig, axes = plt.subplots(4, num_testproblems, sharex='col', figsize=(25, 8))
         ax_col = 0
-        for testprob in [
-                "quadratic_deep", "mnist_vae", "fmnist_2c2d", "cifar10_3c3d"
-        ]:
-            if testprob in self.testproblems:
-                for _, opt in self.testproblems[testprob].optimizers.items(
-                ):
-                    opt.plot_lr_sensitivity(axis[0][ax_col], mode=mode)
-                ax_col += 1
+        for tp_name, tp in self.testproblems.items():
+            for opt_name, opt in tp.optimizers.items():
+                # workaround if there is only one testproblem
+                if num_testproblems == 1:
+                    opt.plot_optimizer_performance(axes, mode = mode)
+                else:
+                    opt.plot_optimizer_performance(axes[:, ax_col], mode = mode)
+                # TODO rescaling
+            ax_col += 1
 
-        # TODO wrap the baseline plotting somewhere else
-        if baseline_pars is not None:
-            ax_col = 0
-            for testprob in [
-                    "quadratic_deep", "mnist_vae", "fmnist_2c2d", "cifar10_3c3d"
-            ]:
-                if testprob in baseline_pars.testproblems:
-                    for _, opt in baseline_pars.testproblems[
-                            testprob].optimizers.items():
-                        opt.plot_lr_sensitivity(axis[0][ax_col], mode=mode)
-                    ax_col += 1
+        # label the plot
+        rows = ['Test Loss', 'Train Loss', 'Test Accuracy', 'Train Accuracy']
+        cols = [tp_name for tp_name, _ in self.testproblems.items()]
 
-        # large testproblem set
-        ax_col = 0
-        for testprob in [
-                "fmnist_vae", "cifar100_allcnnc", "svhn_wrn164", "tolstoi_char_rnn"
-        ]:
-            if testprob in self.testproblems:
-                for _, opt in self.testproblems[testprob].optimizers.items(
-                ):
-                    opt.plot_lr_sensitivity(axis[1][ax_col], mode=mode)
-                ax_col += 1
+        for ax, col in zip(axes[0], cols):
+            ax.set_title(col)
+        # TODO add workaround if only one testproblem is in the folder
+        for ax, row in zip(axes[:,0], rows):
+            ax.set_ylabel(row)
 
-        # TODO same as above for baseline parser
-        if baseline_pars is not None:
-            ax_col = 0
-            for testprob in [
-                    "fmnist_vae", "cifar100_allcnnc", "svhn_wrn164",
-                    "tolstoi_char_rnn"
-            ]:
-                if testprob in baseline_pars.testproblems:
-                    for _, opt in baseline_pars.testproblems[
-                            testprob].optimizers.items():
-                        opt.plot_lr_sensitivity(axis[1][ax_col], mode=mode)
-                    ax_col += 1
-
-        fig, axis = beautify_lr_sensitivity(
-            fig, axis)
-
-        # TODO implement textification
-#        texify_lr_sensitivity(fig, axis)
-        plt.show()
-
-    def plot_performance(self, baseline_pars=None, mode="most"):
-        # Small Benchmark
-        fig, axis = plt.subplots(4, 4, sharex='col', figsize=(25, 8))
-
-        ax_col = 0
-        for testprob in [
-                "quadratic_deep", "mnist_vae", "fmnist_2c2d", "cifar10_3c3d"
-        ]:
-            if testprob in self.testproblems:
-                for _, opt in self.testproblems[testprob].optimizers.items(
-                ):
-                    opt.plot_performance(axis[:, ax_col], mode=mode)
-                ax_col += 1
-
-        if baseline_pars is not None:
-            ax_col = 0
-            for testprob in [
-                    "quadratic_deep", "mnist_vae", "fmnist_2c2d", "cifar10_3c3d"
-            ]:
-                if testprob in baseline_pars.testproblems:
-                    for _, opt in baseline_pars.testproblems[
-                            testprob].optimizers.items():
-                        opt.plot_performance(axis[:, ax_col], mode='most')
-                    ax_col += 1
-        fig, axis = beautify_plot_performance(
-            fig, axis, self, "small")
-#        texify_plot_performance(fig, axis, "small")
-        plt.show()
-
-        # Large Benchmark
-        fig, axis = plt.subplots(4, 4, sharex='col', figsize=(25, 8))
-
-        ax_col = 0
-        for testprob in [
-                "fmnist_vae", "cifar100_allcnnc", "svhn_wrn164", "tolstoi_char_rnn"
-        ]:
-            if testprob in self.testproblems:
-                for _, opt in self.testproblems[testprob].optimizers.items():
-                    opt.plot_performance(axis[:, ax_col], mode=mode)
-                ax_col += 1
-        if baseline_pars is not None:
-            ax_col = 0
-            for testprob in [
-                    "fmnist_vae", "cifar100_allcnnc", "svhn_wrn164",
-                    "tolstoi_char_rnn"
-            ]:
-                if testprob in baseline_pars.testproblems:
-                    for _, opt in baseline_pars.testproblems[
-                            testprob].optimizers.items():
-                        opt.plot_performance(axis[:, ax_col], mode='most')
-                    ax_col += 1
-        fig, axis = beautify_plot_performance(
-            fig, axis, self, "large")
-        texify_plot_performance(fig, axis, "large")
-        plt.show()
-
-    def plot_table(self, baseline_pars=None):
-        print("Plot overall performance table")
-
-        bm_table_small = dict()
-        for testprob in [
-                "quadratic_deep", "mnist_vae", "fmnist_2c2d", "cifar10_3c3d"
-        ]:
-            bm_table_small[testprob] = dict()
-            bm_table_small[testprob]['Performance'] = dict()
-            bm_table_small[testprob]['Speed'] = dict()
-            bm_table_small[testprob]['Tuneability'] = dict()
-            if testprob in self.testproblems:
-                for _, opt in self.testproblems[testprob].optimizers.items():
-                    bm_table_small[testprob] = opt.get_bm_table(
-                        bm_table_small[testprob])
-
-            if baseline_pars is not None:
-                if testprob in baseline_pars.testproblems:
-                    for _, opt in baseline_pars.testproblems[
-                            testprob].optimizers.items():
-                        bm_table_small[testprob] = opt.get_bm_table(
-                            bm_table_small[testprob])
-        bm_table_small_pd = beautify_plot_table(
-            bm_table_small)
-        texify_plot_table(bm_table_small_pd, "small")
-
-        bm_table_large = dict()
-        for testprob in [
-                "fmnist_vae", "cifar100_allcnnc", "svhn_wrn164", "tolstoi_char_rnn"
-        ]:
-            bm_table_large[testprob] = dict()
-            bm_table_large[testprob]['Performance'] = dict()
-            bm_table_large[testprob]['Speed'] = dict()
-            bm_table_large[testprob]['Tuneability'] = dict()
-            if testprob in self.testproblems:
-                for _, opt in self.testproblems[testprob].optimizers.items():
-                    bm_table_large[testprob] = opt.get_bm_table(
-                        bm_table_large[testprob])
-            if baseline_pars is not None:
-                if testprob in baseline_pars.testproblems:
-                    for _, opt in baseline_pars.testproblems[
-                            testprob].optimizers.items():
-                        bm_table_large[testprob] = opt.get_bm_table(
-                            bm_table_large[testprob])
-        bm_table_large_pd = beautify_plot_table(bm_table_large)
-        texify_plot_table(bm_table_large_pd,"large")
-
+        # TODO specifically add a small/large plotter for papers or return the axes to allow for further modifications
 class TestProblemAnalyzer:
     """DeepOBS analyzer class for a specific test problem.
 
@@ -293,7 +255,7 @@ class TestProblemAnalyzer:
             OptimizerAnalyzer class (see below).
 
     """
-    def __init__(self, path, tp):
+    def __init__(self, path, metric):
         """Initializes a new TestProblemAnalyzer instance.
 
         Args:
@@ -301,15 +263,11 @@ class TestProblemAnalyzer:
                 results folder).
             tp (str): Name of the test problem (same as the folder name).
         """
-        self._path = os.path.join(path, tp)
-        self.name = tp
-        print("Analyzing", self.name)
+        self._path = path
+        self.metric = metric
         # TODO make the metrices attributes of the testproblem class?
         # TODO generalize this: if test accuracies not available, use test losses
-        if tp == 'quadratic_deep' or tp == 'mnist_vae' or tp == 'fmnist_vae':
-            self.metric = "test_losses"
-        else:
-            self.metric = "test_accuracies"
+
         self.optimizers = self._read_optimizer()
 
     def _read_optimizer(self):
@@ -322,7 +280,8 @@ class TestProblemAnalyzer:
         """
         optimizers = dict()
         for opt in os.listdir(self._path):
-            optimizers[opt] = OptimizerAnalyzer(self._path, opt, self.metric, self.name)
+            path = os.path.join(self._path, opt)
+            optimizers[opt] = OptimizerAnalyzer(path, self.metric)
         return optimizers
 
 #    def _get_conv_perf(self):
@@ -341,7 +300,6 @@ class TestProblemAnalyzer:
 #        except IOError:
 #            print("Warning: Could not find a convergence performance file.")
 #            return 0.0
-
 
 class OptimizerAnalyzer:
     """DeepOBS analyzer class for an optimizer (and a specific test problem).
@@ -375,7 +333,7 @@ class OptimizerAnalyzer:
         num_settings: Total number of settings for this optimizer
             (and test problem)
     """
-    def __init__(self, path, opt, metric, testproblem):
+    def __init__(self, path, metric):
         """Initializes a new OptimizerAnalyzer instance.
 
         Args:
@@ -390,18 +348,17 @@ class OptimizerAnalyzer:
                 optimizer (folder) belongs to.
 
         """
-        self._path = os.path.join(path, opt)
-        self.name = opt
+        self._path = path
+        self.__name = path.split('/')[-1]
         self.metric = metric
-        self.testproblem = testproblem
 #        self.conv_perf = conv_perf
-        self.setting_analyzers = self._read_setting_analyzers()
-        self.num_settings = len(self.setting_analyzers)
-        self.best_SettingAnalyzer_final = self._get_best_SettingAnalyzer_final()
-        self.best_SettingAnalyzer_best = self._get_best_SettingAnalyzer_best()
-        self.most_run_SettingAnalyzer = self._get_SettingAnalyzer_most_runs()
+        self.__setting_analyzers = self.__read_setting_analyzers()
+        self.num_settings = len(self.__setting_analyzers)
+        self.best_SettingAnalyzer_final = self.__get_best_SettingAnalyzer_final()
+        self.best_SettingAnalyzer_best = self.__get_best_SettingAnalyzer_best()
+        self.most_run_SettingAnalyzer = self.__get_SettingAnalyzer_most_runs()
 
-    def _read_setting_analyzers(self):
+    def __read_setting_analyzers(self):
         """Read all settings (folders) in a optimizer (folder).
 
         Returns:
@@ -411,11 +368,11 @@ class OptimizerAnalyzer:
         """
         settings = dict()
         for sett in os.listdir(self._path):
-            settings[sett] = SettingAnalyzer(self._path, sett, self.metric,
-                                           self.testproblem, self.name)
+            path = os.path.join(self._path, sett)
+            settings[sett] = SettingAnalyzer(path, self.metric)
         return settings
 
-    def _get_best_SettingAnalyzer_final(self):
+    def __get_best_SettingAnalyzer_final(self):
         """Returns the setting for this optimizer that has the best final
         performance using the metric (``test_losses`` or ``test_accuracies``)
         defined for this test problem.
@@ -434,14 +391,14 @@ class OptimizerAnalyzer:
         else:
             raise RuntimeError("Metric unknown")
 
-        for _, sett in self.setting_analyzers.items():
+        for _, sett in self.__setting_analyzers.items():
             val = sett.final_value
             if better(val, current_best):
                 current_best = val
                 best_ind = sett
         return best_ind
 
-    def _get_best_SettingAnalyzer_best(self):
+    def __get_best_SettingAnalyzer_best(self):
         """Returns the setting for this optimizer that has the best overall
         performance using the metric (``test_losses`` or ``test_accuracies``)
         defined for this test problem. In contrast to ``get_best_setting_final``
@@ -461,14 +418,14 @@ class OptimizerAnalyzer:
             better = lambda x, y: x > y
         else:
             raise RuntimeError("Metric unknown")
-        for _, sett in self.setting_analyzers.items():
+        for _, sett in self.__setting_analyzers.items():
             val = sett.best_value
             if better(val, current_best):
                 current_best = val
                 best_ind = sett
         return best_ind
 
-    def _get_SettingAnalyzer_most_runs(self):
+    def __get_SettingAnalyzer_most_runs(self):
         """Returns the setting with the most repeated runs (with the same
         setting, but probably different seeds).
 
@@ -478,57 +435,13 @@ class OptimizerAnalyzer:
 
         """
         most_runs = 0
-        for _, sett in self.setting_analyzers.items():
+        for _, sett in self.__setting_analyzers.items():
             if sett.num_runs > most_runs:
                 most_runs = sett.num_runs
                 most_run_setting = sett
         return most_run_setting
 
-    def plot_lr_sensitivity(self, ax, mode='final'):
-        """Generates the ``learning rate`` sensitivity plot for this optimizer.
-        This plots the relative performance (relative to the best setting for
-        this optimizer) against the ``learning rate`` used in this setting.
-
-        This assumes that all settings or otherwise equal and only different in
-        the ``learning rate``.
-
-        Args:
-            ax (matplotlib.axes): Handle to a matplotlib axis to plot the
-                ``learning rate`` sensitivity onto.
-            mode (str): Whether to use the final (``final``) performance or the
-                best (``best``) when evaluating each setting.
-                Defaults to ``final``.
-        """
-        rel_perf = []
-        lr = []
-        for _, sett in self.setting_analyzers.items():
-
-            if mode == 'final':
-                val = sett.final_value
-                best = self.best_SettingAnalyzer_final.final_value
-            elif mode == 'best':
-                val = sett.best_value
-                best = self.best_SettingAnalyzer_best.best_value
-            else:
-                raise RuntimeError("Mode unknown")
-
-            if self.metric == 'test_losses' or self.metric == 'train_losses':
-                rel_perf.append(best / val)
-            elif self.metric == 'test_accuracies' or self.metric == 'train_accuracies':
-                rel_perf.append(val / best)
-            else:
-                raise RuntimeError("Metric unknown")
-
-            lr.append(sett.settings['learning_rate'])
-        # TODO understand this piece
-        rel_perf = np.nan_to_num(rel_perf)  # replace NaN with zero
-        rel_perf = np.array(np.vstack((rel_perf, lr))).transpose()
-        rel_perf = rel_perf[rel_perf[:, 1].argsort()]
-        ax.plot(rel_perf[:, 1], rel_perf[:, 0], label=self.name)
-        ax.set_xscale('log')
-        ax.set_ylim([0.0, 1.0])
-
-    def plot_performance(self, ax, mode='most'):
+    def plot_optimizer_performance(self, axes=None, mode='most'):
         """Generates a performance plot for this optimzer using one
         hyperparameter setting.
 
@@ -549,107 +462,189 @@ class OptimizerAnalyzer:
                 Defaults to ``most``.
 
         """
+        metrices = ['test_losses',
+                    'train_losses',
+                    'test_accuracies',
+                    'train_accuracies']
+
+        if axes is None:
+            # TODO make the default axes prettier
+            fig, axes = plt.subplots(4, 1, figsize=(25, 8))
+            for idx, metric in enumerate(metrices):
+                axes[idx].set_ylabel(metric)
+            axes[3].set_xlabel("Epochs")
+
         if mode == 'final':
             sett = self.best_SettingAnalyzer_final
         elif mode == 'best':
             sett = self.best_SettingAnalyzer_best
         elif mode == 'most':
             sett = self.most_run_SettingAnalyzer
-            print("Plotting", sett.num_runs, "runs for ", self.name,
-                  "on", sett.testproblem)
         else:
             raise RuntimeError("Mode unknown")
 
-        for idx, metric in enumerate([
-                'test_losses', 'train_losses', 'test_accuracies',
-                'train_accuracies'
-        ]):
-            ax[idx].plot(
+        for idx, metric in enumerate(metrices):
+            axes[idx].plot(
                 sett.aggregate[metric]['mean'],
-                label=sett.optimizer)
-            ax[idx].fill_between(
+                label=self.__name)
+            axes[idx].fill_between(
                 range(sett.aggregate[metric]['mean'].size),
                 sett.aggregate[metric]['mean'] -
                 sett.aggregate[metric]['std'],
                 sett.aggregate[metric]['mean'] +
                 sett.aggregate[metric]['std'],
-                color=ax[idx].get_lines()[-1].get_color(),
+                color=axes[idx].get_lines()[-1].get_color(),
                 alpha=0.2)
+            axes[idx].legend()
+    # TODO the rescaling should only be done once after every optimizer was plottet
+#        axes = self.__rescale_optimizer_performance_axes(axes)
 
-    def get_bm_table(self, perf_table, mode='most'):
-        """Generates the overall performance table for this optimizer.
-        This includes metrics for the performance, speed and tuneability of this
-        optimizer (on this test problem).
-        Args:
-            perf_table (dict): A dictionary with three keys: ``Performance``,
-                ``Speed`` and ``Tuneability``.
-            mode (str): Whether to use the setting with the best final
-                (``final``) performance, the best overall (``best``) performance
-                or the setting with the most runs (``most``).
-                Defaults to ``most``.
-        Returns:
-            dict: Dictionary with holding the performance, speed and tuneability
-            measure for this optimizer.
-        """
-        if mode == 'final':
-            sett = self.best_SettingAnalyzer_final
-        elif mode == 'best':
-            sett = self.best_SettingAnalyzer_best
-        elif mode == 'most':
-            sett = self.most_run_SettingAnalyzer
+#    def plot_lr_sensitivity(self, ax, mode='final'):
+#        """Generates the ``learning rate`` sensitivity plot for this optimizer.
+#        This plots the relative performance (relative to the best setting for
+#        this optimizer) against the ``learning rate`` used in this setting.
+#
+#        This assumes that all settings or otherwise equal and only different in
+#        the ``learning rate``.
+#
+#        Args:
+#            ax (matplotlib.axes): Handle to a matplotlib axis to plot the
+#                ``learning rate`` sensitivity onto.
+#            mode (str): Whether to use the final (``final``) performance or the
+#                best (``best``) when evaluating each setting.
+#                Defaults to ``final``.
+#        """
+#        rel_perf = []
+#        lr = []
+#        for _, sett in self.setting_analyzers.items():
+#
+#            if mode == 'final':
+#                val = sett.final_value
+#                best = self.best_SettingAnalyzer_final.final_value
+#            elif mode == 'best':
+#                val = sett.best_value
+#                best = self.best_SettingAnalyzer_best.best_value
+#            else:
+#                raise RuntimeError("Mode unknown")
+#
+#            if self.metric == 'test_losses' or self.metric == 'train_losses':
+#                rel_perf.append(best / val)
+#            elif self.metric == 'test_accuracies' or self.metric == 'train_accuracies':
+#                rel_perf.append(val / best)
+#            else:
+#                raise RuntimeError("Metric unknown")
+#
+#            lr.append(sett.settings['learning_rate'])
+#        # TODO understand this piece
+#        rel_perf = np.nan_to_num(rel_perf)  # replace NaN with zero
+#        rel_perf = np.array(np.vstack((rel_perf, lr))).transpose()
+#        rel_perf = rel_perf[rel_perf[:, 1].argsort()]
+#        ax.plot(rel_perf[:, 1], rel_perf[:, 0], label=self.name)
+#        ax.set_xscale('log')
+#        ax.set_ylim([0.0, 1.0])
+#
+#    def get_bm_table(self, perf_table, mode='most'):
+#        """Generates the overall performance table for this optimizer.
+#        This includes metrics for the performance, speed and tuneability of this
+#        optimizer (on this test problem).
+#        Args:
+#            perf_table (dict): A dictionary with three keys: ``Performance``,
+#                ``Speed`` and ``Tuneability``.
+#            mode (str): Whether to use the setting with the best final
+#                (``final``) performance, the best overall (``best``) performance
+#                or the setting with the most runs (``most``).
+#                Defaults to ``most``.
+#        Returns:
+#            dict: Dictionary with holding the performance, speed and tuneability
+#            measure for this optimizer.
+#        """
+#        if mode == 'final':
+#            sett = self.best_SettingAnalyzer_final
+#        elif mode == 'best':
+#            sett = self.best_SettingAnalyzer_best
+#        elif mode == 'most':
+#            sett = self.most_run_SettingAnalyzer
+#
+#        perf_table['Performance'][self.name] = sett.aggregate[
+#            self.metric]['mean'][-1]
+#        # TODO include speed
+##        perf_table['Speed'][self.name] = sett.aggregate['speed']
+#        perf_table['Tuneability'][self.name] = {
+#            **{
+#                'lr': '{:0.2e}'.format(sett.settings['learning_rate'])
+#            },
+#            **sett.settings['hyperparams']
+#        }
+#        return perf_table
+#
+#    def get_performance_dictionary(self, mode='most'):
+#        """Generates the overall performance overview for this optimizer.
+#
+#        This includes metrics for the performance, speed and tuneability of this
+#        optimizer (on this test problem).
+#
+#        Args:
+#            perf_table (dict): A dictionary with three keys: ``Performance``,
+#                ``Speed`` and ``Tuneability``.
+#            mode (str): Whether to use the setting with the best final
+#                (``final``) performance, the best overall (``best``) performance
+#                or the setting with the most runs (``most``).
+#                Defaults to ``most``.
+#
+#        Returns:
+#            dict: Dictionary with holding the performance, speed and tuneability
+#            measure for this optimizer.
+#
+#        """
+#        if mode == 'final':
+#            sett = self.best_SettingAnalyzer_final
+#        elif mode == 'best':
+#            sett = self.best_SettingAnalyzer_best
+#        elif mode == 'most':
+#            sett = self.SettingAnalyzer_most_runs
+#        else:
+#            raise RuntimeError("Mode unknown")
+#
+#        perf_dict = dict()
+#        perf_dict['Performance'][self.name] = sett.aggregate[
+#            self.metric]['mean'][-1]
+#        perf_dict['Speed'][self.name] = sett.aggregate['speed']
+#        perf_dict['Tuneability'][self.name] = {
+#            **{
+#                'lr': '{:0.2e}'.format(sett.settings['learning_rate'])
+#            },
+#            **sett.settings['hyperparams']
+#        }
+#        return perf_dict
+    @staticmethod
+    def __beautify_optimizer_performance_axes(axes):
+        return axes
 
-        perf_table['Performance'][self.name] = sett.aggregate[
-            self.metric]['mean'][-1]
-        # TODO include speed
-#        perf_table['Speed'][self.name] = sett.aggregate['speed']
-        perf_table['Tuneability'][self.name] = {
-            **{
-                'lr': '{:0.2e}'.format(sett.settings['learning_rate'])
-            },
-            **sett.settings['hyperparams']
-        }
-        return perf_table
+    @staticmethod
+    def __rescale_optimizer_performance_axes(axes):
+        for ax in axes:
+            lines = ax.lines
+            y_data = []
+            y_limits = []
 
-    def get_performance_dictionary(self, mode='most'):
-        """Generates the overall performance overview for this optimizer.
+            for line in lines:
+                if line.get_label() != "convergence_performance":
+                    y_data.append(line.get_ydata())
+                else:
+                    y_limits.append(line.get_ydata()[0])
+            if y_data:
+                y_limits.append(np.percentile(np.array(y_data), 20))
+                y_limits.append(np.percentile(np.array(y_data), 80))
+                y_limits = y_limits + (np.array(y_data)[:, -1].tolist())
+                y_limits = [np.min(y_limits), np.max(y_limits)]
+                y_limits = [y_limits[0] * 0.9, y_limits[1] * 1.1]
+                if y_limits[0] != y_limits[1]:
+                    ax.set_ylim([max(1e-10, y_limits[0]), y_limits[1]])
+                ax.margins(x=0)
+            else:
+                ax.set_ylim([1.0, 2.0])
 
-        This includes metrics for the performance, speed and tuneability of this
-        optimizer (on this test problem).
-
-        Args:
-            perf_table (dict): A dictionary with three keys: ``Performance``,
-                ``Speed`` and ``Tuneability``.
-            mode (str): Whether to use the setting with the best final
-                (``final``) performance, the best overall (``best``) performance
-                or the setting with the most runs (``most``).
-                Defaults to ``most``.
-
-        Returns:
-            dict: Dictionary with holding the performance, speed and tuneability
-            measure for this optimizer.
-
-        """
-        if mode == 'final':
-            sett = self.best_SettingAnalyzer_final
-        elif mode == 'best':
-            sett = self.best_SettingAnalyzer_best
-        elif mode == 'most':
-            sett = self.SettingAnalyzer_most_runs
-        else:
-            raise RuntimeError("Mode unknown")
-
-        perf_dict = dict()
-        perf_dict['Performance'][self.name] = sett.aggregate[
-            self.metric]['mean'][-1]
-        perf_dict['Speed'][self.name] = sett.aggregate['speed']
-        perf_dict['Tuneability'][self.name] = {
-            **{
-                'lr': '{:0.2e}'.format(sett.settings['learning_rate'])
-            },
-            **sett.settings['hyperparams']
-        }
-        return perf_dict
-
+        return axes
 
 class SettingAnalyzer:
     """DeepOBS analyzer class for a setting (a hyperparameter setting).
@@ -677,7 +672,7 @@ class SettingAnalyzer:
         settings (dictionary): Contains all settings that were relevant for the runs (batch size, learning rate, hyperparameters of the optimizer, etc). Random seed is not included.
         num_runs (int): The number of runs or this setting (most likely because of different random seeds)
     """
-    def __init__(self, path, sett, metric, testproblem, optimizer):
+    def __init__(self, path, metric):
         """Initializes a new SettingAnalyzer instance.
 
         Args:
@@ -691,27 +686,27 @@ class SettingAnalyzer:
             conv_perf (float): Convergence performance of the test problem this
                 setting (folder) belongs to.
         """
-        self._path = os.path.join(path, sett)
-        self.name = sett
+        self._path = path
         self.metric = metric
-        self.testproblem = testproblem
-        self.optimizer = optimizer
 #        self.conv_perf = conv_perf
-        self.runs = self._get_all_runs()
-        self.num_runs = len(self.runs)
-        self.settings = self._get_settings()
-        self.aggregate = self._determine_aggregate_from_runs()
-        self.final_value = self._get_final_value()
-        self.best_value = self._get_best_value()
+        self.__runs = self.__get_all_runs()
+        # num_runs needs to be accessed by most_run analyzer
+        self.num_runs = len(self.__runs)
 
-    def _get_final_value(self):
+        self.settings = self.__get_settings()
+        # does aggregate need to be public?
+        self.aggregate = self.__determine_aggregate_from_runs()
+        self.final_value = self.__get_final_value()
+        self.best_value = self.__get_best_value()
+
+    def __get_final_value(self):
         """Get final (mean) value of the metric used in this test problem.
         Returns:
             float: Final (mean) value of the test problem's metric.
         """
         return self.aggregate[self.metric]['mean'][-1]
 
-    def _get_best_value(self):
+    def __get_best_value(self):
         """Get best (mean) value of the metric used in this test problem.
         Returns:
             float: Best (mean) value of the test problem's metric.
@@ -723,23 +718,26 @@ class SettingAnalyzer:
         else:
             raise RuntimeError("Metric unknown")
 
-    def _get_settings(self):
+    def __get_settings(self):
         # all runs have the same setting, so just take the first run.
         # TODO should not raise an error if no run is available for this setting (i.e. folder is empty).
         # make the interested settings a config global variable?
-        json_data = self._load_json(os.path.join(self._path, self.runs[0]))
-        settings = {k: json_data[k] for k in ['learning_rate', 'hyperparams']}
+        # TODO write try catch to solve 0 run problem?
+        json_data = self.__load_json(self._path, self.__runs[0])
+        # TODO so far we only analyze the hyperparams but SPECIFIC training params should be
+        # analyzed as well {e.g. lr schedules but not tf_logging etc.)
+        settings = json_data['optimizer_hyperparams']
         return settings
 
-    def _determine_aggregate_from_runs(self):
+    def __determine_aggregate_from_runs(self):
         # metrices
         train_losses = []
         train_accuracies = []
         test_losses = []
         test_accuracies = []
 
-        for run in self.runs:
-            json_data = self._load_json(os.path.join(self._path, run))
+        for run in self.__runs:
+            json_data = self.__load_json(self._path, run)
             train_losses.append(json_data['train_losses'])
             test_losses.append(json_data['test_losses'])
             if 'train_accuracies' in json_data:
@@ -768,19 +766,11 @@ class SettingAnalyzer:
 
         return aggregate
 
-    def _get_all_runs(self):
+    def __get_all_runs(self):
         runs = [run for run in os.listdir(self._path) if run.endswith(".json")]
         return runs
 
-    def _load_json(self, path):
-        """Load the ``JSON`` file of the given path.
-
-        Args:
-            path (str): Path to a ``JSON`` file.
-
-        Returns:
-            dict: Dictionary from the ``JSON`` file.
-
-        """
-        with open(path, "r") as f:
-            return json.load(f)
+    def __load_json(self, path, file_name):
+        with open(os.path.join(path, file_name), "r") as f:
+             json_data = json.load(f)
+        return json_data
