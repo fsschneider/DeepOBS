@@ -6,6 +6,7 @@ import json
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+from .analyze_utils import rescale_ax
 class Analyzer:
     def __init__(self, settings_of_interest, metric, path):
         self.settings_of_interest = settings_of_interest
@@ -218,7 +219,9 @@ class TestSetAnalyzer:
                     opt.plot_optimizer_performance(axes, mode = mode)
                 else:
                     opt.plot_optimizer_performance(axes[:, ax_col], mode = mode)
-                # TODO rescaling
+                # rescaling
+                for idx, ax in enumerate(axes[:, ax_col]):
+                    axes[idx, ax_col] = rescale_ax(ax)
             ax_col += 1
 
         # label the plot
@@ -616,35 +619,6 @@ class OptimizerAnalyzer:
 #            **sett.settings['hyperparams']
 #        }
 #        return perf_dict
-    @staticmethod
-    def __beautify_optimizer_performance_axes(axes):
-        return axes
-
-    @staticmethod
-    def __rescale_optimizer_performance_axes(axes):
-        for ax in axes:
-            lines = ax.lines
-            y_data = []
-            y_limits = []
-
-            for line in lines:
-                if line.get_label() != "convergence_performance":
-                    y_data.append(line.get_ydata())
-                else:
-                    y_limits.append(line.get_ydata()[0])
-            if y_data:
-                y_limits.append(np.percentile(np.array(y_data), 20))
-                y_limits.append(np.percentile(np.array(y_data), 80))
-                y_limits = y_limits + (np.array(y_data)[:, -1].tolist())
-                y_limits = [np.min(y_limits), np.max(y_limits)]
-                y_limits = [y_limits[0] * 0.9, y_limits[1] * 1.1]
-                if y_limits[0] != y_limits[1]:
-                    ax.set_ylim([max(1e-10, y_limits[0]), y_limits[1]])
-                ax.margins(x=0)
-            else:
-                ax.set_ylim([1.0, 2.0])
-
-        return axes
 
 class SettingAnalyzer:
     """DeepOBS analyzer class for a setting (a hyperparameter setting).

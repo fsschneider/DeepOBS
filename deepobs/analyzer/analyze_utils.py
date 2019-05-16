@@ -94,25 +94,23 @@ def rescale_ax(ax):
 
     """
     lines = ax.lines
-    y_data = []
+    y_data = np.array([])
     y_limits = []
     for line in lines:
         if line.get_label() != "convergence_performance":
-            y_data.append(line.get_ydata())
+            y_data = np.append(y_data, line.get_ydata())
         else:
             y_limits.append(line.get_ydata()[0])
-    if y_data:
-        y_limits.append(np.percentile(np.array(y_data), 20))
-        y_limits.append(np.percentile(np.array(y_data), 80))
-        y_limits = y_limits + (np.array(y_data)[:, -1].tolist())
-        y_limits = [np.min(y_limits), np.max(y_limits)]
+    if len(y_data)!=0:
+        y_limits.append(np.percentile(y_data, 20))
+        y_limits.append(np.percentile(y_data, 80))
         y_limits = [y_limits[0] * 0.9, y_limits[1] * 1.1]
         if y_limits[0] != y_limits[1]:
             ax.set_ylim([max(1e-10, y_limits[0]), y_limits[1]])
         ax.margins(x=0)
     else:
         ax.set_ylim([1.0, 2.0])
-
+    return ax
 
 def beautify_plot_performance(fig, ax, folder_parser, problem_set):
     """Beautify a performance plot.
