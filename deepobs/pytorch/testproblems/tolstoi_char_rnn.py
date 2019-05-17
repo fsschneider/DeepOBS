@@ -13,8 +13,6 @@ class tolstoi_char_rnn(TestProblem):
         self.data = tolstoi(self._batch_size)
         self.loss_function = nn.CrossEntropyLoss()
         self.net = net_char_rnn(seq_len=50, hidden_dim=128, vocab_size=83, num_layers=2)
-        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#        self._device = torch.device('cpu')
         self.net.to(self._device)
 
     # override the init operation for training to reset the hidden states and cell states after every epoch

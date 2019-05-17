@@ -32,7 +32,6 @@ class fmnist_vae(TestProblem):
     def set_up(self):
         self.data = fmnist(self._batch_size)
         self.net = net_vae(n_latent = 8)
-        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.net.to(self._device)
 
 

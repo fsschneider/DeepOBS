@@ -5,11 +5,13 @@ from scipy.stats import truncnorm as tn
 from math import ceil
 from torch import nn
 from torch.nn import functional as F
+from numpy.random import RandomState
 
 def _determine_inverse_padding_from_tf_same(input_dimensions, kernel_dimensions, stride_dimensions):
-    # implements tf's padding 'same' for inverse processses such as transpose convolution
-    # input: dimensions are tuple (height, width) or ints for quadratic dimensions
-    # output: a padding 4-tuple for padding layer creation that mimics tf's padding 'same'
+    """implements tf's padding 'same' for inverse processses such as transpose convolution
+     input: dimensions are tuple (height, width) or ints for quadratic dimensions
+     output: a padding 4-tuple for padding layer creation that mimics tf's padding 'same'
+     """
 
     # get dimensions
     in_height, in_width = input_dimensions
@@ -43,9 +45,10 @@ def _determine_inverse_padding_from_tf_same(input_dimensions, kernel_dimensions,
     return (pad_left, pad_right, pad_top, pad_bottom)
 
 def _determine_padding_from_tf_same(input_dimensions, kernel_dimensions, stride_dimensions):
-    # implements tf's padding 'same'
-    # input: dimensions are tuple (height, width) or ints for quadratic dimensions
-    # output: a padding 4-tuple for padding layer creation that mimics tf's padding 'same'
+    """"implements tf's padding 'same'
+     input: dimensions are tuple (height, width) or ints for quadratic dimensions
+     output: a padding 4-tuple for padding layer creation that mimics tf's padding 'same'
+     """
 
     # get dimensions
     in_height, in_width = input_dimensions
@@ -79,10 +82,23 @@ def _determine_padding_from_tf_same(input_dimensions, kernel_dimensions, stride_
     return (pad_left, pad_right, pad_top, pad_bottom)
 
 def _truncated_normal_init(tensor, mean=0, stddev=1):
-    # implements tf's truncated normal initialisation method
+    """ Implements tf's truncated normal initialisation method.
+    Truncates 2 stddevs away from the mean. Samples the numpy random state
+    from the torch seed to ensure seed consistency.
+
+    input: tensor (torch.Tensor): The tensor to init.
+            mean (float): The mean of the normal distr.
+            stddev (float): Stddev of the normal distr.
+    """
+
     total_size = tensor.numel()
+
+    # determine the scipy random state from the torch seed
+    # the numpy seed can be between 0 and 2**32-1
+    np_seed = torch.randint(0,2**32-1, (1,1)).view(-1).item()
+    np_state = RandomState(np_seed)
     # truncates 2 std from mean, since rescaling: a = ((mean-2std)-mean)/std = -2
-    samples = tn.rvs(a = -2, b = 2, loc = mean, scale = stddev, size = total_size)
+    samples = tn.rvs(a = -2, b = 2, loc = mean, scale = stddev, size = total_size, random_state = np_state)
     samples = samples.reshape(tuple(tensor.size()))
     init_tensor = torch.from_numpy(samples).type_as(tensor)
     return init_tensor

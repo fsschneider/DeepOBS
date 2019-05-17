@@ -51,7 +51,7 @@ class svhn(dataset.DataSet):
                     ])
 
         dataset = datasets.SVHN(root = config.get_data_dir(), split = split, download = True, transform = transform)
-        loader = dat.DataLoader(dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory=True, num_workers=4, sampler=sampler)
+        loader = dat.DataLoader(dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory=self._pin_memory, num_workers=1, sampler=sampler)
         return loader
 
     def _make_train_dataloader(self):

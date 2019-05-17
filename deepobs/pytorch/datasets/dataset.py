@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+import abc
+from .. import config
 """Base class for DeepOBS datasets."""
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods
-class DataSet(object):
+class DataSet(abc.ABC):
     """Base class for DeepOBS data sets.
 
   Args:
@@ -22,36 +24,39 @@ class DataSet(object):
       batch_size (int): The mini-batch size to use.
     """
         self._batch_size = batch_size
+
+        if config.get_default_device() == 'cuda':
+            self._pin_memory = True
+        else:
+            self._pin_memory = False
+
         self._train_dataloader = self._make_train_dataloader()
         self._train_eval_dataloader = self._make_train_eval_dataloader()
         self._test_dataloader = self._make_test_dataloader()
 
+    @abc.abstractmethod
     def _make_train_dataloader(self):
         """Creates the training data loader.
 
     Returns:
       A torch.utils.data.DataLoader instance with batches of training data.
     """
-        raise NotImplementedError(
-            """'DataSet' is an abstract base class, please use
-        one of the sub-classes.""")
+        pass
 
+    @abc.abstractmethod
     def _make_train_eval_dataloader(self):
         """Creates the train eval data loader.
 
     Returns:
       A torch.utils.data.DataLoader instance with batches of training eval data.
     """
-        raise NotImplementedError(
-            """'DataSet' is an abstract base class, please use
-        one of the sub-classes.""")
+        pass
 
+    @abc.abstractmethod
     def _make_test_dataloader(self):
         """Creates the test data loader.
 
     Returns:
       A torch.utils.data.DataLoader instance with batches of test data.
     """
-        raise NotImplementedError(
-            """'DataSet' is an abstract base class, please use
-        one of the sub-classes.""")
+        pass

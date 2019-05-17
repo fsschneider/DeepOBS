@@ -44,7 +44,7 @@ class mnist(dataset.DataSet):
     def _make_dataloader(self, train, shuffle = True, sampler = None):
         transform = transforms.ToTensor()
         dataset = datasets.MNIST(root = config.get_data_dir(), train = train, download = True, transform = transform)
-        loader = dat.DataLoader(dataset, batch_size=self._batch_size, shuffle=shuffle, sampler=sampler, drop_last=True, pin_memory=True, num_workers=4)
+        loader = dat.DataLoader(dataset, batch_size=self._batch_size, shuffle=shuffle, sampler=sampler, drop_last=True, pin_memory=self._pin_memory, num_workers=1)
         return loader
 
     def _make_train_dataloader(self):

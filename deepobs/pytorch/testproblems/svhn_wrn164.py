@@ -13,8 +13,6 @@ class svhn_wrn164(TestProblem):
         self.data = svhn(self._batch_size, data_augmentation=True)
         self.loss_function = nn.CrossEntropyLoss()
         self.net = net_wrn(num_outputs=10, num_residual_blocks=2, widening_factor=4)
-#        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self._device = torch.device('cpu')
         self.net.to(self._device)
 
     def get_regularization_loss(self):

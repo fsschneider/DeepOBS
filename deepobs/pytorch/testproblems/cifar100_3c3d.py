@@ -16,7 +16,6 @@ class cifar100_3c3d(TestProblem):
         self.data = cifar100(self._batch_size)
         self.loss_function = nn.CrossEntropyLoss()
         self.net = net_cifar10_3c3d(num_outputs=100)
-        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.net.to(self._device)
 
     def get_regularization_loss(self):
