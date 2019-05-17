@@ -33,5 +33,4 @@ class mnist_2c2d(TestProblem):
         self.data = mnist(self._batch_size)
         self.loss_function = nn.CrossEntropyLoss()
         self.net = net_mnist_2c2d(num_outputs=10)
-        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.net.to(self._device)

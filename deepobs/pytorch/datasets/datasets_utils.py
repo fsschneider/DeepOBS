@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
-from torch.utils.data import sampler
-import numpy as np
+import torch
+import torch.utils.data.sampler as s
 
-class train_eval_sampler(sampler.Sampler):
+class train_eval_sampler(s.Sampler):
     """A subclass of torch Sampler to easily draw the train eval set
     """
     def __init__(self, size, sub_size):
         self.size = size
         self.sub_size = sub_size
+
     def __iter__(self):
-        indices = np.arange(self.size)
-        return iter(np.random.choice(indices, size = self.sub_size, replace = False).tolist())
+        indices = torch.randperm(self.size).tolist()
+        sub_indices = indices[0:self.sub_size]
+        return iter(sub_indices)
+
     def __len__(self):
         return self.sub_size

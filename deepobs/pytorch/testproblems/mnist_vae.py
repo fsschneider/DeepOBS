@@ -33,7 +33,6 @@ class mnist_vae(TestProblem):
         """Sets up the vanilla CNN test problem on MNIST."""
         self.data = mnist(self._batch_size)
         self.net = net_vae(n_latent = 8)
-        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.net.to(self._device)
 
 

@@ -7,13 +7,9 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from .analyze_utils import rescale_ax
-class Analyzer:
-    def __init__(self, settings_of_interest, metric, path):
-        self.settings_of_interest = settings_of_interest
-        self.metric = metric
-        self.path = path
+from .. import config
 
-class TestSetAnalyzer:
+class Analyzer:
     """DeepOBS analyzer class to generate result plots or get other summaries.
 
     Args:
@@ -25,7 +21,7 @@ class TestSetAnalyzer:
             name of a test problem (e.g. ``cifar10_3c3d``) and the value is an
             instance of the TestProblemAnalyzer class (see below).
     """
-    def __init__(self, results_path, metric):
+    def __init__(self, results_path, metric = 'test_accuracies'):
         """Initializes a new Analyzer instance.
 
         Args:
@@ -47,16 +43,15 @@ class TestSetAnalyzer:
         """
         testproblems = dict()
         for tp in os.listdir(self.path):
-            # TODO how to make sure that these do not allow for accuracie metric?
-#            if tp == 'quadratic_deep' or tp == 'mnist_vae' or tp == 'fmnist_vae':
-#                metric = "test_losses"
-#            else:
-#                metric = "test_accuracies"
+            if tp == 'quadratic_deep' or tp == 'mnist_vae' or tp == 'fmnist_vae':
+                metric = "test_losses"
+            else:
+                metric = self.metric
 
             path = os.path.join(self.path, tp)
             if os.path.isdir(path):
                 print('Analyzing', tp)
-                testproblems[tp] = TestProblemAnalyzer(path, self.metric)
+                testproblems[tp] = TestProblemAnalyzer(path, metric)
         return testproblems
 
     def print_best_runs(self):
@@ -71,6 +66,7 @@ class TestSetAnalyzer:
                 print(pd.DataFrame(runs_dict[tp_name][opt_name]))
             print('********************')
 
+# TODO implement lr sensitivity with default dict.get()
 #    def plot_lr_sensitivity(self, baseline_pars=None, mode='final'):
 #        print("Plot learning rate sensitivity plot")
 #        # TODO make the plotting abstract for every testproblem and not only the fixed ones.
@@ -178,7 +174,6 @@ class TestSetAnalyzer:
 #        texify_plot_table(bm_table_large_pd,"large")
 
     def get_best_runs(self):
-        # TODO rename since most does not neccessarily mean best run
         """Iterates through all testproblems and optimizers to get the setting for each mode (best, final, most).
         Returns a nested dict structured as follows:
              {
@@ -209,6 +204,11 @@ class TestSetAnalyzer:
         return best_runs
 
     def plot_performance(self, mode='final'):
+
+# TODO merge the labels of the optimizers to only one. otherwise overcrowded
+# TODO tight layout of subplots
+
+        # TODO if there are too many testproblems, split in two figures
         num_testproblems = len(self.testproblems)
         fig, axes = plt.subplots(4, num_testproblems, sharex='col', figsize=(25, 8))
         ax_col = 0
@@ -220,6 +220,7 @@ class TestSetAnalyzer:
                 else:
                     opt.plot_optimizer_performance(axes[:, ax_col], mode = mode)
                 # rescaling
+                # TODO improve the scaling
                 for idx, ax in enumerate(axes[:, ax_col]):
                     axes[idx, ax_col] = rescale_ax(ax)
             ax_col += 1
@@ -267,6 +268,7 @@ class TestProblemAnalyzer:
             tp (str): Name of the test problem (same as the folder name).
         """
         self._path = path
+        self.__name = path.split('/')[-1]
         self.metric = metric
         # TODO make the metrices attributes of the testproblem class?
         # TODO generalize this: if test accuracies not available, use test losses
@@ -287,22 +289,21 @@ class TestProblemAnalyzer:
             optimizers[opt] = OptimizerAnalyzer(path, self.metric)
         return optimizers
 
-#    def _get_conv_perf(self):
-#        """Read the convergence performance for this test problem from a
-#        dictionary in the baseline folder.
-#
-#        Returns:
-#            float: Convergence performance for this test problem
-#
-#        """
-#        # TODO here is tf used!! This will not work for the pytorch version. Make the baseline dir a general config !
-#        try:
-#            with open(os.path.join(tensorflow.config.get_baseline_dir(),
-#                         "convergence_performance.json"), "r") as f:
-#                return json.load(f)[self.name]
-#        except IOError:
-#            print("Warning: Could not find a convergence performance file.")
-#            return 0.0
+    def _get_conv_perf(self):
+        """Read the convergence performance for this test problem from a
+        dictionary in the baseline folder.
+
+        Returns:
+            float: Convergence performance for this test problem
+
+        """
+        try:
+            with open(os.path.join(config.get_baseline_dir(),
+                         "convergence_performance.json"), "r") as f:
+                return json.load(f)[self.__name]
+        except IOError:
+            print("Warning: Could not find a convergence performance for this testproblem. Either the file does not exist or there are no convergence results for this testproblem.")
+            return 0.0
 
 class OptimizerAnalyzer:
     """DeepOBS analyzer class for an optimizer (and a specific test problem).
@@ -336,7 +337,7 @@ class OptimizerAnalyzer:
         num_settings: Total number of settings for this optimizer
             (and test problem)
     """
-    def __init__(self, path, metric):
+    def __init__(self, path, metric, conv_perf = 0.0):
         """Initializes a new OptimizerAnalyzer instance.
 
         Args:
@@ -354,7 +355,8 @@ class OptimizerAnalyzer:
         self._path = path
         self.__name = path.split('/')[-1]
         self.metric = metric
-#        self.conv_perf = conv_perf
+        # TODO if I call optimizer analyzer directly, the conv performance will always be 0?
+        self.conv_perf = conv_perf
         self.__setting_analyzers = self.__read_setting_analyzers()
         self.num_settings = len(self.__setting_analyzers)
         self.best_SettingAnalyzer_final = self.__get_best_SettingAnalyzer_final()
@@ -372,7 +374,7 @@ class OptimizerAnalyzer:
         settings = dict()
         for sett in os.listdir(self._path):
             path = os.path.join(self._path, sett)
-            settings[sett] = SettingAnalyzer(path, self.metric)
+            settings[sett] = SettingAnalyzer(path, self.metric, self.conv_perf)
         return settings
 
     def __get_best_SettingAnalyzer_final(self):
@@ -487,21 +489,23 @@ class OptimizerAnalyzer:
             raise RuntimeError("Mode unknown")
 
         for idx, metric in enumerate(metrices):
-            axes[idx].plot(
-                sett.aggregate[metric]['mean'],
-                label=self.__name)
-            axes[idx].fill_between(
-                range(sett.aggregate[metric]['mean'].size),
-                sett.aggregate[metric]['mean'] -
-                sett.aggregate[metric]['std'],
-                sett.aggregate[metric]['mean'] +
-                sett.aggregate[metric]['std'],
-                color=axes[idx].get_lines()[-1].get_color(),
-                alpha=0.2)
-            axes[idx].legend()
-    # TODO the rescaling should only be done once after every optimizer was plottet
-#        axes = self.__rescale_optimizer_performance_axes(axes)
+            if metric not in sett.aggregate:
+                pass
+            else:
+                axes[idx].plot(
+                    sett.aggregate[metric]['mean'],
+                    label=self.__name)
+                axes[idx].fill_between(
+                    range(sett.aggregate[metric]['mean'].size),
+                    sett.aggregate[metric]['mean'] -
+                    sett.aggregate[metric]['std'],
+                    sett.aggregate[metric]['mean'] +
+                    sett.aggregate[metric]['std'],
+                    color=axes[idx].get_lines()[-1].get_color(),
+                    alpha=0.2)
+                axes[idx].legend()
 
+# TODO how to plot the lr sens in the general case? pt vs tf? maybe preprocess the json settings?
 #    def plot_lr_sensitivity(self, ax, mode='final'):
 #        """Generates the ``learning rate`` sensitivity plot for this optimizer.
 #        This plots the relative performance (relative to the best setting for
@@ -546,79 +550,39 @@ class OptimizerAnalyzer:
 #        ax.set_xscale('log')
 #        ax.set_ylim([0.0, 1.0])
 #
-#    def get_bm_table(self, perf_table, mode='most'):
-#        """Generates the overall performance table for this optimizer.
-#        This includes metrics for the performance, speed and tuneability of this
-#        optimizer (on this test problem).
-#        Args:
-#            perf_table (dict): A dictionary with three keys: ``Performance``,
-#                ``Speed`` and ``Tuneability``.
-#            mode (str): Whether to use the setting with the best final
-#                (``final``) performance, the best overall (``best``) performance
-#                or the setting with the most runs (``most``).
-#                Defaults to ``most``.
-#        Returns:
-#            dict: Dictionary with holding the performance, speed and tuneability
-#            measure for this optimizer.
-#        """
-#        if mode == 'final':
-#            sett = self.best_SettingAnalyzer_final
-#        elif mode == 'best':
-#            sett = self.best_SettingAnalyzer_best
-#        elif mode == 'most':
-#            sett = self.most_run_SettingAnalyzer
-#
-#        perf_table['Performance'][self.name] = sett.aggregate[
-#            self.metric]['mean'][-1]
-#        # TODO include speed
-##        perf_table['Speed'][self.name] = sett.aggregate['speed']
-#        perf_table['Tuneability'][self.name] = {
-#            **{
-#                'lr': '{:0.2e}'.format(sett.settings['learning_rate'])
-#            },
-#            **sett.settings['hyperparams']
-#        }
-#        return perf_table
-#
-#    def get_performance_dictionary(self, mode='most'):
-#        """Generates the overall performance overview for this optimizer.
-#
-#        This includes metrics for the performance, speed and tuneability of this
-#        optimizer (on this test problem).
-#
-#        Args:
-#            perf_table (dict): A dictionary with three keys: ``Performance``,
-#                ``Speed`` and ``Tuneability``.
-#            mode (str): Whether to use the setting with the best final
-#                (``final``) performance, the best overall (``best``) performance
-#                or the setting with the most runs (``most``).
-#                Defaults to ``most``.
-#
-#        Returns:
-#            dict: Dictionary with holding the performance, speed and tuneability
-#            measure for this optimizer.
-#
-#        """
-#        if mode == 'final':
-#            sett = self.best_SettingAnalyzer_final
-#        elif mode == 'best':
-#            sett = self.best_SettingAnalyzer_best
-#        elif mode == 'most':
-#            sett = self.SettingAnalyzer_most_runs
-#        else:
-#            raise RuntimeError("Mode unknown")
-#
-#        perf_dict = dict()
-#        perf_dict['Performance'][self.name] = sett.aggregate[
-#            self.metric]['mean'][-1]
-#        perf_dict['Speed'][self.name] = sett.aggregate['speed']
-#        perf_dict['Tuneability'][self.name] = {
-#            **{
-#                'lr': '{:0.2e}'.format(sett.settings['learning_rate'])
-#            },
-#            **sett.settings['hyperparams']
-#        }
-#        return perf_dict
+    def get_performance_dictionary(self, mode='most'):
+        """Generates the overall performance overview for this optimizer.
+
+        This includes metrics for the performance, speed and tuneability of this
+        optimizer (on this test problem).
+
+        Args:
+            perf_table (dict): A dictionary with three keys: ``Performance``,
+                ``Speed`` and ``Tuneability``.
+            mode (str): Whether to use the setting with the best final
+                (``final``) performance, the best overall (``best``) performance
+                or the setting with the most runs (``most``).
+                Defaults to ``most``.
+
+        Returns:
+            dict: Dictionary with holding the performance, speed and tuneability
+            measure for this optimizer.
+
+        """
+        if mode == 'final':
+            sett = self.best_SettingAnalyzer_final
+        elif mode == 'best':
+            sett = self.best_SettingAnalyzer_best
+        elif mode == 'most':
+            sett = self.most_run_SettingAnalyzer
+        else:
+            raise RuntimeError("Mode unknown")
+
+        perf_dict = dict()
+        perf_dict['Performance'] = sett.aggregate[self.metric]['mean'][-1]
+        perf_dict['Speed'] = sett.aggregate['speed']
+        perf_dict['Tuneability'] = sett.settings
+        return perf_dict
 
 class SettingAnalyzer:
     """DeepOBS analyzer class for a setting (a hyperparameter setting).
@@ -646,7 +610,7 @@ class SettingAnalyzer:
         settings (dictionary): Contains all settings that were relevant for the runs (batch size, learning rate, hyperparameters of the optimizer, etc). Random seed is not included.
         num_runs (int): The number of runs or this setting (most likely because of different random seeds)
     """
-    def __init__(self, path, metric):
+    def __init__(self, path, metric, conv_perf = 0.0):
         """Initializes a new SettingAnalyzer instance.
 
         Args:
@@ -662,8 +626,8 @@ class SettingAnalyzer:
         """
         self._path = path
         self.metric = metric
-#        self.conv_perf = conv_perf
-        self.__runs = self.__get_all_runs()
+        self.__runs = self.__read_all_runs()
+        self.conv_perf = conv_perf
         # num_runs needs to be accessed by most_run analyzer
         self.num_runs = len(self.__runs)
 
@@ -695,12 +659,17 @@ class SettingAnalyzer:
     def __get_settings(self):
         # all runs have the same setting, so just take the first run.
         # TODO should not raise an error if no run is available for this setting (i.e. folder is empty).
-        # make the interested settings a config global variable?
         # TODO write try catch to solve 0 run problem?
         json_data = self.__load_json(self._path, self.__runs[0])
-        # TODO so far we only analyze the hyperparams but SPECIFIC training params should be
-        # analyzed as well {e.g. lr schedules but not tf_logging etc.)
-        settings = json_data['optimizer_hyperparams']
+
+        # captures all possible output setups at the moment
+        # TODO once the final output design is fixed for both frameworks, simplify this
+        settings = {**json_data.get('optimizer_hyperparams', {}),
+                    **json_data.get('analyzable_training_params', {})}
+        # TODO remove this workaround after final output design
+        # workaround for old tensorflow outputs
+        if 'learning_rate' in json_data:
+            settings = {**settings, 'learning_rate': json_data['learning_rate']}
         return settings
 
     def __determine_aggregate_from_runs(self):
@@ -714,33 +683,39 @@ class SettingAnalyzer:
             json_data = self.__load_json(self._path, run)
             train_losses.append(json_data['train_losses'])
             test_losses.append(json_data['test_losses'])
-            if 'train_accuracies' in json_data:
+            # just add accuracies to the aggregate if they are available
+            # in tensorflow they must exist, in pytorch they must be different from 0 (the default)
+            if 'train_accuracies' in json_data and np.mean(json_data['train_accuracies'])!=0:
                 train_accuracies.append(json_data['train_accuracies'])
                 test_accuracies.append(json_data['test_accuracies'])
 
         aggregate = dict()
-        # compute speed
-#        perf = np.array(eval(self.metric))
-#        if self.metric == "test_losses" or self.metric == "train_losses":
-#            # average over first time they reach conv perf (use num_epochs if conv perf is not reached)
-#            aggregate['speed'] = np.mean(
-#                np.argmax(perf <= self.conv_perf, axis=1) +
-#                np.invert(np.max(perf <= self.conv_perf, axis=1)) *
-#                perf.shape[1])
-#        elif self.metric == "test_accuracies" or self.metric == "train_accuracies":
-#            aggregate['speed'] = np.mean(
-#                np.argmax(perf >= self.conv_perf, axis=1) +
-#                np.invert(np.max(perf >= self.conv_perf, axis=1)) *
-#                perf.shape[1])
+
+#       compute speed
+        perf = np.array(eval(self.metric))
+        if self.metric == "test_losses" or self.metric == "train_losses":
+            # average over first time they reach conv perf (use num_epochs if conv perf is not reached)
+            aggregate['speed'] = np.mean(
+                np.argmax(perf <= self.conv_perf, axis=1) +
+                np.invert(np.max(perf <= self.conv_perf, axis=1)) *
+                perf.shape[1])
+        elif self.metric == "test_accuracies" or self.metric == "train_accuracies":
+            aggregate['speed'] = np.mean(
+                np.argmax(perf >= self.conv_perf, axis=1) +
+                np.invert(np.max(perf >= self.conv_perf, axis=1)) *
+                perf.shape[1])
+
         for metrics in ['train_losses', 'test_losses', 'train_accuracies', 'test_accuracies']:
-            aggregate[metrics] = {
-                'mean': np.mean(eval(metrics), axis=0),
-                'std': np.std(eval(metrics), axis=0)
-            }
+            # only add the metric if available
+            if len(eval(metrics)) != 0:
+                aggregate[metrics] = {
+                    'mean': np.mean(eval(metrics), axis=0),
+                    'std': np.std(eval(metrics), axis=0)
+                }
 
         return aggregate
 
-    def __get_all_runs(self):
+    def __read_all_runs(self):
         runs = [run for run in os.listdir(self._path) if run.endswith(".json")]
         return runs
 

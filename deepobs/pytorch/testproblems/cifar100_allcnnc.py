@@ -16,8 +16,6 @@ class cifar100_allcnnc(TestProblem):
         self.data = cifar100(self._batch_size)
         self.loss_function = nn.CrossEntropyLoss()
         self.net = net_cifar100_allcnnc()
-#        self._device = 'cpu'
-#        torch.set_num_threads(12)
         self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.net.to(self._device)
 

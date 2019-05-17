@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import torch
+import abc
+from .. import config
 """Base class for DeepOBS test problems."""
 
-class TestProblem(object):
+class TestProblem(abc.ABC):
     """Base class for DeepOBS test problems.
 
   Args:
@@ -44,6 +46,8 @@ class TestProblem(object):
         self._batch_size = batch_size
         self._weight_decay = weight_decay
 
+        self._device = torch.device(config.get_default_device())
+
         # Public attributes by which to interact with test problems. These have to
         # be created by the set_up function of sub-classes.
         self.data = None
@@ -51,21 +55,31 @@ class TestProblem(object):
         self.net = None
 
     def train_init_op(self):
+        """Initializes the testproblem instance to train mode. I.e.
+        sets the iterator to the training set and sets the model to train mode.
+        """
         self._iterator = iter(self.data._train_dataloader)
         self.phase = "train"
         self.net.train()
 
     def train_eval_init_op(self):
+        """Initializes the testproblem instance to train eval mode. I.e.
+        sets the iterator to the train evaluation set and sets the model to eval mode.
+        """
         self._iterator = iter(self.data._train_eval_dataloader)
         self.phase = "train_eval"
         self.net.eval()
 
     def test_init_op(self):
+        """Initializes the testproblem instance to test mode. I.e.
+        sets the iterator to the test set and sets the model to eval mode.
+        """
         self._iterator = iter(self.data._test_dataloader)
         self.phase = "test"
         self.net.eval()
 
     def _get_next_batch(self):
+        """Returns the next batch from the iterator."""
         return next(self._iterator)
 
     def get_batch_loss_and_accuracy(self):
@@ -95,10 +109,8 @@ class TestProblem(object):
         accuracy = correct/total
         return loss, accuracy
 
+    @abc.abstractmethod
     def set_up(self):
-        """Sets up the test problem.
+        """Sets up the test problem. Must be implemented by subclass.
         """
-
-        raise NotImplementedError(
-            """'TestProblem' is an abstract base class, please
-        use one of the sub-classes.""")
+        pass
