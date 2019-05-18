@@ -108,7 +108,6 @@ def make_legend_and_colors_consistent(axes):
                     handles[idx].set_color(colormap[color_idx])
 
 
-#        ax.legend(handles, labels, loc='upper center')
 def rescale_ax(ax):
     """Rescale an axis to include the most important data.
 
