@@ -1,2 +1,1 @@
-from . import analyze_utils
-from . import analyze
+from .analyze import Analyzer

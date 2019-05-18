@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+import torch
 
 DATA_DIR = "data_deepobs/pytorch"
-DEFAULT_DEVICE = "cuda"
+DEFAULT_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def get_data_dir():
     return DATA_DIR
@@ -15,4 +16,4 @@ def get_default_device():
 
 def set_default_device(device):
     global DEFAULT_DEVICE
-    DEFAULT_DEVICE = device
+    DEFAULT_DEVICE = torch.device(device)

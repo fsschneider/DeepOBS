@@ -206,13 +206,12 @@ class Analyzer:
         return best_runs
 
     def plot_performance(self, mode='final'):
-
         # TODO if there are too many testproblems, split in two figures
         num_testproblems = len(self.testproblems)
         fig, axes = plt.subplots(4, num_testproblems, sharex='col', figsize=(25, 8))
         ax_col = 0
         for tp_name, tp in self.testproblems.items():
-            for opt_name, opt in tp.optimizers.items():
+            for opt_name, opt in sorted(tp.optimizers.items()):
                 # workaround if there is only one testproblem
                 if num_testproblems == 1:
                     opt.plot_optimizer_performance(axes, mode = mode)
@@ -308,9 +307,14 @@ class TestProblemAnalyzer:
         # add the reference optimizers
         if reference_path is not None:
             reference_testproblem = os.path.join(reference_path, self.__name)
-            for opt in os.listdir(reference_testproblem):
-                            path = os.path.join(reference_testproblem, opt)
-                            optimizers[opt] = OptimizerAnalyzer(path, self.metric)
+            # if the reference for the testproblem exist, add it
+            if os.path.isdir(reference_testproblem):
+                for opt in os.listdir(reference_testproblem):
+                                path = os.path.join(reference_testproblem, opt)
+                                optimizers[opt] = OptimizerAnalyzer(path, self.metric)
+            else:
+                print('WARNING: There is no reference result for testproblem', self.__name)
+
         return optimizers
 
     def _get_conv_perf(self):
