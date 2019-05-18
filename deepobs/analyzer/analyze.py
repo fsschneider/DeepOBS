@@ -216,13 +216,17 @@ class Analyzer:
                 # workaround if there is only one testproblem
                 if num_testproblems == 1:
                     opt.plot_optimizer_performance(axes, mode = mode)
+                    # rescaling
+                    for idx, ax in enumerate(axes):
+                        axes[idx] = rescale_ax(ax)
+                    axes[0].legend()
                 else:
                     opt.plot_optimizer_performance(axes[:, ax_col], mode = mode)
-                # rescaling
-                # TODO improve the scaling
-                for idx, ax in enumerate(axes[:, ax_col]):
-                    axes[idx, ax_col] = rescale_ax(ax)
-                axes[0,ax_col].legend()
+                    # rescaling
+                    for idx, ax in enumerate(axes[:, ax_col]):
+                        axes[idx, ax_col] = rescale_ax(ax)
+                    axes[0,ax_col].legend()
+
             ax_col += 1
 
         # all lines with the same label should have the same color such
@@ -234,16 +238,20 @@ class Analyzer:
         rows = ['Test Loss', 'Train Loss', 'Test Accuracy', 'Train Accuracy']
         cols = [tp_name for tp_name, _ in self.testproblems.items()]
 
-        for ax, col in zip(axes[0], cols):
-            ax.set_title(col)
-        # TODO add workaround if only one testproblem is in the folder
-        for ax, row in zip(axes[:,0], rows):
-            ax.set_ylabel(row)
+        # workaround if there is only one testproblem
+        if num_testproblems == 1:
+            axes[0].set_title(cols[0])
+            for ax, row in zip(axes, rows):
+                ax.set_ylabel(row)
+        else:
+            for ax, col in zip(axes[0], cols):
+                ax.set_title(col)
+            for ax, row in zip(axes[:,0], rows):
+                ax.set_ylabel(row)
 
         plt.tight_layout()
 
         return fig, axes
-        # TODO specifically add a small/large plotter for papers or return the axes to allow for further modifications
 
 class TestProblemAnalyzer:
     """DeepOBS analyzer class for a specific test problem.
