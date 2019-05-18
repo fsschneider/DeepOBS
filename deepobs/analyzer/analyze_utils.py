@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from matplotlib import cm
 import matplotlib.pyplot as plt
 from matplotlib2tikz import get_tikz_code
 
@@ -85,7 +86,29 @@ def texify_lr_sensitivity(fig, ax):
 
     return tikz_code
 
+def make_legend_and_colors_consistent(axes):
+    handles_and_labels = []
+    for ax_col in range(len(axes[0,:])): # for each testproblem get the color coding of the optimizer
+        handles_and_labels_tupel = axes[0, ax_col].get_legend_handles_labels()
+        handles_and_labels.append(handles_and_labels_tupel)
 
+    # at first get a unique list of all optimizers included in the figure and their color
+    optimizers = []
+    for handles, labels in handles_and_labels:
+        for idx, label in enumerate(labels):
+            if label not in optimizers:
+                optimizers.append(label)
+
+    # now get unique color for each optimizer
+    colormap = cm.Dark2(np.linspace(0, 1, len(optimizers)))
+    for color_idx, optimizer in enumerate(optimizers):
+        for handles, labels in handles_and_labels:
+            for idx, label in enumerate(labels):
+                if optimizer == label:
+                    handles[idx].set_color(colormap[color_idx])
+
+
+#        ax.legend(handles, labels, loc='upper center')
 def rescale_ax(ax):
     """Rescale an axis to include the most important data.
 

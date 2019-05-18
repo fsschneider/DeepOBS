@@ -8,6 +8,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from .analyze_utils import rescale_ax
 from .. import config
+from .analyze_utils import make_legend_and_colors_consistent
 
 class Analyzer:
     """DeepOBS analyzer class to generate result plots or get other summaries.
@@ -21,7 +22,7 @@ class Analyzer:
             name of a test problem (e.g. ``cifar10_3c3d``) and the value is an
             instance of the TestProblemAnalyzer class (see below).
     """
-    def __init__(self, results_path, metric = 'test_accuracies'):
+    def __init__(self, results_path, metric = 'test_accuracies', reference_path = None):
         """Initializes a new Analyzer instance.
 
         Args:
@@ -30,6 +31,7 @@ class Analyzer:
         """
         self.metric = metric
         self.path = results_path
+        self.reference_path = reference_path
         self.testproblems = self._read_testproblems()
 
     def _read_testproblems(self):
@@ -51,7 +53,7 @@ class Analyzer:
             path = os.path.join(self.path, tp)
             if os.path.isdir(path):
                 print('Analyzing', tp)
-                testproblems[tp] = TestProblemAnalyzer(path, metric)
+                testproblems[tp] = TestProblemAnalyzer(path, metric, self.reference_path)
         return testproblems
 
     def print_best_runs(self):
@@ -205,9 +207,6 @@ class Analyzer:
 
     def plot_performance(self, mode='final'):
 
-# TODO merge the labels of the optimizers to only one. otherwise overcrowded
-# TODO tight layout of subplots
-
         # TODO if there are too many testproblems, split in two figures
         num_testproblems = len(self.testproblems)
         fig, axes = plt.subplots(4, num_testproblems, sharex='col', figsize=(25, 8))
@@ -223,7 +222,13 @@ class Analyzer:
                 # TODO improve the scaling
                 for idx, ax in enumerate(axes[:, ax_col]):
                     axes[idx, ax_col] = rescale_ax(ax)
+                axes[0,ax_col].legend()
             ax_col += 1
+
+        # all lines with the same label should have the same color such
+        # that the color for the optimizer is the same for all testproblems
+        # TODO make colors of legend consistent for all testproblems
+#        make_legend_and_colors_consistent(axes)
 
         # label the plot
         rows = ['Test Loss', 'Train Loss', 'Test Accuracy', 'Train Accuracy']
@@ -235,7 +240,11 @@ class Analyzer:
         for ax, row in zip(axes[:,0], rows):
             ax.set_ylabel(row)
 
+        plt.tight_layout()
+
+        return fig, axes
         # TODO specifically add a small/large plotter for papers or return the axes to allow for further modifications
+
 class TestProblemAnalyzer:
     """DeepOBS analyzer class for a specific test problem.
 
@@ -259,7 +268,7 @@ class TestProblemAnalyzer:
             OptimizerAnalyzer class (see below).
 
     """
-    def __init__(self, path, metric):
+    def __init__(self, path, metric, reference_path):
         """Initializes a new TestProblemAnalyzer instance.
 
         Args:
@@ -273,9 +282,9 @@ class TestProblemAnalyzer:
         # TODO make the metrices attributes of the testproblem class?
         # TODO generalize this: if test accuracies not available, use test losses
 
-        self.optimizers = self._read_optimizer()
+        self.optimizers = self._read_optimizer(reference_path)
 
-    def _read_optimizer(self):
+    def _read_optimizer(self, reference_path):
         """Read all optimizer (folders) in a test problem (folder).
 
         Returns:
@@ -287,6 +296,13 @@ class TestProblemAnalyzer:
         for opt in os.listdir(self._path):
             path = os.path.join(self._path, opt)
             optimizers[opt] = OptimizerAnalyzer(path, self.metric)
+
+        # add the reference optimizers
+        if reference_path is not None:
+            reference_testproblem = os.path.join(reference_path, self.__name)
+            for opt in os.listdir(reference_testproblem):
+                            path = os.path.join(reference_testproblem, opt)
+                            optimizers[opt] = OptimizerAnalyzer(path, self.metric)
         return optimizers
 
     def _get_conv_perf(self):
@@ -503,7 +519,6 @@ class OptimizerAnalyzer:
                     sett.aggregate[metric]['std'],
                     color=axes[idx].get_lines()[-1].get_color(),
                     alpha=0.2)
-                axes[idx].legend()
 
 # TODO how to plot the lr sens in the general case? pt vs tf? maybe preprocess the json settings?
 #    def plot_lr_sensitivity(self, ax, mode='final'):
@@ -550,6 +565,7 @@ class OptimizerAnalyzer:
 #        ax.set_xscale('log')
 #        ax.set_ylim([0.0, 1.0])
 #
+    # TODO bring performance dict to analyzer level
     def get_performance_dictionary(self, mode='most'):
         """Generates the overall performance overview for this optimizer.
 
