@@ -295,6 +295,15 @@ class StandardRunner(PTRunner):
                 except StopIteration:
                     break
 
+        # add interesting training params to the output if they were specified
+        if lr_sched_epochs is not None:
+            analyzable_training_params = {
+                    "lr_sched_epochs": lr_sched_epochs,
+                    "lr_sched_factors": lr_sched_factors
+                    }
+        else:
+            analyzable_training_params = {}
+
         # Put results into output dictionary.
         output = {
             "train_losses": train_losses,
@@ -303,10 +312,7 @@ class StandardRunner(PTRunner):
 #            "minibatch_train_losses": minibatch_train_losses,
             "train_accuracies": train_accuracies,
             "test_accuracies": test_accuracies,
-            "analyzable_training_params": {
-                    "lr_sched_epochs": lr_sched_epochs,
-                    "lr_sched_factors": lr_sched_factors
-                    }
+            "analyzable_training_params": analyzable_training_params
         }
 
         return output
