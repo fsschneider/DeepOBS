@@ -44,6 +44,4 @@ at https://github.com/fsschneider/DeepOBS if you want to use the **TensorFlow** 
 ## Installation
 	pip install -e git+https://github.com/abahde/DeepOBS.git@master#egg=DeepOBS
 
-We tested the package with Python 3.6 and TensorFlow version 1.12. Other
-versions of Python and TensorFlow (>= 1.4.0) might work, and we plan to expand
-compatibility in the future.
+We tested the package with Python 3.6 and Torch version 1.0.1
