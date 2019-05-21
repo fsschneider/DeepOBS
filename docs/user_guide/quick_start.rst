@@ -12,7 +12,7 @@ You can install the latest DeepOBS with PyTorch implementation using `pip`:
 
 .. code-block:: bash
 
-   pip install -e git+https://git.abahde.com/DeepOBS.git@master#egg=DeepOBS
+   pip install -e git+https://github.com/abahde/DeepOBS.git@master#egg=DeepOBS
 
 .. NOTE::
   The package requires the following packages:
