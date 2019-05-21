@@ -15,14 +15,15 @@ You can install the latest DeepOBS with PyTorch implementation using `pip`:
    pip install -e git+https://github.com/abahde/DeepOBS.git@master#egg=DeepOBS
 
 .. NOTE::
-  The package requires the following packages:
+  Apart from Python 3.6 or higher, the package requires the following packages:
 
   - argparse
   - numpy
   - pandas
   - matplotlib
   - matplotlib2tikz
-  - torch (version 1.0.1)
+  - torch (version 1.0.1 or higher)
+  - torchvision (version 0.2.2 or higher)
 
 Set-Up Data Sets
 ================
