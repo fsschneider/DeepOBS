@@ -104,6 +104,8 @@ class PTRunner(Runner, abc.ABC):
             run_folder_name, file_name = self.create_output_directory(output_dir, output)
             self.write_output(output, run_folder_name, file_name)
 
+        return output
+
     @staticmethod
     def create_testproblem(testproblem, batch_size, weight_decay, random_seed):
         """Sets up the testproblem.
