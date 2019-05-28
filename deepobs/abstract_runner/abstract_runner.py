@@ -41,7 +41,7 @@ class Runner(abc.ABC):
 
     @abc.abstractmethod
     def run(self):
-        pass
+        return
 
     # creates the output folder structure depending on the settings of interest
     def create_output_directory(self, output_dir, output):
