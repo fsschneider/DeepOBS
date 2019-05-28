@@ -9,6 +9,7 @@ from .. import config
 from .. import testproblems
 from . import runner_utils
 from deepobs.abstract_runner.abstract_runner import Runner
+import numpy as np
 
 class PTRunner(Runner, abc.ABC):
     def __init__(self, optimizer_class, hyperparams):
@@ -296,6 +297,13 @@ class StandardRunner(PTRunner):
 
                 except StopIteration:
                     break
+
+            # break from training if it goes wrong
+            if np.isnan(batch_loss.item()) or np.isinf(batch_loss.item()):
+                print('Breaking from run after epoch', str(epoch_count), 'due to wrongly calibrated optimization (Loss is Nan or Inf)')
+                break
+            else:
+                continue
 
         # Put results into output dictionary.
         output = {
