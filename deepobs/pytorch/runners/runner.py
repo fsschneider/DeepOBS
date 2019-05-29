@@ -84,6 +84,7 @@ class PTRunner(Runner, abc.ABC):
                 **training_params (dict): Kwargs for the training method.
         """
 
+
         if data_dir is not None:
             config.set_data_dir(data_dir)
 
@@ -118,8 +119,12 @@ class PTRunner(Runner, abc.ABC):
         Returns:
             tproblem: An instance of deepobs.pytorch.testproblems.testproblem
         """
-        # set the seed
+        # set the seed and GPU determinism
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        np.random.seed(random_seed)
         torch.manual_seed(random_seed)
+
         # Find testproblem by name and instantiate with batch size and weight decay.
         try:
             testproblem_mod = importlib.import_module(testproblem)
