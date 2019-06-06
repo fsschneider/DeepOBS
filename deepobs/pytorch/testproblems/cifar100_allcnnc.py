@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """The all CNN-C architecture for CIFAR-100."""
 
-import torch
 from torch import nn
 from .testproblems_modules import net_cifar100_allcnnc
 from ..datasets.cifar100 import cifar100
@@ -16,7 +15,6 @@ class cifar100_allcnnc(TestProblem):
         self.data = cifar100(self._batch_size)
         self.loss_function = nn.CrossEntropyLoss()
         self.net = net_cifar100_allcnnc()
-        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.net.to(self._device)
 
     def get_regularization_loss(self):

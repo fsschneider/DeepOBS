@@ -5,6 +5,7 @@ from __future__ import print_function
 import torch
 import importlib
 import abc
+from deepobs import config as global_config
 from .. import config
 from .. import testproblems
 from . import runner_utils
@@ -57,8 +58,8 @@ class PTRunner(Runner, abc.ABC):
 
     def run(self,
             testproblem,
-            batch_size,
-            num_epochs,
+            batch_size = None,
+            num_epochs = None,
             random_seed=42,
             data_dir=None,
             output_dir='./results',
@@ -84,6 +85,10 @@ class PTRunner(Runner, abc.ABC):
                 **training_params (dict): Kwargs for the training method.
         """
 
+        if batch_size is None:
+            batch_size = global_config.get_testproblem_default_setting(testproblem)[batch_size]
+        if num_epochs is None:
+            num_epochs = global_config.get_testproblem_default_setting(testproblem)[num_epochs]
 
         if data_dir is not None:
             config.set_data_dir(data_dir)
