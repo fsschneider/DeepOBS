@@ -48,7 +48,7 @@ class mnist(dataset.DataSet):
         return loader
 
     def _make_train_dataloader(self):
-        return self._make_dataloader(train=True, shuffle = False)
+        return self._make_dataloader(train=True, shuffle = True)
 
     def _make_test_dataloader(self):
         return self._make_dataloader(train=False, shuffle = False)
