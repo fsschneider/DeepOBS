@@ -31,14 +31,6 @@ class TFRunner(Runner, abc.ABC):
         # TODO sketch the structure of a runner
         """..."""
 
-        self._run_folder_name, file_name = self.create_output_directory(testproblem,
-                                     num_epochs,
-                                     batch_size,
-                                     weight_decay,
-                                     random_seed,
-                                     output_dir,
-                                     **training_params)
-
         if data_dir is not None:
             config.set_data_dir(data_dir)
 
@@ -59,7 +51,8 @@ class TFRunner(Runner, abc.ABC):
                   **output}
 
         if not no_logs:
-            self.write_output(output, self._run_folder_name, file_name)
+            run_folder_name, file_name = self.create_output_directory(output_dir, output)
+            self.write_output(output, run_folder_name, file_name)
 
     @staticmethod
     def create_testproblem(testproblem, batch_size, weight_decay, random_seed):
