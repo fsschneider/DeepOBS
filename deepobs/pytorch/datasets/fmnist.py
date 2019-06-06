@@ -27,7 +27,6 @@ class fmnist(dataset.DataSet):
 
     def __init__(self,
                  batch_size,
-                 data_augmentation = False,
                  train_eval_size=10000):
         """Creates a new MNIST instance.
 
@@ -39,23 +38,22 @@ class fmnist(dataset.DataSet):
           Defaults to ``10 000`` the size of the test set.
     """
         self._name = "fmnist"
-        self._data_augmentation = data_augmentation
         self._train_eval_size = train_eval_size
         super(fmnist, self).__init__(batch_size)
 
-    def _make_dataloader(self, train = True, shuffle=True, data_augmentation = False, sampler=None):
+    def _make_dataloader(self, train, shuffle, sampler=None):
         transform = transforms.ToTensor()
         dataset = datasets.FashionMNIST(root = config.get_data_dir(), train = train, download = True, transform = transform)
         loader = dat.DataLoader(dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory=self._pin_memory, num_workers=1, sampler=sampler)
         return loader
 
     def _make_train_dataloader(self):
-        return self._make_dataloader(train=True, shuffle = True, data_augmentation = self._data_augmentation, sampler=None)
+        return self._make_dataloader(train=True, shuffle = True)
 
     def _make_test_dataloader(self):
-        return self._make_dataloader(train=False, shuffle = False, data_augmentation = False, sampler=None)
+        return self._make_dataloader(train=False, shuffle = False)
 
     def _make_train_eval_dataloader(self):
         size = len(self._train_dataloader.dataset)
         sampler = train_eval_sampler(size, self._train_eval_size)
-        return self._make_dataloader(train=True, shuffle=False, data_augmentation=False, sampler=sampler)
+        return self._make_dataloader(train=True, shuffle=False, sampler=sampler)
