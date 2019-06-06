@@ -366,3 +366,21 @@ class net_quadratic_deep(nn.Module):
         out_batched = 0.5*torch.bmm(qt, z)
 
         return out_batched.mean()
+
+class net_mlp(nn.Sequential):
+    def __init__(self, num_outputs):
+        super(net_mlp, self).__init__()
+
+        self.add_module('flatten', flatten())
+        self.add_module('dense1', nn.Linear(784, 1000))
+        self.add_module('relu1', nn.ReLU())
+        self.add_module('dense2', nn.Linear(1000, 500))
+        self.add_module('relu2', nn.ReLU())
+        self.add_module('dense3', nn.Linear(500, 100))
+        self.add_module('relu3', nn.ReLU())
+        self.add_module('dense4', nn.Linear(100, num_outputs))
+
+        for module in self.modules():
+            if isinstance(module, nn.Linear):
+                nn.init.constant_(module.bias, 0.0)
+                module.weight.data = _truncated_normal_init(module.weight.data, mean = 0, stddev=3e-2)
