@@ -19,3 +19,6 @@ from .svhn_wrn164 import svhn_wrn164
 from .tolstoi_char_rnn import tolstoi_char_rnn
 
 from .quadratic_deep import quadratic_deep
+
+from .mnist_mlp import mnist_mlp
+from .fmnist_mlp import fmnist_mlp
