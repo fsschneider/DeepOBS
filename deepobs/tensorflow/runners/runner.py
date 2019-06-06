@@ -8,6 +8,7 @@ import abc
 from .. import config
 from .. import testproblems
 from . import runner_utils
+from copy import deepcopy
 
 from deepobs.abstract_runner.abstract_runner import Runner
 
@@ -46,8 +47,7 @@ class TFRunner(Runner, abc.ABC):
                   'num_epochs': num_epochs,
                   'random_seed': random_seed,
                   'weight_decay': weight_decay,
-                  'optimizer_hyperparams': {**self._optimizer_hyperparams},
-                  'training_params': {**training_params},
+                  'optimizer_hyperparams': self._optimizer_hyperparams,
                   **output}
 
         if not no_logs:
@@ -205,7 +205,7 @@ class TFStandardRunner(TFRunner):
         # TODO make this clear
         learning_rate = self._optimizer_hyperparams['learning_rate']
         learning_rate_var = tf.Variable(learning_rate, trainable=False)
-        hyperparams = self._optimizer_hyperparams
+        hyperparams = deepcopy(self._optimizer_hyperparams)
         hyperparams.pop('learning_rate')
 
         opt = self._optimizer_class(learning_rate_var, **hyperparams)
@@ -311,7 +311,11 @@ class TFStandardRunner(TFRunner):
         output = {
             "train_losses": train_losses,
             "test_losses": test_losses,
-            "minibatch_train_losses": minibatch_train_losses
+            "minibatch_train_losses": minibatch_train_losses,
+            "analyzable_training_params": {
+                    "lr_sched_epochs": lr_sched_epochs,
+                    "lr_sched_factors": lr_sched_factors
+                    }
         }
         if tproblem.accuracy is not None:
             output["train_accuracies"] = train_accuracies
