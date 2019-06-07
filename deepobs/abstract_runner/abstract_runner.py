@@ -43,7 +43,8 @@ class Runner(abc.ABC):
         return
 
     # creates the output folder structure depending on the settings of interest
-    def create_output_directory(self, output_dir, output):
+    @staticmethod
+    def create_output_directory(output_dir, output):
 
         """Creates the output directory of the run.
         Input:
@@ -86,7 +87,7 @@ class Runner(abc.ABC):
         file_name = "random_seed__{0:d}__".format(output['random_seed'])
         file_name += time.strftime("%Y-%m-%d-%H-%M-%S")
 
-        run_directory = os.path.join(output_dir, output['testproblem'], self._optimizer_name,
+        run_directory = os.path.join(output_dir, output['testproblem'], output['optimizer_name'],
                                      run_folder_name)
         if not os.path.exists(run_directory):
             os.makedirs(run_directory)
