@@ -4,7 +4,7 @@
 import tensorflow as tf
 
 from ._mlp import _mlp
-from ..datasets.mnist import mnist
+from ..datasets.fmnist import fmnist
 from .testproblem import TestProblem
 
 
@@ -63,7 +63,7 @@ class fmnist_mlp(TestProblem):
     def set_up(self):
         """Set up the multi-layer perceptron test problem instance on
         Fashion-MNIST."""
-        self.dataset = mnist(self._batch_size)
+        self.dataset = fmnist(self._batch_size)
         self.train_init_op = self.dataset.train_init_op
         self.train_eval_init_op = self.dataset.train_eval_init_op
         self.test_init_op = self.dataset.test_init_op

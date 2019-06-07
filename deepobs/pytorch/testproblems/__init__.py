@@ -13,3 +13,7 @@ from .fmnist_2c2d import fmnist_2c2d
 from .fmnist_vae import fmnist_vae
 
 from .quadratic_deep import quadratic_deep
+
+from .mnist_mlp import mnist_mlp
+from .fmnist_mlp import fmnist_mlp
+

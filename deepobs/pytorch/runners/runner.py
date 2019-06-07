@@ -5,10 +5,12 @@ from __future__ import print_function
 import torch
 import importlib
 import abc
+from deepobs import config as global_config
 from .. import config
 from .. import testproblems
 from . import runner_utils
 from deepobs.abstract_runner.abstract_runner import Runner
+import numpy as np
 
 class PTRunner(Runner, abc.ABC):
     def __init__(self, optimizer_class, hyperparams):
@@ -56,8 +58,8 @@ class PTRunner(Runner, abc.ABC):
 
     def run(self,
             testproblem,
-            batch_size,
-            num_epochs,
+            batch_size = None,
+            num_epochs = None,
             random_seed=42,
             data_dir=None,
             output_dir='./results',
@@ -83,6 +85,11 @@ class PTRunner(Runner, abc.ABC):
                 **training_params (dict): Kwargs for the training method.
         """
 
+        if batch_size is None:
+            batch_size = global_config.get_testproblem_default_setting(testproblem)[batch_size]
+        if num_epochs is None:
+            num_epochs = global_config.get_testproblem_default_setting(testproblem)[num_epochs]
+
         if data_dir is not None:
             config.set_data_dir(data_dir)
 
@@ -104,6 +111,8 @@ class PTRunner(Runner, abc.ABC):
             run_folder_name, file_name = self.create_output_directory(output_dir, output)
             self.write_output(output, run_folder_name, file_name)
 
+        return output
+
     @staticmethod
     def create_testproblem(testproblem, batch_size, weight_decay, random_seed):
         """Sets up the testproblem.
@@ -115,8 +124,12 @@ class PTRunner(Runner, abc.ABC):
         Returns:
             tproblem: An instance of deepobs.pytorch.testproblems.testproblem
         """
-        # set the seed
+        # set the seed and GPU determinism
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        np.random.seed(random_seed)
         torch.manual_seed(random_seed)
+
         # Find testproblem by name and instantiate with batch size and weight decay.
         try:
             testproblem_mod = importlib.import_module(testproblem)
@@ -294,6 +307,13 @@ class StandardRunner(PTRunner):
 
                 except StopIteration:
                     break
+
+            # break from training if it goes wrong
+            if np.isnan(batch_loss.item()) or np.isinf(batch_loss.item()):
+                print('Breaking from run after epoch', str(epoch_count), 'due to wrongly calibrated optimization (Loss is Nan or Inf)')
+                break
+            else:
+                continue
 
         # add interesting training params to the output if they were specified
         if lr_sched_epochs is not None:
