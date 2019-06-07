@@ -13,7 +13,7 @@ from deepobs.abstract_runner.abstract_runner import Runner
 import numpy as np
 
 class PTRunner(Runner, abc.ABC):
-    def __init__(self, optimizer_class, hyperparams):
+    def __init__(self, optimizer_class):
         """The abstract class for runner in the pytorch framework.
         Args:
             optimizer_class: The optimizer class of the optimizer that is run on
@@ -28,10 +28,10 @@ class PTRunner(Runner, abc.ABC):
             training: An abstract method that has to be overwritten by the subclass.
             It performs the training loop.
         """
-        super(PTRunner, self).__init__(optimizer_class, hyperparams)
+        super(PTRunner, self).__init__(optimizer_class)
 
     @abc.abstractmethod
-    def training(self, testproblem, num_epochs, **training_params):
+    def training(self, testproblem, hyperparams, num_epochs, **training_params):
         """Must be implemented by the subclass. Performs the training and stores
         the metrices.
         Args:
@@ -58,6 +58,7 @@ class PTRunner(Runner, abc.ABC):
 
     def run(self,
             testproblem,
+            hyperparams,
             batch_size = None,
             num_epochs = None,
             random_seed=42,
@@ -95,7 +96,7 @@ class PTRunner(Runner, abc.ABC):
 
         tproblem = self.create_testproblem(testproblem, batch_size, weight_decay, random_seed)
 
-        output = self.training(tproblem, num_epochs, **training_params)
+        output = self.training(tproblem, hyperparams, num_epochs, **training_params)
 
         # merge meta data to output dict
         # TODO this step interacts with the Analyzer and should be the same for both frameworks
@@ -104,7 +105,7 @@ class PTRunner(Runner, abc.ABC):
                   'num_epochs': num_epochs,
                   'random_seed': random_seed,
                   'weight_decay': weight_decay,
-                  'optimizer_hyperparams': self._optimizer_hyperparams,
+                  'optimizer_hyperparams': hyperparams,
                   **output}
 
         if not no_logs:
@@ -205,12 +206,13 @@ class StandardRunner(PTRunner):
         training: Performs the training on a testproblem instance.
     """
 
-    def __init__(self, optimizer_class, hyperparams):
+    def __init__(self, optimizer_class):
 
-        super(StandardRunner, self).__init__(optimizer_class, hyperparams)
+        super(StandardRunner, self).__init__(optimizer_class)
 
     def training(self,
             tproblem,
+            hyperparams,
             num_epochs,
             # the following are the training_params
             lr_sched_epochs=None,
@@ -244,7 +246,7 @@ class StandardRunner(PTRunner):
             case, this dict is empty.
         """
 
-        opt = self._optimizer_class(tproblem.net.parameters(), **self._optimizer_hyperparams)
+        opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
         if lr_sched_epochs is not None:
             lr_schedule = runner_utils.make_lr_schedule(optimizer=opt, lr_sched_epochs=lr_sched_epochs, lr_sched_factors=lr_sched_factors)
 

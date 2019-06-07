@@ -33,14 +33,13 @@ class Runner(abc.ABC):
     write_output: Writes the output of the run to the output directory.
     """
 
-    def __init__(self, optimizer_class, hyperparams):
+    def __init__(self, optimizer_class):
 
         self._optimizer_class = optimizer_class
         self._optimizer_name = optimizer_class.__name__
-        self._optimizer_hyperparams = hyperparams
 
     @abc.abstractmethod
-    def run(self):
+    def run(self, testproblem, hyperparams):
         return
 
     # creates the output folder structure depending on the settings of interest
@@ -68,7 +67,7 @@ class Runner(abc.ABC):
                 float2str(output['weight_decay']))
 
         # Add all hyperparameters to the name (sorted alphabetically).
-        for hp_name, hp_value in sorted(self._optimizer_hyperparams.items()):
+        for hp_name, hp_value in sorted(output['optimizer_hyperparams'].items()):
             run_folder_name += "__{0:s}".format(hp_name)
             run_folder_name += "__{0:s}".format(
                 float2str(hp_value) if isinstance(hp_value, float)
