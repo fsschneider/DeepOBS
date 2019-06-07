@@ -105,6 +105,7 @@ class PTRunner(Runner, abc.ABC):
                   'num_epochs': num_epochs,
                   'random_seed': random_seed,
                   'weight_decay': weight_decay,
+                  'optimizer_name': self._optimizer_name,
                   'optimizer_hyperparams': hyperparams,
                   **output}
 
