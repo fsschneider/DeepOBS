@@ -4,8 +4,10 @@
 import os
 import json
 from .abstract_runner_utils import float2str
+from .abstract_runner_utils import StoreDictKeyPair
 import time
 import abc
+import argparse
 
 class Runner(abc.ABC):
     """Abstract base class for all different runners in DeepOBS.
@@ -38,11 +40,129 @@ class Runner(abc.ABC):
         self._optimizer_class = optimizer_class
         self._optimizer_name = optimizer_class.__name__
 
+# TODO train log interval and tf logging?
     @abc.abstractmethod
-    def run(self, testproblem, hyperparams):
+    def run(self,
+            testproblem,
+            hyperparams,
+            batch_size = None,
+            num_epochs = None,
+            random_seed=42,
+            data_dir=None,
+            output_dir='./results',
+            weight_decay=None,
+            no_logs=False,
+            **training_params):
         return
 
-    # creates the output folder structure depending on the settings of interest
+    @staticmethod
+    def parse_args(testproblem,
+            hyperparams,
+            batch_size,
+            num_epochs,
+            random_seed,
+            data_dir,
+            output_dir,
+            weight_decay,
+            no_logs,
+            **training_params):
+
+# TODO train log interval and tf logging?
+        args = {}
+        parser = argparse.ArgumentParser(description='Arguments for running optimizer script.')
+
+        if testproblem is None:
+            parser.add_argument('testproblem')
+        else:
+            args['testproblem'] = testproblem
+
+        if hyperparams is None:
+            parser.add_argument('hyperparams', action = StoreDictKeyPair)
+        else:
+            args['hyperparams'] = hyperparams
+
+        if weight_decay is None:
+            parser.add_argument(
+                "--weight_decay",
+                "--wd",
+                type=float,
+                help="""Factor
+          used for the weight_deacy. If not given, the default weight decay for
+          this model is used. Note that not all models use weight decay and this
+          value will be ignored in such a case.""")
+        else:
+            args['weight_decay'] = weight_decay
+
+        if batch_size is None:
+            parser.add_argument(
+                "--batch_size",
+                "--bs",
+                type=int,
+                help="The batch size (positive integer).")
+        else:
+            args['batch_size'] = batch_size
+
+        if num_epochs is None:
+            parser.add_argument(
+                "-N",
+                "--num_epochs",
+                type=int,
+                help="Total number of training epochs.")
+        else:
+            args['num_epochs'] = num_epochs
+
+        if random_seed is None:
+            parser.add_argument(
+                "-r",
+                "--random_seed",
+                type=int,
+                default=42,
+                help="An integer to set as tensorflow's random seed.")
+        else:
+            args['random_seed'] = random_seed
+
+        if data_dir is None:
+            parser.add_argument(
+                "--data_dir",
+                help="""Path to the base data dir. If
+      not specified, DeepOBS uses its default.""")
+        else:
+            args['data_dir'] = data_dir
+
+        if output_dir is None:
+            parser.add_argument(
+                "--output_dir",
+                type=str,
+                default="results",
+                help="""Path to the base directory in which output files will be
+          stored. Results will automatically be sorted into subdirectories of
+          the form 'testproblem/optimizer'.""")
+        else:
+            args['output_dir'] = output_dir
+
+        if not training_params:
+            parser.add_argument(
+                "--training_params",
+                help="""Additional training parameters as key-value pairs.""",
+                action = StoreDictKeyPair,
+                default = {})
+        else:
+            args['training_params'] = training_params
+
+        if no_logs is None:
+            parser.add_argument(
+                "--no_logs",
+                action="store_const",
+                const=True,
+                default=False,
+                help="""Add this flag to not save any json logging files.""")
+        else:
+            args['no_logs'] = no_logs
+
+        cmdline_args = vars(parser.parse_args())
+        args.update(cmdline_args)
+        return args
+
     @staticmethod
     def create_output_directory(output_dir, output):
 
