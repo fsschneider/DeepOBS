@@ -56,9 +56,12 @@ class PTRunner(Runner, abc.ABC):
             """
         return
 
+# TODO testproblem and hyperparams have to default to use them in argparse
+# how to avoid this? it is more clear if they are required
+
     def run(self,
-            testproblem,
-            hyperparams,
+            testproblem = None,
+            hyperparams = None,
             batch_size = None,
             num_epochs = None,
             random_seed=42,
@@ -86,13 +89,41 @@ class PTRunner(Runner, abc.ABC):
                 **training_params (dict): Kwargs for the training method.
         """
 
+        args = self.parse_args(testproblem,
+            hyperparams,
+            batch_size,
+            num_epochs,
+            random_seed,
+            data_dir,
+            output_dir,
+            weight_decay,
+            no_logs,
+            **training_params)
+
+        # overwrite locals after argparse
+        # TODO simplify
+        print(args)
+        testproblem = args['testproblem']
+        hyperparams = args['hyperparams']
+        batch_size = args['batch_size']
+        num_epochs = args['num_epochs']
+        random_seed = args['random_seed']
+        data_dir = args['data_dir']
+        output_dir = args['output_dir']
+        weight_decay = args['weight_decay']
+        no_logs = args['weight_decay']
+        training_params = args['training_params']
+
+        print(testproblem, batch_size, weight_decay, random_seed)
+
         if batch_size is None:
-            batch_size = global_config.get_testproblem_default_setting(testproblem)[batch_size]
+            batch_size = global_config.get_testproblem_default_setting(testproblem)['batch_size']
         if num_epochs is None:
-            num_epochs = global_config.get_testproblem_default_setting(testproblem)[num_epochs]
+            num_epochs = global_config.get_testproblem_default_setting(testproblem)['num_epochs']
 
         if data_dir is not None:
             config.set_data_dir(data_dir)
+
 
         tproblem = self.create_testproblem(testproblem, batch_size, weight_decay, random_seed)
 

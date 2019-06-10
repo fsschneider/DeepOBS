@@ -13,12 +13,13 @@ from copy import deepcopy
 from deepobs.abstract_runner.abstract_runner import Runner
 
 class TFRunner(Runner, abc.ABC):
-    def __init__(self, optimizer_class,hyperparams):
+    def __init__(self, optimizer_class):
 
-        super(TFRunner, self).__init__(optimizer_class, hyperparams)
+        super(TFRunner, self).__init__(optimizer_class)
 
     def run(self,
             testproblem,
+            hyperparams,
             batch_size,
             num_epochs,
             random_seed=42,
@@ -37,7 +38,7 @@ class TFRunner(Runner, abc.ABC):
 
         tproblem = self.create_testproblem(testproblem, batch_size, weight_decay, random_seed)
 
-        output = self.training(tproblem, num_epochs, **training_params)
+        output = self.training(tproblem, hyperparams, num_epochs, **training_params)
 
         # merge meta data to output dict
         # TODO this step interacts with the Analyzer and should be the same for both methods!
@@ -47,7 +48,8 @@ class TFRunner(Runner, abc.ABC):
                   'num_epochs': num_epochs,
                   'random_seed': random_seed,
                   'weight_decay': weight_decay,
-                  'optimizer_hyperparams': self._optimizer_hyperparams,
+                  'optimizer_name': self._optimizer_name,
+                  'optimizer_hyperparams': hyperparams,
                   **output}
 
         if not no_logs:
@@ -118,16 +120,16 @@ class TFRunner(Runner, abc.ABC):
 
 
     @abc.abstractmethod
-    def training(self, testproblem, num_epochs, **training_params):
+    def training(self, testproblem, hyperparams, num_epochs, **training_params):
         """Must be implemented by subclass. Returns a dict of all captured metrices."""
         return
 
 class TFStandardRunner(TFRunner):
 
 
-    def __init__(self, optimizer_class, hyperparams):
+    def __init__(self, optimizer_class):
 
-        super(TFStandardRunner, self).__init__(optimizer_class, hyperparams)
+        super(TFStandardRunner, self).__init__(optimizer_class)
 
     def init_summary(self, loss,
                      learning_rate_var,
@@ -187,6 +189,7 @@ class TFStandardRunner(TFRunner):
     # arguments from the command line.
     def training(self,
             tproblem,
+            hyperparams,
             num_epochs,
             lr_sched_epochs=None,
             lr_sched_factors=None,
@@ -203,12 +206,12 @@ class TFStandardRunner(TFRunner):
 
         # this is neccesary to apply the lr_sched later.
         # TODO make this clear
-        learning_rate = self._optimizer_hyperparams['learning_rate']
+        learning_rate = hyperparams['learning_rate']
         learning_rate_var = tf.Variable(learning_rate, trainable=False)
-        hyperparams = deepcopy(self._optimizer_hyperparams)
-        hyperparams.pop('learning_rate')
+        hyperparams_ = deepcopy(hyperparams)
+        hyperparams_.pop('learning_rate')
 
-        opt = self._optimizer_class(learning_rate_var, **hyperparams)
+        opt = self._optimizer_class(learning_rate_var, **hyperparams_)
         lr_schedule = runner_utils.make_lr_schedule(
             learning_rate, lr_sched_epochs, lr_sched_factors)
 
@@ -320,8 +323,5 @@ class TFStandardRunner(TFRunner):
         if tproblem.accuracy is not None:
             output["train_accuracies"] = train_accuracies
             output["test_accuracies"] = test_accuracies
-
-        # Put all run parameters into output dictionary.
-        output["optimizer"] = self._optimizer_name
 
         return output
