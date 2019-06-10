@@ -1,4 +1,2 @@
 # -*- coding: utf-8 -*-
-
-from . import grid_search.py
-
+from .random_search import RandomSearch
