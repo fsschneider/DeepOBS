@@ -102,7 +102,6 @@ class PTRunner(Runner, abc.ABC):
 
         # overwrite locals after argparse
         # TODO simplify
-        print(args)
         testproblem = args['testproblem']
         hyperparams = args['hyperparams']
         batch_size = args['batch_size']
@@ -113,8 +112,6 @@ class PTRunner(Runner, abc.ABC):
         weight_decay = args['weight_decay']
         no_logs = args['weight_decay']
         training_params = args['training_params']
-
-        print(testproblem, batch_size, weight_decay, random_seed)
 
         if batch_size is None:
             batch_size = global_config.get_testproblem_default_setting(testproblem)['batch_size']

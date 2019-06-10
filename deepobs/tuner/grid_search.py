@@ -21,3 +21,7 @@ class GridSearch(Tuner):
             runner = self._runner(self._optimizer_class, optimizer_settings)
             result = runner.run(testproblem, **config.get_testproblem_default_setting(testproblem), **training_params)
         return
+
+    def generate_jobs_script(self, testproblem, **training_params):
+
+

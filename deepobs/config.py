@@ -28,6 +28,7 @@ def set_large_test_set(testset):
     global LARGE_TEST_SET
     LARGE_TEST_SET = testset
 
+# TODO at defaults for all testproblems
 DEFAULT_TEST_PROBLEMS_SETTINGS = {
         'quadratic_deep': {
             'batch_size': 128,
@@ -60,7 +61,11 @@ DEFAULT_TEST_PROBLEMS_SETTINGS = {
         'tolstoi_char_rnn': {
             'batch_size': 50,
             'num_epochs': 200
-            }
+            },
+        'mnist_2c2d': {
+                'batch_size': 128,
+                'num_epochs': 100
+                }
         }
 
 def get_testproblem_default_setting(testproblem):

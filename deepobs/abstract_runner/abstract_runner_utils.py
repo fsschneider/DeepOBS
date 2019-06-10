@@ -10,7 +10,7 @@ def float2str(x):
 class StoreDictKeyPair(argparse.Action):
      def __call__(self, parser, namespace, values, option_string=None):
          my_dict = {}
-         # TODO split at different character
+         # TODO split at different character (chane this in tuner as well)
          for kv in values.split(",,"):
              k,v = kv.split("=")
              my_dict[k] = eval(v)
