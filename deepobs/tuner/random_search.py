@@ -6,7 +6,7 @@ class RandomSearch(ParallelizedTuner):
         super(RandomSearch, self).__init__(optimizer_class, hyperparams, ressources, runner_type)
 
         self._distributions = distributions
-
+        self._search_name = 'random_search'
     def _sample(self):
         params = []
         for i in range(self._ressources):
