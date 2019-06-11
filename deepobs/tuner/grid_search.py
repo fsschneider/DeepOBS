@@ -1,27 +1,43 @@
 # -*- coding: utf-8 -*-
-from .tuner import Tuner
-from .. import config
-class GridSearch(Tuner):
+from .tuner import ParallelizedTuner
+from itertools import product
+class InputError(Exception):
+    """Exception raised for errors in the input.
 
-    def __init__(self, optimizer_class, hyperparams, grid, ressources, mode = 'final', testproblems=None, runner_type='StandardRunner'):
-        super(GridSearch).__init__(self, optimizer_class, hyperparams, ressources, mode, testproblems, runner_type)
-        # TODO determine grid from ressources
+    Attributes:
+        expression -- input expression in which the error occurred
+        message -- explanation of the error
+    """
+
+    def __init__(self, message):
+        self.message = message
+
+class GridSearch(ParallelizedTuner):
+
+    def __init__(self, optimizer_class, hyperparams, grid, ressources, runner_type='StandardRunner'):
+        super(GridSearch, self).__init__(optimizer_class, hyperparams, ressources, runner_type)
+        self._check_if_grid_is_valid(grid, ressources)
         self._grid = grid
-#        self._grid = self.__create_grid(self)
+        self._search_name = 'grid_search'
 
-#    def __create_grid(self):
-#        sample_size_per_parameter = self._ressources // len(self._hyperparams)
-#        for name in self._hyperparams.iterkeys():
+    @staticmethod
+    def _check_if_grid_is_valid(grid, ressources):
+        grid_size = len(list(product(*[values for values in grid.values()])))
+        if grid_size > ressources:
+            raise InputError('Grid is too large for the available number of iterations.')
 
-    def tune(self, testproblem, **training_params):
-        # TODO parallelize
-        # TODO return the commands if no parallelization possible
-        for grid_point in self._grid:
-            optimizer_settings = dict(zip(self._hyperparams, grid_point))
-            runner = self._runner(self._optimizer_class, optimizer_settings)
-            result = runner.run(testproblem, **config.get_testproblem_default_setting(testproblem), **training_params)
-        return
+    def _sample(self):
+        all_values = []
+        all_keys = []
+        for key, values in self._grid.items():
+            all_values.append(values)
+            all_keys.append(key)
 
-    def generate_jobs_script(self, testproblem, **training_params):
+        samples = []
+        for sample in product(*all_values):
+            sample_dict = {}
+            for index, value in enumerate(sample):
+                sample_dict[all_keys[index]] = value
+            samples.append(sample_dict)
 
-
+        return samples

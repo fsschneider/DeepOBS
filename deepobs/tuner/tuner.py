@@ -94,7 +94,7 @@ class ParallelizedTuner(Tuner):
     def generate_commands_script(self, testproblems):
         script = self._generate_python_script()
         params = self._sample()
-        file = open('jobs_'+ self._optimizer_name  + '_random_search.txt', 'w')
+        file = open('jobs_'+ self._optimizer_name  + '_' + self._search_name + '.txt', 'w')
         for testproblem in testproblems:
             file.write('##### ' + testproblem + ' #####\n')
             for sample in params:
