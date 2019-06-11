@@ -51,6 +51,8 @@ class ParallelizedTuner(Tuner):
                                                 hyperparams,
                                                 ressources,
                                                 runner_type)
+
+            # TODO hyperparams seems to be optional for all tuning methods
     @abc.abstractmethod
     def _sample(self):
         return
@@ -67,7 +69,7 @@ class ParallelizedTuner(Tuner):
         # TODO vereinheitliche runner paths
         import_line1 = 'from deepobs.' + config.get_framework() + '.runners.runner import ' + self._runner_type
         import_line2 = 'from ' + self._optimizer_class.__module__ + ' import ' + self._optimizer_class.__name__
-        # TODO optimizer_class  must implement __str__ accordingly
+        # TODO optimizer_class  must implement __module__ and __name__ accordingly
         script.write(import_line1 +
                      '\n' +
                      import_line2 +
