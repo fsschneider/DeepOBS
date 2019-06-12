@@ -30,17 +30,6 @@ class Tuner(abc.ABC):
         except AttributeError:
             raise AttributeError('Runner type ', runner_type,' not implemented. If you really need it, you have to implement it on your own.')
 
-# TODO testset automation
-#    def tune_small_test_set(self, **training_params):
-#        testproblems = config.get_small_test_set()
-#        for testproblem in testproblems:
-#            self.tune(testproblem, **training_params)
-#
-#    def tune_large_test_set(self, **training_params):
-#        testproblems = config.get_large_test_set()
-#        for testproblem in testproblems:
-#            self.tune(testproblem, **training_params)
-
 class ParallelizedTuner(Tuner):
     def __init__(self,
                  optimizer_class,
@@ -51,8 +40,6 @@ class ParallelizedTuner(Tuner):
                                                 hyperparams,
                                                 ressources,
                                                 runner_type)
-
-            # TODO hyperparams seems to be optional for all tuning methods
     @abc.abstractmethod
     def _sample(self):
         return
@@ -89,7 +76,15 @@ class ParallelizedTuner(Tuner):
         string = string[:-2]
         return string
 
-# TODO write convenience method
+    def tune(self, testproblems, **kwargs):
+        params = self._sample()
+        for testproblem in testproblems:
+            print('Tuning', self._optimizer_name, 'on testproblem', testproblem)
+            for sample in params:
+                print('Start training with', sample)
+                runner = self._runner(self._optimizer_class)
+                # TODO how does kwargs works with training params?
+                runner.run(testproblem, hyperparams=sample, **kwargs)
 
 # TODO write into subfolder
 # TODO write different testproblems in different files
@@ -97,6 +92,7 @@ class ParallelizedTuner(Tuner):
         script = self._generate_python_script()
         params = self._sample()
         file = open('jobs_'+ self._optimizer_name  + '_' + self._search_name + '.txt', 'w')
+        # TODO sample new hyperparams for each testproblem?
         for testproblem in testproblems:
             file.write('##### ' + testproblem + ' #####\n')
             for sample in params:
