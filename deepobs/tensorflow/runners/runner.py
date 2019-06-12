@@ -12,7 +12,7 @@ from copy import deepcopy
 
 from deepobs.abstract_runner.abstract_runner import Runner
 
-class TFRunner(Runner, abc.ABC):
+class TFRunner(Runner):
     def __init__(self, optimizer_class):
 
         super(TFRunner, self).__init__(optimizer_class)
