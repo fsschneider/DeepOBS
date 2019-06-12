@@ -13,6 +13,7 @@ from deepobs.abstract_runner.abstract_runner import Runner
 import numpy as np
 
 class PTRunner(Runner, abc.ABC):
+    # TODO is inheritance from abc neccessary? Runner already inherits abc.
     def __init__(self, optimizer_class):
         """The abstract class for runner in the pytorch framework.
         Args:

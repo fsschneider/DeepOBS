@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from .tuner import ParallelizedTuner
 from itertools import product
+
 class InputError(Exception):
     """Exception raised for errors in the input.
 
     Attributes:
-        expression -- input expression in which the error occurred
         message -- explanation of the error
     """
 
@@ -14,7 +14,8 @@ class InputError(Exception):
 
 class GridSearch(ParallelizedTuner):
 
-    def __init__(self, optimizer_class, hyperparams, grid, ressources, runner_type='StandardRunner'):
+    def __init__(self, optimizer_class, grid, ressources, runner_type='StandardRunner'):
+        hyperparams = list(grid.keys())
         super(GridSearch, self).__init__(optimizer_class, hyperparams, ressources, runner_type)
         self._check_if_grid_is_valid(grid, ressources)
         self._grid = grid
