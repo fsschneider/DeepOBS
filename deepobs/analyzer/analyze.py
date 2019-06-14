@@ -216,16 +216,18 @@ class Analyzer:
                 # workaround if there is only one testproblem
                 if num_testproblems == 1:
                     opt.plot_optimizer_performance(axes, mode = mode)
-                    # rescaling
-                    for idx, ax in enumerate(axes):
-                        axes[idx] = rescale_ax(ax)
                     axes[0].legend()
                 else:
                     opt.plot_optimizer_performance(axes[:, ax_col], mode = mode)
-                    # rescaling
-                    for idx, ax in enumerate(axes[:, ax_col]):
-                        axes[idx, ax_col] = rescale_ax(ax)
                     axes[0,ax_col].legend()
+
+            # rescaling
+            if num_testproblems == 1:
+                for idx, ax in enumerate(axes):
+                    axes[idx] = rescale_ax(ax)
+            else:
+                for idx, ax in enumerate(axes[:, ax_col]):
+                    axes[idx, ax_col] = rescale_ax(ax)
 
             ax_col += 1
 
@@ -732,6 +734,7 @@ class SettingAnalyzer:
         for metrics in ['train_losses', 'test_losses', 'train_accuracies', 'test_accuracies']:
             # only add the metric if available
             if len(eval(metrics)) != 0:
+            # exclude the parts which are NaN
                 aggregate[metrics] = {
                     'mean': np.mean(eval(metrics), axis=0),
                     'std': np.std(eval(metrics), axis=0)
