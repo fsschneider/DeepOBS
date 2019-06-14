@@ -2,7 +2,7 @@
 from .tuner import ParallelizedTuner
 class RandomSearch(ParallelizedTuner):
 
-    def __init__(self, optimizer_class, ressources, distributions, runner_type='StandardRunner'):
+    def __init__(self, optimizer_class, distributions, ressources, runner_type='StandardRunner'):
         hyperparams = list(distributions.keys())
         super(RandomSearch, self).__init__(optimizer_class, hyperparams, ressources, runner_type)
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import abc
 from .. import config
-import os
+from numpy.random import seed as np_seed
 
 class Tuner(abc.ABC):
     def __init__(self,
@@ -25,10 +25,14 @@ class Tuner(abc.ABC):
             raise RuntimeError('Framework not implemented.')
         # check if requested runner is implemented as a class
         try:
-            # TODO make sure that tf and pt pathes are consistent
             self._runner = getattr(fw.runners.runner, runner_type)
         except AttributeError:
             raise AttributeError('Runner type ', runner_type,' not implemented. If you really need it, you have to implement it on your own.')
+
+    @staticmethod
+    def _set_seed(random_seed):
+        # TODO which other seeds to include?
+        np_seed(random_seed)
 
 class ParallelizedTuner(Tuner):
     def __init__(self,
@@ -44,14 +48,8 @@ class ParallelizedTuner(Tuner):
     def _sample(self):
         return
 
-    def __create_folder(self):
-        if not os.path.exists('./scripts'):
-            os.makedirs('./scripts')
-        return
-
     # TODO smarter way to create that file?
     def _generate_python_script(self):
-        # TODO what happens if this file does exist already?
         script = open(self._optimizer_name + '.py', 'w')
         # TODO vereinheitliche runner paths
         import_line1 = 'from deepobs.' + config.get_framework() + '.runners.runner import ' + self._runner_type
@@ -76,26 +74,42 @@ class ParallelizedTuner(Tuner):
         string = string[:-2]
         return string
 
-    def tune(self, testproblems, **kwargs):
-        params = self._sample()
+    @staticmethod
+    def _generate_kwargs_format_for_command_line(**kwargs):
+        string = ''
+        for key, value in kwargs.items():
+            string += '--' + key + ' ' + str(value) + ' '
+        string = string [:-1]
+        return string
+
+    def tune(self, testproblems, random_seed=42, **kwargs):
+        # testproblems can also be only one testproblem
+        self._set_seed(random_seed)
+        if type(testproblems) == str:
+            testproblems=testproblems.split()
         for testproblem in testproblems:
+            params = self._sample()
             print('Tuning', self._optimizer_name, 'on testproblem', testproblem)
             for sample in params:
                 print('Start training with', sample)
                 runner = self._runner(self._optimizer_class)
-                # TODO how does kwargs works with training params?
-                runner.run(testproblem, hyperparams=sample, **kwargs)
+                runner.run(testproblem, hyperparams=sample, random_seed=random_seed, **kwargs)
 
 # TODO write into subfolder
-# TODO write different testproblems in different files
-    def generate_commands_script(self, testproblems):
+# TODO write different testproblems in different files?
+    def generate_commands_script(self, testproblems, random_seed = 42, **kwargs):
+        # TODO rather seed in testproblems loop? otherwise order of testproblems changes the seeds for each of them
+        self._set_seed(random_seed)
+        # testproblems can also be only one testproblem
+        if type(testproblems) == str:
+            testproblems=testproblems.split()
         script = self._generate_python_script()
-        params = self._sample()
         file = open('jobs_'+ self._optimizer_name  + '_' + self._search_name + '.txt', 'w')
-        # TODO sample new hyperparams for each testproblem?
+        kwargs_string = self._generate_kwargs_format_for_command_line(**kwargs)
         for testproblem in testproblems:
+            params = self._sample()
             file.write('##### ' + testproblem + ' #####\n')
             for sample in params:
                 sample_string = self._generate_hyperparams_formate_for_command_line(sample)
-                file.write('python3 ' + script + ' ' + testproblem + ' ' + sample_string + '\n')
+                file.write('python3 ' + script + ' ' + testproblem + ' ' + sample_string + ' ' + '--random_seed ' + str(random_seed) + ' ' + kwargs_string  + '\n')
         file.close()
