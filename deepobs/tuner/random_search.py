@@ -15,6 +15,6 @@ class RandomSearch(ParallelizedTuner):
             # sample parameters
             sample = {}
             for param_name, param_distr in self._distributions.items():
-                sample[param_name] = param_distr.rvs()
+                sample[param_name] = param_distr.rvs()[0]
             params.append(sample)
         return params
