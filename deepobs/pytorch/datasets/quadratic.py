@@ -64,7 +64,7 @@ class quadratic(dataset.DataSet):
 
 
         dataset = dat.TensorDataset(torch.from_numpy(X))
-        loader = dat.DataLoader(dataset=dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory = self._pin_memory, num_workers = 1)
+        loader = dat.DataLoader(dataset=dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory = self._pin_memory, num_workers = self._num_workers)
         return loader
 
     def _make_train_dataloader(self):

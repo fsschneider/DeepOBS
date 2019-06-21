@@ -2,6 +2,14 @@
 
 DATA_DIR = "data_deepobs/pytorch"
 DEFAULT_DEVICE = "cuda"
+NUM_WORKERS = 0
+
+def get_num_workers():
+    return NUM_WORKERS
+
+def set_num_workers(num_workers):
+    global NUM_WORKERS
+    NUM_WORKERS = num_workers
 
 def get_data_dir():
     return DATA_DIR

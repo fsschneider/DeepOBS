@@ -44,7 +44,7 @@ class fmnist(dataset.DataSet):
     def _make_dataloader(self, train, shuffle, sampler=None):
         transform = transforms.ToTensor()
         dataset = datasets.FashionMNIST(root = config.get_data_dir(), train = train, download = True, transform = transform)
-        loader = dat.DataLoader(dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory=self._pin_memory, num_workers=1, sampler=sampler)
+        loader = dat.DataLoader(dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory=self._pin_memory, num_workers=self._num_workers, sampler=sampler)
         return loader
 
     def _make_train_dataloader(self):

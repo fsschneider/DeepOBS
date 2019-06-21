@@ -29,7 +29,7 @@ class DataSet(abc.ABC):
             self._pin_memory = True
         else:
             self._pin_memory = False
-
+        self._num_workers = config.get_num_workers()
         self._train_dataloader = self._make_train_dataloader()
         self._train_eval_dataloader = self._make_train_eval_dataloader()
         self._test_dataloader = self._make_test_dataloader()
