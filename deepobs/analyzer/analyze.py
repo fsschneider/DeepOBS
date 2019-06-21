@@ -287,7 +287,7 @@ class TestProblemAnalyzer:
             tp (str): Name of the test problem (same as the folder name).
         """
         self._path = path
-        self.__name = path.split('/')[-1]
+        self.__name = os.path.split(path)[-1]
         self.metric = metric
         # TODO make the metrices attributes of the testproblem class?
         # TODO generalize this: if test accuracies not available, use test losses
@@ -379,7 +379,7 @@ class OptimizerAnalyzer:
 
         """
         self._path = path
-        self.__name = path.split('/')[-1]
+        self.__name = os.path.split(path)[-1]
         self.metric = metric
         # TODO if I call optimizer analyzer directly, the conv performance will always be 0?
         self.conv_perf = conv_perf
