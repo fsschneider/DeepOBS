@@ -2,6 +2,8 @@
 import abc
 from .. import config
 from numpy.random import seed as np_seed
+import os
+import json
 
 class Tuner(abc.ABC):
     def __init__(self,
@@ -82,7 +84,27 @@ class ParallelizedTuner(Tuner):
         string = string [:-1]
         return string
 
-    def tune(self, testproblems, random_seed=42, **kwargs):
+    def _init_tuning_summary(self):
+        pass
+    def _write_tuning_summary(self, step, testproblem, output_dir, runner_output):
+        path = os.path.join(output_dir, testproblem, self._optimizer_name)
+        path += 'tuner_log.json'
+        summary_dict['final_test_loss'] = runner_output['test_losses'][-1]
+        # TODO this will not work for tensorflow where acc might be empty
+        # TODO this is one reason more to unify the runner outputs
+        summary_dict['final_test_accuracy'] = runner_output['test_accuracies'][-1]
+        summary_dict['optimizer_hyperparams'] = runner_output['optimizer_hyperparams']
+        summary_dict['testproblem'] = runner_output['testproblem']
+        summary_dict['optimizer'] = runner_output['optimizer']
+    
+        with open(path, 'r') as f:
+            json_dict = f.load(path)
+        
+        with open() as f:
+            f.write(json.dumps(summary_dict))
+            
+    # TODO add output dir to command line string
+    def tune(self, testproblems, output_dir = './results', random_seed=42, **kwargs):
         # testproblems can also be only one testproblem
         self._set_seed(random_seed)
         if type(testproblems) == str:
@@ -93,10 +115,11 @@ class ParallelizedTuner(Tuner):
             for sample in params:
                 print('Start training with', sample)
                 runner = self._runner(self._optimizer_class)
-                runner.run(testproblem, hyperparams=sample, random_seed=random_seed, **kwargs)
+                runner.run(testproblem, hyperparams=sample, random_seed=random_seed, output_dir = output_dir, **kwargs)
+                
 
+        
 # TODO write into subfolder
-# TODO write different testproblems in different files?
     def generate_commands_script(self, testproblems, random_seed = 42, **kwargs):
         # TODO rather seed in testproblems loop? otherwise order of testproblems changes the seeds for each of them
         self._set_seed(random_seed)
