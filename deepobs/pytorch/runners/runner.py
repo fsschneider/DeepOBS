@@ -125,17 +125,13 @@ class PTRunner(Runner):
         tproblem = self.create_testproblem(testproblem, batch_size, weight_decay, random_seed)
 
         output = self.training(tproblem, hyperparams, num_epochs, **training_params)
-
-        # merge meta data to output dict
-        # TODO this step interacts with the Analyzer and should be the same for both frameworks
-        output = {'testproblem': testproblem,
-                  'batch_size': batch_size,
-                  'num_epochs': num_epochs,
-                  'random_seed': random_seed,
-                  'weight_decay': weight_decay,
-                  'optimizer_name': self._optimizer_name,
-                  'optimizer_hyperparams': hyperparams,
-                  **output}
+        output = self._post_process_output(output, 
+                                           testproblem, 
+                                           batch_size, 
+                                           num_epochs, 
+                                           random_seed, 
+                                           weight_decay, 
+                                           hyperparams)
 
         if not no_logs:
             run_folder_name, file_name = self.create_output_directory(output_dir, output)
