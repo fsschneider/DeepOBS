@@ -39,19 +39,13 @@ class TFRunner(Runner):
         tproblem = self.create_testproblem(testproblem, batch_size, weight_decay, random_seed)
 
         output = self.training(tproblem, hyperparams, num_epochs, **training_params)
-
-        # merge meta data to output dict
-        # TODO this step interacts with the Analyzer and should be the same for both methods!
-        # TODO Attention! train_params that default are not written to output (e.g. train log interval)!
-        output = {'testproblem': testproblem,
-                  'batch_size': batch_size,
-                  'num_epochs': num_epochs,
-                  'random_seed': random_seed,
-                  'weight_decay': weight_decay,
-                  'optimizer_name': self._optimizer_name,
-                  'optimizer_hyperparams': hyperparams,
-                  **output}
-
+        output = self._post_process_output(output, 
+                                           testproblem, 
+                                           batch_size, 
+                                           num_epochs, 
+                                           random_seed, 
+                                           weight_decay, 
+                                           hyperparams)
         if not no_logs:
             run_folder_name, file_name = self.create_output_directory(output_dir, output)
             self.write_output(output, run_folder_name, file_name)
@@ -314,14 +308,13 @@ class TFStandardRunner(TFRunner):
         output = {
             "train_losses": train_losses,
             "test_losses": test_losses,
+            "train_accuracies" : train_accuracies,
+            "test_accuracies" : test_accuracies,
             "minibatch_train_losses": minibatch_train_losses,
             "analyzable_training_params": {
                     "lr_sched_epochs": lr_sched_epochs,
                     "lr_sched_factors": lr_sched_factors
                     }
         }
-        if tproblem.accuracy is not None:
-            output["train_accuracies"] = train_accuracies
-            output["test_accuracies"] = test_accuracies
-
+            
         return output

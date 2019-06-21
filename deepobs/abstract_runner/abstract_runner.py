@@ -213,7 +213,33 @@ class Runner(abc.ABC):
             os.makedirs(run_directory)
 
         return run_directory, file_name
-
+    
+    def _post_process_output(self, output, testproblem, batch_size, num_epochs, random_seed, weight_decay, hyperparams):
+        '''Ensures that for both frameworks the structure of the output is the same'''
+        
+        # remove test accuracy if it is not available
+        if output['test_accuracies']:
+            if all(output['test_accuracies']) == 0:
+                del output['test_accuracies']
+                del output['train_accuracies']
+        
+        # add empty analyzable trainig_params dict if the user forgot it
+        if not output['analyzable_training_params']:
+            output['analyzable_training_params'] = {}
+        
+        # merge meta data to output dict
+        # TODO Attention! train_params that default are not written to output (e.g. train log interval)!
+        output = {'testproblem': testproblem,
+                  'batch_size': batch_size,
+                  'num_epochs': num_epochs,
+                  'random_seed': random_seed,
+                  'weight_decay': weight_decay,
+                  'optimizer_name': self._optimizer_name,
+                  'optimizer_hyperparams': hyperparams,
+                  **output}
+        
+        return output
+            
     @staticmethod
     def write_output(output, run_folder_name, file_name):
         """Writes the JSON output.
