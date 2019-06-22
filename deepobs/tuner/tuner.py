@@ -35,7 +35,11 @@ class Tuner(abc.ABC):
     def _set_seed(random_seed):
         # TODO which other seeds to include?
         np_seed(random_seed)
-
+    
+    @abc.abstractmethod
+    def tune():
+        pass
+        
 class ParallelizedTuner(Tuner):
     def __init__(self,
                  optimizer_class,
@@ -86,6 +90,7 @@ class ParallelizedTuner(Tuner):
 
     def _init_tuning_summary(self):
         pass
+    
     def _write_tuning_summary(self, step, testproblem, output_dir, runner_output):
         path = os.path.join(output_dir, testproblem, self._optimizer_name)
         path += 'tuner_log.json'
