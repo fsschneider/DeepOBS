@@ -1,26 +1,42 @@
 # -*- coding: utf-8 -*-
-from bayes_opt import UtilityFunction
 import numpy as np
-from bayes_opt import observer
 import os
-from bayes_opt.event import Events
 import json
 from scipy.stats. distributions import uniform
 import matplotlib.pyplot as plt
-from bayes_opt.util import UtilityFunction
+import shutil
 
-# TODO all these analyses break if I start multiple tries with different params in the same results folder
 # TODO somehow use the ranking to automate 10 seeds run?
 
+def plot_bo_posterior(optimizer_path, step):
+    # TODO do the steps really align?? check if posterior at each step is correct
+    # TODO how to distuingish 1d 2d and >2d not possible?
+    # TODO plot the evaluation points and the acq
+    json_data = _load_json(optimizer_path, 'tuning_log.json')
+    
+    domain_path = os.path.join(optimizer_path, 'domain.txt')
+    domain = np.loadtxt(domain_path)
+    
+    posterior_mean_path = os.path.join(optimizer_path, 'posterior_mean_step_' + str(step) + '.txt')
+    posterior_mean = np.loadtxt(posterior_mean_path)
+    
+    posterior_std_path = os.path.join(optimizer_path, 'posterior_std_step_' + str(step) + '.txt')
+    posterior_std = np.loadtxt(posterior_std_path)
+    
+    plt.plot(domain, posterior_mean)
+    plt.fill_between(domain, posterior_mean-posterior_std, posterior_mean+posterior_std, alpha=0.3)
+    plt.show()
+    
 def create_tuning_ranking(optimizer_path, mode = 'final'):
+    # TODO is bayes was run in different mode than it should not be possible to get the ranking according to wrong mode
     # make sure that summary is up to date
     generate_tuning_summary(optimizer_path)
     json_data = _load_json(optimizer_path, 'tuning_log.json')
     
-    if mode + '_test_accuracy' in json_data['Step_1']:
+    if mode + '_test_accuracy' in json_data['step_1']:
         sgn = -1
         metric = mode + '_test_accuracy'
-    elif mode + '_test_loss' in json_data['Step_1']:
+    elif mode + '_test_loss' in json_data['step_1']:
         sgn = 1
         metric = mode + '_test_loss'
     else:
@@ -31,13 +47,14 @@ def create_tuning_ranking(optimizer_path, mode = 'final'):
     ranked_list = [{'parameters': json_data[step]['parameters'], metric: json_data[step][metric]} for step in step_ranking]
     return ranked_list
 
-def read_in_parameter_performances(optimizer_path, hyperparams):
+def read_in_parameter_performances(optimizer_path, hyperparams, mode = 'final'):
+    # TODO create general API for all tuning methods and implement target by mode
     if type(hyperparams) == str:
         hyperparams = hyperparams.split()
     
     json_data = _load_json(optimizer_path, 'tuning_log.json')
         
-    steps = [step for step in json_data.keys() if 'Step' in step]
+    steps = [step for step in json_data.keys() if 'step' in step]
     
     list_dict = {param: [] for param in hyperparams}
     list_dict['final_test_loss'] = []
@@ -148,34 +165,54 @@ def aggregate_runs(setting_folder):
                 'mean': np.mean(eval(metrics), axis=0),
                 'std': np.std(eval(metrics), axis=0)
             }
-
+    # merge meta data
+    aggregate['optimizer_hyperparams'] = json_data['optimizer_hyperparams']
     return aggregate
 
-# TODO implement the summary for bayesian with advanced observer (because order matters) really? because DURING tuning it should be fine
-def generate_tuning_summary(optimizer_path, mode = 'final'):
+def get_aggregated_setting_summary(setting_path):
+    # TODO aggregated summary needs to return params
     summary_dict = {}
-    os.chdir(optimizer_path)
-    setting_folders_ordered_by_creation_time = sorted(filter(os.path.isdir, os.listdir(optimizer_path)), key=os.path.getctime)
-    step = 1
-    for setting_folder in setting_folders_ordered_by_creation_time:
-        # TODO How to do this in case there are several seed runs for one setting
-        sub_dict = {}
-        file_name = os.listdir(setting_folder)[0]
-        path = os.path.join(optimizer_path, setting_folder, file_name)
-        with open(path, 'r') as f:
-            runner_output = json.load(f)
-        # TODO step order does not matter for random and grid search but for bayesian
-        sub_dict['parameters'] = runner_output['optimizer_hyperparams']
-        # TODO final hard coded
-        sub_dict['final_test_loss'] = runner_output['test_losses'][-1]
-        # TODO will not work for tf version
-        sub_dict['final_test_accuracy'] = runner_output['test_accuracies'][-1]
-       
-        summary_dict['Step_' + str(step)] = sub_dict
-        step += 1
+    aggregate = aggregate_runs(setting_path)
+    params = aggregate['optimizer_hyperparams']
+    if 'test_accuracies' in aggregate:
+        summary_dict['final_test_accuracy'] = aggregate['test_accuracies']['mean'][-1]
+        summary_dict['best_test_accuracy'] = max(aggregate['test_accuracies']['mean'])
+    summary_dict['final_test_loss'] = aggregate['test_losses']['mean'][-1]
+    summary_dict['best_test_loss'] = min(aggregate['test_losses']['mean'])
+    return (params, summary_dict)
+
+def get_setting_file_summary(setting_path, json_file):
+    json_data = _load_json(setting_path, json_file)
+    parameters = json_data['optimizer_hyperparams']
+    summary_dict = {}
+    if 'test_accuracies' in json_data:
+        summary_dict['final_test_accuracy'] = json_data['test_accuracies'][-1]
+        summary_dict['best_test_accuracy'] = max(json_data['test_accuracies'])
+    summary_dict['final_test_loss'] = json_data['test_losses'][-1]
+    summary_dict['best_test_loss'] = min(json_data['test_losses'])
+    return (parameters, summary_dict)
+
+def generate_tuning_summary(optimizer_path, aggregated = False):
+    # TODO make it clear that this is not used for bayesian
     
-    with open(os.path.join(optimizer_path, 'tuning_log.json'), 'w') as f:
-        f.write(json.dumps(summary_dict))
+    os.chdir(optimizer_path)
+    setting_folders = [d for d in os.listdir(optimizer_path) if os.path.isdir(os.path.join(optimizer_path,d))]
+    
+    # clear json
+    _clear_json(optimizer_path, 'tuning_log.json')
+    
+    for setting_folder in setting_folders:
+        if aggregated:
+            path = os.path.join(optimizer_path, setting_folder)
+            summary_tuple = get_aggregated_setting_summary(path)    
+        else:
+            file_name = os.listdir(setting_folder)[0]
+            path = os.path.join(optimizer_path, setting_folder)
+            summary_tuple = get_setting_file_summary(path, file_name)
+        
+        # append to the json
+        _append_json(optimizer_path, 'tuning_log.json', summary_tuple)
+        
 
 class log_uniform():        
     def __init__(self, a, b, base=10):
@@ -187,121 +224,36 @@ class log_uniform():
         uniform_values = uniform(loc=self.loc, scale=self.scale)
         return np.power(self.base, uniform_values.rvs(size=size, random_state=random_state))
     
-
-class AdvancedObserver(observer._Tracker):
-    def __init__(self, path, bounds, posterior_domain, acq_type, acq_kappa, acq_xi):
-        self._path = os.path.join(path) if path[-5:] == ".json" else os.path.join(path, ".json")
-        try:
-            os.remove(self._path)
-        except OSError:
-            pass
-
-        # TODO how to deal with posterior domain for discrete variables?
-        if posterior_domain is None:
-            self._posterior_domain = self._generate_posterior_domain_from_bounds(bounds)
-        else:
-            self._posterior_domain = posterior_domain
-
-        super(AdvancedObserver, self).__init__()
-        
-        # needed for target prediction
-        self._acq_type = acq_type
-        self._acq_kappa = acq_kappa
-        self._acq_xi = acq_xi
-        
-        self._init_json()
-
-    def _init_json(self):
-        with open(self._path, 'w') as f:
-            dic = {}
-#            dic['posterior_domain'] = self._posterior_domain
-            f.write(json.dumps(dic))
-
-    def _generate_posterior_domain_from_bounds(self, bounds):
-        domain = {}
-        for key, value in bounds.items():
-            domain[key] = list(np.linspace(*value, 100))
-        return domain
-    
-    def _get_predicted_target(self, instance):
-        # save the random state since suggesting changes it
-        random_state = instance._random_state
-        utility = UtilityFunction(self._acq_type, kappa = self._acq_kappa, xi = self._acq_xi)
-        suggested_point = instance.suggest(utility)
-        instance._
-        instance._random_state = random_state
-        
-        
-    def update(self, event, instance):
-
-        if event == Events.OPTMIZATION_STEP:
-            data = dict(instance.res[-1])
-
-            now, time_elapsed, time_delta = self._time_metrics()
-            data["datetime"] = {
-                "datetime": now,
-                "elapsed": time_elapsed,
-                "delta": time_delta,
-            }
-
-            # TODO calculate predicted target
-            predicted_target = self._get_predicted_target(instance)
-            # TODO SIMPLIFY
-            abstract_data = {}
-            abstract_data['Step ' + str(self._iterations)] = data
-            with open(self._path, 'r') as f:
-                json_data = json.load(f)
-            json_data.update(**abstract_data)
-            with open(self._path, 'w') as f:
-                f.write(json.dumps(json_data))
-
-            # write utility and posterior to seperate files
-            plotting_data = {}
-            plotting_data['step'] = self._iterations
-            mean, var = self._get_posterior(instance, self._posterior_domain)
-            # TODO abstract domain to own file (same for every step)
-            plotting_data['posterior_domain'] = self._posterior_domain
-            plotting_data['posterior_mean'] = mean
-            plotting_data['posterior_var'] = var
-            # TODO understand utility arg 0
-            utility_function = UtilityFunction(kind="ucb", kappa=5, xi=0)
-            utility = utility_function.utility(self._posterior_domain, instance._gp, 0)
-            plotting_data['utility'] = list(utility)
-            # TODO correct path
-            with open('some_path_' + 'step_' + str(self._iterations), 'w') as f:
-                f.write(json.dumps(plotting_data))
-
-        self._update_tracker(event, instance)
-
-    def _get_posterior(self, instance, domain):
-        x_obs = []
-        domain = []
-        for param_name, param_domain in domain.items():
-            x_obs.append([res["params"][param_name] for res in instance.res])
-            domain.append(param_domain)
-        x_obs = np.array(x_obs).T
-        domain = np.array(domain).T
-
-        y_obs = np.array([res["target"] for res in instance.res])
-
-        instance._gp.fit(x_obs, y_obs)
-
-        mu, sigma = instance._gp.predict(domain, return_std=True)
-        return list(mu), list(sigma)
-    
 def _generate_posterior_domain_from_bounds(bounds):
-        n_samples = 100
-        domain = np.zeros((n_samples, len(bounds)))
-        c=0
-        for key, value in bounds.items():
-            domain[:,c] = list(np.linspace(*value, n_samples))
-            c+=1 
-        return domain
+    keys = sorted(bounds)
+    n_samples = 10000
+    # make sure that the order in the array is the same as for the fitting in the optimization
+    # the same step is done in the suggest() of the BO object
+    domain = np.asarray([list(np.linspace(*bounds[key], n_samples)) for key in keys])
+    return domain.T
+
+def _append_json(path, file, obj):
+    with open(os.path.join(path, file), 'a') as f:
+        f.write(json.dumps(obj))
+        f.write('\n')
+
+def _clear_json(path, file):
+    json_path = os.path.join(path, file)
+    if os.path.exists(json_path):
+        os.remove(json_path)
+
+def _init_bo_tuning_summary(log_path, op):
+    # adds init values if availble
+    # clear json
+    _clear_json(log_path, 'tuning_log.json')
     
-def _init_bo_tuning_summary(log_path):
-    json_dict = {}
-    _dump_json(log_path, 'tuning_log.json', json_dict)
-        
+    summary_dict = {}
+    for idx, res in enumerate(op.res):
+        params = res['params']
+        summary_dict['target'] = res['target']
+        _append_json(log_path, 'bo_tuning_log.json', (params, summary_dict))
+    # TODO append a visual (and useful) guidance for end on init values
+
 def _init_bo_plotting_summary(bounds, log_path):
     # TODO how to properly sample? latin hypercube from prior?
     # TODO it would be better to save the domain as dict to know which axis is which param
@@ -309,12 +261,13 @@ def _init_bo_plotting_summary(bounds, log_path):
     np.savetxt(os.path.join(log_path, 'domain.txt'), domain)
     return domain
 
-def _dump_json(path, file_name, json_data):
-    with open(os.path.join(path, file_name), 'w') as f:
-        f.write(json.dumps(json_data))
+def _dump_json(path, file, obj):
+    with open(os.path.join(path, file), 'w') as f:
+        f.write(json.dumps(obj))
 
 def _update_bo_plotting_summary(utility_func, gp, iteration, domain, log_path):
     posterior_mean, posterior_std = gp.predict(domain, return_std = True)
+    # TODO dump all this in one json?
     # TODO why 0 as last argument for utility?
     acquisition = utility_func.utility(domain, gp, 0)     
     # save plotting data
@@ -325,19 +278,16 @@ def _update_bo_plotting_summary(utility_func, gp, iteration, domain, log_path):
 def _update_bo_tuning_summary(op, utility_func, iteration, log_path):
     
     last_point = op.res[-1]['params']
-    # TODO how the fuck does the gp know the order of the params?
     grid =  np.zeros((1, len(last_point)))
     c = 0
     for key, value in last_point.items():
         grid[0,c] = value
         c += 1
-    actual_target = op.res[-1]['target']
+    target = op.res[-1]['target']
     predicted_target_mean, predicted_target_std = op._gp.predict(grid, return_std = True)
-    json_data = _load_json(log_path, 'tuning_log.json')
-    json_data['Step_' + str(iteration)] = {'parameters': last_point,
-              'predicted_target': list(predicted_target_mean),
-              'predicted_target_std': list(predicted_target_std),
-              'actual_target': actual_target
-            }
-    _dump_json(log_path, 'tuning_log.json', json_data)
     
+    parameters = last_point
+    summary_dict = {}
+    summary_dict['predicted_target'] = list(predicted_target_mean)
+    summary_dict['target'] = target
+    _append_json(log_path, 'bo_tuning_log.json', (parameters, summary_dict))
