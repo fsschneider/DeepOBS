@@ -15,7 +15,7 @@ class InputError(Exception):
 class GridSearch(ParallelizedTuner):
 
     def __init__(self, optimizer_class, grid, ressources, runner_type='StandardRunner'):
-        hyperparams = list(grid.keys())
+        hyperparams = sorted(grid)
         super(GridSearch, self).__init__(optimizer_class, hyperparams, ressources, runner_type)
         self._check_if_grid_is_valid(grid, ressources)
         self._grid = grid

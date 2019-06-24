@@ -3,7 +3,7 @@ import abc
 from .. import config
 from numpy.random import seed as np_seed
 import os
-import json
+import shutil
 
 class Tuner(abc.ABC):
     def __init__(self,
@@ -35,6 +35,31 @@ class Tuner(abc.ABC):
     def _set_seed(random_seed):
         # TODO which other seeds to include?
         np_seed(random_seed)
+    
+    @staticmethod
+    def _check_output_path(path):
+        """Checks if path already exists. creates it if not, cleans it if yes."""
+        # TODO warn user that path will be cleaned up! data might be lost for users if they dont know
+        # TODO or maybe add some unique id to the outdir?
+        if not os.path.isdir(path):
+            # create if it does not exist
+            os.makedirs(path)
+        else:
+            # delete content if it exist
+            contentlist = os.listdir(path)
+            for f in contentlist:
+                _path = os.path.join(path, f)
+                if os.path.isfile(_path):
+                    os.remove(_path)
+                elif os.path.isdir(_path):
+                    shutil.rmtree(_path)
+                    
+    def _read_testproblems(testproblems):
+        if type(testproblems) == str:
+            testproblems=testproblems.split()
+        else:
+            testproblems = sorted(testproblems)
+        return testproblems
     
     @abc.abstractmethod
     def tune():
@@ -87,34 +112,15 @@ class ParallelizedTuner(Tuner):
             string += '--' + key + ' ' + str(value) + ' '
         string = string [:-1]
         return string
-
-    def _init_tuning_summary(self):
-        pass
     
-    def _write_tuning_summary(self, step, testproblem, output_dir, runner_output):
-        path = os.path.join(output_dir, testproblem, self._optimizer_name)
-        path += 'tuner_log.json'
-        summary_dict['final_test_loss'] = runner_output['test_losses'][-1]
-        # TODO this will not work for tensorflow where acc might be empty
-        # TODO this is one reason more to unify the runner outputs
-        summary_dict['final_test_accuracy'] = runner_output['test_accuracies'][-1]
-        summary_dict['optimizer_hyperparams'] = runner_output['optimizer_hyperparams']
-        summary_dict['testproblem'] = runner_output['testproblem']
-        summary_dict['optimizer'] = runner_output['optimizer']
-    
-        with open(path, 'r') as f:
-            json_dict = f.load(path)
-        
-        with open() as f:
-            f.write(json.dumps(summary_dict))
-            
     # TODO add output dir to command line string
     def tune(self, testproblems, output_dir = './results', random_seed=42, **kwargs):
-        # testproblems can also be only one testproblem
         self._set_seed(random_seed)
-        if type(testproblems) == str:
-            testproblems=testproblems.split()
+        testproblems = self._read_testproblems(testproblems)
         for testproblem in testproblems:
+            log_path = os.path.join(output_dir, testproblem, self._optimizer_name)
+            self._check_output_path(log_path)
+            
             params = self._sample()
             print('Tuning', self._optimizer_name, 'on testproblem', testproblem)
             for sample in params:
@@ -122,22 +128,20 @@ class ParallelizedTuner(Tuner):
                 runner = self._runner(self._optimizer_class)
                 runner.run(testproblem, hyperparams=sample, random_seed=random_seed, output_dir = output_dir, **kwargs)
                 
-
-        
 # TODO write into subfolder
-    def generate_commands_script(self, testproblems, random_seed = 42, **kwargs):
+    def generate_commands_script(self, testproblems, output_dir = './results', random_seed = 42, **kwargs):
         # TODO rather seed in testproblems loop? otherwise order of testproblems changes the seeds for each of them
         self._set_seed(random_seed)
-        # testproblems can also be only one testproblem
-        if type(testproblems) == str:
-            testproblems=testproblems.split()
+        testproblems = self._read_testproblems(testproblems)
         script = self._generate_python_script()
         file = open('jobs_'+ self._optimizer_name  + '_' + self._search_name + '.txt', 'w')
         kwargs_string = self._generate_kwargs_format_for_command_line(**kwargs)
         for testproblem in testproblems:
+            log_path = os.path.join(output_dir, testproblem, self._optimizer_name)
+            self._check_output_path(log_path)
             params = self._sample()
             file.write('##### ' + testproblem + ' #####\n')
             for sample in params:
                 sample_string = self._generate_hyperparams_formate_for_command_line(sample)
-                file.write('python3 ' + script + ' ' + testproblem + ' ' + sample_string + ' ' + '--random_seed ' + str(random_seed) + ' ' + kwargs_string  + '\n')
+                file.write('python3 ' + script + ' ' + testproblem + ' ' + sample_string + ' ' + '--random_seed ' + str(random_seed) + '--output_dir' + output_dir + ' ' + kwargs_string  + '\n')
         file.close()
