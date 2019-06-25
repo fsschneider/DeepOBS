@@ -53,7 +53,8 @@ class Tuner(abc.ABC):
                     os.remove(_path)
                 elif os.path.isdir(_path):
                     shutil.rmtree(_path)
-                    
+    
+    @staticmethod
     def _read_testproblems(testproblems):
         if type(testproblems) == str:
             testproblems=testproblems.split()
