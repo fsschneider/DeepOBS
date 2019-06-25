@@ -2,7 +2,7 @@
 from .tuner import Tuner
 from bayes_opt import UtilityFunction
 import bayes_opt
-from .tuner_utils import _init_bo_plotting_summary, _init_bo_tuning_summary, _update_bo_plotting_summary, _update_bo_tuning_summary
+from .bayesian_utils import _init_bo_plotting_summary, _init_bo_tuning_summary, _update_bo_plotting_summary, _update_bo_tuning_summary
 import os
 
 class GP(Tuner):
@@ -21,6 +21,7 @@ class GP(Tuner):
         self._acquisition_function = acquisition_function
         self._bounds = self._read_in_bounds(bounds)
 
+    @staticmethod
     def _determine_cost_from_output_and_mode(output, mode):
         # check if accuracy is available, else take loss
         if not 'test_accuracies' in output:
@@ -59,11 +60,13 @@ class GP(Tuner):
         return _cost_function
     
     def _init_bo_space(self, op, cost_function, n_init_samples):
-        for iteration in range(1, n_init_samples):
+        for iteration in range(1, n_init_samples+1):
             random_sample = op.space.random_sample()
             params = dict(zip(self._hyperparams, random_sample))
             target = cost_function(**params)
             op.register(params, target)
+        # finally fit the gp
+        op._gp.fit(op._space.params, op._space.target)
         
     def tune(self, testproblems, 
              output_dir = './results', 
@@ -92,19 +95,26 @@ class GP(Tuner):
             log_path = os.path.join(output_dir, testproblem, self._optimizer_name)
             self._check_output_path(log_path)
             
-            utility_func = UtilityFunction(acq_type, kappa = acq_kappa, xi = acq_xi)
+            # evaluates the random points
             self._init_bo_space(op, cost_function, n_init_samples)
+            utility_func = UtilityFunction(acq_type, kappa = acq_kappa, xi = acq_xi)
+            
             if plotting_summary:
-                domain = _init_bo_plotting_summary(self._bounds, log_path)
+                domain = _init_bo_plotting_summary(utility_func, op._gp, self._bounds, log_path)
+                
             if tuning_summary:
                 _init_bo_tuning_summary(log_path, op)
+            
             for iteration in range(1, self._ressources+1):
                 next_point = op.suggest(utility_func)
                 actual_target = cost_function(**next_point)
                 op.register(params=next_point, target = actual_target)
                 
                 if tuning_summary:
-                    _update_bo_tuning_summary(op, utility_func, iteration, log_path)
+                    _update_bo_tuning_summary(op, iteration, log_path)
+                
+                # fit gp on new registered points
+                op._gp.fit(op._space.params, op._space.target)
                 if plotting_summary:
                     _update_bo_plotting_summary(utility_func, op._gp, iteration, domain, log_path)
         return op
