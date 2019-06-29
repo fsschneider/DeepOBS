@@ -2,7 +2,7 @@
 from .tuner import Tuner
 from bayes_opt import UtilityFunction
 import bayes_opt
-from .bayesian_utils import _init_bo_plotting_summary, _init_bo_tuning_summary, _update_bo_plotting_summary, _update_bo_tuning_summary
+from .bayesian_utils import _save_bo_optimizer_object, _init_bo_tuning_summary, _update_bo_tuning_summary
 import os
 
 class GP(Tuner):
@@ -52,6 +52,7 @@ class GP(Tuner):
     # TODO how to deal with discrete categoricals?
     def _generate_cost_function(self, testproblem, output_dir, mode, **kwargs):
         '''Factory to create the cost function depending on the testproblem and kwargs.'''
+        # TODO das Abbrechen eines Runners wegen NaNs hat Einfluss auf BO results!!!!
         def _cost_function(**hyperparams):
             runner = self._runner(self._optimizer_class)
             output = runner.run(testproblem, hyperparams, output_dir=output_dir, **kwargs)
@@ -59,15 +60,28 @@ class GP(Tuner):
             return cost
         return _cost_function
     
-    def _init_bo_space(self, op, cost_function, n_init_samples):
+    def _init_bo_space(self, 
+                       op, 
+                       cost_function, 
+                       n_init_samples,
+                       utility_func,
+                       log_path, 
+                       plotting_summary, 
+                       tuning_summary):
+        
         for iteration in range(1, n_init_samples+1):
             random_sample = op.space.random_sample()
             params = dict(zip(self._hyperparams, random_sample))
             target = cost_function(**params)
+            if tuning_summary:
+                    _update_bo_tuning_summary(op._gp, params, target, log_path)
             op.register(params, target)
-        # finally fit the gp
-        op._gp.fit(op._space.params, op._space.target)
-        
+            
+            # fit gp on new registered points
+            op._gp.fit(op._space.params, op._space.target)
+            if plotting_summary:
+                _save_bo_optimizer_object(os.path.join(log_path, 'obj'), str(iteration), op)
+                
     def tune(self, testproblems, 
              output_dir = './results', 
              random_seed = 42, 
@@ -95,26 +109,34 @@ class GP(Tuner):
             log_path = os.path.join(output_dir, testproblem, self._optimizer_name)
             self._check_output_path(log_path)
             
-            # evaluates the random points
-            self._init_bo_space(op, cost_function, n_init_samples)
             utility_func = UtilityFunction(acq_type, kappa = acq_kappa, xi = acq_xi)
-            
-            if plotting_summary:
-                domain = _init_bo_plotting_summary(utility_func, op._gp, self._bounds, log_path)
-                
+
             if tuning_summary:
-                _init_bo_tuning_summary(log_path, op)
-            
-            for iteration in range(1, self._ressources+1):
-                next_point = op.suggest(utility_func)
-                actual_target = cost_function(**next_point)
-                op.register(params=next_point, target = actual_target)
+                _init_bo_tuning_summary(log_path, op)            
+            if plotting_summary:
+                self._check_output_path(os.path.join(log_path, 'obj'))
+                _save_bo_optimizer_object(os.path.join(log_path, 'obj'), 'acq_func', utility_func)
                 
+            # evaluates the random points
+            self._init_bo_space(op, 
+                                cost_function, 
+                                n_init_samples, 
+                                utility_func,
+                                log_path, 
+                                plotting_summary, 
+                                tuning_summary)
+            
+            # execute remainig ressources
+            # TODO assert that ressources >= n init points
+            for iteration in range(n_init_samples+1, self._ressources + 1):
+                next_point = op.suggest(utility_func)
+                target = cost_function(**next_point)
                 if tuning_summary:
-                    _update_bo_tuning_summary(op, iteration, log_path)
+                    _update_bo_tuning_summary(op._gp, next_point, target, log_path)
+                op.register(params=next_point, target = target)
                 
                 # fit gp on new registered points
                 op._gp.fit(op._space.params, op._space.target)
                 if plotting_summary:
-                    _update_bo_plotting_summary(utility_func, op._gp, iteration, domain, log_path)
+                    _save_bo_optimizer_object(os.path.join(log_path, 'obj'), str(iteration), op)
         return op
