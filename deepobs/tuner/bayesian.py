@@ -88,23 +88,26 @@ class GP(Tuner):
              n_init_samples = 5, 
              tuning_summary = True, 
              plotting_summary = True, 
-             kernel = None, 
+             kernel = None,
+             alpha = None,
              acq_type = 'ucb', 
              acq_kappa = 2.576, 
              acq_xi = 0.0, 
              mode = 'final',
              **kwargs):
         
-        self._set_seed(random_seed)
-        # TODO noise level of the cost function?
         testproblems = self._read_testproblems(testproblems)
         for testproblem in testproblems:
+            self._set_seed(random_seed)
             cost_function = self._generate_cost_function(testproblem, output_dir, mode, **kwargs)
             # TODO when to normalize the y values in gp ?
             op = bayes_opt.BayesianOptimization(f = None, pbounds = self._bounds, random_state=random_seed)
             if kernel is not None:
                 # TODO how to check if kernel is valid
                 op._gp.kernel = kernel
+            if alpha is not None:
+                # set noise level
+                op._gp.alpha = alpha
             
             log_path = os.path.join(output_dir, testproblem, self._optimizer_name)
             self._check_output_path(log_path)

@@ -336,8 +336,15 @@ class StandardRunner(PTRunner):
                     break
 
             # break from training if it goes wrong
+            # TODO find a good penalization and add to tf version and rather do this in abstract runner (to be independent of user)
             if np.isnan(batch_loss.item()) or np.isinf(batch_loss.item()):
                 print('Breaking from run after epoch', str(epoch_count), 'due to wrongly calibrated optimization (Loss is Nan or Inf)')
+                # fill remaining epochs with penalization
+                for i in range(epoch_count, num_epochs):
+                    train_losses.append(train_losses[0])
+                    test_losses.append(test_losses[0])
+                    train_accuracies.append(train_accuracies[0])
+                    test_accuracies.append(test_accuracies[0])
                 break
             else:
                 continue

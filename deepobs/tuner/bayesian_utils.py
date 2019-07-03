@@ -29,7 +29,7 @@ def plot_bo_posterior(optimizer_path, step, resolution):
     elif dim ==2:
         fig, ax = plot_2d_bo_posterior(optimizer_path, step, resolution)
     else:
-        raise NotImplemented
+        raise NotImplementedError
         
 def plot_2d_bo_posterior(optimizer_path, step, resolution):
     op = _load_bo_optimizer_object(os.path.join(optimizer_path, 'obj'), str(step))
@@ -98,7 +98,6 @@ def _init_bo_tuning_summary(log_path, op):
     _clear_json(log_path, 'tuning_log.json')
 
 def _save_bo_optimizer_object(path, file_name, op):
-    # TODO path must exist
     with open(os.path.join(path, file_name), 'wb') as f:
         pickle.dump(op, f)
         
@@ -120,17 +119,4 @@ def _update_bo_tuning_summary(gp, next_point, target, log_path):
     summary_dict = {}
     summary_dict['predicted_target'] = predicted_target_mean[0]
     summary_dict['target'] = target
-    _append_json(log_path, 'bo_tuning_log.json', (next_point, summary_dict))
-    
-# TODO this can be the same for every tuning method?
-def _read_eval_points_from_bo_tuning_summary(path_to_json, step):
-    step_pairs = []
-    with open(path_to_json, 'r') as f:
-        for idx, line in enumerate(f):
-            # only read the first <step> points
-            if idx == step:
-                break
-            line = json.loads(line)
-            step_pairs.append(line)
-    return step_pairs
-            
+    _append_json(log_path, 'bo_tuning_log.json', (next_point, summary_dict))            

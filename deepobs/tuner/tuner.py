@@ -18,7 +18,7 @@ class Tuner(abc.ABC):
         self._ressources = ressources
         self._runner_type = runner_type
 
-    # where to make framework setable by the user?
+    # # TODO where to make framework setable by the user?
         if config.get_framework() == 'tensorflow':
             from .. import tensorflow as fw
         elif config.get_framework() == 'pytorch':
@@ -33,26 +33,26 @@ class Tuner(abc.ABC):
 
     @staticmethod
     def _set_seed(random_seed):
-        # TODO which other seeds to include?
         np_seed(random_seed)
     
     @staticmethod
     def _check_output_path(path):
         """Checks if path already exists. creates it if not, cleans it if yes."""
         # TODO warn user that path will be cleaned up! data might be lost for users if they dont know
-        # TODO or maybe add some unique id to the outdir?
+        # TODO or add some unique id to the outdir?
         if not os.path.isdir(path):
             # create if it does not exist
             os.makedirs(path)
-        else:
-            # delete content if it exist
-            contentlist = os.listdir(path)
-            for f in contentlist:
-                _path = os.path.join(path, f)
-                if os.path.isfile(_path):
-                    os.remove(_path)
-                elif os.path.isdir(_path):
-                    shutil.rmtree(_path)
+            # TODO I dont delete the folder for now!! not a good idea (e.g. momentum = SGD in torch)
+#        else:
+#            # delete content if it exist
+#            contentlist = os.listdir(path)
+#            for f in contentlist:
+#                _path = os.path.join(path, f)
+#                if os.path.isfile(_path):
+#                    os.remove(_path)
+#                elif os.path.isdir(_path):
+#                    shutil.rmtree(_path)
     
     @staticmethod
     def _read_testproblems(testproblems):
@@ -114,11 +114,10 @@ class ParallelizedTuner(Tuner):
         string = string [:-1]
         return string
     
-    # TODO add output dir to command line string
     def tune(self, testproblems, output_dir = './results', random_seed=42, **kwargs):
-        self._set_seed(random_seed)
         testproblems = self._read_testproblems(testproblems)
         for testproblem in testproblems:
+            self._set_seed(random_seed)
             log_path = os.path.join(output_dir, testproblem, self._optimizer_name)
             self._check_output_path(log_path)
             
@@ -131,13 +130,12 @@ class ParallelizedTuner(Tuner):
                 
 # TODO write into subfolder
     def generate_commands_script(self, testproblems, output_dir = './results', random_seed = 42, **kwargs):
-        # TODO rather seed in testproblems loop? otherwise order of testproblems changes the seeds for each of them
-        self._set_seed(random_seed)
         testproblems = self._read_testproblems(testproblems)
         script = self._generate_python_script()
         file = open('jobs_'+ self._optimizer_name  + '_' + self._search_name + '.txt', 'w')
         kwargs_string = self._generate_kwargs_format_for_command_line(**kwargs)
         for testproblem in testproblems:
+            self._set_seed(random_seed)
             log_path = os.path.join(output_dir, testproblem, self._optimizer_name)
             self._check_output_path(log_path)
             params = self._sample()
