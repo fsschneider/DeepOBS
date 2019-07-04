@@ -1,7 +1,7 @@
 """Module implementing StandardRunner."""
 
 from __future__ import print_function
-
+import numpy as np
 import importlib
 import tensorflow as tf
 import abc
@@ -30,9 +30,6 @@ class TFRunner(Runner):
             **training_params
             ):
 
-        # TODO sketch the structure of a runner
-        """..."""
-
         if data_dir is not None:
             config.set_data_dir(data_dir)
 
@@ -49,6 +46,8 @@ class TFRunner(Runner):
         if not no_logs:
             run_folder_name, file_name = self.create_output_directory(output_dir, output)
             self.write_output(output, run_folder_name, file_name)
+        
+        return output
 
     @staticmethod
     def create_testproblem(testproblem, batch_size, weight_decay, random_seed):
@@ -118,12 +117,12 @@ class TFRunner(Runner):
         """Must be implemented by subclass. Returns a dict of all captured metrices."""
         return
 
-class TFStandardRunner(TFRunner):
+class StandardRunner(TFRunner):
 
 
     def __init__(self, optimizer_class):
 
-        super(TFStandardRunner, self).__init__(optimizer_class)
+        super(StandardRunner, self).__init__(optimizer_class)
 
     def init_summary(self, loss,
                      learning_rate_var,
@@ -179,8 +178,6 @@ class TFStandardRunner(TFRunner):
         per_iter_summary_ = sess.run(per_iter_summaries)
         summary_writer.add_summary(per_iter_summary_, current_step)
 
-    # This function is a wrapper around _run() which grabs all non-specified
-    # arguments from the command line.
     def training(self,
             tproblem,
             hyperparams,
@@ -300,6 +297,19 @@ class TFStandardRunner(TFRunner):
                     s += 1
                 except tf.errors.OutOfRangeError:
                     break
+            # break from training if it goes wrong
+            # TODO find a good penalization and rather do this in abstract runner (to be independent of user)
+            if np.isnan(loss_) or np.isinf(loss_):
+                print('Breaking from run after epoch', str(n), 'due to wrongly calibrated optimization (Loss is Nan or Inf)')
+                # fill remaining epochs with penalization
+                for i in range(n, num_epochs):
+                    train_losses.append(train_losses[0])
+                    test_losses.append(test_losses[0])
+                    train_accuracies.append(train_accuracies[0])
+                    test_accuracies.append(test_accuracies[0])
+                break
+            else:
+                continue
 
         sess.close()
         # --- End of training loop.
