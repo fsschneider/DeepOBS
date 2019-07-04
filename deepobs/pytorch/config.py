@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+import torch
 
 DATA_DIR = "data_deepobs/pytorch"
-DEFAULT_DEVICE = "cuda"
+DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else 'cpu'
 NUM_WORKERS = 0
 
 def get_num_workers():
