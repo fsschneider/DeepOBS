@@ -139,7 +139,11 @@ class log_uniform():
 
     def rvs(self, size=1, random_state=None):
         uniform_values = uniform(loc=self.loc, scale=self.scale)
-        return np.power(self.base, uniform_values.rvs(size=size, random_state=random_state))
+        exp_values = np.power(self.base, uniform_values.rvs(size=size, random_state=random_state))
+        if len(exp_values)==1:
+            return exp_values[0]
+        else:
+            return exp_values
 
 def _dump_json(path, file, obj):
     with open(os.path.join(path, file), 'w') as f:
