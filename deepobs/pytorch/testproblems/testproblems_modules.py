@@ -38,7 +38,7 @@ class net_cifar10_3c3d(nn.Sequential):
 
         # init the layers
         for module in self.modules():
-            if isinstance(module, tfconv2d):
+            if isinstance(module, nn.Conv2d):
                 nn.init.constant_(module.bias, 0.0)
                 nn.init.xavier_normal_(module.weight)
 
@@ -67,7 +67,7 @@ class net_mnist_2c2d(nn.Sequential):
 
             # init the layers
             for module in self.modules():
-                if isinstance(module, tfconv2d):
+                if isinstance(module, nn.Conv2d):
                     nn.init.constant_(module.bias, 0.05)
                     module.weight.data = _truncated_normal_init(module.weight.data, mean = 0, stddev=0.05)
 
@@ -111,10 +111,10 @@ class net_vae(nn.Module):
 
         # init the layers
         for module in self.modules():
-            if isinstance(module, tfconv2d):
+            if isinstance(module, nn.Conv2d):
                 nn.init.constant_(module.bias, 0.0)
                 nn.init.xavier_uniform_(module.weight)
-            if isinstance(module, tfconv2d_transpose):
+            if isinstance(module, nn.ConvTranspose2d):
                 nn.init.constant_(module.bias, 0.0)
                 nn.init.xavier_uniform_(module.weight)
             if isinstance(module, nn.Linear):
@@ -235,7 +235,7 @@ class net_vgg(nn.Sequential):
 
         # init the layers
         for module in self.modules():
-            if isinstance(module, tfconv2d):
+            if isinstance(module, nn.Conv2d):
                 nn.init.constant_(module.bias, 0.0)
                 nn.init.xavier_normal_(module.weight)
 
@@ -278,7 +278,7 @@ class net_cifar100_allcnnc(nn.Sequential):
 
         # init the layers
         for module in self.modules():
-            if isinstance(module, tfconv2d):
+            if isinstance(module, nn.Conv2d):
                 nn.init.constant_(module.bias, 0.1)
                 nn.init.xavier_normal_(module.weight)
 
@@ -318,7 +318,7 @@ class net_wrn(nn.Sequential):
 
         # initialisation
         for module in self.modules():
-            if isinstance(module, tfconv2d):
+            if isinstance(module, nn.Conv2d):
                 nn.init.xavier_uniform_(module.weight)
             if isinstance(module, nn.BatchNorm2d):
                 nn.init.constant_(module.weight, 1.0) # gamma
@@ -336,6 +336,7 @@ class net_char_rnn(nn.Module):
         self.embedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=hidden_dim)
         self.lstm = nn.LSTM(input_size = hidden_dim, hidden_size = hidden_dim, num_layers=num_layers, dropout=0.2, batch_first = True)
         self.dense = nn.Linear(in_features=hidden_dim, out_features=vocab_size)
+        # TODO init layers?
 
     def forward(self, x, state = None):
         """state is a tuple for hidden and cell state for initialisation of the lstm"""
