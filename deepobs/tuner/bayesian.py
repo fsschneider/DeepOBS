@@ -5,8 +5,10 @@ import bayes_opt
 from .bayesian_utils import _save_bo_optimizer_object, _init_bo_tuning_summary, _update_bo_tuning_summary
 import os
 
+
 class GP(Tuner):
     def __init__(self, optimizer_class,
+                 hyperparam_names,
                  bounds,
                  ressources,
                  acquisition_function = 'EI',
@@ -14,9 +16,8 @@ class GP(Tuner):
 
     # TODO ressources and acq should rather be a argument of tune()\
     # TODO if tune() is the only thing a tuner does, then why have a class?
-    
-        hyperparams = sorted(bounds)
-        super(GP, self).__init__(optimizer_class, hyperparams, ressources, runner_type)
+
+        super(GP, self).__init__(optimizer_class, hyperparam_names, ressources, runner_type)
 
         self._acquisition_function = acquisition_function
         self._bounds = self._read_in_bounds(bounds)
@@ -40,6 +41,7 @@ class GP(Tuner):
 
     @staticmethod
     def _read_in_bounds(bounds):
+        # TODO categoricals?
 #        bounds = _check_for_categorical(bounds)
         return bounds
 
@@ -54,7 +56,7 @@ class GP(Tuner):
         '''Factory to create the cost function depending on the testproblem and kwargs.'''
         # TODO das Abbrechen eines Runners wegen NaNs hat Einfluss auf BO results!!!!
         def _cost_function(**hyperparams):
-            runner = self._runner(self._optimizer_class)
+            runner = self._runner(self._optimizer_class, self._hyperparam_names)
             output = runner.run(testproblem, hyperparams, output_dir=output_dir, **kwargs)
             cost = self._determine_cost_from_output_and_mode(output, mode)
             return cost
@@ -64,17 +66,16 @@ class GP(Tuner):
                        op, 
                        cost_function, 
                        n_init_samples,
-                       utility_func,
                        log_path, 
                        plotting_summary, 
                        tuning_summary):
         
         for iteration in range(1, n_init_samples+1):
             random_sample = op.space.random_sample()
-            params = dict(zip(self._hyperparams, random_sample))
+            params = dict(zip(sorted(self._hyperparam_names), random_sample))
             target = cost_function(**params)
             if tuning_summary:
-                    _update_bo_tuning_summary(op._gp, params, target, log_path)
+                _update_bo_tuning_summary(op._gp, params, target, log_path)
             op.register(params, target)
             
             # fit gp on new registered points
@@ -123,8 +124,7 @@ class GP(Tuner):
             # evaluates the random points
             self._init_bo_space(op, 
                                 cost_function, 
-                                n_init_samples, 
-                                utility_func,
+                                n_init_samples,
                                 log_path, 
                                 plotting_summary, 
                                 tuning_summary)
