@@ -2,6 +2,7 @@
 from .tuner import ParallelizedTuner
 from itertools import product
 
+
 class InputError(Exception):
     """Exception raised for errors in the input.
 
@@ -12,11 +13,11 @@ class InputError(Exception):
     def __init__(self, message):
         self.message = message
 
+
 class GridSearch(ParallelizedTuner):
 
-    def __init__(self, optimizer_class, grid, ressources, runner_type='StandardRunner'):
-        hyperparams = sorted(grid)
-        super(GridSearch, self).__init__(optimizer_class, hyperparams, ressources, runner_type)
+    def __init__(self, optimizer_class, hyperparam_names, grid, ressources, runner_type='StandardRunner'):
+        super(GridSearch, self).__init__(optimizer_class, hyperparam_names, ressources, runner_type)
         self._check_if_grid_is_valid(grid, ressources)
         self._grid = grid
         self._search_name = 'grid_search'

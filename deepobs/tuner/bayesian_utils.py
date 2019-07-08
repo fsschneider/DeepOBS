@@ -4,10 +4,11 @@ import numpy as np
 import os
 import json
 import matplotlib.pyplot as plt
-from .tuner_utils import _dump_json, _load_json, _append_json, _clear_json
+from .tuner_utils import _append_json, _clear_json
 from itertools import product
 
-# TODO how to do slicing for d >2?
+
+# TODO how to do slicing for d >=2?
 def _reshape_posterior_and_domain_for_plotting(mean, std, domain, acq, resolution):
     num_features = domain.shape[-1]
     new_shape = tuple(np.repeat(resolution, num_features))
@@ -18,7 +19,8 @@ def _reshape_posterior_and_domain_for_plotting(mean, std, domain, acq, resolutio
     for idx in range(num_features):
         new_domain.append(domain[:,idx].reshape(new_shape))
     return mean, std, new_domain, acq
-    
+
+
 def plot_bo_posterior(optimizer_path, step, resolution):
     # check whether the tuning run can be plotted (i.e. dim(GP)<=2)
     with open(os.path.join(optimizer_path, 'bo_tuning_log.json'), 'r') as f:
@@ -30,7 +32,8 @@ def plot_bo_posterior(optimizer_path, step, resolution):
         fig, ax = plot_2d_bo_posterior(optimizer_path, step, resolution)
     else:
         raise NotImplementedError
-        
+
+
 def plot_2d_bo_posterior(optimizer_path, step, resolution):
     op = _load_bo_optimizer_object(os.path.join(optimizer_path, 'obj'), str(step))
     acq_func = _load_bo_optimizer_object(os.path.join(optimizer_path, 'obj'), 'acq_func')
@@ -52,6 +55,7 @@ def plot_2d_bo_posterior(optimizer_path, step, resolution):
     ax[1].contourf(domain[0], domain[1], acq)
     plt.show()
     return fig, ax
+
 
 # TODO 1d 2d plot share abstraction
 def plot_1d_bo_posterior(optimizer_path, step, resolution):
@@ -77,6 +81,7 @@ def plot_1d_bo_posterior(optimizer_path, step, resolution):
     plt.show()
     return fig, ax
 
+
 def _generate_domain_from_op(op, resolution):
     keys = op.space.keys
     bounds = op.space.bounds
@@ -88,23 +93,28 @@ def _generate_domain_from_op(op, resolution):
     domain = np.array(list(product(*linspaces)))
     return domain
 
+
 def _calculate_posterior_from_op(op, resolution):
     domain = _generate_domain_from_op(op, resolution)
     mean, std = op._gp.predict(domain, return_std = True)
     return mean, std, domain
 
+
 def _init_bo_tuning_summary(log_path, op):
     # clear json
     _clear_json(log_path, 'tuning_log.json')
 
+
 def _save_bo_optimizer_object(path, file_name, op):
     with open(os.path.join(path, file_name), 'wb') as f:
         pickle.dump(op, f)
-        
+
+
 def _load_bo_optimizer_object(path, file_name):
     with open(os.path.join(path, file_name), 'rb') as f:
        op =  pickle.load(f)
     return op
+
 
 def _update_bo_tuning_summary(gp, next_point, target, log_path):
     
@@ -119,4 +129,4 @@ def _update_bo_tuning_summary(gp, next_point, target, log_path):
     summary_dict = {}
     summary_dict['predicted_target'] = predicted_target_mean[0]
     summary_dict['target'] = target
-    _append_json(log_path, 'bo_tuning_log.json', (next_point, summary_dict))            
+    _append_json(log_path, 'bo_tuning_log.json', (next_point, summary_dict))

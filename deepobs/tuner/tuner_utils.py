@@ -5,7 +5,9 @@ import json
 from scipy.stats. distributions import uniform
 import matplotlib.pyplot as plt
 
+
 # TODO somehow use the ranking to automate 10 seeds run?
+
 
 def _read_eval_pairs_from_tuning_summary(path_to_json):
     step_pairs = []
@@ -14,6 +16,7 @@ def _read_eval_pairs_from_tuning_summary(path_to_json):
             line = json.loads(line)
             step_pairs.append(line)
     return step_pairs
+
 
 def create_tuning_ranking(optimizer_path, mode = 'final', aggregated = False):
     # TODO is bayes was run in different mode than it should not be possible to get the ranking according to wrong mode
@@ -40,6 +43,7 @@ def create_tuning_ranking(optimizer_path, mode = 'final', aggregated = False):
         step_ranking = sorted(eval_pairs, key = lambda step: sgn * step[1][metric])
     ranked_list = [{'parameters': step[0], metric: step[1][metric]} for step in step_ranking]
     return ranked_list
+
 
 def plot_1d_tuning_summary(optimizer_path, hyperparam, mode = 'final', xscale = 'linear', aggregated = False):
     # make sure that summary is up to date
@@ -77,10 +81,12 @@ def plot_1d_tuning_summary(optimizer_path, hyperparam, mode = 'final', xscale = 
     plt.show()
     return fig, ax
 
+
 def plot_2d_tuning_summary(optimizer_path, hyperparam, mode = 'final', xscale = 'linear', aggregated = False):
     # TODO
     return
-    
+
+
 def get_aggregated_setting_summary(setting_path):
     summary_dict = {}
     aggregate = aggregate_runs(setting_path)
@@ -99,7 +105,8 @@ def get_aggregated_setting_summary(setting_path):
     idx = np.argmin(aggregate['test_losses']['mean'])
     summary_dict['best_test_loss'] = {'mean': aggregate['test_losses']['mean'][idx],
                                     'std': aggregate['test_losses']['std'][idx]}
-    return (params, summary_dict)
+    return params, summary_dict
+
 
 def get_setting_file_summary(setting_path, json_file):
     json_data = _load_json(setting_path, json_file)
@@ -110,7 +117,8 @@ def get_setting_file_summary(setting_path, json_file):
         summary_dict['best_test_accuracy'] = max(json_data['test_accuracies'])
     summary_dict['final_test_loss'] = json_data['test_losses'][-1]
     summary_dict['best_test_loss'] = min(json_data['test_losses'])
-    return (parameters, summary_dict)
+    return parameters, summary_dict
+
 
 def generate_tuning_summary(optimizer_path, aggregated = False):
     os.chdir(optimizer_path)
@@ -131,6 +139,7 @@ def generate_tuning_summary(optimizer_path, aggregated = False):
         # append to the json
         _append_json(optimizer_path, 'tuning_log.json', summary_tuple)
 
+
 class log_uniform():        
     def __init__(self, a, b, base=10):
         self.loc = a
@@ -145,24 +154,29 @@ class log_uniform():
         else:
             return exp_values
 
+
 def _dump_json(path, file, obj):
     with open(os.path.join(path, file), 'w') as f:
         f.write(json.dumps(obj))
-        
+
+
 def _append_json(path, file, obj):
     with open(os.path.join(path, file), 'a') as f:
         f.write(json.dumps(obj))
         f.write('\n')
-        
+
+
 def _clear_json(path, file):
     json_path = os.path.join(path, file)
     if os.path.exists(json_path):
         os.remove(json_path)
 
+
 def _load_json(path, file_name):
     with open(os.path.join(path, file_name), "r") as f:
          json_data = json.load(f)
     return json_data
+
 
 def compute_speed(setting_folder, conv_perf, metric):
     runs = [run for run in os.listdir(setting_folder) if run.endswith(".json")]
@@ -197,6 +211,7 @@ def compute_speed(setting_folder, conv_perf, metric):
         raise NotImplementedError
     
     return speed
+
 
 def aggregate_runs(setting_folder):
     runs = [run for run in os.listdir(setting_folder) if run.endswith(".json")]

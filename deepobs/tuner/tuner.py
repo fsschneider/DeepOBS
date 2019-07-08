@@ -5,20 +5,22 @@ from numpy.random import seed as np_seed
 import os
 import shutil
 
+
+# TODO refactor tuner with new hyperparams specification
 class Tuner(abc.ABC):
     def __init__(self,
                  optimizer_class,
-                 hyperparams,
+                 hyperparam_names,
                  ressources,
-                 runner_type = 'StandardRunner'):
+                 runner_type='StandardRunner'):
 
         self._optimizer_class = optimizer_class
         self._optimizer_name = optimizer_class.__name__
-        self._hyperparams = hyperparams
+        self._hyperparam_names = hyperparam_names
         self._ressources = ressources
         self._runner_type = runner_type
 
-    # # TODO where to make framework setable by the user?
+        # # TODO where to make framework setable by the user?
         if config.get_framework() == 'tensorflow':
             from .. import tensorflow as fw
         elif config.get_framework() == 'pytorch':
@@ -29,12 +31,13 @@ class Tuner(abc.ABC):
         try:
             self._runner = getattr(fw.runners.runner, runner_type)
         except AttributeError:
-            raise AttributeError('Runner type ', runner_type,' not implemented. If you really need it, you have to implement it on your own.')
+            raise AttributeError('Runner type ', runner_type,
+                                 ' not implemented. If you really need it, you have to implement it on your own.')
 
     @staticmethod
     def _set_seed(random_seed):
         np_seed(random_seed)
-    
+
     @staticmethod
     def _check_output_path(path):
         """Checks if path already exists. creates it if not, cleans it if yes."""
@@ -44,42 +47,46 @@ class Tuner(abc.ABC):
             # create if it does not exist
             os.makedirs(path)
             # TODO I dont delete the folder for now!! not a good idea (e.g. momentum = SGD in torch)
-#        else:
-#            # delete content if it exist
-#            contentlist = os.listdir(path)
-#            for f in contentlist:
-#                _path = os.path.join(path, f)
-#                if os.path.isfile(_path):
-#                    os.remove(_path)
-#                elif os.path.isdir(_path):
-#                    shutil.rmtree(_path)
-    
+
+    #        else:
+    #            # delete content if it exist
+    #            contentlist = os.listdir(path)
+    #            for f in contentlist:
+    #                _path = os.path.join(path, f)
+    #                if os.path.isfile(_path):
+    #                    os.remove(_path)
+    #                elif os.path.isdir(_path):
+    #                    shutil.rmtree(_path)
+
     @staticmethod
     def _read_testproblems(testproblems):
         if type(testproblems) == str:
-            testproblems=testproblems.split()
+            testproblems = testproblems.split()
         else:
             testproblems = sorted(testproblems)
         return testproblems
-    
+
     @abc.abstractmethod
-    def tune():
+    def tune(self):
         pass
-        
+
+
 class ParallelizedTuner(Tuner):
     def __init__(self,
                  optimizer_class,
-                 hyperparams,
+                 hyperparam_names,
                  ressources,
-                 runner_type = 'StandardRunner'):
+                 runner_type='StandardRunner'):
         super(ParallelizedTuner, self).__init__(optimizer_class,
-                                                hyperparams,
+                                                hyperparam_names,
                                                 ressources,
                                                 runner_type)
+
     @abc.abstractmethod
     def _sample(self):
         return
 
+    # TODO include the changes for hyperparam_names
     # TODO smarter way to create that file?
     def _generate_python_script(self):
         script = open(self._optimizer_name + '.py', 'w')
@@ -101,38 +108,39 @@ class ParallelizedTuner(Tuner):
     @staticmethod
     def _generate_hyperparams_formate_for_command_line(hyperparams):
         string = ''
-        for key,value in hyperparams.items():
-            string = string + key + '=' + str(value) + ',,'
-        string = string[:-2]
+        for key, value in hyperparams.items():
+            string += ' --' + key + ' ' + str(value)
         return string
 
     @staticmethod
+    # TODO how to deal with the training_params dict?
     def _generate_kwargs_format_for_command_line(**kwargs):
         string = ''
         for key, value in kwargs.items():
-            string += '--' + key + ' ' + str(value) + ' '
-        string = string [:-1]
+            string += ' --' + key + ' ' + str(value)
         return string
-    
-    def tune(self, testproblems, output_dir = './results', random_seed=42, **kwargs):
+
+    # TODO does tune() also work with command line arguments like --lr 0.9?
+    def tune(self, testproblems, output_dir='./results', random_seed=42, **kwargs):
         testproblems = self._read_testproblems(testproblems)
         for testproblem in testproblems:
             self._set_seed(random_seed)
             log_path = os.path.join(output_dir, testproblem, self._optimizer_name)
             self._check_output_path(log_path)
-            
+
+            # TODO better prints or not at all
             params = self._sample()
             print('Tuning', self._optimizer_name, 'on testproblem', testproblem)
             for sample in params:
                 print('Start training with', sample)
                 runner = self._runner(self._optimizer_class)
-                runner.run(testproblem, hyperparams=sample, random_seed=random_seed, output_dir = output_dir, **kwargs)
-                
-# TODO write into subfolder
-    def generate_commands_script(self, testproblems, output_dir = './results', random_seed = 42, **kwargs):
+                runner.run(testproblem, hyperparams=sample, random_seed=random_seed, output_dir=output_dir, **kwargs)
+
+    # TODO write into subfolder
+    def generate_commands_script(self, testproblems, output_dir='./results', random_seed=42, **kwargs):
         testproblems = self._read_testproblems(testproblems)
         script = self._generate_python_script()
-        file = open('jobs_'+ self._optimizer_name  + '_' + self._search_name + '.txt', 'w')
+        file = open('jobs_' + self._optimizer_name + '_' + self._search_name + '.txt', 'w')
         kwargs_string = self._generate_kwargs_format_for_command_line(**kwargs)
         for testproblem in testproblems:
             self._set_seed(random_seed)
@@ -142,5 +150,6 @@ class ParallelizedTuner(Tuner):
             file.write('##### ' + testproblem + ' #####\n')
             for sample in params:
                 sample_string = self._generate_hyperparams_formate_for_command_line(sample)
-                file.write('python3 ' + script + ' ' + testproblem + ' ' + sample_string + ' ' + '--random_seed ' + str(random_seed) + '--output_dir' + output_dir + ' ' + kwargs_string  + '\n')
+                file.write('python3 ' + script + ' ' + testproblem + ' ' + sample_string + ' ' + '--random_seed ' + str(
+                    random_seed) + '--output_dir' + output_dir + ' ' + kwargs_string + '\n')
         file.close()
