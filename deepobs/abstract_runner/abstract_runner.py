@@ -85,7 +85,7 @@ class Runner(abc.ABC):
         else:     # if there is one, fill the missing params from command line
             for hp_name, hp_specification in self._hyperparameter_names.items():
                 if hp_name in hyperparams:
-                    args[hp_name] = {hp_name: hyperparams[hp_name]}
+                    args[hp_name] = hyperparams[hp_name]
                 else:
                     _add_hp_to_argparse(parser, self._optimizer_name, hp_specification, hp_name)
 
