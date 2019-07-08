@@ -1,10 +1,10 @@
 """Module implementing StandardRunner."""
 
 from __future__ import print_function
-
 import torch
 import importlib
 import abc
+from argparse import Namespace
 from deepobs import config as global_config
 from .. import config
 from .. import testproblems
@@ -13,7 +13,7 @@ from deepobs.abstract_runner.abstract_runner import Runner
 import numpy as np
 
 class PTRunner(Runner):
-    def __init__(self, optimizer_class):
+    def __init__(self, optimizer_class, hyperparameter_names):
         """The abstract class for runner in the pytorch framework.
         Args:
             optimizer_class: The optimizer class of the optimizer that is run on
@@ -28,7 +28,7 @@ class PTRunner(Runner):
             training: An abstract method that has to be overwritten by the subclass.
             It performs the training loop.
         """
-        super(PTRunner, self).__init__(optimizer_class)
+        super(PTRunner, self).__init__(optimizer_class, hyperparameter_names)
 
     @abc.abstractmethod
     def training(self, testproblem, hyperparams, num_epochs, **training_params):
@@ -55,9 +55,6 @@ class PTRunner(Runner):
             case, this dict is empty.
             """
         return
-
-# TODO testproblem and hyperparams have to default to use them in argparse
-# how to avoid this? it is more clear if they are required
 
     def run(self,
             testproblem = None,
@@ -101,7 +98,6 @@ class PTRunner(Runner):
             **training_params)
 
         # overwrite locals after argparse
-        # TODO simplify
         testproblem = args['testproblem']
         hyperparams = args['hyperparams']
         batch_size = args['batch_size']
@@ -113,6 +109,8 @@ class PTRunner(Runner):
         no_logs = args['weight_decay']
         training_params = args['training_params']
 
+        print(hyperparams)
+
         if batch_size is None:
             batch_size = global_config.get_testproblem_default_setting(testproblem)['batch_size']
         if num_epochs is None:
@@ -120,7 +118,6 @@ class PTRunner(Runner):
 
         if data_dir is not None:
             config.set_data_dir(data_dir)
-
 
         tproblem = self.create_testproblem(testproblem, batch_size, weight_decay, random_seed)
 
@@ -151,8 +148,12 @@ class PTRunner(Runner):
             tproblem: An instance of deepobs.pytorch.testproblems.testproblem
         """
         # set the seed and GPU determinism
-        torch.backends.cudnn.deterministic = True
-        torch.backends.cudnn.benchmark = False
+        if config.get_is_deterministic():
+            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.benchmark = False
+        else:
+            torch.backends.cudnn.deterministic = False
+            torch.backends.cudnn.benchmark = True
         np.random.seed(random_seed)
         torch.manual_seed(random_seed)
 
@@ -231,9 +232,9 @@ class StandardRunner(PTRunner):
         training: Performs the training on a testproblem instance.
     """
 
-    def __init__(self, optimizer_class):
+    def __init__(self, optimizer_class, hyperparameter_names):
 
-        super(StandardRunner, self).__init__(optimizer_class)
+        super(StandardRunner, self).__init__(optimizer_class, hyperparameter_names)
 
     def training(self,
             tproblem,

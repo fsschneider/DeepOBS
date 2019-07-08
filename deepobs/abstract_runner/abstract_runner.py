@@ -5,6 +5,7 @@ import os
 import json
 from .abstract_runner_utils import float2str
 from .abstract_runner_utils import StoreDictKeyPair
+from .abstract_runner_utils import _add_hp_to_argparse
 import time
 import abc
 import argparse
@@ -35,10 +36,11 @@ class Runner(abc.ABC):
     write_output: Writes the output of the run to the output directory.
     """
 
-    def __init__(self, optimizer_class):
+    def __init__(self, optimizer_class, hyperparameter_names):
 
         self._optimizer_class = optimizer_class
         self._optimizer_name = optimizer_class.__name__
+        self._hyperparameter_names = hyperparameter_names
 
 # TODO train log interval and tf logging?
     @abc.abstractmethod
@@ -55,8 +57,8 @@ class Runner(abc.ABC):
             **training_params):
         return
 
-    @staticmethod
-    def parse_args(testproblem,
+
+    def parse_args(self, testproblem,
             hyperparams,
             batch_size,
             num_epochs,
@@ -76,10 +78,16 @@ class Runner(abc.ABC):
         else:
             args['testproblem'] = testproblem
 
-        if hyperparams is None:
-            parser.add_argument('hyperparams', action = StoreDictKeyPair)
-        else:
-            args['hyperparams'] = hyperparams
+        if hyperparams is None:    # if no hyperparams dict is passed to run()
+            for hp_name, hp_specification in self._hyperparameter_names.items():
+                _add_hp_to_argparse(parser, self._optimizer_name, hp_specification, hp_name)
+
+        else:     # if there is one, fill the missing params from command line
+            for hp_name, hp_specification in self._hyperparameter_names.items():
+                if hp_name in hyperparams:
+                    args[hp_name] = {hp_name: hyperparams[hp_name]}
+                else:
+                    _add_hp_to_argparse(parser, self._optimizer_name, hp_specification, hp_name)
 
         if weight_decay is None:
             parser.add_argument(
@@ -141,6 +149,7 @@ class Runner(abc.ABC):
             args['output_dir'] = output_dir
 
         if not training_params:
+            # TODO how to get rid of ,, for training params? -> own dict and empty dict as default?
             parser.add_argument(
                 "--training_params",
                 help="""Additional training parameters as key-value pairs.""",
@@ -161,6 +170,12 @@ class Runner(abc.ABC):
 
         cmdline_args = vars(parser.parse_args())
         args.update(cmdline_args)
+
+        # put all optimizer hyperparams in one subdict
+        args['hyperparams'] = {}
+        for hp in self._hyperparameter_names:
+            args['hyperparams'][hp] = args[hp]
+            del args[hp]
         return args
 
     @staticmethod
