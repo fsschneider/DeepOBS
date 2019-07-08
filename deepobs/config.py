@@ -65,7 +65,15 @@ DEFAULT_TEST_PROBLEMS_SETTINGS = {
         'mnist_2c2d': {
                 'batch_size': 128,
                 'num_epochs': 100
-                }
+                },
+        'mnist_mlp': {
+            'batch_size': 128,
+            'num_epochs': 100
+            },
+        'fmnist_mlp': {
+            'batch_size': 128,
+            'num_epochs': 100
+            }
         }
 
 def get_testproblem_default_setting(testproblem):
