@@ -6,7 +6,6 @@ import os
 import shutil
 
 
-# TODO refactor tuner with new hyperparams specification
 class Tuner(abc.ABC):
     def __init__(self,
                  optimizer_class,
@@ -20,7 +19,6 @@ class Tuner(abc.ABC):
         self._ressources = ressources
         self._runner_type = runner_type
 
-        # # TODO where to make framework setable by the user?
         if config.get_framework() == 'tensorflow':
             from .. import tensorflow as fw
         elif config.get_framework() == 'pytorch':
@@ -86,7 +84,7 @@ class ParallelizedTuner(Tuner):
     def _sample(self):
         return
 
-    # TODO include the changes for hyperparam_names
+    # TODO hyperparam_names['type'] is formatted incorrectly
     # TODO smarter way to create that file?
     def _generate_python_script(self):
         script = open(self._optimizer_name + '.py', 'w')
@@ -100,7 +98,8 @@ class ParallelizedTuner(Tuner):
                      '\nrunner = ' +
                      self._runner_type +
                      '(' +
-                     self._optimizer_class.__name__ +
+                     self._optimizer_class.__name__ + ', '
+                     + str(self._hyperparam_names) +
                      ')\nrunner.run()')
         script.close()
         return self._optimizer_name + '.py'
@@ -120,7 +119,6 @@ class ParallelizedTuner(Tuner):
             string += ' --' + key + ' ' + str(value)
         return string
 
-    # TODO does tune() also work with command line arguments like --lr 0.9?
     def tune(self, testproblems, output_dir='./results', random_seed=42, **kwargs):
         testproblems = self._read_testproblems(testproblems)
         for testproblem in testproblems:
@@ -133,7 +131,7 @@ class ParallelizedTuner(Tuner):
             print('Tuning', self._optimizer_name, 'on testproblem', testproblem)
             for sample in params:
                 print('Start training with', sample)
-                runner = self._runner(self._optimizer_class)
+                runner = self._runner(self._optimizer_class, self._hyperparam_names)
                 runner.run(testproblem, hyperparams=sample, random_seed=random_seed, output_dir=output_dir, **kwargs)
 
     # TODO write into subfolder
