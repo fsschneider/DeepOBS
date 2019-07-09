@@ -95,6 +95,7 @@ class GP(Tuner):
              acq_kappa = 2.576, 
              acq_xi = 0.0, 
              mode = 'final',
+             rerun_best_setting = False,
              **kwargs):
         
         testproblems = self._read_testproblems(testproblems)
@@ -129,7 +130,7 @@ class GP(Tuner):
                                 plotting_summary, 
                                 tuning_summary)
             
-            # execute remainig ressources
+            # execute remaining ressources
             # TODO assert that ressources >= n init points
             for iteration in range(n_init_samples+1, self._ressources + 1):
                 next_point = op.suggest(utility_func)
@@ -142,4 +143,8 @@ class GP(Tuner):
                 op._gp.fit(op._space.params, op._space.target)
                 if plotting_summary:
                     _save_bo_optimizer_object(os.path.join(log_path, 'obj'), str(iteration), op)
-        return op
+
+            if rerun_best_setting:
+                # TODO momentum is rerun in SGD folder!!
+                optimizer_path = os.path.join(output_dir, testproblem, self._optimizer_name)
+                self.rerun_best_setting(optimizer_path)
