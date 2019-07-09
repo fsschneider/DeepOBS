@@ -106,7 +106,10 @@ class TFRunner(Runner):
         loss_ /= num_iters
         acc_ /= num_iters
 #
-        print("{0:s} loss {1:g}, acc {2:f}".format(msg, loss_, acc_))
+        if acc_ != 0.0:
+            print("{0:s} loss {1:g}, acc {2:f}".format(msg, loss_, acc_))
+        else:
+            print("{0:s} loss {1:g}".format(msg, loss_))
 
         # Print and return the results.
         return loss_, acc_

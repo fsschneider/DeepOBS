@@ -219,7 +219,10 @@ class PTRunner(Runner):
         if hasattr(tproblem, 'get_regularization_loss'):
             loss += tproblem.get_regularization_loss().item()
 
-        print("{0:s} loss {1:g}, acc {2:f}".format(msg, loss, accuracy))
+        if accuracy != 0.0:
+            print("{0:s} loss {1:g}, acc {2:f}".format(msg, loss, accuracy))
+        else:
+            print("{0:s} loss {1:g}".format(msg, loss))
 
         return loss, accuracy
 
