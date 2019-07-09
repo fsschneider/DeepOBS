@@ -2,8 +2,8 @@
 import abc
 from .. import config
 from numpy.random import seed as np_seed
-from .tuner_utils import create_tuning_ranking
-from .tuner_utils import _load_json
+from ..analyzer.analyze import create_setting_analyzer_ranking
+from ..analyzer.shared_utils import _check_if_metric_is_available
 import os
 import numpy as np
 
@@ -34,21 +34,17 @@ class Tuner(abc.ABC):
             raise AttributeError('Runner type ', runner_type,
                                  ' not implemented. If you really need it, you have to implement it on your own.')
 
-    def rerun_best_setting(self, optimizer_path, seeds = np.arange(43, 52), rank=1, mode='final', aggregated=False):
+    def rerun_best_setting(self, optimizer_path, seeds = np.arange(43, 52), rank=1, mode='final', metric = 'test_accuracies'):
+        metric = _check_if_metric_is_available(optimizer_path, metric)
         optimizer_path = os.path.join(optimizer_path)
-        # TODO would be easier if that also returns the path to the setting
-        ranking = create_tuning_ranking(optimizer_path, mode, aggregated)
-        setting = ranking[rank - 1]['parameters']
+
+        setting_analyzer_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
+        setting = setting_analyzer_ranking[rank - 1]
+
         runner = self._runner(self._optimizer_class, self._hyperparam_names)
-
-        # read in meta data, such as num_epochs, testproblem, etc
-        a_sett_path = [sett for sett in os.listdir(optimizer_path) if os.path.isdir(os.path.join(optimizer_path, sett))][0]
-        a_json = [j for j in os.listdir(os.path.join(optimizer_path, a_sett_path))][0]
-        json_data = _load_json(a_sett_path, a_json)
-        testproblem = json_data['testproblem']
-        num_epochs = json_data['num_epochs']
-        batch_size = json_data['batch_size']
-
+        testproblem = setting.aggregate['testproblem']
+        num_epochs = setting.aggregate['num_epochs']
+        batch_size = setting.aggregate['batch_size']
         results_path = os.path.split(os.path.split(optimizer_path)[0])[0]
         for seed in seeds:
             runner.run(testproblem, hyperparams = setting, random_seed = int(seed), num_epochs = num_epochs, batch_size = batch_size, output_dir = results_path)
