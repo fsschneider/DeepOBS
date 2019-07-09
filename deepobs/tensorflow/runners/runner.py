@@ -13,9 +13,9 @@ from copy import deepcopy
 from deepobs.abstract_runner.abstract_runner import Runner
 
 class TFRunner(Runner):
-    def __init__(self, optimizer_class):
+    def __init__(self, optimizer_class, hyperparameter_names):
 
-        super(TFRunner, self).__init__(optimizer_class)
+        super(TFRunner, self).__init__(optimizer_class, hyperparameter_names)
 
     def run(self,
             testproblem,
@@ -120,9 +120,9 @@ class TFRunner(Runner):
 class StandardRunner(TFRunner):
 
 
-    def __init__(self, optimizer_class):
+    def __init__(self, optimizer_class, hyperparameter_names):
 
-        super(StandardRunner, self).__init__(optimizer_class)
+        super(StandardRunner, self).__init__(optimizer_class, hyperparameter_names)
 
     def init_summary(self, loss,
                      learning_rate_var,
