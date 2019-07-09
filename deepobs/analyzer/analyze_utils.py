@@ -3,6 +3,45 @@ import pandas as pd
 from matplotlib import cm
 import matplotlib.pyplot as plt
 from matplotlib2tikz import get_tikz_code
+import os
+from .shared_utils import _load_json
+
+
+# TODO is compute speed up to date?
+def compute_speed(setting_folder, conv_perf, metric):
+    runs = [run for run in os.listdir(setting_folder) if run.endswith(".json")]
+    # metrices
+    train_losses = []
+    train_accuracies = []
+    test_losses = []
+    test_accuracies = []
+
+    for run in runs:
+        json_data = _load_json(setting_folder, run)
+        train_losses.append(json_data['train_losses'])
+        test_losses.append(json_data['test_losses'])
+        # just add accuracies to the aggregate if they are available
+        if 'train_accuracies' in json_data:
+            train_accuracies.append(json_data['train_accuracies'])
+            test_accuracies.append(json_data['test_accuracies'])
+
+    perf = np.array(eval(metric))
+    if metric == "test_losses" or metric == "train_losses":
+        # average over first time they reach conv perf (use num_epochs if conv perf is not reached)
+        speed = np.mean(
+            np.argmax(perf <= conv_perf, axis=1) +
+            np.invert(np.max(perf <= conv_perf, axis=1)) *
+            perf.shape[1])
+    elif metric == "test_accuracies" or metric == "train_accuracies":
+        speed = np.mean(
+            np.argmax(perf >= conv_perf, axis=1) +
+            np.invert(np.max(perf >= conv_perf, axis=1)) *
+            perf.shape[1])
+    else:
+        raise NotImplementedError
+
+    return speed
+
 
 def beautify_lr_sensitivity(fig, ax):
     """Beautify a learning rate sensitivity plot.
