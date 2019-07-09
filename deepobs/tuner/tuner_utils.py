@@ -6,9 +6,6 @@ from scipy.stats. distributions import uniform
 import matplotlib.pyplot as plt
 
 
-# TODO somehow use the ranking to automate 10 seeds run?
-
-
 def _read_eval_pairs_from_tuning_summary(path_to_json):
     step_pairs = []
     with open(path_to_json, 'r') as f:
@@ -22,6 +19,7 @@ def create_tuning_ranking(optimizer_path, mode = 'final', aggregated = False):
     # TODO is bayes was run in different mode than it should not be possible to get the ranking according to wrong mode
     
     # make sure that summary is up to date
+    # TODO no need to write summary into file. Return as dict or something and only write if the user wants to
     generate_tuning_summary(optimizer_path, aggregated=aggregated)
     
     # read in the whole summary    

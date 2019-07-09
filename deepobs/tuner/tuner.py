@@ -2,8 +2,10 @@
 import abc
 from .. import config
 from numpy.random import seed as np_seed
+from .tuner_utils import create_tuning_ranking
+from .tuner_utils import _load_json
 import os
-import shutil
+import numpy as np
 
 
 class Tuner(abc.ABC):
@@ -31,6 +33,26 @@ class Tuner(abc.ABC):
         except AttributeError:
             raise AttributeError('Runner type ', runner_type,
                                  ' not implemented. If you really need it, you have to implement it on your own.')
+
+    def rerun_best_setting(self, optimizer_path, seeds = np.arange(43, 52), rank=1, mode='final', aggregated=False):
+        optimizer_path = os.path.join(optimizer_path)
+        # TODO would be easier if that also returns the path to the setting
+        ranking = create_tuning_ranking(optimizer_path, mode, aggregated)
+        setting = ranking[rank - 1]['parameters']
+        runner = self._runner(self._optimizer_class, self._hyperparam_names)
+
+        # read in meta data, such as num_epochs, testproblem, etc
+        a_sett_path = [sett for sett in os.listdir(optimizer_path) if os.path.isdir(os.path.join(optimizer_path, sett))][0]
+        a_json = [j for j in os.listdir(os.path.join(optimizer_path, a_sett_path))][0]
+        json_data = _load_json(a_sett_path, a_json)
+        testproblem = json_data['testproblem']
+        num_epochs = json_data['num_epochs']
+        batch_size = json_data['batch_size']
+
+        results_path = os.path.split(os.path.split(optimizer_path)[0])[0]
+        for seed in seeds:
+            runner.run(testproblem, hyperparams = setting, random_seed = int(seed), num_epochs = num_epochs, batch_size = batch_size, output_dir = results_path)
+
 
     @staticmethod
     def _set_seed(random_seed):
@@ -119,7 +141,7 @@ class ParallelizedTuner(Tuner):
             string += ' --' + key + ' ' + str(value)
         return string
 
-    def tune(self, testproblems, output_dir='./results', random_seed=42, **kwargs):
+    def tune(self, testproblems, output_dir='./results', random_seed=42, rerun_best_setting = False, **kwargs):
         testproblems = self._read_testproblems(testproblems)
         for testproblem in testproblems:
             self._set_seed(random_seed)
@@ -133,6 +155,10 @@ class ParallelizedTuner(Tuner):
                 print('Start training with', sample)
                 runner = self._runner(self._optimizer_class, self._hyperparam_names)
                 runner.run(testproblem, hyperparams=sample, random_seed=random_seed, output_dir=output_dir, **kwargs)
+            if rerun_best_setting:
+                # TODO momentum is rerun in SGD folder!!
+                optimizer_path = os.path.join(output_dir, testproblem, self._optimizer_name)
+                self.rerun_best_setting(optimizer_path)
 
     # TODO write into subfolder
     def generate_commands_script(self, testproblems, output_dir='./results', random_seed=42, **kwargs):
