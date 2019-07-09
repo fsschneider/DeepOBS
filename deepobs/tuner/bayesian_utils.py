@@ -4,7 +4,7 @@ import numpy as np
 import os
 import json
 import matplotlib.pyplot as plt
-from .tuner_utils import _append_json, _clear_json
+from ..analyzer.shared_utils import _append_json, _clear_json
 from itertools import product
 
 
