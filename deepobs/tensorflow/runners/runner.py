@@ -9,6 +9,7 @@ from .. import config
 from .. import testproblems
 from . import runner_utils
 from copy import deepcopy
+from deepobs import config as global_config
 
 from deepobs.abstract_runner.abstract_runner import Runner
 
@@ -19,24 +20,63 @@ class TFRunner(Runner):
         super(TFRunner, self).__init__(optimizer_class, hyperparameter_names)
 
     def run(self,
-            testproblem,
-            hyperparams,
-            batch_size,
-            num_epochs,
-            random_seed=42,
+            testproblem = None,
+            hyperparams = None,
+            batch_size = None,
+            num_epochs = None,
+            random_seed=None,
             data_dir=None,
-            output_dir='./results',
+            output_dir=None,
             weight_decay=None,
-            no_logs=False,
-            **training_params
-            ):
+            no_logs=None,
+            train_log_interval = None,
+            print_train_iter = None,
+            tb_log = None,
+            tb_log_dir = None,
+            **training_params):
+
+        args = self.parse_args(testproblem,
+                               hyperparams,
+                               batch_size,
+                               num_epochs,
+                               random_seed,
+                               data_dir,
+                               output_dir,
+                               weight_decay,
+                               no_logs,
+                               train_log_interval,
+                               print_train_iter,
+                               tb_log,
+                               tb_log_dir,
+                               **training_params)
+
+        # overwrite locals after argparse
+        testproblem = args['testproblem']
+        hyperparams = args['hyperparams']
+        batch_size = args['batch_size']
+        num_epochs = args['num_epochs']
+        random_seed = args['random_seed']
+        data_dir = args['data_dir']
+        output_dir = args['output_dir']
+        weight_decay = args['weight_decay']
+        no_logs = args['weight_decay']
+        training_params = args['training_params']
+        tb_log_dir = args['tb_log_dir']
+        tb_log = args['tb_log']
+        train_log_interval = args['train_log_interval']
+        print_train_iter = args['print_train_iter']
+
+        if batch_size is None:
+            batch_size = global_config.get_testproblem_default_setting(testproblem)['batch_size']
+        if num_epochs is None:
+            num_epochs = global_config.get_testproblem_default_setting(testproblem)['num_epochs']
 
         if data_dir is not None:
             config.set_data_dir(data_dir)
 
         tproblem = self.create_testproblem(testproblem, batch_size, weight_decay, random_seed)
 
-        output = self.training(tproblem, hyperparams, num_epochs, **training_params)
+        output = self.training(tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params)
         output = self._post_process_output(output, 
                                            testproblem, 
                                            batch_size, 
@@ -175,7 +215,7 @@ class TFRunner(Runner):
 
 
     @abc.abstractmethod
-    def training(self, testproblem, hyperparams, num_epochs, **training_params):
+    def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params):
         """Must be implemented by subclass. Returns a dict of all captured metrices."""
         return
 
@@ -187,13 +227,7 @@ class StandardRunner(TFRunner):
         super(StandardRunner, self).__init__(optimizer_class, hyperparameter_names)
 
     def training(self,
-            tproblem,
-            hyperparams,
-            num_epochs,
-            train_log_interval=10,
-            print_train_iter=False,
-            tf_logging=False,
-            tf_logging_dir='./tensorboard_logs'):
+                 tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir):
 
         # TODO abstract loss
         loss = tf.reduce_mean(tproblem.losses) + tproblem.regularizer
@@ -225,12 +259,12 @@ class StandardRunner(TFRunner):
         test_accuracies = []
 
         # Tensorboard summaries
-        if tf_logging:
+        if tb_log:
             batch_size = tproblem._batch_size
             per_iter_summaries, per_epoch_summaries, summary_writer = self.init_summary(loss,
                                                                                         learning_rate_var,
                                                                                         batch_size,
-                                                                                        tf_logging_dir)
+                                                                                        tb_log_dir)
         # Start tensorflow session and initialize variables.
         sess = tf.Session()
         sess.run(tf.global_variables_initializer())
@@ -242,7 +276,7 @@ class StandardRunner(TFRunner):
             print("Evaluating after {0:d} of {1:d} epochs...".format(n, num_epochs))
 
             loss_, acc_ = self.evaluate(tproblem, sess, loss, test=False)
-            if tf_logging:
+            if tb_log:
                 current_step = len(train_losses)
                 self.write_per_epoch_summary(sess,
                                          loss_,
@@ -255,7 +289,7 @@ class StandardRunner(TFRunner):
             train_accuracies.append(acc_)
 
             loss_, acc_ = self.evaluate(tproblem, sess, loss, test=True)
-            if tf_logging:
+            if tb_log:
                 current_step = len(test_losses)
                 self.write_per_epoch_summary(sess,
                                          loss_,
@@ -282,7 +316,7 @@ class StandardRunner(TFRunner):
                         _, loss_ = sess.run([step, loss])
                         minibatch_train_losses.append(loss_.astype(float))
 
-                        if tf_logging:
+                        if tb_log:
                             current_step = sess.run(global_step)
                             self.write_per_iter_summary(sess,
                                                         per_iter_summaries,
