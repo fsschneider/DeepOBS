@@ -4,7 +4,7 @@ from __future__ import print_function
 import torch
 import importlib
 import abc
-from argparse import Namespace
+from torch.utils.tensorboard import SummaryWriter
 from deepobs import config as global_config
 from .. import config
 from .. import testproblems
@@ -31,7 +31,7 @@ class PTRunner(Runner):
         super(PTRunner, self).__init__(optimizer_class, hyperparameter_names)
 
     @abc.abstractmethod
-    def training(self, testproblem, hyperparams, num_epochs, **training_params):
+    def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params):
         """Must be implemented by the subclass. Performs the training and stores
         the metrices.
         Args:
@@ -61,13 +61,18 @@ class PTRunner(Runner):
             hyperparams = None,
             batch_size = None,
             num_epochs = None,
-            random_seed=42,
+            random_seed=None,
             data_dir=None,
-            output_dir='./results',
+            output_dir=None,
             weight_decay=None,
-            no_logs=False,
+            no_logs=None,
+            train_log_interval = None,
+            print_train_iter = None,
+            tb_log = None,
+            tb_log_dir = None,
             **training_params
             ):
+
         """Runs a testproblem with the optimizer_class. Has the following tasks:
             1. setup testproblem
             2. run the training (must be implemented by subclass)
@@ -95,6 +100,10 @@ class PTRunner(Runner):
             output_dir,
             weight_decay,
             no_logs,
+            train_log_interval,
+            print_train_iter,
+            tb_log,
+            tb_log_dir,
             **training_params)
 
         # overwrite locals after argparse
@@ -108,8 +117,10 @@ class PTRunner(Runner):
         weight_decay = args['weight_decay']
         no_logs = args['weight_decay']
         training_params = args['training_params']
-
-        print(hyperparams)
+        tb_log_dir = args['tb_log_dir']
+        tb_log  = args['tb_log']
+        train_log_interval = args['train_log_interval']
+        print_train_iter = args['print_train_iter']
 
         if batch_size is None:
             batch_size = global_config.get_testproblem_default_setting(testproblem)['batch_size']
@@ -121,7 +132,7 @@ class PTRunner(Runner):
 
         tproblem = self.create_testproblem(testproblem, batch_size, weight_decay, random_seed)
 
-        output = self.training(tproblem, hyperparams, num_epochs, **training_params)
+        output = self.training(tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params)
         output = self._post_process_output(output, 
                                            testproblem, 
                                            batch_size, 
@@ -240,13 +251,7 @@ class StandardRunner(PTRunner):
 
         super(StandardRunner, self).__init__(optimizer_class, hyperparameter_names)
 
-    def training(self,
-            tproblem,
-            hyperparams,
-            num_epochs,
-            # the following are the training_params
-            train_log_interval = 10,
-            print_train_iter = False):
+    def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir):
 
         """Input:
                 tproblem (testproblem): The testproblem instance to train on.
@@ -283,6 +288,10 @@ class StandardRunner(PTRunner):
         test_accuracies = []
 
         minibatch_train_losses = []
+
+        if tb_log:
+            summary_writer = SummaryWriter(log_dir=tb_log_dir)
+        global_step = 0
 
         for epoch_count in range(num_epochs+1):
             # Evaluate at beginning of epoch.
@@ -324,18 +333,23 @@ class StandardRunner(PTRunner):
                         minibatch_train_losses.append(batch_loss.item())
                         if print_train_iter:
                             print("Epoch {0:d}, step {1:d}: loss {2:g}".format(epoch_count, batch_count, batch_loss))
+                        if tb_log:
+                            summary_writer.add_scalar('loss', batch_loss.item(), global_step)
+
                     batch_count += 1
+                    global_step += 1
 
                 except StopIteration:
                     break
 
             if np.isnan(batch_loss.item()) or np.isinf(batch_loss.item()):
-                train_losses, test_losses, train_accuracies, test_accuracies = self._abort_routine(epoch_count,
+                train_losses, test_losses, train_accuracies, test_accuracies, minibatch_train_losses = self._abort_routine(epoch_count,
                                                                                                    num_epochs,
                                                                                                    train_losses,
                                                                                                    test_losses,
                                                                                                    train_accuracies,
-                                                                                                   test_accuracies)
+                                                                                                   test_accuracies,
+                                                                                                minibatch_train_losses)
                 break
             else:
                 continue
@@ -344,8 +358,7 @@ class StandardRunner(PTRunner):
         output = {
             "train_losses": train_losses,
             "test_losses": test_losses,
-            # dont need minibatch train losses at the moment
-#            "minibatch_train_losses": minibatch_train_losses,
+            "minibatch_train_losses": minibatch_train_losses,
             "train_accuracies": train_accuracies,
             "test_accuracies": test_accuracies
         }
