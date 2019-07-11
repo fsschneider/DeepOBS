@@ -31,6 +31,8 @@ def aggregate_runs(setting_folder):
     # merge meta data
     aggregate['optimizer_hyperparams'] = json_data['optimizer_hyperparams']
     aggregate['testproblem'] = json_data['testproblem']
+    aggregate['num_epochs'] = json_data['num_epochs']
+    aggregate['batch_size'] = json_data['batch_size']
     return aggregate
 
 
