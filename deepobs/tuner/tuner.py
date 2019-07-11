@@ -42,12 +42,16 @@ class Tuner(abc.ABC):
         setting = setting_analyzer_ranking[rank - 1]
 
         runner = self._runner(self._optimizer_class, self._hyperparam_names)
+
+        hyperparams = setting.aggregate['optimizer_hyperparams']
         testproblem = setting.aggregate['testproblem']
         num_epochs = setting.aggregate['num_epochs']
         batch_size = setting.aggregate['batch_size']
         results_path = os.path.split(os.path.split(optimizer_path)[0])[0]
+        # TODO remove print
+        print(testproblem, metric, results_path)
         for seed in seeds:
-            runner.run(testproblem, hyperparams = setting, random_seed = int(seed), num_epochs = num_epochs, batch_size = batch_size, output_dir = results_path)
+            runner.run(testproblem, hyperparams = hyperparams, random_seed = int(seed), num_epochs = num_epochs, batch_size = batch_size, output_dir = results_path)
 
 
     @staticmethod
