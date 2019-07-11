@@ -10,6 +10,7 @@ import time
 import abc
 import argparse
 
+
 class Runner(abc.ABC):
     """Abstract base class for all different runners in DeepOBS.
     Captures everything that is common to both frameworks and every runner type.
@@ -233,13 +234,13 @@ class Runner(abc.ABC):
         '''Ensures that for both frameworks the structure of the output is the same'''
         
         # remove test accuracy if it is not available
-        if output['test_accuracies']:
+        if 'test_accuracies' in output:
             if all(output['test_accuracies']) == 0:
                 del output['test_accuracies']
                 del output['train_accuracies']
         
         # add empty analyzable trainig_params dict if the user forgot it
-        if not output['analyzable_training_params']:
+        if 'analyzable_training_params' not in output:
             output['analyzable_training_params'] = {}
         
         # merge meta data to output dict
@@ -265,3 +266,15 @@ class Runner(abc.ABC):
         """
         with open(os.path.join(run_folder_name, file_name + ".json"), "w") as f:
                 json.dump(output, f)
+
+    @staticmethod
+    def _abort_routine(epoch_count, num_epochs, train_losses, test_losses, train_accuracies, test_accuracies):
+        print('Breaking from run after epoch', str(epoch_count),
+              'due to wrongly calibrated optimization (Loss is Nan or Inf)')
+        for i in range(epoch_count, num_epochs):
+            # TODO how to deal with minibatch-train-losses here?
+            train_losses.append(train_losses[0])
+            test_losses.append(test_losses[0])
+            train_accuracies.append(train_accuracies[0])
+            test_accuracies.append(test_accuracies[0])
+        return train_losses, test_losses, train_accuracies, test_accuracies
