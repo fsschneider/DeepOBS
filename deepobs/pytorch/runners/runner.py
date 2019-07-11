@@ -226,6 +226,7 @@ class PTRunner(Runner):
 
         return loss, accuracy
 
+
 class StandardRunner(PTRunner):
     """A standard runner. Can run a normal training loop with fixed
     hyperparams or a learning rate schedule. It should be used as a template
@@ -238,6 +239,132 @@ class StandardRunner(PTRunner):
     def __init__(self, optimizer_class, hyperparameter_names):
 
         super(StandardRunner, self).__init__(optimizer_class, hyperparameter_names)
+
+    def training(self,
+            tproblem,
+            hyperparams,
+            num_epochs,
+            # the following are the training_params
+            train_log_interval = 10,
+            print_train_iter = False):
+
+        """Input:
+                tproblem (testproblem): The testproblem instance to train on.
+                num_epochs (int): The number of training epochs.
+
+            **training_params are:
+                lr_sched_epochs (list): The epochs where to adjust the learning rate.
+                lr_sched_factots (list): The corresponding factors by which to adjust the learning rate.
+                train_log_interval (int): When to log the minibatch loss/accuracy.
+                print_train_iter (bool): Whether to print the training progress at every train_log_interval
+
+            Returns:
+                output (dict): The logged metrices. Is of the form:
+                    {'test_losses' : test_losses
+                     'train_losses': train_losses,
+                     'test_accuracies': test_accuracies,
+                     'train_accuracies': train_accuracies,
+                     'analyzable_training_params': {...}
+                     }
+
+            where the metrices values are lists that were filled during training
+            and the key 'analyzable_training_params' holds a dict of training
+            parameters that should be taken into account in the analysis later on.
+            These can be, for example, learning rate schedules. Or in the easiest
+            case, this dict is empty.
+        """
+
+        opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
+
+        # Lists to log train/test loss and accuracy.
+        train_losses = []
+        test_losses = []
+        train_accuracies = []
+        test_accuracies = []
+
+        minibatch_train_losses = []
+
+        for epoch_count in range(num_epochs+1):
+            # Evaluate at beginning of epoch.
+            print("********************************")
+            print("Evaluating after {0:d} of {1:d} epochs...".format(epoch_count, num_epochs))
+
+            loss_, acc_ = self.evaluate(tproblem, test=False)
+            train_losses.append(loss_)
+            train_accuracies.append(acc_)
+
+            loss_, acc_ = self.evaluate(tproblem, test=True)
+            test_losses.append(loss_)
+            test_accuracies.append(acc_)
+
+            print("********************************")
+
+            # Break from train loop after the last round of evaluation
+            if epoch_count == num_epochs:
+                break
+
+            ### Training ###
+
+            # set to training mode
+            tproblem.train_init_op()
+            batch_count = 0
+            while True:
+                try:
+                    opt.zero_grad()
+                    batch_loss, _ = tproblem.get_batch_loss_and_accuracy()
+                    # if the testproblem has a regularization, add the regularization loss.
+                    if hasattr(tproblem, 'get_regularization_loss'):
+                        regularizer_loss = tproblem.get_regularization_loss()
+                        batch_loss += regularizer_loss
+
+                    batch_loss.backward()
+                    opt.step()
+
+                    if batch_count % train_log_interval == 0:
+                        minibatch_train_losses.append(batch_loss.item())
+                        if print_train_iter:
+                            print("Epoch {0:d}, step {1:d}: loss {2:g}".format(epoch_count, batch_count, batch_loss))
+                    batch_count += 1
+
+                except StopIteration:
+                    break
+
+            if np.isnan(batch_loss.item()) or np.isinf(batch_loss.item()):
+                train_losses, test_losses, train_accuracies, test_accuracies = self._abort_routine(epoch_count,
+                                                                                                   num_epochs,
+                                                                                                   train_losses,
+                                                                                                   test_losses,
+                                                                                                   train_accuracies,
+                                                                                                   test_accuracies)
+                break
+            else:
+                continue
+
+        # Put results into output dictionary.
+        output = {
+            "train_losses": train_losses,
+            "test_losses": test_losses,
+            # dont need minibatch train losses at the moment
+#            "minibatch_train_losses": minibatch_train_losses,
+            "train_accuracies": train_accuracies,
+            "test_accuracies": test_accuracies
+        }
+
+        return output
+
+
+class LearningRateScheduleRunner(PTRunner):
+    """A standard runner. Can run a normal training loop with fixed
+    hyperparams or a learning rate schedule. It should be used as a template
+    to implement custom runners.
+
+    Methods:
+        training: Performs the training on a testproblem instance.
+    """
+
+    def __init__(self, optimizer_class, hyperparameter_names):
+
+        super(LearningRateScheduleRunner, self).__init__(optimizer_class, hyperparameter_names)
 
     def training(self,
             tproblem,
@@ -339,16 +466,13 @@ class StandardRunner(PTRunner):
                     break
 
             # break from training if it goes wrong
-            # TODO find a good penalization and add to tf version and rather do this in abstract runner (to be independent of user)
             if np.isnan(batch_loss.item()) or np.isinf(batch_loss.item()):
-                print('Breaking from run after epoch', str(epoch_count), 'due to wrongly calibrated optimization (Loss is Nan or Inf)')
-                # fill remaining epochs with penalization
-                for i in range(epoch_count, num_epochs):
-                    # TODO how to deal with minibatch-train-losses here?
-                    train_losses.append(train_losses[0])
-                    test_losses.append(test_losses[0])
-                    train_accuracies.append(train_accuracies[0])
-                    test_accuracies.append(test_accuracies[0])
+                train_losses, test_losses, train_accuracies, test_accuracies = self._abort_routine(epoch_count,
+                                                                                                   num_epochs,
+                                                                                                   train_losses,
+                                                                                                   test_losses,
+                                                                                                   train_accuracies,
+                                                                                                   test_accuracies)
                 break
             else:
                 continue
