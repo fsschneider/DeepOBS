@@ -53,7 +53,6 @@ def _check_if_metric_is_available(optimizer_path, metric):
         return False
 
 
-# TODO wherever it was used with warning, change from _check metric to _determine_metric
 def _determine_available_metric(optimizer_path, metric):
     if _check_if_metric_is_available(optimizer_path, metric):
         return metric
