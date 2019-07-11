@@ -3,7 +3,7 @@ import abc
 from .. import config
 from numpy.random import seed as np_seed
 from ..analyzer.analyze import create_setting_analyzer_ranking
-from ..analyzer.shared_utils import _check_if_metric_is_available
+from ..analyzer.shared_utils import _determine_available_metric
 import os
 import numpy as np
 
@@ -35,7 +35,7 @@ class Tuner(abc.ABC):
                                  ' not implemented. If you really need it, you have to implement it on your own.')
 
     def rerun_best_setting(self, optimizer_path, seeds = np.arange(43, 52), rank=1, mode='final', metric = 'test_accuracies'):
-        metric = _check_if_metric_is_available(optimizer_path, metric)
+        metric = _determine_available_metric(optimizer_path, metric)
         optimizer_path = os.path.join(optimizer_path)
 
         setting_analyzer_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)

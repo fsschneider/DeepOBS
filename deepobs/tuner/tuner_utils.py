@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from scipy.stats. distributions import uniform
-from ..analyzer.shared_utils import create_setting_analyzer_ranking, _clear_json, _append_json
+from ..analyzer.shared_utils import create_setting_analyzer_ranking, _clear_json, _append_json, _determine_available_metric
 
 
 def plot_2d_tuning_summary(optimizer_path, hyperparam, mode = 'final', xscale = 'linear', aggregated = False):
@@ -18,6 +18,7 @@ def write_tuning_summary(optimizer_path, mode = 'final', metric = 'test_accuraci
 
 
 def generate_tuning_summary(optimizer_path, mode = 'final', metric = 'test_accuracies'):
+    metric = _determine_available_metric(optimizer_path, metric)
     setting_analyzer_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
     tuning_summary = []
     for sett in setting_analyzer_ranking:
