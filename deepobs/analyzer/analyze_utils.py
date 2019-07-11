@@ -7,6 +7,16 @@ import os
 from .shared_utils import _load_json
 
 
+def _preprocess_reference_path(reference_path):
+    os.chdir(reference_path)
+    pathes = [path for path in os.listdir(reference_path) if os.path.isdir(path)]
+
+    if 'num_epochs' in pathes[0]:    # path was a path to an optimizer
+        return reference_path.split()
+    else:    # path was a testproblem path
+        return [os.path.join(reference_path, path) for path in pathes]
+
+
 # TODO is compute speed up to date?
 def compute_speed(setting_folder, conv_perf, metric):
     runs = [run for run in os.listdir(setting_folder) if run.endswith(".json")]
@@ -124,6 +134,7 @@ def texify_lr_sensitivity(fig, ax):
         file.write(tikz_code)
 
     return tikz_code
+
 
 def make_legend_and_colors_consistent(axes):
     handles_and_labels = []

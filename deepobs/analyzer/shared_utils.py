@@ -48,10 +48,18 @@ def _check_if_metric_is_available(optimizer_path, metric):
     run = [r for r in os.listdir(path) if '.json' in r][0]
     json_data = _load_json(path, run)
     if metric in json_data:
+        return True
+    else:
+        return False
+
+
+# TODO wherever it was used with warning, change from _check metric to _determine_metric
+def _determine_available_metric(optimizer_path, metric):
+    if _check_if_metric_is_available(optimizer_path, metric):
         return metric
     else:
         print('Metric {0:s} does not exist for testproblem {1:s}. We now use fallback metric \'test_losses\''.format(
-            metric, json_data['testproblem']))
+            metric, os.path.split(os.path.split(optimizer_path)[0])[1]))
         return 'test_losses'
 
 
@@ -79,7 +87,7 @@ def _load_json(path, file_name):
 
 
 def _get_all_setting_analyzer(optimizer_path, metric = 'test_accuracies'):
-    metric = _check_if_metric_is_available(optimizer_path, metric)
+    metric = _determine_available_metric(optimizer_path, metric)
     optimizer_path = os.path.join(optimizer_path)
     setting_folders = _read_all_settings_folders(optimizer_path)
     setting_analyzers = []
@@ -90,6 +98,7 @@ def _get_all_setting_analyzer(optimizer_path, metric = 'test_accuracies'):
 
 
 def create_setting_analyzer_ranking(optimizer_path, mode = 'final', metric = 'test_accuracies'):
+    metric = _determine_available_metric(optimizer_path, metric)
     setting_analyzers = _get_all_setting_analyzer(optimizer_path, metric)
 
     if 'accuracies' in metric:
