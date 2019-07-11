@@ -46,20 +46,24 @@ class Runner(abc.ABC):
 # TODO train log interval and tf logging?
     @abc.abstractmethod
     def run(self,
-            testproblem,
-            hyperparams,
+            testproblem = None,
+            hyperparams = None,
             batch_size = None,
             num_epochs = None,
-            random_seed=42,
+            random_seed=None,
             data_dir=None,
-            output_dir='./results',
+            output_dir=None,
             weight_decay=None,
             no_logs=False,
+            train_log_interval = None,
+            print_train_iter = None,
+            tb_log = None,
+            tb_log_dir = None,
             **training_params):
         return
 
-
-    def parse_args(self, testproblem,
+    def parse_args(self,
+            testproblem,
             hyperparams,
             batch_size,
             num_epochs,
@@ -68,9 +72,12 @@ class Runner(abc.ABC):
             output_dir,
             weight_decay,
             no_logs,
+            train_log_interval,
+            print_train_iter,
+            tb_log,
+            tb_log_dir,
             **training_params):
 
-# TODO train log interval and tf logging?
         args = {}
         parser = argparse.ArgumentParser(description='Arguments for running optimizer script.')
 
@@ -142,7 +149,7 @@ class Runner(abc.ABC):
             parser.add_argument(
                 "--output_dir",
                 type=str,
-                default="results",
+                default="./results",
                 help="""Path to the base directory in which output files will be
           stored. Results will automatically be sorted into subdirectories of
           the form 'testproblem/optimizer'.""")
@@ -169,6 +176,44 @@ class Runner(abc.ABC):
         else:
             args['no_logs'] = no_logs
 
+        if train_log_interval is None:
+            parser.add_argument(
+                "--train_log_interval",
+                type = int,
+                default=10,
+                help="""Interval of steps at which to log training loss.""")
+        else:
+            args['train_log_interval'] = train_log_interval
+
+        if print_train_iter is None:
+            parser.add_argument(
+                "--print_train_iter",
+                action="store_const",
+                const=True,
+                default=False,
+                help="""Add this flag to print the mini-batch-loss at the train_log_interval.""")
+        else:
+            args['print_train_iter'] = print_train_iter
+
+        if tb_log is None:
+            parser.add_argument(
+                "--tb_log",
+                action="store_const",
+                const=True,
+                default=False,
+                help="""Add this flag to save tensorboard logging files.""")
+        else:
+            args['tb_log'] = tb_log
+
+        if tb_log_dir is None:
+            parser.add_argument(
+                "--tb_log_dir",
+                type=str,
+                default="./tb_log",
+                help="""Path to the directory where the tensorboard logs are saved.""")
+        else:
+            args['tb_log_dir'] = tb_log_dir
+
         cmdline_args = vars(parser.parse_args())
         args.update(cmdline_args)
 
@@ -177,6 +222,7 @@ class Runner(abc.ABC):
         for hp in self._hyperparameter_names:
             args['hyperparams'][hp] = args[hp]
             del args[hp]
+
         return args
 
     @staticmethod
@@ -268,13 +314,14 @@ class Runner(abc.ABC):
                 json.dump(output, f)
 
     @staticmethod
-    def _abort_routine(epoch_count, num_epochs, train_losses, test_losses, train_accuracies, test_accuracies):
+    def _abort_routine(epoch_count, num_epochs, train_losses, test_losses, train_accuracies, test_accuracies,
+                       minibatch_train_losses):
         print('Breaking from run after epoch', str(epoch_count),
               'due to wrongly calibrated optimization (Loss is Nan or Inf)')
         for i in range(epoch_count, num_epochs):
-            # TODO how to deal with minibatch-train-losses here?
             train_losses.append(train_losses[0])
             test_losses.append(test_losses[0])
             train_accuracies.append(train_accuracies[0])
             test_accuracies.append(test_accuracies[0])
-        return train_losses, test_losses, train_accuracies, test_accuracies
+            minibatch_train_losses.append(minibatch_train_losses[0])
+        return train_losses, test_losses, train_accuracies, test_accuracies, minibatch_train_losses
