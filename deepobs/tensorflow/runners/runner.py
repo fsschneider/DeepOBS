@@ -12,6 +12,7 @@ from copy import deepcopy
 
 from deepobs.abstract_runner.abstract_runner import Runner
 
+
 class TFRunner(Runner):
     def __init__(self, optimizer_class, hyperparameter_names):
 
@@ -49,6 +50,65 @@ class TFRunner(Runner):
         
         return output
 
+
+    @staticmethod
+    def init_summary(loss,
+                     learning_rate_var,
+                     batch_size,
+                     log_dir):
+        # per iteration
+        mb_train_loss_summary = tf.summary.scalar(
+            "training/minibatch_train_losses",
+            loss,
+            collections=[tf.GraphKeys.SUMMARIES, "per_iteration"])
+        # per epoch
+        lr_summary = tf.summary.scalar(
+            "hyperparams/learning_rate",
+            learning_rate_var,
+            collections=[tf.GraphKeys.SUMMARIES, "per_epoch"])
+        batch_summary = tf.summary.scalar(
+            "hyperparams/batch_size",
+            batch_size,
+            collections=[tf.GraphKeys.SUMMARIES, "per_epoch"])
+
+        per_iter_summaries = tf.summary.merge_all(key="per_iteration")
+        per_epoch_summaries = tf.summary.merge_all(key="per_epoch")
+        summary_writer = tf.summary.FileWriter(log_dir)
+        return per_iter_summaries, per_epoch_summaries, summary_writer
+
+    @staticmethod
+    def write_per_epoch_summary(
+                                sess,
+                                loss_,
+                                acc_,
+                                current_step,
+                                per_epoch_summaries,
+                                summary_writer,
+                                test=True):
+        if test:
+            tag = "epoch/test_"
+        else:
+            tag = "epoch/train_"
+        summary = tf.Summary()
+        summary.value.add(tag=tag + "loss_", simple_value=loss_)
+        summary.value.add(tag=tag + "acc_", simple_value=acc_)
+        per_epoch_summary_ = sess.run(per_epoch_summaries)
+        summary_writer.add_summary(per_epoch_summary_,
+                                   current_step)
+        summary_writer.add_summary(summary, current_step)
+        summary_writer.flush()
+        return
+
+    @staticmethod
+    def write_per_iter_summary(
+                               sess,
+                               per_iter_summaries,
+                               summary_writer,
+                               current_step):
+        per_iter_summary_ = sess.run(per_iter_summaries)
+        summary_writer.add_summary(per_iter_summary_, current_step)
+
+
     @staticmethod
     def create_testproblem(testproblem, batch_size, weight_decay, random_seed):
         # Find testproblem by name and instantiate with batch size and weight decay.
@@ -70,7 +130,6 @@ class TFRunner(Runner):
         return tproblem
 
     # Wrapper functions for the evaluation phase.
-    # TODO get rid of test arg and split into two function for clarity?
     @staticmethod
     def evaluate(tproblem, sess, loss, test=True):
         """Computes average loss and accuracy in the evaluation phase."""
@@ -120,66 +179,12 @@ class TFRunner(Runner):
         """Must be implemented by subclass. Returns a dict of all captured metrices."""
         return
 
-class StandardRunner(TFRunner):
 
+class StandardRunner(TFRunner):
 
     def __init__(self, optimizer_class, hyperparameter_names):
 
         super(StandardRunner, self).__init__(optimizer_class, hyperparameter_names)
-
-    def init_summary(self, loss,
-                     learning_rate_var,
-                     batch_size,
-                     log_dir):
-        # per iteration
-        mb_train_loss_summary = tf.summary.scalar(
-            "training/minibatch_train_losses",
-            loss,
-            collections=[tf.GraphKeys.SUMMARIES, "per_iteration"])
-        # per epoch
-        lr_summary = tf.summary.scalar(
-            "hyperparams/learning_rate",
-            learning_rate_var,
-            collections=[tf.GraphKeys.SUMMARIES, "per_epoch"])
-        batch_summary = tf.summary.scalar(
-            "hyperparams/batch_size",
-            batch_size,
-            collections=[tf.GraphKeys.SUMMARIES, "per_epoch"])
-
-        per_iter_summaries = tf.summary.merge_all(key="per_iteration")
-        per_epoch_summaries = tf.summary.merge_all(key="per_epoch")
-        summary_writer = tf.summary.FileWriter(log_dir)
-        return per_iter_summaries, per_epoch_summaries, summary_writer
-
-    def write_per_epoch_summary(self,
-                                sess,
-                                loss_,
-                                acc_,
-                                current_step,
-                                per_epoch_summaries,
-                                summary_writer,
-                                test=True):
-        if test:
-            tag = "epoch/test_"
-        else:
-            tag = "epoch/train_"
-        summary = tf.Summary()
-        summary.value.add(tag=tag + "loss_", simple_value=loss_)
-        summary.value.add(tag=tag + "acc_", simple_value=acc_)
-        per_epoch_summary_ = sess.run(per_epoch_summaries)
-        summary_writer.add_summary(per_epoch_summary_,
-                                   current_step)
-        summary_writer.add_summary(summary, current_step)
-        summary_writer.flush()
-        return
-
-    def write_per_iter_summary(self,
-                               sess,
-                               per_iter_summaries,
-                               summary_writer,
-                               current_step):
-        per_iter_summary_ = sess.run(per_iter_summaries)
-        summary_writer.add_summary(per_iter_summary_, current_step)
 
     def training(self,
             tproblem,
@@ -326,60 +331,6 @@ class LearningRateScheduleRunner(TFRunner):
     def __init__(self, optimizer_class, hyperparameter_names):
 
         super(LearningRateScheduleRunner, self).__init__(optimizer_class, hyperparameter_names)
-
-    def init_summary(self, loss,
-                     learning_rate_var,
-                     batch_size,
-                     log_dir):
-        # per iteration
-        mb_train_loss_summary = tf.summary.scalar(
-            "training/minibatch_train_losses",
-            loss,
-            collections=[tf.GraphKeys.SUMMARIES, "per_iteration"])
-        # per epoch
-        lr_summary = tf.summary.scalar(
-            "hyperparams/learning_rate",
-            learning_rate_var,
-            collections=[tf.GraphKeys.SUMMARIES, "per_epoch"])
-        batch_summary = tf.summary.scalar(
-            "hyperparams/batch_size",
-            batch_size,
-            collections=[tf.GraphKeys.SUMMARIES, "per_epoch"])
-
-        per_iter_summaries = tf.summary.merge_all(key="per_iteration")
-        per_epoch_summaries = tf.summary.merge_all(key="per_epoch")
-        summary_writer = tf.summary.FileWriter(log_dir)
-        return per_iter_summaries, per_epoch_summaries, summary_writer
-
-    def write_per_epoch_summary(self,
-                                sess,
-                                loss_,
-                                acc_,
-                                current_step,
-                                per_epoch_summaries,
-                                summary_writer,
-                                test=True):
-        if test:
-            tag = "epoch/test_"
-        else:
-            tag = "epoch/train_"
-        summary = tf.Summary()
-        summary.value.add(tag=tag + "loss_", simple_value=loss_)
-        summary.value.add(tag=tag + "acc_", simple_value=acc_)
-        per_epoch_summary_ = sess.run(per_epoch_summaries)
-        summary_writer.add_summary(per_epoch_summary_,
-                                   current_step)
-        summary_writer.add_summary(summary, current_step)
-        summary_writer.flush()
-        return
-
-    def write_per_iter_summary(self,
-                               sess,
-                               per_iter_summaries,
-                               summary_writer,
-                               current_step):
-        per_iter_summary_ = sess.run(per_iter_summaries)
-        summary_writer.add_summary(per_iter_summary_, current_step)
 
     def training(self,
                  tproblem,
