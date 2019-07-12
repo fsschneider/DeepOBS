@@ -10,6 +10,7 @@ def float2str(x):
     return mantissa.rstrip("0") + "e" + exponent
 
 
+# TODO do I still need this?
 def make_run_name(weight_decay, batch_size, num_epochs, learning_rate,
                   lr_sched_epochs, lr_sched_factors, random_seed,
                   **optimizer_hyperparams):

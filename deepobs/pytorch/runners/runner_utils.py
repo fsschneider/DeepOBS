@@ -5,7 +5,7 @@ from torch.optim import lr_scheduler
 import numpy as np
 
 def make_lr_schedule(optimizer, lr_sched_epochs = None, lr_sched_factors = None):
-    """Creates a learning rate schedule in the form of a torch Lambda LRScheduler instance.
+    """Creates a learning rate schedule in the form of a torch.optim.lr_scheduler.LambdaLR instance.
 
   After ``lr_sched_epochs[i]`` epochs of training, the learning rate will be set
   to ``lr_sched_factors[i] * lr_base``.
@@ -28,9 +28,6 @@ def make_lr_schedule(optimizer, lr_sched_epochs = None, lr_sched_factors = None)
     sched: A torch.optim.lr_scheduler.LambdaLR instance with a function that determines the learning rate at every epoch.
   """
 
-    # TODO Make sure learning rate schedule has been properly specified: integer epochs, lists of same length, epochs in ascending order, ...
-
-    # TODO simplify?
     if (lr_sched_factors is None) or (lr_sched_epochs is None):
         determine_lr = lambda epoch: 1
     else:

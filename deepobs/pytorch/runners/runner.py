@@ -13,47 +13,13 @@ from deepobs.abstract_runner.abstract_runner import Runner
 import numpy as np
 
 class PTRunner(Runner):
+    """The abstract class for runner in the pytorch framework."""
+
     def __init__(self, optimizer_class, hyperparameter_names):
-        """The abstract class for runner in the pytorch framework.
-        Args:
-            optimizer_class: The optimizer class of the optimizer that is run on
-            the testproblems. Must be a subclass of torch.optim.Optimizer.
-
-            hyperparams (dict): A dict containing the hyperparams for the optimizer_class.
-
-        Methods:
-            run: Runs a testproblem with the optimizer_class.
-            create_testproblem: Sets up the testproblem.
-            evaluate: Evaluates the testproblem model on the testproblem.
-            training: An abstract method that has to be overwritten by the subclass.
-            It performs the training loop.
-        """
         super(PTRunner, self).__init__(optimizer_class, hyperparameter_names)
 
     @abc.abstractmethod
     def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params):
-        """Must be implemented by the subclass. Performs the training and stores
-        the metrices.
-        Args:
-            testproblem: instance of the testproblem
-            num_epochs (int): number of training epochs
-            **training_params (dict): kwargs for the training process
-
-        Must return a dict of the form:
-
-            {'test_losses' : test_losses
-            'train_losses': train_losses,
-            'test_accuracies': test_accuracies,
-            'train_accuracies': train_accuracies,
-            'analyzable_training_params': {...}
-            }
-
-            where the metrices values are lists that were filled during training
-            and the key 'analyzable_training_params' holds a dict of training
-            parameters that should be taken into account in the analysis later on.
-            These can be, for example, learning rate schedules. Or in the easiest
-            case, this dict is empty.
-            """
         return
 
     def run(self,
@@ -72,24 +38,6 @@ class PTRunner(Runner):
             tb_log_dir = None,
             **training_params
             ):
-
-        """Runs a testproblem with the optimizer_class. Has the following tasks:
-            1. setup testproblem
-            2. run the training (must be implemented by subclass)
-            3. merge and write output
-
-            Input:
-                testproblem (str): Name of the testproblem.
-                batch_size (int): Mini-batch size for the training data.
-                num_epochs (int): The number of training epochs.
-                random_seed (int): The torch random seed.
-                data_dir (str): The path where the data is stored.
-                output_dir (str): Path of the folder where the results are written to.
-
-                weight_decay (float): Regularization factor for the testproblem.
-                no_logs (bool): Whether to write the output or not
-                **training_params (dict): Kwargs for the training method.
-        """
 
         args = self.parse_args(testproblem,
             hyperparams,
@@ -149,7 +97,7 @@ class PTRunner(Runner):
 
     @staticmethod
     def create_testproblem(testproblem, batch_size, weight_decay, random_seed):
-        """Sets up the testproblem.
+        """Sets up the deepobs.pytorch.testproblems.testproblem instance.
         Args:
             testproblem (str): The name of the testproblem.
             batch_size (int): Batch size that is used for training
@@ -197,7 +145,7 @@ class PTRunner(Runner):
         Args:
             tproblem (testproblem): The testproblem instance to evaluate
             test (bool): Whether tproblem is evaluated on the test set.
-            If false, it is evaluated in the train evaluation set.
+            If false, it is evaluated on the train evaluation set.
         Returns:
             loss (float): The loss of the current state.
             accuracy (float): The accuracy of the current state.
@@ -240,44 +188,16 @@ class PTRunner(Runner):
 
 class StandardRunner(PTRunner):
     """A standard runner. Can run a normal training loop with fixed
-    hyperparams or a learning rate schedule. It should be used as a template
-    to implement custom runners.
+    hyperparams. It should be used as a template to implement custom runners.
 
     Methods:
         training: Performs the training on a testproblem instance.
     """
 
     def __init__(self, optimizer_class, hyperparameter_names):
-
         super(StandardRunner, self).__init__(optimizer_class, hyperparameter_names)
 
     def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir):
-
-        """Input:
-                tproblem (testproblem): The testproblem instance to train on.
-                num_epochs (int): The number of training epochs.
-
-            **training_params are:
-                lr_sched_epochs (list): The epochs where to adjust the learning rate.
-                lr_sched_factots (list): The corresponding factors by which to adjust the learning rate.
-                train_log_interval (int): When to log the minibatch loss/accuracy.
-                print_train_iter (bool): Whether to print the training progress at every train_log_interval
-
-            Returns:
-                output (dict): The logged metrices. Is of the form:
-                    {'test_losses' : test_losses
-                     'train_losses': train_losses,
-                     'test_accuracies': test_accuracies,
-                     'train_accuracies': train_accuracies,
-                     'analyzable_training_params': {...}
-                     }
-
-            where the metrices values are lists that were filled during training
-            and the key 'analyzable_training_params' holds a dict of training
-            parameters that should be taken into account in the analysis later on.
-            These can be, for example, learning rate schedules. Or in the easiest
-            case, this dict is empty.
-        """
 
         opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
 
@@ -367,9 +287,8 @@ class StandardRunner(PTRunner):
 
 
 class LearningRateScheduleRunner(PTRunner):
-    """A standard runner. Can run a normal training loop with fixed
-    hyperparams or a learning rate schedule. It should be used as a template
-    to implement custom runners.
+    """A runner for learning rate schedules. Can run a normal training loop with fixed hyperparams or a learning rate
+    schedule. It should be used as a template to implement custom runners.
 
     Methods:
         training: Performs the training on a testproblem instance.
@@ -389,13 +308,14 @@ class LearningRateScheduleRunner(PTRunner):
             train_log_interval=10,
             print_train_iter=False):
 
-        """Input:
+        """Args:
                 tproblem (testproblem): The testproblem instance to train on.
+                hyperparams (dict): The optimizer hyperparameters to use for the training.
                 num_epochs (int): The number of training epochs.
 
             **training_params are:
                 lr_sched_epochs (list): The epochs where to adjust the learning rate.
-                lr_sched_factots (list): The corresponding factors by which to adjust the learning rate.
+                lr_sched_factors (list): The corresponding factors by which to adjust the learning rate.
                 train_log_interval (int): When to log the minibatch loss/accuracy.
                 print_train_iter (bool): Whether to print the training progress at every train_log_interval
 

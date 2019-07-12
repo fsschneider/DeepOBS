@@ -96,6 +96,7 @@ class TFRunner(Runner):
                      learning_rate_var,
                      batch_size,
                      log_dir):
+        """Initializes the tensorboard summaries"""
         # per iteration
         mb_train_loss_summary = tf.summary.scalar(
             "training/minibatch_train_losses",
@@ -125,6 +126,7 @@ class TFRunner(Runner):
                                 per_epoch_summaries,
                                 summary_writer,
                                 test=True):
+        """Writes the tensorboard epoch summary"""
         if test:
             tag = "epoch/test_"
         else:
@@ -145,6 +147,7 @@ class TFRunner(Runner):
                                per_iter_summaries,
                                summary_writer,
                                current_step):
+        """Writes the tensorboard iteration summary"""
         per_iter_summary_ = sess.run(per_iter_summaries)
         summary_writer.add_summary(per_iter_summary_, current_step)
 
@@ -216,7 +219,6 @@ class TFRunner(Runner):
 
     @abc.abstractmethod
     def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params):
-        """Must be implemented by subclass. Returns a dict of all captured metrices."""
         return
 
 
