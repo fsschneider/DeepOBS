@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+"""Base class for DeepOBS test problems."""
 import torch
 import abc
 from .. import config
-"""Base class for DeepOBS test problems."""
+
 
 class TestProblem(abc.ABC):
     """Base class for DeepOBS test problems.

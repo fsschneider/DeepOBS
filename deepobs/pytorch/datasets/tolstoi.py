@@ -8,6 +8,7 @@ from . import dataset
 from .. import config
 import torch
 
+
 class tolstoi(dataset.DataSet):
     """DeepOBS data set class for character prediction on `War and Peace` by\
     Leo Tolstoi.
@@ -21,8 +22,6 @@ class tolstoi(dataset.DataSet):
     train_eval_size (int): Size of the train eval dataset.
         Defaults to ``653 237``, the size of the test set.
 
-  Methods:
-      _make_dataloader: A helper that is shared by all three data loader methods.
   """
 
     def __init__(self, batch_size, seq_length=50, train_eval_size=653237):
@@ -43,14 +42,6 @@ class tolstoi(dataset.DataSet):
         super(tolstoi, self).__init__(batch_size)
 
     def _make_dataloader(self, filepath):
-        """Creates a Tolstoi data set (helper used by ``.make_*_datset`` below).
-
-    Args:
-        filepath (str): Filepath to the .npy file containing the data set.
-
-    Returns:
-        A torch.utils.data.DataLoader yielding batches of Tolstoi data.
-    """
         # Load the array of character ids, determine the number of batches that
         # can be produced, given batch size and sequence lengh
         arr = np.load(filepath)
@@ -85,29 +76,14 @@ class tolstoi(dataset.DataSet):
         return dataset
 
     def _make_train_dataloader(self):
-        """Creates the Tolstoi training dataset.
-
-    Returns:
-      A torch.utils.data.DataLoader instance with batches of training data.
-    """
         filepath = os.path.join(config.get_data_dir(), "tolstoi", "train.npy")
         return self._make_dataloader(filepath)
 
     def _make_train_eval_dataloader(self):
-        """Creates the Tolstoi train eval dataset.
-
-    Returns:
-      A torch.utils.data.DataLoader instance with batches of training eval data.
-    """
         indices = np.arange(self._train_eval_size // (self._batch_size*self._seq_length))
         train_eval_set = self._train_dataloader[indices]
         return dat.TensorDataset(train_eval_set[0], train_eval_set[1])
 
     def _make_test_dataloader(self):
-        """Creates the Tolstoi test dataset.
-
-    Returns:
-      A torch.utils.data.DataLoader instance with batches of test data.
-    """
         filepath = os.path.join(config.get_data_dir(), "tolstoi", "test.npy")
         return self._make_dataloader(filepath)
