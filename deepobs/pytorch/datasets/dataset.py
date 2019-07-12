@@ -15,6 +15,12 @@ class DataSet(abc.ABC):
      _make_train_eval_dataloader: Creates a torch data loader for the training evaluation data with batches of size batch_size.
      _make_test_dataloader: Creates a torch data loader for the test data with batches of size batch_size.
 
+   Attributes:
+       _pin_memory: Whether to pin memory for the dataloaders. Defaults to 'False' if 'cuda' is not the current device.
+       _num_workers: The number of workers used for the dataloaders. It's value is set to the global variable NUM_WORKERS.
+       _train_dataloader: A torch.utils.data.DataLoader instance that holds the training data.
+        _train_eval_dataloader: A torch.utils.data.DataLoader instance that holds the training evaluation data.
+        _test_dataloader: A torch.utils.data.DataLoader instance that holds the test data.
   """
 
     def __init__(self, batch_size):

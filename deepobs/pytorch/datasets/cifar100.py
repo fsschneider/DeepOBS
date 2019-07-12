@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """CIFAR-100 DeepOBS dataset."""
 
-import numpy as np
 from . import dataset
 from .. import config
 from torch.utils import data as dat
@@ -9,8 +8,9 @@ from torchvision import datasets
 from torchvision import transforms
 from .datasets_utils import train_eval_sampler
 
+
 class cifar100(dataset.DataSet):
-    """DeepOBS data set class for the `CIFAR-10\
+    """DeepOBS data set class for the `CIFAR-100\
     <https://www.cs.toronto.edu/~kriz/cifar.html>`_ data set.
 
   Args:

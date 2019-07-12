@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""All nework architectures that are used by the testproblems"""
+"""All torch modules that are used by the testproblems."""
 
 import torch
 from torch import nn
@@ -12,8 +12,18 @@ from .testproblems_utils import mean_allcnnc
 from .testproblems_utils import residual_block
 from .testproblems_utils import _truncated_normal_init
 
+
 class net_cifar10_3c3d(nn.Sequential):
+    """  Basic conv net for cifar10/100. The network consists of
+    - thre conv layers with ReLUs, each followed by max-pooling
+    - two fully-connected layers with ``512`` and ``256`` units and ReLU activation
+    - output layer with softmax
+  The weight matrices are initialized using Xavier initialization and the biases
+  are initialized to ``0.0``."""
+
     def __init__(self, num_outputs):
+        """Args:
+            num_outputs (int): The numer of outputs (i.e. target classes)."""
         super(net_cifar10_3c3d, self).__init__()
 
         self.add_module('conv1', tfconv2d(in_channels = 3, out_channels = 64, kernel_size = 5))
@@ -48,35 +58,66 @@ class net_cifar10_3c3d(nn.Sequential):
 
 
 class net_mnist_2c2d(nn.Sequential):
-        def __init__(self, num_outputs):
-            super(net_mnist_2c2d, self).__init__()
-            self.add_module('conv1', tfconv2d(in_channels = 1, out_channels = 32, kernel_size = 5, tf_padding_type='same'))
-            self.add_module('relu1', nn.ReLU())
-            self.add_module('max_pool1', tfmaxpool2d(kernel_size = 2, stride = 2, tf_padding_type='same'))
+    """  Basic conv net for (Fashion-)MNIST. The network has been adapted from the `TensorFlow tutorial\
+  <https://www.tensorflow.org/tutorials/estimators/cnn>`_ and consists of
 
-            self.add_module('conv2', tfconv2d(in_channels = 32, out_channels = 64, kernel_size = 5, tf_padding_type='same'))
-            self.add_module('relu2', nn.ReLU())
-            self.add_module('max_pool2', tfmaxpool2d(kernel_size = 2, stride = 2, tf_padding_type='same'))
+    - two conv layers with ReLUs, each followed by max-pooling
+    - one fully-connected layers with ReLUs
+    - output layer with softmax
 
-            self.add_module('flatten', flatten())
+  The weight matrices are initialized with truncated normal (standard deviation
+  of ``0.05``) and the biases are initialized to ``0.05``."""
 
-            self.add_module('dense1', nn.Linear(in_features = 7*7*64, out_features = 1024))
-            self.add_module('relu3', nn.ReLU())
+    def __init__(self, num_outputs):
+        """Args:
+            num_outputs (int): The numer of outputs (i.e. target classes)."""
 
-            self.add_module('dense2', nn.Linear(in_features = 1024, out_features = num_outputs))
+        super(net_mnist_2c2d, self).__init__()
+        self.add_module('conv1', tfconv2d(in_channels = 1, out_channels = 32, kernel_size = 5, tf_padding_type='same'))
+        self.add_module('relu1', nn.ReLU())
+        self.add_module('max_pool1', tfmaxpool2d(kernel_size = 2, stride = 2, tf_padding_type='same'))
 
-            # init the layers
-            for module in self.modules():
-                if isinstance(module, nn.Conv2d):
-                    nn.init.constant_(module.bias, 0.05)
-                    module.weight.data = _truncated_normal_init(module.weight.data, mean = 0, stddev=0.05)
+        self.add_module('conv2', tfconv2d(in_channels = 32, out_channels = 64, kernel_size = 5, tf_padding_type='same'))
+        self.add_module('relu2', nn.ReLU())
+        self.add_module('max_pool2', tfmaxpool2d(kernel_size = 2, stride = 2, tf_padding_type='same'))
 
-                if isinstance(module, nn.Linear):
-                    nn.init.constant_(module.bias, 0.05)
-                    module.weight.data = _truncated_normal_init(module.weight.data, mean = 0, stddev=0.05)
+        self.add_module('flatten', flatten())
+
+        self.add_module('dense1', nn.Linear(in_features = 7*7*64, out_features = 1024))
+        self.add_module('relu3', nn.ReLU())
+
+        self.add_module('dense2', nn.Linear(in_features = 1024, out_features = num_outputs))
+
+        # init the layers
+        for module in self.modules():
+            if isinstance(module, nn.Conv2d):
+                nn.init.constant_(module.bias, 0.05)
+                module.weight.data = _truncated_normal_init(module.weight.data, mean = 0, stddev=0.05)
+
+            if isinstance(module, nn.Linear):
+                nn.init.constant_(module.bias, 0.05)
+                module.weight.data = _truncated_normal_init(module.weight.data, mean = 0, stddev=0.05)
+
 
 class net_vae(nn.Module):
+    """  A basic VAE for (Faschion-)MNIST. The network has been adapted from the `here\
+  <https://towardsdatascience.com/teaching-a-variational-autoencoder-vae-to-draw-mnist-characters-978675c95776>`_
+  and consists of an encoder:
+
+    - With three convolutional layers with each ``64`` filters.
+    - Using a leaky ReLU activation function with :math:`\\alpha = 0.3`
+    - Dropout layers after each convolutional layer with a rate of ``0.2``.
+
+  and an decoder:
+
+    - With two dense layers with ``24`` and ``49`` units and leaky ReLU activation.
+    - With three deconvolutional layers with each ``64`` filters.
+    - Dropout layers after the first two deconvolutional layer with a rate of ``0.2``.
+    - A final dense layer with ``28 x 28`` units and sigmoid activation.
+"""
     def __init__(self, n_latent):
+        """Args:
+            n_latent (int): Size of the latent space."""
         super(net_vae, self).__init__()
         self.n_latent = n_latent
 
@@ -170,6 +211,7 @@ class net_vae(nn.Module):
 
         return image, mean, std_dev
 
+
 class net_vgg(nn.Sequential):
     def __init__(self, num_outputs, variant):
         super(net_vgg, self).__init__()
@@ -242,6 +284,7 @@ class net_vgg(nn.Sequential):
             if isinstance(module, nn.Linear):
                 nn.init.constant_(module.bias, 0.0)
                 nn.init.xavier_uniform_(module.weight)
+
 
 class net_cifar100_allcnnc(nn.Sequential):
     def __init__(self):
@@ -350,7 +393,20 @@ class net_char_rnn(nn.Module):
         return x, new_state
 
 class net_quadratic_deep(nn.Module):
+    r"""This arhcitecture creates an output which corresponds to a loss functions of the form
+
+    :math:`0.5* (\theta - x)^T * Q * (\theta - x)`
+
+    with Hessian ``Q`` and "data" ``x`` coming from the quadratic data set, i.e.,
+    zero-mean normal.
+    The parameters are initialized to 1.
+"""
+
     def __init__(self, dim, Hessian):
+        """Args:
+            dim (int): Number of parameters of the network (Dimension of the quadratic problem).
+            Hessian (np.array): The matrix for the quadratic form."""
+
         super(net_quadratic_deep, self).__init__()
         self.theta = nn.Parameter(torch.ones(dim, requires_grad = True))
         self.Hessian = torch.from_numpy(Hessian).to(torch.float32)
@@ -369,6 +425,14 @@ class net_quadratic_deep(nn.Module):
         return out_batched.mean()
 
 class net_mlp(nn.Sequential):
+    """  A basic MLP architecture. The network is build as follows:
+
+    - Four fully-connected layers with ``1000``, ``500``,``100`` and ``num_outputs``
+      units per layer, where ``num_outputs`` is the number of ouputs (i.e. class labels).
+    - The first three layers use ReLU activation, and the last one a softmax
+      activation.
+    - The biases are initialized to ``0.0`` and the weight matrices with
+      truncated normal (standard deviation of ``3e-2``)"""
     def __init__(self, num_outputs):
         super(net_mlp, self).__init__()
 
