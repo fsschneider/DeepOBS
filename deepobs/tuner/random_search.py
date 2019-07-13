@@ -3,7 +3,10 @@ from .tuner import ParallelizedTuner
 
 
 class RandomSearch(ParallelizedTuner):
-
+    """A basic Random Search tuner.
+    Attributes:
+        _distributions (dict): Holds the distributions for each hyperparameter.
+    """
     def __init__(self, optimizer_class, hyperparam_names, distributions, ressources, runner_type='StandardRunner'):
         super(RandomSearch, self).__init__(optimizer_class, hyperparam_names, ressources, runner_type)
 
