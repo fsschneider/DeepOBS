@@ -216,7 +216,7 @@ class StandardRunner(PTRunner):
             except ImportError as e:
                 print('Not possible to use tensorboard for pytorch. Reason:', e)
                 tb_log = False
-            global_step = 0
+        global_step = 0
 
         for epoch_count in range(num_epochs+1):
             # Evaluate at beginning of epoch.
