@@ -9,6 +9,11 @@ from ..tuner.tuner_utils import generate_tuning_summary
 from .analyze_utils import rescale_ax, _preprocess_reference_path
 
 
+# TODO
+def plot_performance_table(results_path):
+    pass
+
+
 def plot_all_testproblems_performances(results_path, mode = 'final', metric = 'test_accuracies', reference_path = None):
     testproblems = [path for path in os.listdir(results_path) if os.path.isdir(os.path.join(results_path, path))]
     if reference_path is not None:
@@ -60,22 +65,28 @@ def plot_hyperparameter_sensitivity(optimizer_path, hyperparam, mode='final', me
     return fig, ax
 
 
-def get_performance_dictionary(optimizer_path, mode = 'final', metric = 'test_accuracies'):
+def get_performance_dictionary(optimizer_path, mode = 'final', metric = 'test_accuracies', conv_perf_file = None):
     metric = _determine_available_metric(optimizer_path, metric)
     setting_analyzers_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
     sett = setting_analyzers_ranking[0]
 
     perf_dict = dict()
     if mode == 'final':
-        perf_dict['Performance'] = sett.final_value
+        perf_dict['Performance'] = sett.get_final_value(metric)
     elif mode == 'best':
-        perf_dict['Performance'] = sett.best_value
+        perf_dict['Performance'] = sett.get_best_value(metric)
+    elif mode == 'most':
+        # default performance for most is final value
+        perf_dict['Performance'] = sett.get_final_value(metric)
     else:
-        raise RuntimeError('Mode not implemented for the performance dictionary')
+        raise NotImplementedError
 
-    # TODO how and where compute speed?
-    # perf_dict['Speed'] = sett.aggregate['speed']
-    perf_dict['Tuneability'] = sett.aggregate['optimizer_hyperparams']
+    if conv_perf_file is not None:
+        perf_dict['Speed'] = sett.calculate_speed(conv_perf_file)
+    else:
+        perf_dict['Speed'] = 'N.A.'
+
+    perf_dict['Tunability'] = sett.aggregate['optimizer_hyperparams']
     return perf_dict
 
 

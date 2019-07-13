@@ -85,20 +85,19 @@ def _load_json(path, file_name):
     return json_data
 
 
-def _get_all_setting_analyzer(optimizer_path, metric = 'test_accuracies'):
-    metric = _determine_available_metric(optimizer_path, metric)
+def _get_all_setting_analyzer(optimizer_path):
     optimizer_path = os.path.join(optimizer_path)
     setting_folders = _read_all_settings_folders(optimizer_path)
     setting_analyzers = []
     for sett in setting_folders:
         sett_path = os.path.join(optimizer_path, sett)
-        setting_analyzers.append(SettingAnalyzer(sett_path, metric))
+        setting_analyzers.append(SettingAnalyzer(sett_path))
     return setting_analyzers
 
 
 def create_setting_analyzer_ranking(optimizer_path, mode = 'final', metric = 'test_accuracies'):
     metric = _determine_available_metric(optimizer_path, metric)
-    setting_analyzers = _get_all_setting_analyzer(optimizer_path, metric)
+    setting_analyzers = _get_all_setting_analyzer(optimizer_path)
 
     if 'accuracies' in metric:
         sgn = -1
@@ -106,9 +105,9 @@ def create_setting_analyzer_ranking(optimizer_path, mode = 'final', metric = 'te
         sgn = 1
 
     if mode == 'final':
-        setting_analyzers_ordered = sorted(setting_analyzers, key=lambda idx: sgn * idx.final_value)
+        setting_analyzers_ordered = sorted(setting_analyzers, key=lambda idx: sgn * idx.get_final_value(metric))
     elif mode == 'best':
-        setting_analyzers_ordered = sorted(setting_analyzers, key=lambda idx: sgn * idx.best_value)
+        setting_analyzers_ordered = sorted(setting_analyzers, key=lambda idx: sgn * idx.get_best_value(metric))
     elif mode == 'most':
         setting_analyzers_ordered = sorted(setting_analyzers, key=lambda idx: idx.n_runs, reverse=True)
     else:
@@ -120,53 +119,70 @@ def create_setting_analyzer_ranking(optimizer_path, mode = 'final', metric = 'te
 class SettingAnalyzer:
     """DeepOBS analyzer class for a setting (a hyperparameter setting).
 
-    Args:
-        path (str): Path to  the setting folder.
-        metric (str): Metric to use for this test problem. If available this
-            will be ``test_accuracies``, otherwise ``test_losses``.
-
     Attributes:
-        path
-        metric (str): Metric to use for this test problem. If available this
-            will be ``test_accuracies``, otherwise ``test_losses``.
+        path (str): Path to the setting folder.
         aggregate (dictionary): Contains the mean and std of the runs for the given metric.
-        final_value
-        best_value
+        n_runs
     """
-    def __init__(self, path, metric):
+
+    def __init__(self, path):
         """Initializes a new SettingAnalyzer instance.
 
         Args:
             path (str): String to the setting folder.
-            metric (str): Metric to use for this test problem. If available this
-                will be ``test_accuracies``, otherwise ``test_losses``.
         """
 
         self.path = path
         self.n_runs = self.__get_number_of_runs()
         self.aggregate = aggregate_runs(path)
-        self.metric = metric
-        self.final_value = self.__get_final_value()
-        self.best_value = self.__get_best_value()
 
     def __get_number_of_runs(self):
         return len([run for run in os.listdir(self.path) if run.endswith(".json")])
 
-    def __get_final_value(self):
+    def get_final_value(self, metric):
         """Get final (mean) value of the metric used in this test problem.
         Returns:
             float: Final (mean) value of the test problem's metric.
         """
-        return self.aggregate[self.metric]['mean'][-1]
+        return self.aggregate[metric]['mean'][-1]
 
-    def __get_best_value(self):
+    def get_best_value(self, metric):
         """Get best (mean) value of the metric used in this test problem.
         Returns:
             float: Best (mean) value of the test problem's metric.
         """
-        if self.metric == 'test_losses' or self.metric == 'train_losses':
-            return min(self.aggregate[self.metric]['mean'])
-        elif self.metric == 'test_accuracies' or self.metric == 'train_accuracies':
-            return max(self.aggregate[self.metric]['mean'])
+        if metric == 'test_losses' or metric == 'train_losses':
+            return min(self.aggregate[metric]['mean'])
+        elif metric == 'test_accuracies' or metric == 'train_accuracies':
+            return max(self.aggregate[metric]['mean'])
         else:
             raise RuntimeError("Metric unknown")
+
+    def calculate_speed(self, conv_perf_file):
+        path, file = os.path.split(conv_perf_file)
+        conv_perf = _load_json(path, file)[self.aggregate['testproblem']]
+
+        runs = [run for run in os.listdir(self.path) if run.endswith(".json")]
+        metric = 'test_accuracies' if 'test_accuracies' in self.aggregate else 'test_losses'
+        perf_values = []
+
+        for run in runs:
+            json_data = _load_json(self.path, run)
+            perf_values.append(json_data[metric])
+
+        perf_values = np.array(perf_values)
+        if metric == "test_losses":
+            # average over first time they reach conv perf (use num_epochs if conv perf is not reached)
+            speed = np.mean(
+                np.argmax(perf_values <= conv_perf, axis=1) +
+                np.invert(np.max(perf_values <= conv_perf, axis=1)) *
+                perf_values.shape[1])
+        elif metric == "test_accuracies":
+            speed = np.mean(
+                np.argmax(perf_values >= conv_perf, axis=1) +
+                np.invert(np.max(perf_values >= conv_perf, axis=1)) *
+                perf_values.shape[1])
+        else:
+            raise NotImplementedError
+
+        return speed
