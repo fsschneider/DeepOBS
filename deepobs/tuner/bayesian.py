@@ -2,8 +2,9 @@
 from .tuner import Tuner
 from bayes_opt import UtilityFunction
 import bayes_opt
-from .bayesian_utils import _save_bo_optimizer_object, _init_bo_tuning_summary, _update_bo_tuning_summary
+from .bayesian_utils import _save_bo_optimizer_object, _init_summary_directory, _update_bo_tuning_summary
 import os
+from .tuner_utils import rerun_setting
 
 
 class GP(Tuner):
@@ -11,15 +12,9 @@ class GP(Tuner):
                  hyperparam_names,
                  bounds,
                  ressources,
-                 acquisition_function = 'EI',
                  runner_type='StandardRunner'):
 
-    # TODO ressources and acq should rather be a argument of tune()\
-    # TODO if tune() is the only thing a tuner does, then why have a class?
-
         super(GP, self).__init__(optimizer_class, hyperparam_names, ressources, runner_type)
-
-        self._acquisition_function = acquisition_function
         self._bounds = self._read_in_bounds(bounds)
 
     @staticmethod
@@ -83,7 +78,7 @@ class GP(Tuner):
             if plotting_summary:
                 _save_bo_optimizer_object(os.path.join(log_path, 'obj'), str(iteration), op)
                 
-    def tune(self, testproblems, 
+    def tune(self, testproblem,
              output_dir = './results', 
              random_seed = 42, 
              n_init_samples = 5, 
@@ -97,54 +92,53 @@ class GP(Tuner):
              mode = 'final',
              rerun_best_setting = False,
              **kwargs):
-        
-        testproblems = self._read_testproblems(testproblems)
-        for testproblem in testproblems:
-            self._set_seed(random_seed)
-            cost_function = self._generate_cost_function(testproblem, output_dir, mode, **kwargs)
-            # TODO when to normalize the y values in gp ?
-            op = bayes_opt.BayesianOptimization(f = None, pbounds = self._bounds, random_state=random_seed)
-            if kernel is not None:
-                # TODO how to check if kernel is valid
-                op._gp.kernel = kernel
-            if alpha is not None:
-                # set noise level
-                op._gp.alpha = alpha
-            
-            log_path = os.path.join(output_dir, testproblem, self._optimizer_name)
-            self._check_output_path(log_path)
-            
-            utility_func = UtilityFunction(acq_type, kappa = acq_kappa, xi = acq_xi)
 
+        self._set_seed(random_seed)
+        log_path = os.path.join(output_dir, testproblem, self._optimizer_name)
+
+        cost_function = self._generate_cost_function(testproblem, output_dir, mode, **kwargs)
+        # TODO when to normalize the y values in gp ?
+        op = bayes_opt.BayesianOptimization(f = None, pbounds = self._bounds, random_state=random_seed)
+        if kernel is not None:
+            # TODO how to check if kernel is valid
+            op._gp.kernel = kernel
+        if alpha is not None:
+            # set noise level
+            op._gp.alpha = alpha
+
+        utility_func = UtilityFunction(acq_type, kappa = acq_kappa, xi = acq_xi)
+
+        if tuning_summary:
+            _init_summary_directory(log_path, 'bo_tuning_log.json')
+        if plotting_summary:
+            _init_summary_directory(os.path.join(log_path, 'obj'))
+            _save_bo_optimizer_object(os.path.join(log_path, 'obj'), 'acq_func', utility_func)
+
+        # evaluates the random points
+        try:
+            assert n_init_samples <= self._ressources
+        except AssertionError:
+            raise AssertionError('Number of initial evaluations exceeds the ressources.')
+        self._init_bo_space(op,
+                            cost_function,
+                            n_init_samples,
+                            log_path,
+                            plotting_summary,
+                            tuning_summary)
+
+        # execute remaining ressources
+        for iteration in range(n_init_samples+1, self._ressources + 1):
+            next_point = op.suggest(utility_func)
+            target = cost_function(**next_point)
             if tuning_summary:
-                _init_bo_tuning_summary(log_path, op)            
-            if plotting_summary:
-                self._check_output_path(os.path.join(log_path, 'obj'))
-                _save_bo_optimizer_object(os.path.join(log_path, 'obj'), 'acq_func', utility_func)
-                
-            # evaluates the random points
-            self._init_bo_space(op, 
-                                cost_function, 
-                                n_init_samples,
-                                log_path, 
-                                plotting_summary, 
-                                tuning_summary)
-            
-            # execute remaining ressources
-            # TODO assert that ressources >= n init points
-            for iteration in range(n_init_samples+1, self._ressources + 1):
-                next_point = op.suggest(utility_func)
-                target = cost_function(**next_point)
-                if tuning_summary:
-                    _update_bo_tuning_summary(op._gp, next_point, target, log_path)
-                op.register(params=next_point, target = target)
-                
-                # fit gp on new registered points
-                op._gp.fit(op._space.params, op._space.target)
-                if plotting_summary:
-                    _save_bo_optimizer_object(os.path.join(log_path, 'obj'), str(iteration), op)
+                _update_bo_tuning_summary(op._gp, next_point, target, log_path)
+            op.register(params=next_point, target = target)
 
-            if rerun_best_setting:
-                # TODO momentum is rerun in SGD folder!!
-                optimizer_path = os.path.join(output_dir, testproblem, self._optimizer_name)
-                self.rerun_best_setting(optimizer_path)
+            # fit gp on new registered points
+            op._gp.fit(op._space.params, op._space.target)
+            if plotting_summary:
+                _save_bo_optimizer_object(os.path.join(log_path, 'obj'), str(iteration), op)
+
+        if rerun_best_setting:
+            optimizer_path = os.path.join(output_dir, testproblem, self._optimizer_name)
+            rerun_setting(self._runner, self._optimizer_class, self._hyperparam_names, optimizer_path)

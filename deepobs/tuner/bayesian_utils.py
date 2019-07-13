@@ -69,7 +69,7 @@ def plot_1d_bo_posterior(optimizer_path, step, resolution):
     domain = np.squeeze(domain)
     acq = np.squeeze(acq)
     
-    fig, ax = plt.subplots(2,1)
+    fig, ax = plt.subplots(2, 1)
     ax[0].plot(domain, mean)
     ax[0].fill_between(domain, mean-std, mean+std, alpha=0.3)
     ax[0].set_xlabel(op.space.keys[0])
@@ -100,9 +100,14 @@ def _calculate_posterior_from_op(op, resolution):
     return mean, std, domain
 
 
-def _init_bo_tuning_summary(log_path, op):
-    # clear json
-    _clear_json(log_path, 'tuning_log.json')
+def _init_summary_directory(log_path, file = None):
+    if not os.path.isdir(log_path):
+        os.makedirs(log_path, exist_ok=True)
+    else:
+        if file is not None:    # clean just one file
+            _clear_json(log_path, file)
+        else:    # clean whole directory
+            [os.remove(os.path.join(log_path, file)) for file in os.listdir(log_path)]
 
 
 def _save_bo_optimizer_object(path, file_name, op):
