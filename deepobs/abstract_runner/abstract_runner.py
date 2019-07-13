@@ -16,34 +16,38 @@ class Runner(abc.ABC):
     Captures everything that is common to both frameworks and every runner type.
     This includes folder creation amd writing of the output to the folder.
 
-    Args:
-    optimizer_class: The optimizer class of the optimizer that is run on
-    the testproblems. For tensorflow this is a subclass of tf.train.Optimizer.
-    For pytorch this is a subclass of torch.optim.Optimizer
-
-    hyperparams (dict): A dict containing the hyperparams for the optimizer_class.
-
     Attributes:
     _optimizer_class: See argument optimizer_class
     _optimizer_name: The name of the optimizer class
-    _optimizer_hyperparams: See argument hyperparams
+    _hyperparameter_names: A nested dictionary that lists all hyperparameters of the optimizer,
+    their type and their default values
 
     Methods:
     run: An abstract method that is overwritten by the tensorflow and pytorch
     specific subclasses. It performs the actual run on a testproblem.
-
+    training: An abstract method that performs the actual training and is overwritten by the subclasses.
     create_output_directory: Creates the output folder of the run.
-
     write_output: Writes the output of the run to the output directory.
     """
 
     def __init__(self, optimizer_class, hyperparameter_names):
+        """
+        Args:
+            optimizer_class: The optimizer class of the optimizer that is run on
+            the testproblems. For PyTorch this must be a subclass of torch.optim.Optimizer. For
+            TensorFlow a subclass of tf.train.Optimizer.
 
+            hyperparameter_names (dict): A nested dictionary that lists all hyperparameters of the optimizer,
+            their type and their default values (if they have any) in the form: {'<name>': {'type': <type>, 'default': <default value>}},
+            e.g. for torch.optim.SGD with momentum:
+            {'lr': {'type': float},
+            'momentum': {'type': float, 'default': 0.99},
+            'uses_nesterov': {'type': bool, 'default': False}}
+        """
         self._optimizer_class = optimizer_class
         self._optimizer_name = optimizer_class.__name__
         self._hyperparameter_names = hyperparameter_names
 
-# TODO train log interval and tf logging?
     @abc.abstractmethod
     def run(self,
             testproblem = None,
@@ -54,13 +58,87 @@ class Runner(abc.ABC):
             data_dir=None,
             output_dir=None,
             weight_decay=None,
-            no_logs=False,
+            no_logs=None,
             train_log_interval = None,
             print_train_iter = None,
             tb_log = None,
             tb_log_dir = None,
-            **training_params):
+            **training_params
+            ):
+
+        """Runs a testproblem with the optimizer_class. Has the following tasks:
+            1. setup testproblem
+            2. run the training (must be implemented by subclass)
+            3. merge and write output
+
+            Args:
+                testproblem (str): Name of the testproblem.
+                hyperparams (dict): The explizit values of the hyperparameters of the optimizer that are used for training
+                batch_size (int): Mini-batch size for the training data.
+                num_epochs (int): The number of training epochs.
+                random_seed (int): The torch random seed.
+                data_dir (str): The path where the data is stored.
+                output_dir (str): Path of the folder where the results are written to.
+                weight_decay (float): Regularization factor for the testproblem.
+                no_logs (bool): Whether to write the output or not.
+                train_log_interval (int): Mini-batch interval for logging.
+                print_train_iter (bool): Whether to print the training progress at each train_log_interval.
+                tb_log (bool): Whether to use tensorboard logging or not
+                tb_log_dir (str): The path where to save tensorboard events.
+                **training_params (dict): Kwargs for the training method.
+            Returns:
+                output (dict):
+                    {<...meta data...>
+                    'test_losses' : test_losses
+                     'train_losses': train_losses,
+                     'test_accuracies': test_accuracies,
+                     'train_accuracies': train_accuracies,
+                     'analyzable_training_params': {...}
+                     }
+                were <...meta data...> stores the run args.
+
+        """
         return
+
+    @abc.abstractmethod
+    def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params):
+        """Must be implemented by the subclass. Performs the training and stores the metrices.
+            Args:
+                tproblem (deepobs.[tensorflow/pytorch].testproblems.testproblem): The testproblem instance to train on.
+                hyperparams (dict): The optimizer hyperparameters to use for the training.
+                num_epochs (int): The number of training epochs.
+                print_train_iter (bool): Whether to print the training progress at every train_log_interval
+                train_log_interval (int): Mini-batch interval for logging.
+                tb_log (bool): Whether to use tensorboard logging or not
+                tb_log_dir (str): The path where to save tensorboard events.
+                **training_params (dict): Kwargs for additional training parameters that are implemented by subclass.
+
+            Returns:
+                output (dict): The logged metrices. Is of the form:
+                    {'test_losses' : test_losses
+                     'train_losses': train_losses,
+                     'test_accuracies': test_accuracies,
+                     'train_accuracies': train_accuracies,
+                     'analyzable_training_params': {...}
+                     }
+
+            where the metrices values are lists that were filled during training
+            and the key 'analyzable_training_params' holds a dict of training
+            parameters that should be taken into account in the analysis later on.
+            These can be, for example, learning rate schedules. Or in the easiest
+            case, this dict is empty.
+        """
+        return
+
+    @staticmethod
+    @abc.abstractmethod
+    def evaluate():
+        pass
+
+    @staticmethod
+    @abc.abstractmethod
+    def create_testproblem():
+        pass
 
     def parse_args(self,
             testproblem,
@@ -78,6 +156,25 @@ class Runner(abc.ABC):
             tb_log_dir,
             **training_params):
 
+        """Constructs an argparse.ArgumentParser and parses the arguments from command line.
+        Args:
+                testproblem (str): Name of the testproblem.
+                hyperparams (dict): The explizit values of the hyperparameters of the optimizer that are used for training
+                batch_size (int): Mini-batch size for the training data.
+                num_epochs (int): The number of training epochs.
+                random_seed (int): The torch random seed.
+                data_dir (str): The path where the data is stored.
+                output_dir (str): Path of the folder where the results are written to.
+                weight_decay (float): Regularization factor for the testproblem.
+                no_logs (bool): Whether to write the output or not.
+                train_log_interval (int): Mini-batch interval for logging.
+                print_train_iter (bool): Whether to print the training progress at each train_log_interval.
+                tb_log (bool): Whether to use tensorboard logging or not
+                tb_log_dir (str): The path where to save tensorboard events.
+                **training_params (dict): Kwargs for the training method.
+
+        Returns: args (dict): A dicionary of all arguments.
+            """
         args = {}
         parser = argparse.ArgumentParser(description='Arguments for running optimizer script.')
 
@@ -277,7 +374,7 @@ class Runner(abc.ABC):
         return run_directory, file_name
     
     def _post_process_output(self, output, testproblem, batch_size, num_epochs, random_seed, weight_decay, hyperparams):
-        '''Ensures that for both frameworks the structure of the output is the same'''
+        """Ensures that for both frameworks the structure of the output is the same"""
         
         # remove test accuracy if it is not available
         if 'test_accuracies' in output:
@@ -316,8 +413,11 @@ class Runner(abc.ABC):
     @staticmethod
     def _abort_routine(epoch_count, num_epochs, train_losses, test_losses, train_accuracies, test_accuracies,
                        minibatch_train_losses):
+        """A routine that is executed if a training run is aborted (loss is NaN or Inf)."""
         print('Breaking from run after epoch', str(epoch_count),
               'due to wrongly calibrated optimization (Loss is Nan or Inf)')
+
+        # fill the rest of the metrices with initial observations
         for i in range(epoch_count, num_epochs):
             train_losses.append(train_losses[0])
             test_losses.append(test_losses[0])
