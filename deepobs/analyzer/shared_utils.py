@@ -4,6 +4,12 @@ import numpy as np
 
 
 def aggregate_runs(setting_folder):
+    """Aggregates all seed runs for a setting.
+    Args:
+        setting_folder (str): The path to the setting folder.
+    Returns:
+        A dictionary that contains the aggregated mean and std of all metrices, as well as the meta data.
+        """
     runs = [run for run in os.listdir(setting_folder) if run.endswith(".json")]
     # metrices
     train_losses = []
@@ -37,11 +43,13 @@ def aggregate_runs(setting_folder):
 
 
 def _read_all_settings_folders(optimizer_path):
+    """Returns a list of all setting folders in ``optimizer_path``"""
     optimizer_path = os.path.join(optimizer_path)
     return [f for f in os.listdir(optimizer_path) if os.path.isdir(os.path.join(optimizer_path, f)) and 'num_epochs' in f]
 
 
 def _check_if_metric_is_available(optimizer_path, metric):
+    """Checks if the metric ``metric`` is availabe for the runs in ``optimizer_path``"""
     settings = _read_all_settings_folders(optimizer_path)
     sett = settings[0]
     path = os.path.join(optimizer_path, sett)
@@ -54,6 +62,8 @@ def _check_if_metric_is_available(optimizer_path, metric):
 
 
 def _determine_available_metric(optimizer_path, metric):
+    """Checks if the metric ``metric`` is availabe for the runs in ``optimizer_path``.
+    If not, it returns the fallback metric 'test_losses',"""
     if _check_if_metric_is_available(optimizer_path, metric):
         return metric
     else:
@@ -86,6 +96,7 @@ def _load_json(path, file_name):
 
 
 def _get_all_setting_analyzer(optimizer_path):
+    """Creates a list of SettingAnalyzers (one for each setting in ``optimizer_path``)"""
     optimizer_path = os.path.join(optimizer_path)
     setting_folders = _read_all_settings_folders(optimizer_path)
     setting_analyzers = []
@@ -96,6 +107,14 @@ def _get_all_setting_analyzer(optimizer_path):
 
 
 def create_setting_analyzer_ranking(optimizer_path, mode = 'final', metric = 'test_accuracies'):
+    """Reads in all settings in ``optimizer_path`` and sets up a ranking by returning an ordered list of SettingAnalyzers.
+    Args:
+        optimizer_path (str): The path to the optimizer to analyse.
+        mode (str): The mode by which to decide the best setting.
+        metric (str): The metric by which to decide the best setting.
+    Returns:
+        An ordered list of SettingAnalyzers. I.e. the first item is considered 'the best one' etc.
+    """
     metric = _determine_available_metric(optimizer_path, metric)
     setting_analyzers = _get_all_setting_analyzer(optimizer_path)
 
@@ -121,8 +140,8 @@ class SettingAnalyzer:
 
     Attributes:
         path (str): Path to the setting folder.
-        aggregate (dictionary): Contains the mean and std of the runs for the given metric.
-        n_runs
+        aggregate (dictionary): Contains the mean and std of the runs as well as the meta data.
+        n_runs (int): The number of seed runs that were performed for this setting.
     """
 
     def __init__(self, path):
@@ -137,28 +156,30 @@ class SettingAnalyzer:
         self.aggregate = aggregate_runs(path)
 
     def __get_number_of_runs(self):
+        """Calculates the total number of seed runs."""
         return len([run for run in os.listdir(self.path) if run.endswith(".json")])
 
     def get_final_value(self, metric):
-        """Get final (mean) value of the metric used in this test problem.
-        Returns:
-            float: Final (mean) value of the test problem's metric.
-        """
-        return self.aggregate[metric]['mean'][-1]
+        """Get the final (mean) value of the metric."""
+        try:
+            return self.aggregate[metric]['mean'][-1]
+        except KeyError:
+            raise KeyError('Metric {0:s} not available for testproblem {1:s} of this setting'.format(metric, self.aggregate['testproblem']))
 
     def get_best_value(self, metric):
-        """Get best (mean) value of the metric used in this test problem.
-        Returns:
-            float: Best (mean) value of the test problem's metric.
-        """
-        if metric == 'test_losses' or metric == 'train_losses':
-            return min(self.aggregate[metric]['mean'])
-        elif metric == 'test_accuracies' or metric == 'train_accuracies':
-            return max(self.aggregate[metric]['mean'])
-        else:
-            raise RuntimeError("Metric unknown")
+        """Get the best (mean) value of the metric."""
+        try:
+            if metric == 'test_losses' or metric == 'train_losses':
+                return min(self.aggregate[metric]['mean'])
+            elif metric == 'test_accuracies' or metric == 'train_accuracies':
+                return max(self.aggregate[metric]['mean'])
+            else:
+                raise NotImplementedError
+        except KeyError:
+            raise KeyError('Metric {0:s} not available for testproblem {1:s} of this setting'.format(metric, self.aggregate['testproblem']))
 
     def calculate_speed(self, conv_perf_file):
+        """Calculates the speed of the setting."""
         path, file = os.path.split(conv_perf_file)
         conv_perf = _load_json(path, file)[self.aggregate['testproblem']]
 
