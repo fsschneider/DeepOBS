@@ -4,13 +4,13 @@ from __future__ import print_function
 import torch
 import importlib
 import abc
-from torch.utils.tensorboard import SummaryWriter
 from deepobs import config as global_config
 from .. import config
 from .. import testproblems
 from . import runner_utils
 from deepobs.abstract_runner.abstract_runner import Runner
 import numpy as np
+
 
 class PTRunner(Runner):
     """The abstract class for runner in the pytorch framework."""
@@ -210,8 +210,13 @@ class StandardRunner(PTRunner):
         minibatch_train_losses = []
 
         if tb_log:
-            summary_writer = SummaryWriter(log_dir=tb_log_dir)
-        global_step = 0
+            try:
+                from torch.utils.tensorboard import SummaryWriter
+                summary_writer = SummaryWriter(log_dir=tb_log_dir)
+            except ImportError as e:
+                print('Not possible to use tensorboard for pytorch. Reason:', e)
+                tb_log = False
+            global_step = 0
 
         for epoch_count in range(num_epochs+1):
             # Evaluate at beginning of epoch.
