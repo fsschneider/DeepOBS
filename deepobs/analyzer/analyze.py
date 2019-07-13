@@ -15,6 +15,17 @@ def plot_performance_table(results_path):
 
 
 def plot_all_testproblems_performances(results_path, mode = 'final', metric = 'test_accuracies', reference_path = None):
+    """Plots all optimizer performances for all testproblems.
+    Args:
+        results_path (str): The path to the results folder.
+        mode (str): The mode by which to decide the best setting.
+        metric (str): The metric by which to decide the best setting.
+        reference_path(str): Path to the reference results folder. For each available reference testproblem, all optimizers are plotted as reference.
+
+
+    Returns:
+        ax (plt.axes): The axes with the plots.
+        """
     testproblems = [path for path in os.listdir(results_path) if os.path.isdir(os.path.join(results_path, path))]
     if reference_path is not None:
         reference_testproblems = [path for path in os.listdir(results_path) if os.path.isdir(os.path.join(reference_path, path))]
@@ -33,6 +44,16 @@ def plot_all_testproblems_performances(results_path, mode = 'final', metric = 't
 
 
 def _plot_all_optimizer_performances_for_testproblem(testproblem_path, ax = None, mode = 'final', metric = 'test_accuracies'):
+    """Plots the performance of all optimizers in one testproblem folder.
+    Args:
+        testproblem_path (str): The path to the testproblem.
+        ax (plt.axes instance that has 4 subaxes (one for each possible metric)): The axes to plot the trainig curves for all metrices.
+        mode (str): The mode by which to decide the best setting.
+        metric (str): The metric by which to decide the best setting.
+
+    Returns:
+        ax (plt.axes): The axes with the plots.
+        """
     optimizers = [path for path in os.listdir(testproblem_path) if os.path.isdir(os.path.join(testproblem_path, path))]
     for optimizer in optimizers:
         optimizer_path = os.path.join(testproblem_path, optimizer)
@@ -41,6 +62,17 @@ def _plot_all_optimizer_performances_for_testproblem(testproblem_path, ax = None
 
 
 def plot_hyperparameter_sensitivity(optimizer_path, hyperparam, mode='final', metric = 'test_accuracies', xscale='linear'):
+    """Plots the hyperparameter sensitivtiy of the optimizer.
+    Args:
+        optimizer_path (str): The path to the optimizer to analyse.
+        hyperparam (str): The name of the hyperparameter that should be analyzed.
+        mode (str): The mode by which to decide the best setting.
+        metric (str): The metric by which to decide the best setting.
+        xscale (str): The scale for the parameter axes. Is passed to plt.xscale().
+    Returns:
+        fig, ax: The figure and axes of the plot.
+
+        """
     tuning_summary = generate_tuning_summary(optimizer_path, mode, metric)
 
     optimizer_name = os.path.split(optimizer_path)[-1]
@@ -66,6 +98,15 @@ def plot_hyperparameter_sensitivity(optimizer_path, hyperparam, mode='final', me
 
 
 def get_performance_dictionary(optimizer_path, mode = 'final', metric = 'test_accuracies', conv_perf_file = None):
+    """Summarizes the performance of the optimizer.
+    Args:
+        optimizer_path (str): The path to the optimizer to analyse.
+        mode (str): The mode by which to decide the best setting.
+        metric (str): The metric by which to decide the best setting.
+        conv_perf_file (str): Path to the convergence performance file. It is used to calculate the speed of the optimizer. Defaults to ``None`` in which case the speed measure is N.A.
+    Returns:
+        perf_dict (dict): A dictionary that holds the best setting and it's perormance.
+        """
     metric = _determine_available_metric(optimizer_path, metric)
     setting_analyzers_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
     sett = setting_analyzers_ranking[0]
@@ -91,6 +132,16 @@ def get_performance_dictionary(optimizer_path, mode = 'final', metric = 'test_ac
 
 
 def _plot_optimizer_performance(optimizer_path, ax = None, mode = 'final', metric = 'test_accuracies'):
+    """Plots the training curve of an optimizer.
+    Args:
+        optimizer_path (str): The path to the optimizer to analyse.
+        ax (plt.axes instance that has 4 subaxes (one for each possible metric)): The axes to plot the trainig curves for all metrices.
+        mode (str): The mode by which to decide the best setting.
+        metric (str): The metric by which to decide the best setting.
+
+    Returns:
+        ax (plt.axes): The axes with the plots.
+        """
     setting_analyzer_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
     setting = setting_analyzer_ranking[0]
 
@@ -109,7 +160,17 @@ def _plot_optimizer_performance(optimizer_path, ax = None, mode = 'final', metri
 
 
 def plot_optimizer_performance(optimizer_path, ax = None, mode = 'final', metric = 'test_accuracies', reference_path = None):
+    """Plots the training curve of an optimizer and addionally plots reference results from the ``reference_path``
+    Args:
+        optimizer_path (str): The path to the optimizer to analyse.
+        ax (plt.axes instance that has 4 subaxes (one for each possible metric)): The axes to plot the trainig curves for all metrices.
+        mode (str): The mode by which to decide the best setting.
+        metric (str): The metric by which to decide the best setting.
+        reference_path(str): Path to the reference optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are taken as reference)
 
+    Returns:
+        ax (plt.axes): The axes with the plots.
+        """
     ax = _plot_optimizer_performance(optimizer_path, ax, mode, metric)
     if reference_path is not None:
         reference_path = _preprocess_reference_path(reference_path)    # reference path can either be an optimizer_path or a testproblem path

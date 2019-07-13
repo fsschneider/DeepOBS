@@ -2,9 +2,15 @@ import numpy as np
 from matplotlib import cm
 import os
 
+
 def _preprocess_reference_path(reference_path):
     """The reference path can either be a path to a specific optimizer or to a whole testproblem.
-    In the latter case the reference path should become a list of all optimizers for that testproblem"""
+    In the latter case the reference path should become a list of all optimizers for that testproblem
+    Args:
+        reference_path(str): Path to the reference optimizer or to a whole testproblem
+    Returns:
+        A list of all reference optimizers.
+        """
     os.chdir(reference_path)
     pathes = [path for path in os.listdir(reference_path) if os.path.isdir(path)]
 
@@ -37,12 +43,6 @@ def make_legend_and_colors_consistent(axes):
 
 
 def rescale_ax(ax):
-    """Rescale an axis to include the most important data.
-
-    Args:
-        ax (matplotlib.axis): Handle to a matplotlib axis.
-
-    """
     lines = ax.lines
     y_data = np.array([])
     y_limits = []
