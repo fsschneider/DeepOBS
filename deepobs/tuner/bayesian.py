@@ -8,6 +8,12 @@ from .tuner_utils import rerun_setting
 
 
 class GP(Tuner):
+    # TODO write docstrings
+    """A Bayesian optimization tuner that uses a Gaussian Process surrogate.
+    Attributes:
+         _bounds (dict): The bounds for each hyperparameter.
+    Methods:
+    """
     def __init__(self, optimizer_class,
                  hyperparam_names,
                  bounds,
