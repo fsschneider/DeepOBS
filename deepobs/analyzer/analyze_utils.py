@@ -1,10 +1,10 @@
 import numpy as np
 from matplotlib import cm
 import os
-from .shared_utils import _load_json
-
 
 def _preprocess_reference_path(reference_path):
+    """The reference path can either be a path to a specific optimizer or to a whole testproblem.
+    In the latter case the reference path should become a list of all optimizers for that testproblem"""
     os.chdir(reference_path)
     pathes = [path for path in os.listdir(reference_path) if os.path.isdir(path)]
 
@@ -12,42 +12,6 @@ def _preprocess_reference_path(reference_path):
         return reference_path.split()
     else:    # path was a testproblem path
         return [os.path.join(reference_path, path) for path in pathes]
-
-
-# TODO is compute speed up to date?
-def compute_speed(setting_folder, conv_perf, metric):
-    runs = [run for run in os.listdir(setting_folder) if run.endswith(".json")]
-    # metrices
-    train_losses = []
-    train_accuracies = []
-    test_losses = []
-    test_accuracies = []
-
-    for run in runs:
-        json_data = _load_json(setting_folder, run)
-        train_losses.append(json_data['train_losses'])
-        test_losses.append(json_data['test_losses'])
-        # just add accuracies to the aggregate if they are available
-        if 'train_accuracies' in json_data:
-            train_accuracies.append(json_data['train_accuracies'])
-            test_accuracies.append(json_data['test_accuracies'])
-
-    perf = np.array(eval(metric))
-    if metric == "test_losses" or metric == "train_losses":
-        # average over first time they reach conv perf (use num_epochs if conv perf is not reached)
-        speed = np.mean(
-            np.argmax(perf <= conv_perf, axis=1) +
-            np.invert(np.max(perf <= conv_perf, axis=1)) *
-            perf.shape[1])
-    elif metric == "test_accuracies" or metric == "train_accuracies":
-        speed = np.mean(
-            np.argmax(perf >= conv_perf, axis=1) +
-            np.invert(np.max(perf >= conv_perf, axis=1)) *
-            perf.shape[1])
-    else:
-        raise NotImplementedError
-
-    return speed
 
 
 def make_legend_and_colors_consistent(axes):
