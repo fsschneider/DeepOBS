@@ -3,17 +3,6 @@ from .tuner import ParallelizedTuner
 from itertools import product
 
 
-class InputError(Exception):
-    """Exception raised for errors in the input.
-
-    Attributes:
-        message -- explanation of the error
-    """
-
-    def __init__(self, message):
-        self.message = message
-
-
 class GridSearch(ParallelizedTuner):
 
     def __init__(self, optimizer_class, hyperparam_names, grid, ressources, runner_type='StandardRunner'):
@@ -26,7 +15,7 @@ class GridSearch(ParallelizedTuner):
     def _check_if_grid_is_valid(grid, ressources):
         grid_size = len(list(product(*[values for values in grid.values()])))
         if grid_size > ressources:
-            raise InputError('Grid is too large for the available number of iterations.')
+            raise RuntimeError('Grid is too large for the available number of iterations.')
 
     def _sample(self):
         all_values = []

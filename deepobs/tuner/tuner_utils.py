@@ -2,15 +2,45 @@
 import numpy as np
 from scipy.stats. distributions import uniform
 from ..analyzer.shared_utils import create_setting_analyzer_ranking, _clear_json, _append_json, _determine_available_metric
+import os
 
 
-def plot_2d_tuning_summary(optimizer_path, hyperparam, mode = 'final', xscale = 'linear', aggregated = False):
-    # TODO
-    return
+def rerun_setting(runner, optimizer_class, hyperparam_names, optimizer_path, seeds=np.arange(43, 52), rank=1, mode='final', metric='test_accuracies'):
+    """Reruns a hyperparameter setting with several seeds after the tuning is finished. Defaults to rerun the best setting.
+    Args:
+        optimizer_path (str): The path to the optimizer to analyse the best setting on.
+        seeds (iterable): The seeds that are used to rerun the setting.
+        rank (int): The ranking of the setting that is to rerun.
+        mode (str): The mode by which to decide the best setting.
+        metric (str): The metric by which to decide the best setting.
+    """
+    metric = _determine_available_metric(optimizer_path, metric)
+    optimizer_path = os.path.join(optimizer_path)
+
+    setting_analyzer_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
+    setting = setting_analyzer_ranking[rank - 1]
+
+    runner = runner(optimizer_class, hyperparam_names)
+
+    hyperparams = setting.aggregate['optimizer_hyperparams']
+    testproblem = setting.aggregate['testproblem']
+    num_epochs = setting.aggregate['num_epochs']
+    batch_size = setting.aggregate['batch_size']
+    results_path = os.path.split(os.path.split(optimizer_path)[0])[0]
+    for seed in seeds:
+        runner.run(testproblem, hyperparams=hyperparams, random_seed=int(seed), num_epochs=num_epochs,
+                   batch_size=batch_size, output_dir=results_path)
 
 
 def write_tuning_summary(optimizer_path, mode = 'final', metric = 'test_accuracies'):
+    """Writes the tuning summary to a json file in the ``optimizer_path``.
+    Args:
+        optimizer_path (str): Path to the optimizer folder.
+        mode (str): The mode on which the performance measure for the summary is based.
+        metric (str): The metric which is printed to the tuning summary as 'target'
+    """
     tuning_summary = generate_tuning_summary(optimizer_path, mode, metric)
+
     # clear json
     _clear_json(optimizer_path, 'tuning_log.json')
     for line in tuning_summary:
@@ -18,6 +48,18 @@ def write_tuning_summary(optimizer_path, mode = 'final', metric = 'test_accuraci
 
 
 def generate_tuning_summary(optimizer_path, mode = 'final', metric = 'test_accuracies'):
+    """Generates a list of dictionaries that holds an overview of the current tuning process.
+    Should not be used for Bayesian tuning methods, since the order of evaluation is ignored in this summary. For
+    Bayesian tuning methods use the tuning summary logging of the respective class.
+
+    Args:
+        optimizer_path (str): Path to the optimizer folder.
+        mode (str): The mode on which the performance measure for the summary is based.
+        metric (str): The metric which is printed to the tuning summary as 'target'
+    Returns:
+        tuning_summary (list): A list of dictionaries. Each dictionary corresponds to one hyperparameter evaluation
+        of the tuning process and holds the hyperparameters and their performance.
+        """
     metric = _determine_available_metric(optimizer_path, metric)
     setting_analyzer_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
     tuning_summary = []
@@ -36,7 +78,8 @@ def generate_tuning_summary(optimizer_path, mode = 'final', metric = 'test_accur
     return tuning_summary
 
 
-class log_uniform():        
+class log_uniform():
+    """A log uniform distribution that takes an arbitrary base."""
     def __init__(self, a, b, base=10):
         self.loc = a
         self.scale = b - a
@@ -45,7 +88,7 @@ class log_uniform():
     def rvs(self, size=1, random_state=None):
         uniform_values = uniform(loc=self.loc, scale=self.scale)
         exp_values = np.power(self.base, uniform_values.rvs(size=size, random_state=random_state))
-        if len(exp_values)==1:
+        if len(exp_values) == 1:
             return exp_values[0]
         else:
             return exp_values

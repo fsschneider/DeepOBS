@@ -2,18 +2,42 @@
 import abc
 from .. import config
 from numpy.random import seed as np_seed
-from ..analyzer.analyze import create_setting_analyzer_ranking
-from ..analyzer.shared_utils import _determine_available_metric
 import os
-import numpy as np
+import datetime
+from .tuner_utils import rerun_setting
+import copy
 
 
 class Tuner(abc.ABC):
+    """The base class for all tuning methods in DeepOBS.
+    Attributes:
+    _optimizer_class: See argument optimizer_class
+    _optimizer_name: The name of the optimizer class
+    _hyperparameter_names: A nested dictionary that lists all hyperparameters of the optimizer,
+    their type and their default values
+    _resources: The number of evaluations the tuner is allowed to perform on each testproblem.
+    _runner_type: The DeepOBS runner type that the tuner uses for evaluation.
+        """
     def __init__(self,
                  optimizer_class,
                  hyperparam_names,
                  ressources,
                  runner_type='StandardRunner'):
+        """Args:
+            optimizer_class: The optimizer class of the optimizer that is run on
+            the testproblems. For PyTorch this must be a subclass of torch.optim.Optimizer. For
+            TensorFlow a subclass of tf.train.Optimizer.
+
+            hyperparam_names (dict): A nested dictionary that lists all hyperparameters of the optimizer,
+            their type and their default values (if they have any) in the form: {'<name>': {'type': <type>, 'default': <default value>}},
+            e.g. for torch.optim.SGD with momentum:
+            {'lr': {'type': float},
+            'momentum': {'type': float, 'default': 0.99},
+            'uses_nesterov': {'type': bool, 'default': False}}
+
+            ressources (int): The number of evaluations the tuner is allowed to perform on each testproblem.
+            runner_type (str): The DeepOBS runner type that the tuner uses for evaluation.
+        """
 
         self._optimizer_class = optimizer_class
         self._optimizer_name = optimizer_class.__name__
@@ -34,60 +58,17 @@ class Tuner(abc.ABC):
             raise AttributeError('Runner type ', runner_type,
                                  ' not implemented. If you really need it, you have to implement it on your own.')
 
-    def rerun_best_setting(self, optimizer_path, seeds = np.arange(43, 52), rank=1, mode='final', metric = 'test_accuracies'):
-        metric = _determine_available_metric(optimizer_path, metric)
-        optimizer_path = os.path.join(optimizer_path)
-
-        setting_analyzer_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
-        setting = setting_analyzer_ranking[rank - 1]
-
-        runner = self._runner(self._optimizer_class, self._hyperparam_names)
-
-        hyperparams = setting.aggregate['optimizer_hyperparams']
-        testproblem = setting.aggregate['testproblem']
-        num_epochs = setting.aggregate['num_epochs']
-        batch_size = setting.aggregate['batch_size']
-        results_path = os.path.split(os.path.split(optimizer_path)[0])[0]
-        # TODO remove print
-        print(testproblem, metric, results_path)
-        for seed in seeds:
-            runner.run(testproblem, hyperparams = hyperparams, random_seed = int(seed), num_epochs = num_epochs, batch_size = batch_size, output_dir = results_path)
-
-
     @staticmethod
     def _set_seed(random_seed):
+        """Sets all relevant seeds for the tuning."""
         np_seed(random_seed)
 
-    @staticmethod
-    def _check_output_path(path):
-        """Checks if path already exists. creates it if not, cleans it if yes."""
-        # TODO warn user that path will be cleaned up! data might be lost for users if they dont know
-        # TODO or add some unique id to the outdir?
-        if not os.path.isdir(path):
-            # create if it does not exist
-            os.makedirs(path)
-            # TODO I dont delete the folder for now!! not a good idea (e.g. momentum = SGD in torch)
-
-    #        else:
-    #            # delete content if it exist
-    #            contentlist = os.listdir(path)
-    #            for f in contentlist:
-    #                _path = os.path.join(path, f)
-    #                if os.path.isfile(_path):
-    #                    os.remove(_path)
-    #                elif os.path.isdir(_path):
-    #                    shutil.rmtree(_path)
-
-    @staticmethod
-    def _read_testproblems(testproblems):
-        if type(testproblems) == str:
-            testproblems = testproblems.split()
-        else:
-            testproblems = sorted(testproblems)
-        return testproblems
+    def tune_on_testset(self, testset, *args, **kwargs):
+        for testproblem in testset:
+            self.tune(testproblem, *args, **kwargs)
 
     @abc.abstractmethod
-    def tune(self):
+    def tune(self, testproblem, *args, output_dir='./results', random_seed=42, rerun_best_setting = False, **kwargs):
         pass
 
 
@@ -106,14 +87,18 @@ class ParallelizedTuner(Tuner):
     def _sample(self):
         return
 
-    # TODO hyperparam_names['type'] is formatted incorrectly
-    # TODO smarter way to create that file?
-    def _generate_python_script(self):
-        script = open(self._optimizer_name + '.py', 'w')
-        # TODO vereinheitliche runner paths
+    def _formate_hyperparam_names_to_string(self):
+        str_dict = copy.deepcopy(self._hyperparam_names)
+        for hp in self._hyperparam_names:
+            str_dict[hp]['type'] = self._hyperparam_names[hp]['type'].__name__
+        return str(str_dict)
+
+    def _generate_python_script(self, generation_dir):
+        if not os.path.isdir(generation_dir):
+            os.makedirs(generation_dir, exist_ok=True)
+        script = open(os.path.join(generation_dir, self._optimizer_name + '.py'), 'w')
         import_line1 = 'from deepobs.' + config.get_framework() + '.runners.runner import ' + self._runner_type
         import_line2 = 'from ' + self._optimizer_class.__module__ + ' import ' + self._optimizer_class.__name__
-        # TODO optimizer_class  must implement __module__ and __name__ accordingly
         script.write(import_line1 +
                      '\n' +
                      import_line2 +
@@ -121,16 +106,18 @@ class ParallelizedTuner(Tuner):
                      self._runner_type +
                      '(' +
                      self._optimizer_class.__name__ + ', '
-                     + str(self._hyperparam_names) +
+                     + self._formate_hyperparam_names_to_string() +
                      ')\nrunner.run()')
         script.close()
         return self._optimizer_name + '.py'
 
-    @staticmethod
-    def _generate_hyperparams_formate_for_command_line(hyperparams):
+    def _generate_hyperparams_formate_for_command_line(self, hyperparams):
         string = ''
         for key, value in hyperparams.items():
-            string += ' --' + key + ' ' + str(value)
+            if self._hyperparam_names[key]['type'] == bool:
+                string += ' --' + key
+            else:
+                string += ' --' + key + ' ' + str(value)
         return string
 
     @staticmethod
@@ -141,39 +128,29 @@ class ParallelizedTuner(Tuner):
             string += ' --' + key + ' ' + str(value)
         return string
 
-    def tune(self, testproblems, output_dir='./results', random_seed=42, rerun_best_setting = False, **kwargs):
-        testproblems = self._read_testproblems(testproblems)
-        for testproblem in testproblems:
-            self._set_seed(random_seed)
-            log_path = os.path.join(output_dir, testproblem, self._optimizer_name)
-            self._check_output_path(log_path)
+    def tune(self, testproblem, output_dir='./results', random_seed=42, rerun_best_setting = False, **kwargs):
+        self._set_seed(random_seed)
+        params = self._sample()
+        for sample in params:
+            runner = self._runner(self._optimizer_class, self._hyperparam_names)
+            runner.run(testproblem, hyperparams=sample, random_seed=random_seed, output_dir=output_dir, **kwargs)
 
-            # TODO better prints or not at all
-            params = self._sample()
-            print('Tuning', self._optimizer_name, 'on testproblem', testproblem)
-            for sample in params:
-                print('Start training with', sample)
-                runner = self._runner(self._optimizer_class, self._hyperparam_names)
-                runner.run(testproblem, hyperparams=sample, random_seed=random_seed, output_dir=output_dir, **kwargs)
-            if rerun_best_setting:
-                # TODO momentum is rerun in SGD folder!!
-                optimizer_path = os.path.join(output_dir, testproblem, self._optimizer_name)
-                self.rerun_best_setting(optimizer_path)
+        if rerun_best_setting:
+            optimizer_path = os.path.join(output_dir, testproblem, self._optimizer_name)
+            rerun_setting(self._runner, self._optimizer_class, self._hyperparam_names, optimizer_path)
 
-    # TODO write into subfolder
-    def generate_commands_script(self, testproblems, output_dir='./results', random_seed=42, **kwargs):
-        testproblems = self._read_testproblems(testproblems)
-        script = self._generate_python_script()
-        file = open('jobs_' + self._optimizer_name + '_' + self._search_name + '.txt', 'w')
+    def generate_commands_script(self, testproblem, output_dir='./results', random_seed=42, generation_dir = './command_scripts', **kwargs):
+        script = self._generate_python_script(generation_dir)
+        file = open(os.path.join(generation_dir, 'jobs_' + self._optimizer_name + '_' + self._search_name + '_' + testproblem + '.txt'), 'w')
         kwargs_string = self._generate_kwargs_format_for_command_line(**kwargs)
-        for testproblem in testproblems:
-            self._set_seed(random_seed)
-            log_path = os.path.join(output_dir, testproblem, self._optimizer_name)
-            self._check_output_path(log_path)
-            params = self._sample()
-            file.write('##### ' + testproblem + ' #####\n')
-            for sample in params:
-                sample_string = self._generate_hyperparams_formate_for_command_line(sample)
-                file.write('python3 ' + script + ' ' + testproblem + ' ' + sample_string + ' ' + '--random_seed ' + str(
-                    random_seed) + '--output_dir' + output_dir + ' ' + kwargs_string + '\n')
+        self._set_seed(random_seed)
+        params = self._sample()
+        for sample in params:
+            sample_string = self._generate_hyperparams_formate_for_command_line(sample)
+            file.write('python3 ' + script + ' ' + testproblem + ' ' + sample_string + ' --random_seed ' + str(
+                random_seed) + ' --output_dir' + output_dir + ' ' + kwargs_string + '\n')
         file.close()
+
+    def generate_commands_script_for_testset(self, testset, *args, **kwargs):
+        for testproblem in testset:
+            self.generate_commands_script(testproblem, *args, **kwargs)
