@@ -36,12 +36,3 @@ def _add_hp_to_argparse(parser, optimizer_name, hp_specification, hp_name):
                 required=True,
                 type=hp_specification['type'],
                 help='Hyperparameter {0:s} of {1:s} ({2:s}).'.format(hp_name, optimizer_name, str(hp_specification['type'])))
-
-class StoreDictKeyPair(argparse.Action):
-     def __call__(self, parser, namespace, values, option_string=None):
-         my_dict = {}
-         # TODO split at different character (chane this in tuner as well)
-         for kv in values.split(",,"):
-             k,v = kv.split("=")
-             my_dict[k] = eval(v)
-         setattr(namespace, self.dest, my_dict)

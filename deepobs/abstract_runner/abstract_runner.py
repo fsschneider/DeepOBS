@@ -4,7 +4,6 @@
 import os
 import json
 from .abstract_runner_utils import float2str
-from .abstract_runner_utils import StoreDictKeyPair
 from .abstract_runner_utils import _add_hp_to_argparse
 import time
 import abc
@@ -48,7 +47,6 @@ class Runner(abc.ABC):
         self._optimizer_name = optimizer_class.__name__
         self._hyperparameter_names = hyperparameter_names
 
-    @abc.abstractmethod
     def run(self,
             testproblem = None,
             hyperparams = None,
@@ -85,7 +83,7 @@ class Runner(abc.ABC):
                 print_train_iter (bool): Whether to print the training progress at each train_log_interval.
                 tb_log (bool): Whether to use tensorboard logging or not
                 tb_log_dir (str): The path where to save tensorboard events.
-                **training_params (dict): Kwargs for the training method.
+                training_params (dict): Kwargs for the training method.
             Returns:
                 output (dict):
                     {<...meta data...>
@@ -98,6 +96,40 @@ class Runner(abc.ABC):
                 were <...meta data...> stores the run args.
 
         """
+        args = self.parse_args(testproblem,
+            hyperparams,
+            batch_size,
+            num_epochs,
+            random_seed,
+            data_dir,
+            output_dir,
+            weight_decay,
+            no_logs,
+            train_log_interval,
+            print_train_iter,
+            tb_log,
+            tb_log_dir,
+            training_params)
+
+        output = self._run(**args)
+        return output
+
+    @abc.abstractmethod
+    def _run(self,
+            testproblem,
+            hyperparams,
+            batch_size,
+            num_epochs,
+            random_seed,
+            data_dir,
+            output_dir,
+            weight_decay,
+            no_logs,
+            train_log_interval,
+            print_train_iter,
+            tb_log,
+            tb_log_dir,
+            **training_params):
         return
 
     @abc.abstractmethod
@@ -132,12 +164,17 @@ class Runner(abc.ABC):
 
     @staticmethod
     @abc.abstractmethod
-    def evaluate():
+    def evaluate(*args, **kwargs):
         pass
 
     @staticmethod
     @abc.abstractmethod
-    def create_testproblem():
+    def create_testproblem(*args, **kwargs):
+        pass
+
+    @staticmethod
+    def _add_training_params_to_argparse(parser, args, training_params):
+        """Overwrite this method if your runner uses additional training_parameters and if you want to add them to argparse"""
         pass
 
     def parse_args(self,
@@ -154,7 +191,7 @@ class Runner(abc.ABC):
             print_train_iter,
             tb_log,
             tb_log_dir,
-            **training_params):
+            training_params):
 
         """Constructs an argparse.ArgumentParser and parses the arguments from command line.
         Args:
@@ -171,7 +208,7 @@ class Runner(abc.ABC):
                 print_train_iter (bool): Whether to print the training progress at each train_log_interval.
                 tb_log (bool): Whether to use tensorboard logging or not
                 tb_log_dir (str): The path where to save tensorboard events.
-                **training_params (dict): Kwargs for the training method.
+                training_params (dict): Kwargs for the training method.
 
         Returns: args (dict): A dicionary of all arguments.
             """
@@ -253,16 +290,6 @@ class Runner(abc.ABC):
         else:
             args['output_dir'] = output_dir
 
-        if not training_params:
-            # TODO how to get rid of ,, for training params? -> own dict and empty dict as default?
-            parser.add_argument(
-                "--training_params",
-                help="""Additional training parameters as key-value pairs.""",
-                action = StoreDictKeyPair,
-                default = {})
-        else:
-            args['training_params'] = training_params
-
         if no_logs is None:
             parser.add_argument(
                 "--no_logs",
@@ -311,6 +338,8 @@ class Runner(abc.ABC):
         else:
             args['tb_log_dir'] = tb_log_dir
 
+        self._add_training_params_to_argparse(parser, args, training_params)
+
         cmdline_args = vars(parser.parse_args())
         args.update(cmdline_args)
 
@@ -341,7 +370,7 @@ class Runner(abc.ABC):
 
         # add everything mandatory to the name
         run_folder_name = "num_epochs__" + str(
-        output['num_epochs']) + "__batch_size__" + str(output['batch_size'])
+            output['num_epochs']) + "__batch_size__" + str(output['batch_size'])
         if output['weight_decay'] is not None:
             run_folder_name += "__weight_decay__{0:s}".format(
                 float2str(output['weight_decay']))
@@ -354,14 +383,12 @@ class Runner(abc.ABC):
                                     else str(hp_value)
                                     )
 
-        # Add analyzable training parameters to the name (sorted alphabetically)
-        for tp_name, tp_value in sorted(output['analyzable_training_params'].items()):
+        # Add training parameters to the name (sorted alphabetically)
+        for tp_name, tp_value in sorted(output['training_params'].items()):
             if tp_value is not None:
                 run_folder_name += "__{0:s}".format(tp_name)
                 run_folder_name += "__{0:s}".format(
-                    float2str(hp_value) if isinstance(tp_value, float)
-                                        else str(tp_value)
-                                        )
+                    float2str(hp_value) if isinstance(tp_value, float) else str(tp_value))
 
         file_name = "random_seed__{0:d}__".format(output['random_seed'])
         file_name += time.strftime("%Y-%m-%d-%H-%M-%S")
@@ -373,7 +400,7 @@ class Runner(abc.ABC):
 
         return run_directory, file_name
     
-    def _post_process_output(self, output, testproblem, batch_size, num_epochs, random_seed, weight_decay, hyperparams):
+    def _post_process_output(self, output, testproblem, batch_size, num_epochs, random_seed, weight_decay, hyperparams, **training_params):
         """Ensures that for both frameworks the structure of the output is the same"""
         
         # remove test accuracy if it is not available
@@ -382,12 +409,7 @@ class Runner(abc.ABC):
                 del output['test_accuracies']
                 del output['train_accuracies']
         
-        # add empty analyzable trainig_params dict if the user forgot it
-        if 'analyzable_training_params' not in output:
-            output['analyzable_training_params'] = {}
-        
         # merge meta data to output dict
-        # TODO Attention! train_params that default are not written to output (e.g. train log interval)!
         output = {'testproblem': testproblem,
                   'batch_size': batch_size,
                   'num_epochs': num_epochs,
@@ -395,6 +417,7 @@ class Runner(abc.ABC):
                   'weight_decay': weight_decay,
                   'optimizer_name': self._optimizer_name,
                   'optimizer_hyperparams': hyperparams,
+                  'training_params': training_params,
                   **output}
         
         return output
@@ -425,3 +448,5 @@ class Runner(abc.ABC):
             test_accuracies.append(test_accuracies[0])
             minibatch_train_losses.append(minibatch_train_losses[0])
         return train_losses, test_losses, train_accuracies, test_accuracies, minibatch_train_losses
+
+
