@@ -437,8 +437,9 @@ class Runner(abc.ABC):
     def _abort_routine(epoch_count, num_epochs, train_losses, test_losses, train_accuracies, test_accuracies,
                        minibatch_train_losses):
         """A routine that is executed if a training run is aborted (loss is NaN or Inf)."""
-        print('Breaking from run after epoch', str(epoch_count),
-              'due to wrongly calibrated optimization (Loss is Nan or Inf)')
+
+        raise Warning('Breaking from run after epoch ' + str(epoch_count) +
+              ' due to wrongly calibrated optimization (Loss is Nan or Inf)')
 
         # fill the rest of the metrices with initial observations
         for i in range(epoch_count, num_epochs):

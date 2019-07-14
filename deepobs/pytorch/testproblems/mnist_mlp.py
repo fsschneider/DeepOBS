@@ -44,8 +44,8 @@ class mnist_mlp(TestProblem):
         super(mnist_mlp, self).__init__(batch_size, weight_decay)
 
         if weight_decay is not None:
-            print(
-                "WARNING: Weight decay is non-zero but no weight decay is used",
+            raise Warning(
+                "Weight decay is non-zero but no weight decay is used",
                 "for this model."
             )
 
