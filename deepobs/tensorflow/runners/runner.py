@@ -19,7 +19,7 @@ class TFRunner(Runner):
 
         super(TFRunner, self).__init__(optimizer_class, hyperparameter_names)
 
-    def run(self,
+    def _run(self,
             testproblem = None,
             hyperparams = None,
             batch_size = None,
@@ -35,37 +35,7 @@ class TFRunner(Runner):
             tb_log_dir = None,
             **training_params):
 
-        args = self.parse_args(testproblem,
-                               hyperparams,
-                               batch_size,
-                               num_epochs,
-                               random_seed,
-                               data_dir,
-                               output_dir,
-                               weight_decay,
-                               no_logs,
-                               train_log_interval,
-                               print_train_iter,
-                               tb_log,
-                               tb_log_dir,
-                               **training_params)
-
-        # overwrite locals after argparse
-        testproblem = args['testproblem']
-        hyperparams = args['hyperparams']
-        batch_size = args['batch_size']
-        num_epochs = args['num_epochs']
-        random_seed = args['random_seed']
-        data_dir = args['data_dir']
-        output_dir = args['output_dir']
-        weight_decay = args['weight_decay']
-        no_logs = args['weight_decay']
-        training_params = args['training_params']
-        tb_log_dir = args['tb_log_dir']
-        tb_log = args['tb_log']
-        train_log_interval = args['train_log_interval']
-        print_train_iter = args['print_train_iter']
-
+        # TODO move this to argparse?
         if batch_size is None:
             batch_size = global_config.get_testproblem_default_setting(testproblem)['batch_size']
         if num_epochs is None:
@@ -83,7 +53,8 @@ class TFRunner(Runner):
                                            num_epochs, 
                                            random_seed, 
                                            weight_decay, 
-                                           hyperparams)
+                                           hyperparams,
+                                           **training_params)
         if not no_logs:
             run_folder_name, file_name = self.create_output_directory(output_dir, output)
             self.write_output(output, run_folder_name, file_name)
@@ -95,7 +66,7 @@ class TFRunner(Runner):
     def init_summary(loss,
                      learning_rate_var,
                      batch_size,
-                     log_dir):
+                     tb_log_dir):
         """Initializes the tensorboard summaries"""
         # per iteration
         mb_train_loss_summary = tf.summary.scalar(
@@ -114,7 +85,7 @@ class TFRunner(Runner):
 
         per_iter_summaries = tf.summary.merge_all(key="per_iteration")
         per_epoch_summaries = tf.summary.merge_all(key="per_epoch")
-        summary_writer = tf.summary.FileWriter(log_dir)
+        summary_writer = tf.summary.FileWriter(tb_log_dir)
         return per_iter_summaries, per_epoch_summaries, summary_writer
 
     @staticmethod
@@ -367,17 +338,50 @@ class LearningRateScheduleRunner(TFRunner):
     def __init__(self, optimizer_class, hyperparameter_names):
 
         super(LearningRateScheduleRunner, self).__init__(optimizer_class, hyperparameter_names)
+    @staticmethod
+    def _add_training_params_to_argparse(parser, args, training_params):
+        try:
+            args['lr_sched_epochs'] = training_params['lr_sched_epochs']
+        except KeyError:
+            parser.add_argument(
+                "--lr_sched_epochs",
+                nargs="+",
+                type=int,
+                help="""One or more epoch numbers (positive integers) that mark
+          learning rate changes. The base learning rate has to be passed via
+          '--learing_rate' and the factors by which to change have to be passed
+          via '--lr_sched_factors'. Example: '--lr 0.3 --lr_sched_epochs 50 100
+          --lr_sched_factors 0.1 0.01' will start with a learning rate of 0.3,
+          then decrease to 0.1*0.3=0.03 after training for 50 epochs, and
+          decrease to 0.01*0.3=0.003' after training for 100 epochs.""")
+
+        try:
+            args['lr_sched_factors'] = training_params['lr_sched_factors']
+        except KeyError:
+            parser.add_argument(
+                "--lr_sched_factors",
+                nargs="+",
+                type=float,
+                help=
+                """One or more factors (floats) by which to change the learning
+          rate. The base learning rate has to be passed via '--learing_rate' and
+          the epochs at which to change the learning rate have to be passed via
+          '--lr_sched_factors'. Example: '--lr 0.3 --lr_sched_epochs 50 100
+          --lr_sched_factors 0.1 0.01' will start with a learning rate of 0.3,
+          then decrease to 0.1*0.3=0.03 after training for 50 epochs, and
+          decrease to 0.01*0.3=0.003' after training for 100 epochs.""")
 
     def training(self,
                  tproblem,
                  hyperparams,
                  num_epochs,
+                 print_train_iter,
+                 train_log_interval,
+                 tb_log,
+                 tb_log_dir,
+                 # the following are the training_params
                  lr_sched_epochs=None,
-                 lr_sched_factors=None,
-                 train_log_interval=10,
-                 print_train_iter=False,
-                 tf_logging=False,
-                 tf_logging_dir='./tensorboard_logs'):
+                 lr_sched_factors=None):
 
         # TODO abstract loss
         loss = tf.reduce_mean(tproblem.losses) + tproblem.regularizer
@@ -411,12 +415,12 @@ class LearningRateScheduleRunner(TFRunner):
         test_accuracies = []
 
         # Tensorboard summaries
-        if tf_logging:
+        if tb_log:
             batch_size = tproblem._batch_size
             per_iter_summaries, per_epoch_summaries, summary_writer = self.init_summary(loss,
                                                                                         learning_rate_var,
                                                                                         batch_size,
-                                                                                        tf_logging_dir)
+                                                                                        tb_log_dir)
         # Start tensorflow session and initialize variables.
         sess = tf.Session()
         sess.run(tf.global_variables_initializer())
@@ -428,7 +432,7 @@ class LearningRateScheduleRunner(TFRunner):
             print("Evaluating after {0:d} of {1:d} epochs...".format(n, num_epochs))
 
             loss_, acc_ = self.evaluate(tproblem, sess, loss, test=False)
-            if tf_logging:
+            if tb_log:
                 current_step = len(train_losses)
                 self.write_per_epoch_summary(sess,
                                              loss_,
@@ -441,7 +445,7 @@ class LearningRateScheduleRunner(TFRunner):
             train_accuracies.append(acc_)
 
             loss_, acc_ = self.evaluate(tproblem, sess, loss, test=True)
-            if tf_logging:
+            if tb_log:
                 current_step = len(test_losses)
                 self.write_per_epoch_summary(sess,
                                              loss_,
@@ -471,7 +475,7 @@ class LearningRateScheduleRunner(TFRunner):
                         _, loss_ = sess.run([step, loss])
                         minibatch_train_losses.append(loss_.astype(float))
 
-                        if tf_logging:
+                        if tb_log:
                             current_step = sess.run(global_step)
                             self.write_per_iter_summary(sess,
                                                         per_iter_summaries,
@@ -510,10 +514,6 @@ class LearningRateScheduleRunner(TFRunner):
             "train_accuracies": train_accuracies,
             "test_accuracies": test_accuracies,
             "minibatch_train_losses": minibatch_train_losses,
-            "analyzable_training_params": {
-                "lr_sched_epochs": lr_sched_epochs,
-                "lr_sched_factors": lr_sched_factors
-            }
         }
 
         return output

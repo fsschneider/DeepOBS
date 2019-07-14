@@ -22,7 +22,7 @@ class PTRunner(Runner):
     def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params):
         return
 
-    def run(self,
+    def _run(self,
             testproblem = None,
             hyperparams = None,
             batch_size = None,
@@ -36,40 +36,9 @@ class PTRunner(Runner):
             print_train_iter = None,
             tb_log = None,
             tb_log_dir = None,
-            **training_params
-            ):
+             **training_params):
 
-        args = self.parse_args(testproblem,
-            hyperparams,
-            batch_size,
-            num_epochs,
-            random_seed,
-            data_dir,
-            output_dir,
-            weight_decay,
-            no_logs,
-            train_log_interval,
-            print_train_iter,
-            tb_log,
-            tb_log_dir,
-            **training_params)
-
-        # overwrite locals after argparse
-        testproblem = args['testproblem']
-        hyperparams = args['hyperparams']
-        batch_size = args['batch_size']
-        num_epochs = args['num_epochs']
-        random_seed = args['random_seed']
-        data_dir = args['data_dir']
-        output_dir = args['output_dir']
-        weight_decay = args['weight_decay']
-        no_logs = args['weight_decay']
-        training_params = args['training_params']
-        tb_log_dir = args['tb_log_dir']
-        tb_log  = args['tb_log']
-        train_log_interval = args['train_log_interval']
-        print_train_iter = args['print_train_iter']
-
+        # TODO put this to argparse so it is the same for both frameworks?
         if batch_size is None:
             batch_size = global_config.get_testproblem_default_setting(testproblem)['batch_size']
         if num_epochs is None:
@@ -87,7 +56,8 @@ class PTRunner(Runner):
                                            num_epochs, 
                                            random_seed, 
                                            weight_decay, 
-                                           hyperparams)
+                                           hyperparams,
+                                           **training_params)
 
         if not no_logs:
             run_folder_name, file_name = self.create_output_directory(output_dir, output)
@@ -197,7 +167,14 @@ class StandardRunner(PTRunner):
     def __init__(self, optimizer_class, hyperparameter_names):
         super(StandardRunner, self).__init__(optimizer_class, hyperparameter_names)
 
-    def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir):
+    def training(self,
+                 tproblem,
+                 hyperparams,
+                 num_epochs,
+                 print_train_iter,
+                 train_log_interval,
+                 tb_log,
+                 tb_log_dir):
 
         opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
 
@@ -303,41 +280,66 @@ class LearningRateScheduleRunner(PTRunner):
 
         super(LearningRateScheduleRunner, self).__init__(optimizer_class, hyperparameter_names)
 
+    @staticmethod
+    def _add_training_params_to_argparse(parser, args, training_params):
+        try:
+            args['lr_sched_epochs'] = training_params['lr_sched_epochs']
+        except KeyError:
+            parser.add_argument(
+                "--lr_sched_epochs",
+                nargs="+",
+                type=int,
+                help="""One or more epoch numbers (positive integers) that mark
+          learning rate changes. The base learning rate has to be passed via
+          '--learing_rate' and the factors by which to change have to be passed
+          via '--lr_sched_factors'. Example: '--lr 0.3 --lr_sched_epochs 50 100
+          --lr_sched_factors 0.1 0.01' will start with a learning rate of 0.3,
+          then decrease to 0.1*0.3=0.03 after training for 50 epochs, and
+          decrease to 0.01*0.3=0.003' after training for 100 epochs.""")
+
+        try:
+            args['lr_sched_factors'] = training_params['lr_sched_factors']
+        except KeyError:
+            parser.add_argument(
+                "--lr_sched_factors",
+                nargs="+",
+                type=float,
+                help=
+                """One or more factors (floats) by which to change the learning
+          rate. The base learning rate has to be passed via '--learing_rate' and
+          the epochs at which to change the learning rate have to be passed via
+          '--lr_sched_factors'. Example: '--lr 0.3 --lr_sched_epochs 50 100
+          --lr_sched_factors 0.1 0.01' will start with a learning rate of 0.3,
+          then decrease to 0.1*0.3=0.03 after training for 50 epochs, and
+          decrease to 0.01*0.3=0.003' after training for 100 epochs.""")
+
     def training(self,
-            tproblem,
-            hyperparams,
-            num_epochs,
-            # the following are the training_params
-            lr_sched_epochs=None,
-            lr_sched_factors=None,
-            train_log_interval=10,
-            print_train_iter=False):
+                 tproblem,
+                 hyperparams,
+                 num_epochs,
+                 print_train_iter,
+                 train_log_interval,
+                 tb_log,
+                 tb_log_dir,
+                # the following are the training_params
+                lr_sched_epochs=None,
+                lr_sched_factors=None):
+        """
+        **training_params are:
+            lr_sched_epochs (list): The epochs where to adjust the learning rate.
+            lr_sched_factors (list): The corresponding factors by which to adjust the learning rate.
+            train_log_interval (int): When to log the minibatch loss/accuracy.
+            print_train_iter (bool): Whether to print the training progress at every train_log_interval
 
-        """Args:
-                tproblem (testproblem): The testproblem instance to train on.
-                hyperparams (dict): The optimizer hyperparameters to use for the training.
-                num_epochs (int): The number of training epochs.
+        Returns:
+            output (dict): The logged metrices. Is of the form:
+                {'test_losses' : test_losses
+                 'train_losses': train_losses,
+                 'test_accuracies': test_accuracies,
+                 'train_accuracies': train_accuracies
+                 }
 
-            **training_params are:
-                lr_sched_epochs (list): The epochs where to adjust the learning rate.
-                lr_sched_factors (list): The corresponding factors by which to adjust the learning rate.
-                train_log_interval (int): When to log the minibatch loss/accuracy.
-                print_train_iter (bool): Whether to print the training progress at every train_log_interval
-
-            Returns:
-                output (dict): The logged metrices. Is of the form:
-                    {'test_losses' : test_losses
-                     'train_losses': train_losses,
-                     'test_accuracies': test_accuracies,
-                     'train_accuracies': train_accuracies,
-                     'analyzable_training_params': {...}
-                     }
-
-            where the metrices values are lists that were filled during training
-            and the key 'analyzable_training_params' holds a dict of training
-            parameters that should be taken into account in the analysis later on.
-            These can be, for example, learning rate schedules. Or in the easiest
-            case, this dict is empty.
+        where the metrices values are lists that were filled during training.
         """
 
         opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
@@ -372,7 +374,6 @@ class LearningRateScheduleRunner(PTRunner):
                 break
 
             ### Training ###
-
             if lr_sched_epochs is not None:
                 # get the next learning rate
                 lr_schedule.step()
@@ -419,14 +420,9 @@ class LearningRateScheduleRunner(PTRunner):
         output = {
             "train_losses": train_losses,
             "test_losses": test_losses,
-            # dont need minibatch train losses at the moment
-#            "minibatch_train_losses": minibatch_train_losses,
+            "minibatch_train_losses": minibatch_train_losses,
             "train_accuracies": train_accuracies,
-            "test_accuracies": test_accuracies,
-            "analyzable_training_params": {
-                    "lr_sched_epochs": lr_sched_epochs,
-                    "lr_sched_factors": lr_sched_factors
-                    }
+            "test_accuracies": test_accuracies
         }
 
         return output
