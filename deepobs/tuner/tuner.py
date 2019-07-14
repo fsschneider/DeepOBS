@@ -67,6 +67,10 @@ class Tuner(abc.ABC):
         np_seed(random_seed)
 
     def tune_on_testset(self, testset, *args, **kwargs):
+        """Tunes the hyperparameter on a whole testset.
+        Args:
+            testset (list): A list of testproblems.
+        """
         if any(s in kwargs for s in ['num_epochs', 'batch_size', 'weight_decay']):
             raise RuntimeError('Cannot execute tuning on a whole testset if num_epochs, '
                                'weight_decay or batch_size is set. '
@@ -76,6 +80,13 @@ class Tuner(abc.ABC):
 
     @abc.abstractmethod
     def tune(self, testproblem, *args, output_dir='./results', random_seed=42, rerun_best_setting = False, **kwargs):
+        """Tunes hyperparaneter of the optimizer_class on a testproblem.
+        Args:
+            testproblem (str): Testproblem for which to generate commands.
+            output_dir (str): The output path where the execution results are written to.
+            random_seed (int): The random seed for the tuning.
+            rerun_best_setting (bool): Whether to rerun the best setting with 10 different seeds.
+        """
         pass
 
 
@@ -153,6 +164,14 @@ class ParallelizedTuner(Tuner):
             rerun_setting(self._runner, self._optimizer_class, self._hyperparam_names, optimizer_path)
 
     def generate_commands_script(self, testproblem, output_dir='./results', random_seed=42, generation_dir = './command_scripts', **kwargs):
+        """
+        Args:
+            testproblem (str): Testproblem for which to generate commands.
+            output_dir (str): The output path where the execution results are written to.
+            random_seed (int): The random seed for the tuning.
+            generation_dir (str): The path to the directory where the generated scripts are written to.
+
+        """
         script = self.__generate_python_script(generation_dir)
         file = open(os.path.join(generation_dir, 'jobs_' + self._optimizer_name + '_' + self._search_name + '_' + testproblem + '.txt'), 'w')
         kwargs_string = self.__generate_kwargs_format_for_command_line(**kwargs)
@@ -165,5 +184,13 @@ class ParallelizedTuner(Tuner):
         file.close()
 
     def generate_commands_script_for_testset(self, testset, *args, **kwargs):
+        """Generates command scripts for a whole testset.
+        Args:
+            testset (list): A list of the testproblem strings.
+            """
+        if any(s in kwargs for s in ['num_epochs', 'batch_size', 'weight_decay']):
+            raise RuntimeError('Cannot execute tuning on a whole testset if num_epochs, '
+                               'weight_decay or batch_size is set. '
+                               'A testset tuning is ment to tune on default testproblems.')
         for testproblem in testset:
             self.generate_commands_script(testproblem, *args, **kwargs)

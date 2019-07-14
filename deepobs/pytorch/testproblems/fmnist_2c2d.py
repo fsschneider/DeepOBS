@@ -45,7 +45,7 @@ class fmnist_2c2d(TestProblem):
         super(fmnist_2c2d, self).__init__(batch_size, weight_decay)
 
         if weight_decay is not None:
-            print(
+            raise Warning(
                 "WARNING: Weight decay is non-zero but no weight decay is used",
                 "for this model."
             )

@@ -67,7 +67,7 @@ def _determine_available_metric(optimizer_path, metric):
     if _check_if_metric_is_available(optimizer_path, metric):
         return metric
     else:
-        print('Metric {0:s} does not exist for testproblem {1:s}. We now use fallback metric \'test_losses\''.format(
+        raise Warning('Metric {0:s} does not exist for testproblem {1:s}. We now use fallback metric \'test_losses\''.format(
             metric, os.path.split(os.path.split(optimizer_path)[0])[1]))
         return 'test_losses'
 
