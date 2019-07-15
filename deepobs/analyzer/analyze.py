@@ -127,7 +127,8 @@ def get_performance_dictionary(optimizer_path, mode = 'final', metric = 'test_ac
     else:
         perf_dict['Speed'] = 'N.A.'
 
-    perf_dict['Tunability'] = sett.aggregate['optimizer_hyperparams']
+    perf_dict['Hyperparameters'] = sett.aggregate['optimizer_hyperparams']
+    perf_dict['Training Parameters'] = sett.aggregate['training_params']
     return perf_dict
 
 
