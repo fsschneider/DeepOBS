@@ -5,7 +5,7 @@ from torch import nn
 from .testproblems_modules import net_mlp
 from ..datasets.mnist import mnist
 from .testproblem import TestProblem
-
+import warnings
 
 class mnist_mlp(TestProblem):
     """DeepOBS test problem class for a multi-layer perceptron neural network\
@@ -44,9 +44,9 @@ class mnist_mlp(TestProblem):
         super(mnist_mlp, self).__init__(batch_size, weight_decay)
 
         if weight_decay is not None:
-            raise Warning(
-                "Weight decay is non-zero but no weight decay is used",
-                "for this model."
+            warnings.warn(
+                "Weight decay is non-zero but no weight decay is used for this model.",
+                RuntimeWarning
             )
 
     def set_up(self):

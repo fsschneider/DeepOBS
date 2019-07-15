@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """A vanilla CNN architecture for MNIST."""
 
-import torch
+import warnings
 from torch import nn
 from .testproblems_modules import net_mnist_2c2d
 from ..datasets.mnist import mnist
@@ -46,9 +46,9 @@ class mnist_2c2d(TestProblem):
         super(mnist_2c2d, self).__init__(batch_size, weight_decay)
 
         if weight_decay is not None:
-            raise Warning(
-                "Weight decay is non-zero but no weight decay is used",
-                "for this model."
+            warnings.warn(
+                "Weight decay is non-zero but no weight decay is used for this model.",
+                RuntimeWarning
             )
 
 

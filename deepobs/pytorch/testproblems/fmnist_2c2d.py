@@ -5,6 +5,7 @@ from torch import nn
 from .testproblems_modules import net_mnist_2c2d
 from ..datasets.fmnist import fmnist
 from .testproblem import TestProblem
+import warnings
 
 
 class fmnist_2c2d(TestProblem):
@@ -45,9 +46,9 @@ class fmnist_2c2d(TestProblem):
         super(fmnist_2c2d, self).__init__(batch_size, weight_decay)
 
         if weight_decay is not None:
-            raise Warning(
-                "WARNING: Weight decay is non-zero but no weight decay is used",
-                "for this model."
+            warnings.warn(
+                "Weight decay is non-zero but no weight decay is used for this model.",
+                RuntimeWarning
             )
 
     def set_up(self):

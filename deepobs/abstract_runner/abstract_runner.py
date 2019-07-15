@@ -8,6 +8,7 @@ from .abstract_runner_utils import _add_hp_to_argparse
 import time
 import abc
 import argparse
+import warnings
 
 
 class Runner(abc.ABC):
@@ -431,15 +432,14 @@ class Runner(abc.ABC):
             file_name (str): The file name where the output is written to.
         """
         with open(os.path.join(run_folder_name, file_name + ".json"), "w") as f:
-                json.dump(output, f)
+            json.dump(output, f, indent=4)
 
     @staticmethod
     def _abort_routine(epoch_count, num_epochs, train_losses, test_losses, train_accuracies, test_accuracies,
                        minibatch_train_losses):
         """A routine that is executed if a training run is aborted (loss is NaN or Inf)."""
 
-        raise Warning('Breaking from run after epoch ' + str(epoch_count) +
-              ' due to wrongly calibrated optimization (Loss is Nan or Inf)')
+        warnings.warn('Breaking from run after epoch ' + str(epoch_count) + ' due to wrongly calibrated optimization (Loss is Nan or Inf)', RuntimeWarning)
 
         # fill the rest of the metrices with initial observations
         for i in range(epoch_count, num_epochs):
