@@ -3,6 +3,7 @@ import os
 import numpy as np
 import warnings
 
+
 def aggregate_runs(setting_folder):
     """Aggregates all seed runs for a setting.
     Args:
@@ -36,6 +37,7 @@ def aggregate_runs(setting_folder):
                 }
     # merge meta data
     aggregate['optimizer_hyperparams'] = json_data['optimizer_hyperparams']
+    aggregate['training_params'] = json_data['training_params']
     aggregate['testproblem'] = json_data['testproblem']
     aggregate['num_epochs'] = json_data['num_epochs']
     aggregate['batch_size'] = json_data['batch_size']

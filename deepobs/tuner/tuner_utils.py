@@ -23,13 +23,14 @@ def rerun_setting(runner, optimizer_class, hyperparam_names, optimizer_path, see
     runner = runner(optimizer_class, hyperparam_names)
 
     hyperparams = setting.aggregate['optimizer_hyperparams']
+    training_params = setting.aggregate['training_params']
     testproblem = setting.aggregate['testproblem']
     num_epochs = setting.aggregate['num_epochs']
     batch_size = setting.aggregate['batch_size']
     results_path = os.path.split(os.path.split(optimizer_path)[0])[0]
     for seed in seeds:
         runner.run(testproblem, hyperparams=hyperparams, random_seed=int(seed), num_epochs=num_epochs,
-                   batch_size=batch_size, output_dir=results_path)
+                   batch_size=batch_size, output_dir=results_path, **training_params)
 
 
 def write_tuning_summary(optimizer_path, mode = 'final', metric = 'test_accuracies'):
@@ -73,7 +74,7 @@ def generate_tuning_summary(optimizer_path, mode = 'final', metric = 'test_accur
             target_std = sett.aggregate[metric]['std'][idx]
         else:
             raise RuntimeError('Mode not implemented.')
-        line = {'params': sett.aggregate['optimizer_hyperparams'], 'target_mean': target_mean, 'target_std': target_std}
+        line = {'params': {**sett.aggregate['optimizer_hyperparams'], **sett.aggregate['training_params']}, 'target_mean': target_mean, 'target_std': target_std}
         tuning_summary.append(line)
     return tuning_summary
 
