@@ -4,13 +4,27 @@ import torch
 from scipy.stats import truncnorm as tn
 from math import ceil
 from torch import nn
-from torch.nn import functional as F
 from numpy.random import RandomState
 
+
+def vae_loss_function(outputs, targets, mean, std_dev):
+    """The loss function for the VAE testproblems.
+    It consists of the latent loss and the image reconstruction loss."""
+    outputs_flat = outputs.view(-1, 28 * 28)
+    targets_flat = targets.view(-1, 28 * 28)
+    image_loss = torch.mean((outputs_flat - targets_flat).pow(2).sum(dim=1))
+    latent_loss = -0.5 * torch.mean((1 + 2 * std_dev - mean.pow(2) - torch.exp(2 * std_dev)).sum(dim=1))
+    return image_loss + latent_loss
+
+
 def _determine_inverse_padding_from_tf_same(input_dimensions, kernel_dimensions, stride_dimensions):
-    """implements tf's padding 'same' for inverse processses such as transpose convolution
-     input: dimensions are tuple (height, width) or ints for quadratic dimensions
-     output: a padding 4-tuple for padding layer creation that mimics tf's padding 'same'
+    """Implements tf's padding 'same' for inverse processses such as transpose convolution
+    Args:
+        input_dimensions (int or tuple): dimension of the input image
+        kernel_dimensions (int or tuple): dimensions of the convolution kernel
+        stride_dimensions (int or tuple): the stride of the convolution
+
+     Returns: A padding 4-tuple for padding layer creation that mimics tf's padding 'same'.
      """
 
     # get dimensions
@@ -42,12 +56,17 @@ def _determine_inverse_padding_from_tf_same(input_dimensions, kernel_dimensions,
     pad_left = pad_along_width // 2
     pad_right = pad_along_width - pad_left
 
-    return (pad_left, pad_right, pad_top, pad_bottom)
+    return pad_left, pad_right, pad_top, pad_bottom
+
 
 def _determine_padding_from_tf_same(input_dimensions, kernel_dimensions, stride_dimensions):
-    """"implements tf's padding 'same'
-     input: dimensions are tuple (height, width) or ints for quadratic dimensions
-     output: a padding 4-tuple for padding layer creation that mimics tf's padding 'same'
+    """Implements tf's padding 'same' for kernel processes like convolution or pooling.
+    Args:
+        input_dimensions (int or tuple): dimension of the input image
+        kernel_dimensions (int or tuple): dimensions of the convolution kernel
+        stride_dimensions (int or tuple): the stride of the convolution
+
+     Returns: A padding 4-tuple for padding layer creation that mimics tf's padding 'same'.
      """
 
     # get dimensions
@@ -79,23 +98,25 @@ def _determine_padding_from_tf_same(input_dimensions, kernel_dimensions, stride_
     pad_left = pad_along_width // 2
     pad_right = pad_along_width - pad_left
 
-    return (pad_left, pad_right, pad_top, pad_bottom)
+    return pad_left, pad_right, pad_top, pad_bottom
+
 
 def _truncated_normal_init(tensor, mean=0, stddev=1):
     """ Implements tf's truncated normal initialisation method.
     Truncates 2 stddevs away from the mean. Samples the numpy random state
     from the torch seed to ensure seed consistency.
 
-    input: tensor (torch.Tensor): The tensor to init.
+    Args: tensor (torch.Tensor): The tensor to init.
             mean (float): The mean of the normal distr.
             stddev (float): Stddev of the normal distr.
+    Returns: The initialized tensor.
     """
 
     total_size = tensor.numel()
 
     # determine the scipy random state from the torch seed
     # the numpy seed can be between 0 and 2**32-1
-    np_seed = torch.randint(0,2**32-1, (1,1)).view(-1).item()
+    np_seed = torch.randint(0, 2**32-1, (1, 1)).view(-1).item()
     np_state = RandomState(np_seed)
     # truncates 2 std from mean, since rescaling: a = ((mean-2std)-mean)/std = -2
     samples = tn.rvs(a = -2, b = 2, loc = mean, scale = stddev, size = total_size, random_state = np_state)
@@ -103,105 +124,123 @@ def _truncated_normal_init(tensor, mean=0, stddev=1):
     init_tensor = torch.from_numpy(samples).type_as(tensor)
     return init_tensor
 
-class tfmaxpool2d(nn.MaxPool2d):
-    # implements tf's padding 'same' for maxpooling
+
+def hook_factory_tf_padding_same(kernel_size, stride):
+    """Generates the torch pre forward hook that needs to be registered on
+    the padding layer to mimic tf's padding 'same'"""
+    def hook(module, input):
+        """The hook overwrites the padding attribute of the padding layer."""
+        image_dimensions = input[0].size()[-2:]
+        module.padding = _determine_padding_from_tf_same(image_dimensions, kernel_size, stride)
+    return hook
+
+
+def hook_factory_tf_inverse_padding_same(kernel_size, stride):
+    """Generates the torch pre forward hook that needs to be
+    registered on the padding layer to mimic tf's padding 'same' for transpose convolutions."""
+    def hook(module, input):
+        """The hook overwrites the padding attribute of the padding layer."""
+        image_dimensions = input[0].size()[-2:]
+        module.padding = _determine_inverse_padding_from_tf_same(image_dimensions, kernel_size, stride)
+    return hook
+
+
+class tfmaxpool2d(nn.Sequential):
+    """Implements tf's padding 'same' for maxpooling"""
+
     def __init__(self,
                  kernel_size,
                  stride=None,
-                 padding=0,
                  dilation=1,
                  return_indices=False,
                  ceil_mode=False,
                  tf_padding_type = None):
 
-        super(tfmaxpool2d, self).__init__(kernel_size,
-                                             stride,
-                                             padding,
-                                             dilation,
-                                             return_indices,
-                                             ceil_mode)
+        super(tfmaxpool2d, self).__init__()
 
-        self.tf_padding_type = tf_padding_type
+        if tf_padding_type == 'same':
+            self.add_module('padding', nn.ZeroPad2d(0))
+            hook = hook_factory_tf_padding_same(kernel_size, stride)
+            self.padding.register_forward_pre_hook(hook)
 
-    def forward(self, x):
-        if self.tf_padding_type == 'same':
-            with torch.no_grad():
-                image_dimensions = x.size()[-2:]
-                padding_4_tupel = _determine_padding_from_tf_same(image_dimensions, self.kernel_size, self.stride)
-            x = F.pad(x, padding_4_tupel)
-        return F.max_pool2d(x, self.kernel_size, self.stride, self.padding, self.dilation, self.ceil_mode, self.return_indices)
+        self.add_module('maxpool', nn.MaxPool2d(kernel_size=kernel_size,
+                 stride=stride,
+                 padding=0,
+                 dilation=dilation,
+                 return_indices=return_indices,
+                 ceil_mode=ceil_mode,
+                 ))
 
 
-class tfconv2d(nn.Conv2d):
-    # implements tf's padding 'same' for convolutions
+class tfconv2d(nn.Sequential):
+    """Implements tf's padding 'same' for convolutions"""
+
     def __init__(self,
                  in_channels,
                  out_channels,
                  kernel_size,
                  stride=1,
-                 padding=0,
                  dilation=1,
                  groups=1,
                  bias=True,
-                 tf_padding_type = None):
+                 tf_padding_type=None):
 
-        super(tfconv2d, self).__init__(in_channels,
-             out_channels,
-             kernel_size,
-             stride,
-             padding,
-             dilation,
-             groups,
-             bias)
+        super(tfconv2d, self).__init__()
 
-        self.tf_padding_type = tf_padding_type
+        if tf_padding_type == 'same':
+            self.add_module('padding', nn.ZeroPad2d(0))
+            hook = hook_factory_tf_padding_same(kernel_size, stride)
+            self.padding.register_forward_pre_hook(hook)
 
-    def forward(self, x):
-        if self.tf_padding_type == 'same':
-            with torch.no_grad():
-                image_dimensions = x.size()[-2:]
-                padding_4_tupel = _determine_padding_from_tf_same(image_dimensions, self.kernel_size, self.stride)
-            x = F.pad(x, padding_4_tupel)
-        return F.conv2d(x, self.weight, self.bias, self.stride, self.padding, self.dilation, self.groups)
+        self.add_module('conv', nn.Conv2d(in_channels=in_channels,
+                                          out_channels=out_channels,
+                                          kernel_size=kernel_size,
+                                          stride=stride,
+                                          padding=0,
+                                          dilation=dilation,
+                                          groups=groups,
+                                          bias=bias))
 
-class tfconv2d_transpose(nn.ConvTranspose2d):
-    # implements tf's padding 'same' for transpose convolution
+
+class tfconv2d_transpose(nn.Sequential):
+    """Implements tf's padding 'same' for transpose convolutions"""
     def __init__(self,
                  in_channels,
                  out_channels,
                  kernel_size,
                  stride=1,
-                 padding=0,
                  output_padding = 0,
                  groups=1,
                  bias=True,
                  dilation=1,
                  tf_padding_type = None):
 
-        super(tfconv2d_transpose, self).__init__(in_channels,
-             out_channels,
-             kernel_size,
-             stride,
-             padding,
-             output_padding,
-             groups,
-             bias,
-             dilation)
+        super(tfconv2d_transpose, self).__init__()
 
-        self.tf_padding_type = tf_padding_type
+        if tf_padding_type == 'same':
+            self.add_module('padding', nn.ZeroPad2d(0))
+            hook = hook_factory_tf_inverse_padding_same(kernel_size, stride)
+            self.padding.register_forward_pre_hook(hook)
 
-    def forward(self, x):
-        if self.tf_padding_type == 'same':
-            # eliminate the effect of the in-build padding (is not capable of asymmeric padding)
-            if isinstance(self.kernel_size, int):
-                self.padding = self.kernel_size - 1
-            else:
-                self.padding = (self.kernel_size[0] - 1, self.kernel_size[1] - 1)
-            padding_4_tupel = _determine_inverse_padding_from_tf_same(x.size()[-2:], self.kernel_size, self.stride)
-            x = F.pad(x, padding_4_tupel)
-        return F.conv_transpose2d(x, self.weight, self.bias, self.stride, self.padding, self.output_padding, self.groups, self.dilation)
+        # eliminate the effect of the in-build padding (is not capable of asymmeric padding)
+        if isinstance(kernel_size, int):
+            padding = kernel_size - 1
+        else:
+            padding = (kernel_size[0] - 1, kernel_size[1] - 1)
+
+        self.add_module('transconv', nn.ConvTranspose2d(in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride,
+                 padding,
+                 output_padding,
+                 groups,
+                 bias,
+                 dilation))
+
 
 class flatten(nn.Module):
+    """A layer that simply flattens the input."""
     def __init__(self):
         super(flatten, self).__init__()
 
@@ -209,14 +248,19 @@ class flatten(nn.Module):
         shape = torch.prod(torch.tensor(x.shape[1:])).item()
         return x.view(-1, shape)
 
+
 class mean_allcnnc(nn.Module):
+    """The all convolution layer implementation of torch.mean()."""
     def __init__(self):
         super(mean_allcnnc, self).__init__()
 
     def forward(self, x):
         return torch.mean(x, dim=(2,3))
 
+
 class residual_block(nn.Module):
+    """A residual block that is the main component of the wide residual net as
+    described in the original paper: https://arxiv.org/abs/1605.07146."""
     def __init__(self, in_channels, out_channels, kernel_size = 3, first_stride=1, is_first_block = False, bn_momentum = 0.9):
         super(residual_block, self).__init__()
 
@@ -233,8 +277,6 @@ class residual_block(nn.Module):
         self.bn2 = nn.BatchNorm2d(out_channels, momentum=bn_momentum)
         self.relu2 = nn.ReLU()
         self.conv2 = tfconv2d(in_channels = out_channels, out_channels=out_channels, kernel_size=kernel_size, stride = 1, tf_padding_type='same', bias=False)
-
-
 
     def forward(self, x):
 

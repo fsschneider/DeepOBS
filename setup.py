@@ -3,7 +3,28 @@
 
 import setuptools
 
+install_requires_list = [
+        'argparse', 'numpy', 'pandas', 'matplotlib', 'matplotlib2tikz',
+        'seaborn', 'bayesian-optimization'
+    ]
 
+# TODO set framework
+install_requires_list += ['torch', 'torchvision']
+#framework = ''
+#while framework not in ['tensorflow', 'both', 'pytorch']:
+#    framework = input('Which framework do you want to use? (tensorflow/pytorch/both)')
+#    if framework == 'pytorch':
+#        install_requires_list += ['torch', 'torchvision']
+#        break
+#    elif framework == 'tensorflow':
+#        install_requires_list += ['tensorflow']
+#        break
+#    elif framework == 'both':
+#        install_requires_list += ['torch', 'torchvision', 'tensorflow']
+#        break
+#    else:
+#        print('Please enter \'tensorflow\', \'pytorch\' or \'both\'')
+        
 def readme():
     with open('README.md') as f:
         return f.read()
@@ -25,10 +46,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
-    install_requires=[
-        'argparse', 'numpy', 'pandas', 'matplotlib', 'matplotlib2tikz',
-        'seaborn'
-    ],
+    install_requires=install_requires_list,
     scripts=[
         'deepobs/scripts/deepobs_prepare_data.sh',
         'deepobs/scripts/deepobs_get_baselines.sh',
@@ -36,3 +54,13 @@ setuptools.setup(
         'deepobs/scripts/deepobs_estimate_runtime.py'
     ],
     zip_safe=False)
+
+# TODO set framework
+#import deepobs
+#if framework == 'tensorflow':
+#    deepobs.config.set_framework('tensorflow')
+#elif framework == 'pytorch':
+#    deepobs.config.set_framework('pytorch')
+#elif framework == 'both':
+#    # default is pytorch
+#    deepobs.config.set_framework('pytorch')

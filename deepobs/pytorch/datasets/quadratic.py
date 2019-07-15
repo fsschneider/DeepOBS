@@ -6,6 +6,7 @@ from . import dataset
 from torch.utils import data as dat
 import torch
 
+
 class quadratic(dataset.DataSet):
     """DeepOBS data set class to create an n dimensional stochastic quadratic\
     testproblem.
@@ -24,10 +25,7 @@ class quadratic(dataset.DataSet):
     noise_level (float): Standard deviation of the data points around the mean.
         The data points are drawn from a Gaussian distribution.
         Defaults to ``0.6``.
-
-  Methods:
-      _make_dataloader: A helper that is shared by all three data loader methods.
-  """
+        """
 
     def __init__(self, batch_size, dim=100, train_size=1000, noise_level=0.6):
         """Creates a new Quadratic instance.
@@ -50,29 +48,12 @@ class quadratic(dataset.DataSet):
         super(quadratic, self).__init__(batch_size)
 
     def _make_dataloader(self, X, shuffle=True):
-        """Creates a quadratic data set (helper used by ``.make_*_datset`` below).
-
-        Args:
-            X (np.array): Numpy array containing the ``x`` values of the data points.
-            data_y (np.array): Numpy array containing the ``y`` values of the data points.
-            shuffle (bool):  Switch to turn on or off shuffling of the data set.
-                Defaults to ``True``.
-
-        Returns:
-            A tf.data.Dataset yielding batches of quadratic data.
-        """
-
 
         dataset = dat.TensorDataset(torch.from_numpy(X))
-        loader = dat.DataLoader(dataset=dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory = self._pin_memory, num_workers = 1)
+        loader = dat.DataLoader(dataset=dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory = self._pin_memory, num_workers = self._num_workers)
         return loader
 
     def _make_train_dataloader(self):
-        """Creates the quadratic training dataset.
-
-    Returns:
-      A torch.utils.data.DataLoader instance with batches of training data.
-    """
         # Draw data from a random generator with a fixed seed to always get the
         # same data.
         rng = np.random.RandomState(42)
@@ -81,20 +62,10 @@ class quadratic(dataset.DataSet):
         return self._make_dataloader(X, shuffle=True)
 
     def _make_train_eval_dataloader(self):
-        """Creates the quadratic train eval dataset.
-
-        Returns:
-            A torch.utils.data.DataLoader instance with batches of training eval data.
-        """
         # take whole train set for train evaluation
         return self._train_dataloader
 
     def _make_test_dataloader(self):
-        """Creates the quadratic test dataset.
-
-        Returns:
-            A torch.utils.data.DataLoader instance with batches of test data.
-        """
         # Draw data from a random generator with a fixed seed to always get the
         # same data.
         rng = np.random.RandomState(43)

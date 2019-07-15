@@ -63,7 +63,7 @@ class cifar10(dataset.DataSet):
                     transforms.Normalize((0.49139968, 0.48215841, 0.44653091),(0.24703223, 0.24348513, 0.26158784))
                     ])
         dataset = datasets.CIFAR10(root = config.get_data_dir(), train = train, download = True, transform = transform)
-        loader = dat.DataLoader(dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory=self._pin_memory, num_workers=1, sampler=sampler)
+        loader = dat.DataLoader(dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory=self._pin_memory, num_workers=self._num_workers, sampler=sampler)
         return loader
 
     def _make_train_dataloader(self):

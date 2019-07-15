@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""A simple N-Dimensional Noisy Quadratic Problem with Deep Learning eigenvalues."""
+
 import numpy as np
 from .testproblem import TestProblem
 import torch
@@ -5,6 +8,7 @@ from .testproblems_modules import net_quadratic_deep
 from ..datasets.quadratic import quadratic
 
 rng = np.random.RandomState(42)
+
 
 def random_rotation(D):
     """Produces a rotation matrix R in SO(D) (the special orthogonal
@@ -45,6 +49,7 @@ def random_rotation(D):
     # return negative to fix determinant
     return np.negative(R)
 
+
 class quadratic_deep(TestProblem):
     r"""DeepOBS test problem class for a stochastic quadratic test problem ``100``\
     dimensions. The 90 % of the eigenvalues of the Hessian are drawn from the\
@@ -63,6 +68,10 @@ class quadratic_deep(TestProblem):
       batch_size (int): Batch size to use.
       weight_decay (float): No weight decay (L2-regularization) is used in this
           test problem. Defaults to ``None`` and any input here is ignored.
+    Attributes:
+        data: The DeepOBS data set class for the quadratic problem.
+        loss_function: None. The output of the model is the loss.
+        net: The DeepOBS subclass of torch.nn.Module that is trained for this tesproblem (net_quadratic_deep).
           """
 
     def __init__(self, batch_size, weight_decay=None):
@@ -73,7 +82,7 @@ class quadratic_deep(TestProblem):
           weight_decay (float): No weight decay (L2-regularization) is used in this
               test problem. Defaults to ``None`` and any input here is ignored.
         """
-        super(quadratic_deep, self).__init__(batch_size)
+        super(quadratic_deep, self).__init__(batch_size, weight_decay)
 
     def set_up(self):
         eigenvalues = np.concatenate(

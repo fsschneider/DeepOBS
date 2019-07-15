@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """CIFAR-100 DeepOBS dataset."""
 
-import numpy as np
 from . import dataset
 from .. import config
 from torch.utils import data as dat
@@ -9,8 +8,9 @@ from torchvision import datasets
 from torchvision import transforms
 from .datasets_utils import train_eval_sampler
 
+
 class cifar100(dataset.DataSet):
-    """DeepOBS data set class for the `CIFAR-10\
+    """DeepOBS data set class for the `CIFAR-100\
     <https://www.cs.toronto.edu/~kriz/cifar.html>`_ data set.
 
   Args:
@@ -65,7 +65,7 @@ class cifar100(dataset.DataSet):
                     ])
 
         dataset = datasets.CIFAR100(root = config.get_data_dir(), train = train, download = True, transform = transform)
-        loader = dat.DataLoader(dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory=self._pin_memory, num_workers=1, sampler=sampler)
+        loader = dat.DataLoader(dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory=self._pin_memory, num_workers=self._num_workers, sampler=sampler)
         return loader
 
     def _make_train_dataloader(self):

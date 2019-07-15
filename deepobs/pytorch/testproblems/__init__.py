@@ -16,4 +16,3 @@ from .quadratic_deep import quadratic_deep
 
 from .mnist_mlp import mnist_mlp
 from .fmnist_mlp import fmnist_mlp
-

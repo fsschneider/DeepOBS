@@ -8,6 +8,7 @@ from torchvision import datasets
 from torchvision import transforms
 from .datasets_utils import train_eval_sampler
 
+
 class svhn(dataset.DataSet):
     """DeepOBS data set class for the `Street View House Numbers (SVHN)\
     <http://ufldl.stanford.edu/housenumbers/>`_ data set.
@@ -21,9 +22,6 @@ class svhn(dataset.DataSet):
         training data (but not the test data).
     train_eval_size (int): Size of the train eval dataset.
         Defaults to ``26 000`` the size of the test set.
-
-  Methods:
-      _make_dataloader: A helper that is shared by all three data loader methods.
   """
     def __init__(self,
                  batch_size,
@@ -51,7 +49,7 @@ class svhn(dataset.DataSet):
                     ])
 
         dataset = datasets.SVHN(root = config.get_data_dir(), split = split, download = True, transform = transform)
-        loader = dat.DataLoader(dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory=self._pin_memory, num_workers=1, sampler=sampler)
+        loader = dat.DataLoader(dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory=self._pin_memory, num_workers=self._num_workers, sampler=sampler)
         return loader
 
     def _make_train_dataloader(self):
