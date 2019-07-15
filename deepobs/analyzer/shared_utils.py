@@ -1,7 +1,7 @@
 import json
 import os
 import numpy as np
-
+import warnings
 
 def aggregate_runs(setting_folder):
     """Aggregates all seed runs for a setting.
@@ -67,8 +67,8 @@ def _determine_available_metric(optimizer_path, metric):
     if _check_if_metric_is_available(optimizer_path, metric):
         return metric
     else:
-        raise Warning('Metric {0:s} does not exist for testproblem {1:s}. We now use fallback metric \'test_losses\''.format(
-            metric, os.path.split(os.path.split(optimizer_path)[0])[1]))
+        warnings.warn('Metric {0:s} does not exist for testproblem {1:s}. We now use fallback metric \'test_losses\''.format(
+            metric, os.path.split(os.path.split(optimizer_path)[0])[1]), RuntimeWarning)
         return 'test_losses'
 
 

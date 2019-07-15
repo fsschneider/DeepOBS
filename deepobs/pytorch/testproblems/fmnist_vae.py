@@ -6,6 +6,7 @@ from .testproblems_modules import net_vae
 from ..datasets.fmnist import fmnist
 from .testproblem import TestProblem
 from .testproblems_utils import vae_loss_function
+import warnings
 
 
 class fmnist_vae(TestProblem):
@@ -52,9 +53,9 @@ class fmnist_vae(TestProblem):
         super(fmnist_vae, self).__init__(batch_size, weight_decay)
 
         if weight_decay is not None:
-            raise Warning(
-                "Weight decay is non-zero but no weight decay is used",
-                "for this model."
+            warnings.warn(
+                "Weight decay is non-zero but no weight decay is used for this model.",
+                RuntimeWarning
             )
 
         self.loss_function = vae_loss_function

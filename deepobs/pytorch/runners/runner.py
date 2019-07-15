@@ -10,6 +10,7 @@ from .. import testproblems
 from . import runner_utils
 from deepobs.abstract_runner.abstract_runner import Runner
 import numpy as np
+import warnings
 
 
 class PTRunner(Runner):
@@ -191,7 +192,7 @@ class StandardRunner(PTRunner):
                 from torch.utils.tensorboard import SummaryWriter
                 summary_writer = SummaryWriter(log_dir=tb_log_dir)
             except ImportError as e:
-                raise Warning('Not possible to use tensorboard for pytorch. Reason:', e)
+                warnings.warn('Not possible to use tensorboard for pytorch. Reason: ' + e, ImportWarning)
                 tb_log = False
         global_step = 0
 
