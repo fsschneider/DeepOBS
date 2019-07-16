@@ -40,7 +40,7 @@ on `GitHub`_.
 .. toctree::
   :maxdepth: 2
   :caption: API Reference
-
+  
 
 Indices and tables
 ==================

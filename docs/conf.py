@@ -14,8 +14,9 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../'))
+#sys.path.insert(0, os.path.abspath('../'))
 
+print(sys.path)
 
 # -- Project information -----------------------------------------------------
 
@@ -28,7 +29,7 @@ version = u'1.1'
 # The full version, including alpha/beta/rc tags
 release = u'1.1.0'
 
-
+autodoc_mock_imports = ['torch', 'tensorflow', 'torchvision']
 # -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
