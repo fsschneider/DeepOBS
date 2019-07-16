@@ -3,10 +3,9 @@ Quick Start
 ============
 
 **DeepOBS** is a Python package to benchmark deep learning optimizers.
-It currently supports TensorFlow but a PyTorch version is currently in
-development.
+It supports TensorFlow and PyTorch.
 
-We tested the package with Python 3.6 and TensorFlow version 1.12.
+We tested the package with Python 3.6, TensorFlow version 1.12 and Torch version 1.1.0.
 Other versions of Python and TensorFlow (>= 1.4.0) might work, and we plan to
 expand compatibility in the future.
 
@@ -17,7 +16,7 @@ You can install the latest stable release of DeepOBS using `pip`:
 
 .. code-block:: bash
 
-   pip install deepobs
+   pip install -e git+https://github.com/abahde/DeepOBS.git@master#egg=DeepOBS
 
 .. NOTE::
   The package requires the following packages:
@@ -29,8 +28,7 @@ You can install the latest stable release of DeepOBS using `pip`:
   - matplotlib2tikz
   - seaborn
 
-  TensorFlow is not a required package to allow for both the CPU and GPU version.
-  Make sure that one of those is installed.
+  TensorFlow is not a required package to allow for both the CPU and GPU version. Make sure that one of those is installed. Additionally, you have to install torch/torchvision if you want to use the PyTorch framework.
 
 .. HINT::
   We do not specify the exact version of the required package. However, if any
@@ -40,7 +38,7 @@ You can install the latest stable release of DeepOBS using `pip`:
 Set-Up Data Sets
 ================
 
-After installing DeepOBS, you have to download the data sets for the test
+**If you use TensorFlow**, you have to download the data sets for the test
 problems. This can be done by simply running the
 :doc:`../api/scripts/deepobs_prepare_data` script:
 
@@ -63,6 +61,8 @@ It can take a while, as it will download roughly 1 GB.
   download the rest. If you have all data sets, you can skip this step, and
   always tell DeepOBS where the data sets are located. However, the DeepOBS
   package requires the data sets to be organized in a specific way.
+
+**If you use PyTorch**, the data downloading will be handled automatically by torchvision.
 
 You are now ready to run different optimizers on various test problems. We
 provide a :doc:`tutorial` for this, as well as our
