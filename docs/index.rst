@@ -39,20 +39,11 @@ as the data preprocessing scripts or the visualization features.
   :caption: User Guide
 
   user_guide/quick_start
-  user_guide/overview
   user_guide/tutorial
-  user_guide/suggested_protocol
 
 .. toctree::
   :maxdepth: 2
   :caption: API Reference
-
-  api/datasets
-  api/testproblems
-  api/runner
-  api/analyzer
-  api/scripts
-
 
 
 Indices and tables
@@ -62,4 +53,4 @@ Indices and tables
 * :ref:`search`
 
 
-.. _GitHub: https://github.com/fsschneider/DeepOBS
+.. _GitHub: https://github.com/abahde/DeepOBS
