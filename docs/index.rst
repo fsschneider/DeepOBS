@@ -18,8 +18,13 @@ DeepOBS automates several steps when benchmarking deep learning optimizers:
     metrics.
   - Reporting and visualization the results of the optimizer benchmark.
 
-The code for the current implementation working with **PyTorch** can be found
+The code for the current implementation working with **TensorFlow** and **PyTorch** can be found
 on `GitHub`_.
+
+=======
+.. figure:: deepobs.jpg
+    :scale: 40%
+
 
 .. toctree::
   :maxdepth: 2
@@ -31,11 +36,7 @@ on `GitHub`_.
 .. toctree::
   :maxdepth: 2
   :caption: API Reference
-
-  api/datasets
-  api/testproblems
-  api/runner
-  api/analyzer
+=======
 
 Indices and tables
 ==================
