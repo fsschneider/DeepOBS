@@ -25,28 +25,24 @@ DeepOBS automates several steps when benchmarking deep learning optimizers:
 
 ![DeepOBS Output](docs/deepobs.jpg "DeepOBS_output")
 
-The code for the current implementation working with **TensorFlow** can be found
-on [Github](https://github.com/fsschneider/DeepOBS).
+The code for the current implementation working with **TensorFlow** and **PyTorch** can be found
+on [Github](https://github.com/abahde/DeepOBS).
 
 The full documentation is available on readthedocs:
-https://deepobs.readthedocs.io/
+https://deepobs-with-pytorch.readthedocs.io/
 
 The paper describing DeepOBS has been accepted for ICLR 2019 and can be found
 here:
 https://openreview.net/forum?id=rJg6ssC5Y7
 
-We are actively working on a **PyTorch** version and will be releasing it in the
-next months. In the meantime, PyTorch users can still use parts of DeepOBS such
-as the data preprocessing scripts or the visualization features.
-
-
 ## Installation
 
-	pip install deepobs
+```pip install -e git+https://github.com/abahde/DeepOBS.git@master#egg=DeepOBS```
 
-We tested the package with Python 3.6 and TensorFlow version 1.12. Other
-versions of Python and TensorFlow (>= 1.4.0) might work, and we plan to expand
+We tested the package with Python 3.6, TensorFlow version 1.12, Torch version 1.1.0 and Torchvision version 0.3.0. Other
+versions might work, and we plan to expand
 compatibility in the future.
 
 Further tutorials and a suggested protocol for benchmarking deep learning
-optimizers can be found on https://deepobs.readthedocs.io/
+optimizers can be found on https://deepobs-with-pytorch.readthedocs.io/
+
