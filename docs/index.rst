@@ -36,7 +36,8 @@ on `GitHub`_.
 .. toctree::
   :maxdepth: 2
   :caption: API Reference
-=======
+
+  api/analyzer
 
 Indices and tables
 ==================
