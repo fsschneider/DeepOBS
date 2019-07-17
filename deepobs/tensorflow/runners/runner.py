@@ -202,7 +202,7 @@ class StandardRunner(TFRunner):
     @staticmethod
     def _add_training_params_to_argparse(parser, args, training_params):
         pass
-    
+
     def training(self,
                  tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir):
 
