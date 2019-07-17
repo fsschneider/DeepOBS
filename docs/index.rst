@@ -41,6 +41,10 @@ on `GitHub`_.
   :maxdepth: 2
   :caption: API Reference
   
+  api/analyzer
+  api/tensorflow
+  api/pytorch
+  api/abstract_runner
 
 Indices and tables
 ==================

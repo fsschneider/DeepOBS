@@ -1,0 +1,19 @@
+===========================
+Plot Optimizer Performances
+===========================
+
+.. currentmodule:: deepobs.analyzer
+.. autofunction:: plot_optimizer_performance
+
+.. autofunction:: plot_all_testproblems_performances
+
+=================
+Get the Best Runs
+=================
+.. autofunction:: plot_performance_table
+.. autofunction:: get_performance_dictionary
+
+===============================
+Plot Hyperparameter Sensitivity
+===============================
+.. autofunction:: plot_hyperparameter_sensitivity

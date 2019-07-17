@@ -14,3 +14,4 @@ TensorFlow output files that can be plotted in real-time using `Tensorboard`.
   :caption: Runner
 
   runner/standardrunner
+  runner/tfrunner

@@ -2,7 +2,7 @@
 Standard Runner
 =====================
 
-.. currentmodule:: deepobs.tensorflow.runners.standard_runner
+.. currentmodule:: deepobs.pytorch.runners
 
 .. autoclass:: StandardRunner
     :members:
