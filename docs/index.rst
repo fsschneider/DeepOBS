@@ -45,6 +45,7 @@ on `GitHub`_.
   api/tensorflow
   api/pytorch
   api/abstract_runner
+  api/tuner
 
 Indices and tables
 ==================

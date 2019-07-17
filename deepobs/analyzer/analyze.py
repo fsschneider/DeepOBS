@@ -30,6 +30,7 @@ def plot_all_testproblems_performances(results_path, mode = 'final', metric = 't
         """
     testproblems = [path for path in os.listdir(results_path) if os.path.isdir(os.path.join(results_path, path))]
     if reference_path is not None:
+        reference_path = os.path.join(reference_path)
         reference_testproblems = [path for path in os.listdir(results_path) if os.path.isdir(os.path.join(reference_path, path))]
     else:
         reference_testproblems = []
@@ -186,6 +187,7 @@ def plot_optimizer_performance(optimizer_path, ax = None, mode = 'final', metric
         """
     ax = _plot_optimizer_performance(optimizer_path, ax, mode, metric)
     if reference_path is not None:
+        reference_path = os.path.join(reference_path)
         reference_path = _preprocess_reference_path(reference_path)    # reference path can either be an optimizer_path or a testproblem path
         for reference_optimizer_path in reference_path:
             ax = _plot_optimizer_performance(reference_optimizer_path, ax, mode, metric)
