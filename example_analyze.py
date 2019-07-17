@@ -9,4 +9,4 @@ analyzer.plot_optimizer_performance('./results/quadratic_deep/MomentumOptimizer'
 
 # plot again, but this time compare to the Adam baseline
 analyzer.plot_optimizer_performance('./results/quadratic_deep/MomentumOptimizer',
-                                    reference_path='deepobs_baselines/quadratic_deep/AdamOptimizer')
+                                    reference_path='../DeepOBS_Baselines/baselines_tensorflow/quadratic_deep/MomentumOptimizer')

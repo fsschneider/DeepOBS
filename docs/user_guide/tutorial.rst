@@ -45,9 +45,9 @@ We will run it a couple times more this time with different ``learning_rates``
 
 .. code-block:: bash
 
-  python example_momentum_runner.py quadratic_deep --bs 128 --lr 1e-3 --momentum 0.99 --num_epochs 10
-  python example_momentum_runner.py quadratic_deep --bs 128 --lr 1e-4 --momentum 0.99 --num_epochs 10
-  python example_momentum_runner.py quadratic_deep --bs 128 --lr 1e-5 --momentum 0.99 --num_epochs 10
+  python example_momentum_runner.py quadratic_deep --bs 128 --learning_rate 1e-3 --momentum 0.99 --num_epochs 10
+  python example_momentum_runner.py quadratic_deep --bs 128 --learning_rate 1e-4 --momentum 0.99 --num_epochs 10
+  python example_momentum_runner.py quadratic_deep --bs 128 --learning_rate 1e-5 --momentum 0.99 --num_epochs 10
 
 
 Get best Run

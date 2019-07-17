@@ -11,8 +11,8 @@ def _preprocess_reference_path(reference_path):
     Returns:
         A list of all reference optimizers.
         """
-    os.chdir(reference_path)
-    pathes = [path for path in os.listdir(reference_path) if os.path.isdir(path)]
+    reference_path = os.path.abspath(reference_path)
+    pathes = [path for path in os.listdir(reference_path) if os.path.isdir(os.path.join(reference_path, path))]
 
     if 'num_epochs' in pathes[0]:    # path was a path to an optimizer
         return reference_path.split()
