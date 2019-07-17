@@ -168,6 +168,10 @@ class StandardRunner(PTRunner):
     def __init__(self, optimizer_class, hyperparameter_names):
         super(StandardRunner, self).__init__(optimizer_class, hyperparameter_names)
 
+    @staticmethod
+    def _add_training_params_to_argparse(parser, args, training_params):
+        pass
+
     def training(self,
                  tproblem,
                  hyperparams,

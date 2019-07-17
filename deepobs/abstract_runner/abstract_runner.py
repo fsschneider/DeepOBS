@@ -174,8 +174,9 @@ class Runner(abc.ABC):
         pass
 
     @staticmethod
+    @abc.abstractmethod
     def _add_training_params_to_argparse(parser, args, training_params):
-        """Overwrite this method if your runner uses additional training_parameters and if you want to add them to argparse"""
+        """Overwrite this method to specify how your runner should read in additional training_parameters and to add them to argparse"""
         pass
 
     def parse_args(self,
