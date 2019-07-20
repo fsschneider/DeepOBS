@@ -108,6 +108,12 @@ def _get_all_setting_analyzer(optimizer_path):
     return setting_analyzers
 
 
+def _get_optimizer_name_and_testproblem_from_path(optimizer_path):
+    optimizer_name = os.path.split(optimizer_path)[-1]
+    testproblem = os.path.split(os.path.split(optimizer_path)[0])[-1]
+    return optimizer_name, testproblem
+
+
 def create_setting_analyzer_ranking(optimizer_path, mode = 'final', metric = 'test_accuracies'):
     """Reads in all settings in ``optimizer_path`` and sets up a ranking by returning an ordered list of SettingAnalyzers.
     Args:
