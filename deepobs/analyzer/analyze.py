@@ -4,9 +4,9 @@ from __future__ import print_function
 import os
 import numpy as np
 from matplotlib import pyplot as plt
-from .shared_utils import create_setting_analyzer_ranking, _determine_available_metric
+from .shared_utils import create_setting_analyzer_ranking, _determine_available_metric, _get_optimizer_name_and_testproblem_from_path
 from ..tuner.tuner_utils import generate_tuning_summary
-from .analyze_utils import rescale_ax, _preprocess_reference_path
+from .analyze_utils import _rescale_ax, _preprocess_path
 
 
 # TODO
@@ -15,7 +15,7 @@ def plot_performance_table(results_path):
     pass
 
 
-def plot_all_testproblems_performances(results_path, mode = 'final', metric = 'test_accuracies', reference_path = None):
+def plot_testset_performances(results_path, mode = 'final', metric = 'test_accuracies', reference_path = None):
     """Plots all optimizer performances for all testproblems.
 
     Args:
@@ -35,34 +35,26 @@ def plot_all_testproblems_performances(results_path, mode = 'final', metric = 't
     else:
         reference_testproblems = []
     n_testproblems = len(testproblems)
-    __, ax = plt.subplots(4, n_testproblems)
+    __, ax = plt.subplots(4, n_testproblems, sharex='col')
     for idx, testproblem in enumerate(testproblems):
         testproblem_path = os.path.join(results_path, testproblem)
-        ax[:, idx] = _plot_all_optimizer_performances_for_testproblem(testproblem_path, ax[:, idx], mode, metric)
+        ax[:, idx] = _plot_optimizer_performance(testproblem_path, ax[:, idx], mode, metric)
         if testproblem in reference_testproblems:
             reference_testproblem_path = os.path.join(reference_path, testproblem)
-            ax[:, idx] = _plot_all_optimizer_performances_for_testproblem(reference_testproblem_path, ax[:, idx], mode, metric)
+            ax[:, idx] = _plot_optimizer_performance(reference_testproblem_path, ax[:, idx], mode, metric)
+
+    metrices = ['test_losses', 'train_losses', 'test_accuracies', 'train_accuracies']
+    for idx, _metric in enumerate(metrices):
+        # label y axes
+        ax[idx, 0].set_ylabel(_metric)
+        # rescale
+        for idx2 in range(n_testproblems):
+            ax[idx, idx2] = _rescale_ax(ax[idx, idx2])
+            ax[3, idx2].set_xlabel('epochs')
+    # show legend of optimizers
+    ax[0, 0].legend()
+    plt.tight_layout()
     plt.show()
-    return ax
-
-
-def _plot_all_optimizer_performances_for_testproblem(testproblem_path, ax = None, mode = 'final', metric = 'test_accuracies'):
-    """Plots the performance of all optimizers in one testproblem folder.
-
-    Args:
-        testproblem_path (str): The path to the testproblem.
-        ax (plt.axes instance that has 4 subaxes (one for each possible metric)): The axes to plot the trainig curves for all metrices.
-        mode (str): The mode by which to decide the best setting.
-        metric (str): The metric by which to decide the best setting.
-
-    Returns:
-        ax (plt.axes): The axes with the plots.
-
-        """
-    optimizers = [path for path in os.listdir(testproblem_path) if os.path.isdir(os.path.join(testproblem_path, path))]
-    for optimizer in optimizers:
-        optimizer_path = os.path.join(testproblem_path, optimizer)
-        ax = _plot_optimizer_performance(optimizer_path, ax, mode, metric)
     return ax
 
 
@@ -79,10 +71,10 @@ def plot_hyperparameter_sensitivity(optimizer_path, hyperparam, mode='final', me
         fig, ax: The figure and axes of the plot.
 
         """
+    metric = _determine_available_metric(optimizer_path, metric)
     tuning_summary = generate_tuning_summary(optimizer_path, mode, metric)
 
-    optimizer_name = os.path.split(optimizer_path)[-1]
-    testproblem = os.path.split(optimizer_path)[-2]
+    optimizer_name, testproblem = _get_optimizer_name_and_testproblem_from_path(optimizer_path)
 
     # create array for plotting
     param_values = [d['params'][hyperparam] for d in tuning_summary]
@@ -98,6 +90,8 @@ def plot_hyperparameter_sensitivity(optimizer_path, hyperparam, mode='final', me
     ax.plot(param_values, target_means)
     ax.fill_between(param_values, target_means - target_stds, target_means + target_stds, alpha=0.3)
     plt.xscale(xscale)
+    plt.xlabel(hyperparam)
+    plt.ylabel(metric)
     ax.set_title(optimizer_name + ' on ' + testproblem)
     plt.show()
     return fig, ax
@@ -141,11 +135,11 @@ def get_performance_dictionary(optimizer_path, mode = 'final', metric = 'test_ac
     return perf_dict
 
 
-def _plot_optimizer_performance(optimizer_path, ax = None, mode = 'final', metric = 'test_accuracies'):
+def _plot_optimizer_performance(path, ax = None, mode = 'final', metric = 'test_accuracies'):
     """Plots the training curve of an optimizer.
 
     Args:
-        optimizer_path (str): The path to the optimizer to analyse.
+        path (str): Path to the optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are plotted).
         ax (plt.axes): The axes to plot the trainig curves for all metrices. Must have 4 subaxes.
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
@@ -154,28 +148,32 @@ def _plot_optimizer_performance(optimizer_path, ax = None, mode = 'final', metri
         ax (plt.axes): The axes with the plots.
 
         """
-    setting_analyzer_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
-    setting = setting_analyzer_ranking[0]
+    metrices = ['test_losses', 'train_losses', 'test_accuracies', 'train_accuracies']
+    if ax is None:  # create default axis for all 4 metrices
+        _, ax = plt.subplots(4, 1, sharex='col')
 
-    metrices = ['train_losses', 'train_accuracies', 'test_losses', 'test_accuracies']
-    if ax is None:    # create default axis for all 4 metrices
-        _, ax = plt.subplots(4, 1)
-    optimizer_name = os.path.basename(optimizer_path)
-    for idx, _metric in enumerate(metrices):
-        if _metric in setting.aggregate:
-            mean = setting.aggregate[_metric]['mean']
-            std = setting.aggregate[_metric]['std']
-            ax[idx].plot(mean, label=optimizer_name)
-            ax[idx].fill_between(range(len(mean)), mean - std, mean + std, alpha=0.3)
-            ax[idx].legend()
+    pathes = _preprocess_path(path)
+    for optimizer_path in pathes:
+        setting_analyzer_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
+        setting = setting_analyzer_ranking[0]
+
+        optimizer_name = os.path.basename(optimizer_path)
+        for idx, _metric in enumerate(metrices):
+            if _metric in setting.aggregate:
+                mean = setting.aggregate[_metric]['mean']
+                std = setting.aggregate[_metric]['std']
+                ax[idx].plot(mean, label=optimizer_name)
+                ax[idx].fill_between(range(len(mean)), mean - std, mean + std, alpha=0.3)
+    _, testproblem = _get_optimizer_name_and_testproblem_from_path(optimizer_path)
+    ax[0].set_title(testproblem)
     return ax
 
 
-def plot_optimizer_performance(optimizer_path, ax = None, mode = 'final', metric = 'test_accuracies', reference_path = None):
-    """Plots the training curve of an optimizer and addionally plots reference results from the ``reference_path``
+def plot_optimizer_performance(path, ax = None, mode = 'final', metric = 'test_accuracies', reference_path = None):
+    """Plots the training curve of optimizers and addionally plots reference results from the ``reference_path``
 
     Args:
-        optimizer_path (str): The path to the optimizer to analyse.
+        path (str): Path to the optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are plotted).
         ax (plt.axes): The axes to plot the trainig curves for all metrices. Must have 4 subaxes (one for each metric).
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
@@ -185,11 +183,22 @@ def plot_optimizer_performance(optimizer_path, ax = None, mode = 'final', metric
         ax (plt.axes): The axes with the plots.
 
         """
-    ax = _plot_optimizer_performance(optimizer_path, ax, mode, metric)
+
+    ax = _plot_optimizer_performance(path, ax, mode, metric)
     if reference_path is not None:
-        reference_path = os.path.join(reference_path)
-        reference_path = _preprocess_reference_path(reference_path)    # reference path can either be an optimizer_path or a testproblem path
-        for reference_optimizer_path in reference_path:
-            ax = _plot_optimizer_performance(reference_optimizer_path, ax, mode, metric)
+        ax = _plot_optimizer_performance(reference_path, ax, mode, metric)
+
+    metrices = ['test_losses', 'train_losses', 'test_accuracies', 'train_accuracies']
+    for idx, _metric in enumerate(metrices):
+        # set y labels
+        ax[idx].set_ylabel(_metric)
+        # rescale plots
+        ax[idx] = _rescale_ax(ax[idx])
+
+    # show optimizer legens
+    ax[0].legend()
+
+    ax[3].set_xlabel('epochs')
+
     plt.show()
     return ax
