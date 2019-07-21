@@ -33,7 +33,8 @@ def aggregate_runs(setting_folder):
         if len(eval(metrics)) != 0:
             aggregate[metrics] = {
                     'mean': np.mean(eval(metrics), axis=0),
-                    'std': np.std(eval(metrics), axis=0)
+                    'std': np.std(eval(metrics), axis=0),
+                    'all_final_values': [met[-1] for met in eval(metrics)]
                 }
     # merge meta data
     aggregate['optimizer_hyperparams'] = json_data['optimizer_hyperparams']
@@ -215,3 +216,10 @@ class SettingAnalyzer:
             raise NotImplementedError
 
         return speed
+
+    def get_all_final_values(self, metric):
+        """Get all final values of the seed runs for the metric."""
+        try:
+            return self.aggregate[metric]['all_final_values']
+        except KeyError:
+            raise KeyError('Metric {0:s} not available for testproblem {1:s} of this setting'.format(metric, self.aggregate['testproblem']))
