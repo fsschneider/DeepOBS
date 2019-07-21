@@ -58,6 +58,33 @@ def plot_testset_performances(results_path, mode = 'final', metric = 'test_accur
     return ax
 
 
+def plot_hyperparameter_sensitivity_2d(optimizer_path, hyperparams, mode='final', metric = 'test_accuracies', xscale='linear', yscale = 'linear'):
+    param1, param2 = hyperparams
+    metric = _determine_available_metric(optimizer_path, metric)
+    tuning_summary = generate_tuning_summary(optimizer_path, mode, metric)
+
+    optimizer_name, testproblem = _get_optimizer_name_and_testproblem_from_path(optimizer_path)
+
+    param_values1 = np.array([d['params'][param1] for d in tuning_summary])
+    param_values2 = np.array([d['params'][param2] for d in tuning_summary])
+
+    target_means = np.array([d['target_mean'] for d in tuning_summary])
+    target_stds = [d['target_std'] for d in tuning_summary]
+
+    fig, ax = plt.subplots()
+
+    con = ax.tricontourf(param_values1, param_values2, target_means, cmap = 'CMRmap')
+    ax.scatter(param_values1, param_values2)
+    ax.set_xscale(xscale)
+    ax.set_yscale(yscale)
+    ax.set_xlabel(param1)
+    ax.set_ylabel(param2)
+    cbar = plt.colorbar(con)
+    cbar.set_label(metric)
+    plt.show()
+    return fig, ax
+
+
 # TODO make it possible to plot the sensitivity for several optimizer
 def plot_hyperparameter_sensitivity(optimizer_path, hyperparam, mode='final', metric = 'test_accuracies', xscale='linear'):
     """Plots the hyperparameter sensitivtiy of the optimizer.

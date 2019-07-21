@@ -8,7 +8,6 @@ from ..analyzer.shared_utils import _append_json, _clear_json
 from itertools import product
 
 
-# TODO how to do slicing for d >=2?
 def _reshape_posterior_and_domain_for_plotting(mean, std, domain, acq, resolution):
     num_features = domain.shape[-1]
     new_shape = tuple(np.repeat(resolution, num_features))
@@ -17,7 +16,7 @@ def _reshape_posterior_and_domain_for_plotting(mean, std, domain, acq, resolutio
     acq = acq.reshape(new_shape)
     new_domain = []
     for idx in range(num_features):
-        new_domain.append(domain[:,idx].reshape(new_shape))
+        new_domain.append(domain[:, idx].reshape(new_shape))
     return mean, std, new_domain, acq
 
 
@@ -47,10 +46,10 @@ def plot_2d_bo_posterior(optimizer_path, step, resolution):
     ax[0].contourf(domain[0], domain[1], mean)
     ax[0].set_xlabel(op.space.keys[0])
     ax[0].set_ylabel(op.space.keys[1])
-    # TODO how to plot posterior std in 3d?
+    # TODO plot posterior std
     
     # add step points
-    ax[0].scatter(op.space.params[:,0], op.space.params[:,1])
+    ax[0].scatter(op.space.params[:, 0], op.space.params[:, 1])
     
     ax[1].contourf(domain[0], domain[1], acq)
     plt.show()
