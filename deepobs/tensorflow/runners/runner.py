@@ -35,7 +35,6 @@ class TFRunner(Runner):
             tb_log_dir = None,
             **training_params):
 
-        # TODO move this to argparse?
         if batch_size is None:
             batch_size = global_config.get_testproblem_default_setting(testproblem)['batch_size']
         if num_epochs is None:
@@ -206,14 +205,12 @@ class StandardRunner(TFRunner):
     def training(self,
                  tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir):
 
-        # TODO abstract loss
         loss = tf.reduce_mean(tproblem.losses) + tproblem.regularizer
 
         # Set up the optimizer and create learning rate schedule.
         global_step = tf.Variable(0, trainable=False)
 
         # this is neccesary to apply the lr_sched later.
-        # TODO make this clear
         learning_rate = hyperparams['learning_rate']
         learning_rate_var = tf.Variable(learning_rate, trainable=False)
         hyperparams_ = deepcopy(hyperparams)
@@ -387,14 +384,12 @@ class LearningRateScheduleRunner(TFRunner):
                  lr_sched_epochs=None,
                  lr_sched_factors=None):
 
-        # TODO abstract loss
         loss = tf.reduce_mean(tproblem.losses) + tproblem.regularizer
 
         # Set up the optimizer and create learning rate schedule.
         global_step = tf.Variable(0, trainable=False)
 
         # this is neccesary to apply the lr_sched later.
-        # TODO make this clear
         learning_rate = hyperparams['learning_rate']
         learning_rate_var = tf.Variable(learning_rate, trainable=False)
         hyperparams_ = deepcopy(hyperparams)

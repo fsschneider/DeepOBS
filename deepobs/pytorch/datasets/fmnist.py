@@ -2,7 +2,6 @@
 """Fashion-MNIST DeepOBS dataset."""
 
 from __future__ import print_function
-
 from . import dataset
 from .. import config
 from torch.utils import data as dat
