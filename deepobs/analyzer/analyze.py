@@ -85,8 +85,11 @@ def plot_hyperparameter_sensitivity_2d(optimizer_path, hyperparams, mode='final'
     return fig, ax
 
 
-# TODO make it possible to plot the sensitivity for several optimizer
-def plot_hyperparameter_sensitivity(optimizer_path, hyperparam, mode='final', metric = 'test_accuracies', xscale='linear'):
+# TODO plot the sensitivity for several optimizer
+def plot_hyperparameter_sensitivity(optimizer_path, hyperparam, mode='final', metric = 'test_accuracies',
+                                    xscale='linear',
+                                    plot_std=False):
+
     """Plots the hyperparameter sensitivtiy of the optimizer.
     Args:
         optimizer_path (str): The path to the optimizer to analyse.
@@ -107,6 +110,7 @@ def plot_hyperparameter_sensitivity(optimizer_path, hyperparam, mode='final', me
     param_values = [d['params'][hyperparam] for d in tuning_summary]
     target_means = [d['target_mean'] for d in tuning_summary]
     target_stds = [d['target_std'] for d in tuning_summary]
+
     # sort the values synchronised for plotting
     param_values, target_means, target_stds = (list(t) for t in zip(*sorted(zip(param_values, target_means, target_stds))))
 
@@ -115,11 +119,32 @@ def plot_hyperparameter_sensitivity(optimizer_path, hyperparam, mode='final', me
     target_means = np.array(target_means)
     target_stds = np.array(target_stds)
     ax.plot(param_values, target_means)
-    ax.fill_between(param_values, target_means - target_stds, target_means + target_stds, alpha=0.3)
+    if plot_std:
+        ax.fill_between(param_values, target_means - target_stds, target_means + target_stds, alpha=0.3)
     plt.xscale(xscale)
     plt.xlabel(hyperparam)
     plt.ylabel(metric)
     ax.set_title(optimizer_name + ' on ' + testproblem)
+    plt.show()
+    return fig, ax
+
+
+def plot_final_metric_vs_tuning_rank(optimizer_path, metric='test_accuracies'):
+    metric = _determine_available_metric(optimizer_path, metric)
+    ranks = create_setting_analyzer_ranking(optimizer_path, mode='final', metric=metric)
+    means = []
+    fig, ax = plt.subplots()
+    for idx, rank in enumerate(ranks):
+        means.append(rank.get_final_value(metric))
+        values = rank.get_all_final_values(metric)
+        for value in values:
+            ax.scatter(idx, value, marker='x', color='b')
+        ax.plot((idx, idx), (min(values), max(values)), color= 'grey', linestyle='--')
+    ax.plot(range(len(ranks)), means)
+    optimizer, testproblem = _get_optimizer_name_and_testproblem_from_path(optimizer_path)
+    ax.set_title(optimizer + ' on ' + testproblem)
+    ax.set_xlabel('tuning rank')
+    ax.set_ylabel(metric)
     plt.show()
     return fig, ax
 
