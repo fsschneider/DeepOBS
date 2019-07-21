@@ -39,7 +39,6 @@ class PTRunner(Runner):
             tb_log_dir = None,
              **training_params):
 
-        # TODO put this to argparse so it is the same for both frameworks?
         if batch_size is None:
             batch_size = global_config.get_testproblem_default_setting(testproblem)['batch_size']
         if num_epochs is None:

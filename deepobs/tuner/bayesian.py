@@ -55,7 +55,6 @@ class GP(Tuner):
     # TODO how to deal with discrete categoricals?
     def _generate_cost_function(self, testproblem, output_dir, mode, **kwargs):
         '''Factory to create the cost function depending on the testproblem and kwargs.'''
-        # TODO das Abbrechen eines Runners wegen NaNs hat Einfluss auf BO results!!!!
         def _cost_function(**hyperparams):
             runner = self._runner(self._optimizer_class, self._hyperparam_names)
             output = runner.run(testproblem, hyperparams, output_dir=output_dir, **kwargs)
@@ -106,7 +105,6 @@ class GP(Tuner):
         # TODO when to normalize the y values in gp ?
         op = bayes_opt.BayesianOptimization(f = None, pbounds = self._bounds, random_state=random_seed)
         if kernel is not None:
-            # TODO how to check if kernel is valid
             op._gp.kernel = kernel
         if alpha is not None:
             # set noise level
