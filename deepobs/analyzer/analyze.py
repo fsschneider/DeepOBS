@@ -117,10 +117,15 @@ def plot_hyperparameter_sensitivity(optimizer_path, hyperparam, mode='final', me
     fig, ax = plt.subplots()
     param_values = np.array(param_values)
     target_means = np.array(target_means)
-    target_stds = np.array(target_stds)
     ax.plot(param_values, target_means)
     if plot_std:
-        ax.fill_between(param_values, target_means - target_stds, target_means + target_stds, alpha=0.3)
+        ranks = create_setting_analyzer_ranking(optimizer_path, mode, metric)
+        for rank in ranks:
+            values = rank.get_all_final_values(metric)
+            param_value = rank.aggregate['optimizer_hyperparams'][hyperparam]
+            for value in values:
+                ax.scatter(param_value, value, marker='x', color='b')
+            ax.plot((param_value, param_value), (min(values), max(values)), color='grey', linestyle='--')
     plt.xscale(xscale)
     plt.xlabel(hyperparam)
     plt.ylabel(metric)
