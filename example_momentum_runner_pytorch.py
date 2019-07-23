@@ -6,7 +6,7 @@ from deepobs import pytorch as pt
 optimizer_class = SGD
 hyperparams = {"lr": {"type": float},
                "momentum": {"type": float, "default": 0.99},
-               "use_nesterov": {"type": bool, "default": False}}
+               "nesterov": {"type": bool, "default": False}}
 
 runner = pt.runners.StandardRunner(optimizer_class, hyperparams)
-runner.run(testproblem='quadratic_deep', hyperparams={'lr': 0.1}, num_epochs=10)
+runner.run(testproblem='quadratic_deep', hyperparams={'lr': 1e-2}, num_epochs=10)
