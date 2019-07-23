@@ -13,22 +13,12 @@ Create new Run Script
 
 In order to benchmark a new optimization method a new run script has to be
 written. A more detailed description can be found in the :doc:`tutorial` and
-the the API section for the :doc:`../api/runner/standardrunner`, but all is
-needed is the optimizer itself and a list of its hyperparameters. For example
-for the Momentum optimizer this will be.
-
-.. code-block:: python3
-  :linenos:
-
-  import tensorflow as tf
-  import deepobs.tensorflow as tfobs
-
-  optimizer_class = tf.train.MomentumOptimizer
-  hyperparams = [{"name": "momentum", "type": float},
-                 {"name": "use_nesterov", "type": bool, "default": False }]
-  runner = tfobs.runners.StandardRunner(optimizer_class, hyperparams)
-
-  runner.run(train_log_interval=10)
+the the API section for TensorFlow (:doc:`../api/tensorflow/runner/standardrunner`) and PyTorch (:doc:`../api/tensorflow/runner/standardrunner`) respecitvely
+Essentially, all which is needed is the optimizer itself and a list of its hyperparameters. For example
+for the Momentum optimizer in **Tensorlow** this will be:
+.. literalinclude:: ../../example_momentum_runner_tensorflow.py
+And in **PyTorch**:
+.. literalinclude:: ../../example_momentum_runner_pytorch.py
 
 Hyperparameter Search
 =====================
@@ -43,6 +33,11 @@ to ``10e2`` with ``36`` samples. If the same tuning method is used for a new
 optimizer no re-running of the baselines is needed saving valuable
 computational budget.
 
+.. NOTE::
+  Alternatively, this DeepOBS version comes with a tuning automation module: :doc:`../api/tuner`.
+  However, at the moment we do not recommend using it, since it is highly experimental.
+
+
 Repeated Runs with best Setting
 ===============================
 
@@ -51,42 +46,15 @@ runs with the best hyperparameter setting multiple times. This allows an
 assessment of the variance of the optimizer's performance.
 
 For the baselines we determined the best learning rate looking at the final
-performance of each run, which can be done using
-
-.. code-block:: bash
-
-  deepobs_plot_results results/ --get_best_run
-
+performance of each run, which can be done using :doc:`../api/analyzer`,
 and then running the best performing setting again using ten different random
 seeds.
 
 Plot Results
 ============
 
-To visualize the final results it is sufficient to run
-
-.. code-block:: bash
-
-  deepobs_plot_results results/ --full
-
-This will show the performance plots for the ``small`` and ``large`` benchmark
-set
-
-.. image:: performance_plot.png
-    :scale: 40%
-
-as well as the learning rate sensitivity plot
-
-.. image:: lr_sensitivity.png
-    :scale: 40%
-
-and the overall performance table
-
-.. image:: performance_table.png
-    :scale: 40%
-
-If the path to the baseline folder is given, DeepOBS will automatically compare
+To visualize the final results, the user can use the :doc:`../api/analyzer` API.
+For most functionalities, if the path to the baseline folder is given, DeepOBS will automatically compare
 the results with the baselines for ``SGD``, ``Momentum``, and ``Adam``.
 
-For all plots, ``.tex`` files will be generated with pgfplots-code for direct
-inclusion in academic publications.
+

@@ -42,7 +42,7 @@ This includes
     The best way currently is to download and preprocess the `ImageNet` data set
     separately if needed and move it into the DeepOBS data folder.
 
-The automatic data preparation script can be run using
+The automatic data preparation for the TensorFlow version script can be run using
 
 .. code-block:: bash
 
@@ -50,6 +50,8 @@ The automatic data preparation script can be run using
 
 and is described in the API section under
 :doc:`../api/scripts/deepobs_prepare_data`.
+
+For the PyTorch version the data preparation is done automatically (mostly with Torchvision).
 
 
 Data Loading
@@ -62,7 +64,7 @@ shuffling, batching and data augmentation. The data loading module can also be
 used to build new deep learning models that are not (yet) part of DeepOBS.
 
 The outputs of the data loading module is illustrated in the figure below and is
-further described in the API section under :doc:`../api/datasets`.
+further described in the API section for :doc: '../api/tensorflow/datasets' and :doc: '../api/pytorch/datasets' respectively.
 
 .. image:: ImageNetOutput.png
     :scale: 20%
@@ -87,7 +89,7 @@ renders small problems out of date, and introduces new research directions and
 more challenging problems.
 
 The implementation of the models is described in the API section under
-:doc:`../api/testproblems`.
+:doc:`../api/tensorflow/testproblems` and :doc:`../api/pytorch/testproblems` respectively.
 
 
 Runners
@@ -95,12 +97,12 @@ Runners
 
 The runners of the DeepOBS package handle training and the logging of statistics
 measuring the optimizer's performance. For optimizers following the standard
-TensorFlow optimizer API it is enough to provide the runners with a list of the
+TensorFlow or PyTorch optimizer API it is enough to provide the runners with a list of the
 optimizer’s hyperparameters. We provide a template for this, as well as an
 example of including a more sophisticated optimizer that can’t be described as
-a subclass of the TensorFlow optimizer API.
+a subclass of the TensorFlow or PyTorch optimizer API.
 
-In the API section, we described the :doc:`../api/runner/standardrunner` and in
+In the API section, we described the :doc:`../api/tensorflow/runner/standardrunner` and :doc:`../api/pytorch/runner/standardrunner` in
 the :doc:`tutorial` we show an example of creating a run script for a new
 optimizer.
 
@@ -119,50 +121,21 @@ optimizer’s code, assuming the method perform competitively. Currently,
 baselines are available for all test problems in the small and large benchmark
 set.
 
-The baselines can be downloaded automatically by running
+The current baselines can be downloaded from `github`_.
 
-.. code-block:: bash
-
-  deepobs_get_baselines.sh
-
-and the script is described in the API section under
-:doc:`../api/scripts/deepobs_get_baselines`.
+.. _github: https://github.com/abahde/DeepOBS_Baselines
 
 
 Runtime Estimation
 ==================
 
-DeepOBS provides an option to quickly estimate the runtime overhead of a new
-optimization method compared to ``SGD``. It measures the ratio of wall-clock
-time between the new optimizer and ``SGD``.
-
-By default this ratio is measured on five runs each, for three epochs, on a
-fully connected network on ``MNIST``. However, this can be adapted to a setting
-which fairly evaluates the new optimizer, as some optimizers might have a high
-initial cost that amortizes over many epochs.
-
-The :doc:`../api/scripts/deepobs_estimate_runtime` script is described in the
-API section.
-
+In the current DeepOBS version, runtime estimation is not yet available.
 
 Visualization
 =============
 
-
-The DeepOBS visualization module reduces the overhead for the preparation of
+The DeepOBS analyzer module reduces the overhead for the preparation of
 results, and simultaneously standardizes the presentation, making it possible to
-include a comparably large amount of information in limited space.
+include a comparably large amount of information in limited space. A more detailed description
+can be found in its API reference: :doc:`../api/analyzer`. We also procide an example: :doc:`../user_guide/tutorial`
 
-The module produces .tex files with pgfplots-code for all learning curves for
-the proposed optimizer as well as the most relevant baselines. This also
-includes a plot showing the ``learning rate`` sensitivity. An example plot is
-shown below, a more comprehensive example can be seen in section 4 of the
-`DeepOBS`_ paper.
-
-.. _DeepOBS: https://openreview.net/forum?id=rJg6ssC5Y7
-
-.. image:: ../deepobs.jpg
-    :scale: 40%
-
-The :doc:`../api/scripts/deepobs_plot_results` script is described in the
-API section, as well as the lower-level functions it is relying on.

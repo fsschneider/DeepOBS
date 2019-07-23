@@ -6,6 +6,11 @@
 Welcome to DeepOBS
 ===================
 
+.. WARNING::
+  This DeepOBS version is under continious development and NOT an official release. It is at most a beta version.
+  Please report any bugs and comments to `Aaron Bahde`_
+.. _Aaron Bahde: https://github.com/abahde
+
 .. figure:: deepobs_banner.png
 
 **DeepOBS** is a benchmarking suite that drastically simplifies, automates and
@@ -22,6 +27,7 @@ DeepOBS automates several steps when benchmarking deep learning optimizers:
     deep learning architectures.
   - Running the optimizers on multiple test problems and logging relevant
     metrics.
+  - Automatic tuning of optimizer hyperparameters.
   - Reporting and visualization the results of the optimizer benchmark.
 
 .. figure:: deepobs.jpg
@@ -36,6 +42,8 @@ on `GitHub`_.
 
   user_guide/quick_start
   user_guide/tutorial
+  user_guide/overview
+  user_guide/suggested_protocol
 
 .. toctree::
   :maxdepth: 2
@@ -46,6 +54,7 @@ on `GitHub`_.
   api/pytorch
   api/abstract_runner
   api/tuner
+  api/scripts
 
 Indices and tables
 ==================
