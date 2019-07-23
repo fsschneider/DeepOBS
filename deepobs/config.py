@@ -54,7 +54,7 @@ DEFAULT_TEST_PROBLEMS_SETTINGS = {
             'batch_size': 256,
             'num_epochs': 350
             },
-        'svhn_wrn_164': {
+        'svhn_wrn164': {
             'batch_size': 128,
             'num_epochs': 160
             },

@@ -112,6 +112,6 @@ class TestProblem(abc.ABC):
 
     @abc.abstractmethod
     def set_up(self):
-        """Sets up the test problem. Must be implemented by subclass.
+        """Sets up the test problem.
         """
         pass

@@ -60,6 +60,7 @@ def generate_tuning_summary(optimizer_path, mode = 'final', metric = 'test_accur
     Returns:
         tuning_summary (list): A list of dictionaries. Each dictionary corresponds to one hyperparameter evaluation
         of the tuning process and holds the hyperparameters and their performance.
+        setting_analyzer_ranking (list): A ranked list of SettingAnalyzers that were used to generate the summary
         """
     metric = _determine_available_metric(optimizer_path, metric)
     setting_analyzer_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
