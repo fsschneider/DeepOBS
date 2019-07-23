@@ -2,7 +2,7 @@
 Analyzer
 ============
 
-DeepOBS uses the analyzer class to get meaning full outputs from the results
+DeepOBS uses the analyzer module to get meaning full outputs from the results
 created by the runners. This includes:
 
 - Getting the best settings (e.g. best ``learning rate``) for an optimizer on a specific test problem.
@@ -10,9 +10,7 @@ created by the runners. This includes:
 - Plotting all performance metrics of the whole benchmark set.
 - Returning the overall performance table for multiple optimizers.
 
-The analyzer can return those outputs as matplotlib plots or ``.tex`` files for
-direct inclusion in academic publications.
-
+The analyzer can return those outputs as matplotlib plots for customization.
 
 .. toctree::
   :maxdepth: 2

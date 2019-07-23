@@ -12,7 +12,7 @@ expand compatibility in the future.
 Installation
 ==============
 
-You can install the latest stable release of DeepOBS using `pip`:
+You can install the latest try-out version of DeepOBS using `pip`:
 
 .. code-block:: bash
 

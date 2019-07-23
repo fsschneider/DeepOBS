@@ -1,7 +1,7 @@
 """Example run script using StandardRunner."""
 
 import tensorflow as tf
-import deepobs.tensorflow as tfobs
+from deepobs import tensorflow as tfobs
 
 optimizer_class = tf.train.MomentumOptimizer
 hyperparams = {"learning_rate": {"type": float},
@@ -9,7 +9,4 @@ hyperparams = {"learning_rate": {"type": float},
                "use_nesterov": {"type": bool, "default": False}}
 
 runner = tfobs.runners.StandardRunner(optimizer_class, hyperparams)
-
-# The run method needs the explicit hyperparameter values as a dictionary like {'learning_rate': 0.1}. All arguments that are not
-# provided will automatically be grabbed from the command line or default to their default values.
-runner.run()
+runner.run(testproblem='quadratic_deep', hyperparams={'lr': 0.1}, num_epochs=10)

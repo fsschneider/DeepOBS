@@ -5,7 +5,7 @@ Plot Optimizer Performances
 .. currentmodule:: deepobs.analyzer
 .. autofunction:: plot_optimizer_performance
 
-.. autofunction:: plot_all_testproblems_performances
+.. autofunction:: plot_testset_performances
 
 =================
 Get the Best Runs
