@@ -4,7 +4,7 @@ from torch.optim import SGD
 from deepobs import pytorch as pt
 
 optimizer_class = SGD
-hyperparams = {"learning_rate": {"type": float},
+hyperparams = {"lr": {"type": float},
                "momentum": {"type": float, "default": 0.99},
                "use_nesterov": {"type": bool, "default": False}}
 
