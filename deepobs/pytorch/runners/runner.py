@@ -248,7 +248,7 @@ class StandardRunner(PTRunner):
                 except StopIteration:
                     break
 
-            if np.isnan(batch_loss.item()) or np.isinf(batch_loss.item()):
+            if not np.isfinite(batch_loss.item()):
                 train_losses, test_losses, train_accuracies, test_accuracies, minibatch_train_losses = self._abort_routine(epoch_count,
                                                                                                    num_epochs,
                                                                                                    train_losses,
@@ -409,7 +409,7 @@ class LearningRateScheduleRunner(PTRunner):
                     break
 
             # break from training if it goes wrong
-            if np.isnan(batch_loss.item()) or np.isinf(batch_loss.item()):
+            if not np.isfinite(batch_loss.item()):
                 train_losses, test_losses, train_accuracies, test_accuracies = self._abort_routine(epoch_count,
                                                                                                    num_epochs,
                                                                                                    train_losses,
