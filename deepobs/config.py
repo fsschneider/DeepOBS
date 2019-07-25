@@ -76,5 +76,9 @@ DEFAULT_TEST_PROBLEMS_SETTINGS = {
             }
         }
 
+
 def get_testproblem_default_setting(testproblem):
-    return DEFAULT_TEST_PROBLEMS_SETTINGS[testproblem]
+    try:
+        return DEFAULT_TEST_PROBLEMS_SETTINGS[testproblem]
+    except KeyError:
+        raise RuntimeError('There are no default settings for batch_size and num_epochs for testproblem ' + testproblem + '. Please set num_epochs and batch_size in the run.')

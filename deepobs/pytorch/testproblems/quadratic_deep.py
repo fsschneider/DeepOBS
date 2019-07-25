@@ -97,15 +97,30 @@ class quadratic_deep(TestProblem):
         self._device = torch.device('cpu')
         self.net.to(self._device)
 
-    def get_batch_loss_and_accuracy(self):
+    def get_batch_loss_and_accuracy(self, return_forward_func = False):
+        """Gets a new batch and calculates the loss and accuracy (if available)
+        on that batch. This is a default implementation for image classification.
+        Testproblems with different calculation routines (e.g. RNNs) overwrite this method accordingly.
+
+        Args:
+            return_forward_func (bool): If ``True``, the call also returns a function that calculates the loss on the current batch. Can be used if you need to access the forward path twice.
+        Returns:
+            float, float, (callable): loss and accuracy of the model on the current batch. If ``return_forward_func`` is ``True`` it also returns the function that calculates the loss on the current batch.
+            """
         inputs = self._get_next_batch()[0]
 
-        # in evaluation phase is no gradient needed
-        if self.phase in ["train_eval", "test"]:
-            with torch.no_grad():
+        def _get_batch_loss_and_accuracy():
+            # in evaluation phase is no gradient needed
+            if self.phase in ["train_eval", "test"]:
+                with torch.no_grad():
+                    loss = self.net(inputs)
+            else:
                 loss = self.net(inputs)
-        else:
-            loss = self.net(inputs)
 
-        accuracy = 0.0
-        return loss, accuracy
+            accuracy = 0.0
+            return loss, accuracy
+
+        if return_forward_func:
+            return _get_batch_loss_and_accuracy(), _get_batch_loss_and_accuracy
+        else:
+            return _get_batch_loss_and_accuracy()
