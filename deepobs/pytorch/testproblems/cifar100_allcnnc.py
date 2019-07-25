@@ -1,24 +1,30 @@
-import torch
+# -*- coding: utf-8 -*-
+"""The all CNN-C architecture for CIFAR-100."""
+
 from torch import nn
-from .testproblems_modules import net_wrn
-from ..datasets.svhn import svhn
+from .testproblems_modules import net_cifar100_allcnnc
+from ..datasets.cifar100 import cifar100
 from .testproblem import TestProblem
 
 
-class svhn_wrn164(TestProblem):
-    """DeepOBS test problem class for the Wide Residual Network 16-4 architecture\
-    for SVHN.
+class cifar100_allcnnc(TestProblem):
+    """DeepOBS test problem class for the All Convolutional Neural Network C
+  on Cifar-100.
 
   Details about the architecture can be found in the `original paper`_.
+
+  The paper does not comment on initialization; here we use Xavier for conv
+  filters and constant 0.1 for biases.
+
   A weight decay is used on the weights (but not the biases)
   which defaults to ``5e-4``.
 
-  Training settings recommenden in the `original paper`_:
-  ``batch size = 128``, ``num_epochs = 160`` using the Momentum optimizer
-  with :math:`\\mu = 0.9` and an initial learning rate of ``0.01`` with a decrease by
-  ``0.1`` after ``80`` and ``120`` epochs.
+  .. _original paper: https://arxiv.org/abs/1412.6806
 
-  .. _original paper: https://arxiv.org/abs/1605.07146
+  The reference training parameters from the paper are ``batch size = 256``,
+  ``num_epochs = 350`` using the Momentum optimizer with :math:`\\mu = 0.9` and
+  an initial learning rate of :math:`\\alpha = 0.05` and decrease by a factor of
+  ``10`` after ``200``, ``250`` and ``300`` epochs.
 
   Args:
     batch_size (int): Batch size to use.
@@ -28,7 +34,8 @@ class svhn_wrn164(TestProblem):
   """
 
     def __init__(self, batch_size, weight_decay=0.0005):
-        """Create a new WRN 16-4 test problem instance on SVHN.
+
+        """Create a new All CNN C test problem instance on Cifar-100.
 
         Args:
           batch_size (int): Batch size to use.
@@ -36,13 +43,14 @@ class svhn_wrn164(TestProblem):
               is used on the weights but not the biases.
               Defaults to ``5e-4``.
         """
-        super(svhn_wrn164, self).__init__(batch_size, weight_decay)
+
+        super(cifar100_allcnnc, self).__init__(batch_size, weight_decay)
 
     def set_up(self):
-        """Set up the Wide ResNet 16-4 test problem on SVHN."""
-        self.data = svhn(self._batch_size, data_augmentation=True)
+        """Set up the All CNN C test problem on Cifar-100."""
+        self.data = cifar100(self._batch_size)
         self.loss_function = nn.CrossEntropyLoss()
-        self.net = net_wrn(num_outputs=10, num_residual_blocks=2, widening_factor=4)
+        self.net = net_cifar100_allcnnc()
         self.net.to(self._device)
 
     def get_regularization_loss(self):
@@ -50,7 +58,7 @@ class svhn_wrn164(TestProblem):
         layer_norms = []
         for parameters_name, parameters in self.net.named_parameters():
             # penalize only the non bias layer parameters
-            if ('weight' in parameters_name) and (('dense' in parameters_name) or ('conv' in parameters_name)):
+            if 'bias' not in parameters_name:
                 # L2 regularization
                 layer_norms.append(parameters.pow(2).sum())
 
