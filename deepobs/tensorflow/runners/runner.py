@@ -308,13 +308,14 @@ class StandardRunner(TFRunner):
                     break
 
             # break from training if it goes wrong
-            if np.isnan(loss_) or np.isinf(loss_):
-                train_losses, test_losses, train_accuracies, test_accuracies = self._abort_routine(n,
+            if not np.isfinite(loss_):
+                train_losses, test_losses, train_accuracies, test_accuracies, minibatch_train_losses = self._abort_routine(n,
                                                                                                    num_epochs,
                                                                                                    train_losses,
                                                                                                    test_losses,
                                                                                                    train_accuracies,
-                                                                                                   test_accuracies)
+                                                                                                   test_accuracies,
+                                                                                                minibatch_train_losses)
                 break
             else:
                 continue
@@ -492,13 +493,15 @@ class LearningRateScheduleRunner(TFRunner):
                     break
 
             # break from training if it goes wrong
-            if np.isnan(loss_) or np.isinf(loss_):
-                train_losses, test_losses, train_accuracies, test_accuracies = self._abort_routine(n,
+            if not np.isfinite(loss_):
+                train_losses, test_losses, train_accuracies, test_accuracies, minibatch_train_losses = self._abort_routine(n,
                                                                                                    num_epochs,
                                                                                                    train_losses,
                                                                                                    test_losses,
                                                                                                    train_accuracies,
-                                                                                                   test_accuracies)
+                                                                                                   test_accuracies,
+                                                                                                minibatch_train_losses)
+
                 break
             else:
                 continue
