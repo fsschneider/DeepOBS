@@ -9,3 +9,4 @@ TensorFlow
   tensorflow/datasets
   tensorflow/testproblems
   tensorflow/runner
+  tensorflow/config

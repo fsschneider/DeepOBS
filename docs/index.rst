@@ -55,6 +55,7 @@ on `GitHub`_.
   api/abstract_runner
   api/tuner
   api/scripts
+  api/config
 
 Indices and tables
 ==================

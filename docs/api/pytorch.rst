@@ -9,3 +9,4 @@ PyTorch
   pytorch/datasets
   pytorch/testproblems
   pytorch/runner
+  pytorch/config
