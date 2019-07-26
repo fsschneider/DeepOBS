@@ -7,12 +7,43 @@ from matplotlib import pyplot as plt
 from .shared_utils import create_setting_analyzer_ranking, _determine_available_metric, _get_optimizer_name_and_testproblem_from_path
 from ..tuner.tuner_utils import generate_tuning_summary
 from .analyze_utils import _rescale_ax, _preprocess_path
+import pandas as pd
 
 
-# TODO
-def plot_performance_table(results_path):
-    """Creates a table as an overview over the best performance of that optimizer."""
-    pass
+def plot_results_table(results_path, mode='final', metric='test_accuracies', conv_perf_file=None):
+    """Summarizes the performance of the optimizer and prints it to a pandas data frame.
+
+            Args:
+                results_path (str): The path to the results directory.
+                mode (str): The mode by which to decide the best setting.
+                metric (str): The metric by which to decide the best setting.
+                conv_perf_file (str): Path to the convergence performance file. It is used to calculate the speed of the optimizer. Defaults to ``None`` in which case the speed measure is N.A.
+
+            Returns:
+                pandas.DataFrame: A data frame that summarizes the results.
+                """
+    table_dic = {}
+    testproblems = os.listdir(results_path)
+    metric_keys = ['Hyperparameters', 'Performance', 'Speed', 'Training Parameters']
+    for testproblem in testproblems:
+        # init new subdict for testproblem
+        for metric_key in metric_keys:
+            table_dic[(testproblem, metric_key)] = {}
+
+        testproblem_path = os.path.join(results_path, testproblem)
+        optimizers = os.listdir(testproblem_path)
+        for optimizer in optimizers:
+            optimizer_path = os.path.join(testproblem_path, optimizer)
+            optimizer_performance_dic = get_performance_dictionary(optimizer_path, mode, metric, conv_perf_file)
+
+            # invert inner dics for multiindexing
+            for metric_key in metric_keys:
+                table_dic[(testproblem, metric_key)][optimizer] = optimizer_performance_dic[metric_key]
+
+    # correct multiindexing
+    table = pd.DataFrame.from_dict(table_dic, orient='index')
+    print(table)
+    return table
 
 
 def plot_testset_performances(results_path, mode = 'final', metric = 'test_accuracies', reference_path = None):
