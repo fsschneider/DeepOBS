@@ -1,16 +1,168 @@
 """Module implementing StandardRunner."""
 
 from __future__ import print_function
+import torch
+import importlib
+import abc
+from deepobs import config as global_config
+from .. import config
+from .. import testproblems
 from . import runner_utils
-from deepobs.abstract_runner import PTRunner
+from deepobs.abstract_runner.abstract_runner import Runner
 import numpy as np
 import warnings
+
+
+class PTRunner(Runner):
+    """The abstract class for runner in the pytorch framework."""
+
+    def __init__(self, optimizer_class, hyperparameter_names):
+        super(PTRunner, self).__init__(optimizer_class, hyperparameter_names)
+
+    @abc.abstractmethod
+    def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params):
+        """sdfsd"""
+        return
+
+    def _run(self,
+            testproblem = None,
+            hyperparams = None,
+            batch_size = None,
+            num_epochs = None,
+            random_seed=None,
+            data_dir=None,
+            output_dir=None,
+            weight_decay=None,
+            no_logs=None,
+            train_log_interval = None,
+            print_train_iter = None,
+            tb_log = None,
+            tb_log_dir = None,
+             **training_params):
+
+        if batch_size is None:
+            batch_size = global_config.get_testproblem_default_setting(testproblem)['batch_size']
+        if num_epochs is None:
+            num_epochs = global_config.get_testproblem_default_setting(testproblem)['num_epochs']
+
+        if data_dir is not None:
+            config.set_data_dir(data_dir)
+
+        tproblem = self.create_testproblem(testproblem, batch_size, weight_decay, random_seed)
+
+        output = self.training(tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params)
+        output = self._post_process_output(output, 
+                                           testproblem, 
+                                           batch_size, 
+                                           num_epochs, 
+                                           random_seed, 
+                                           weight_decay, 
+                                           hyperparams,
+                                           **training_params)
+
+        if not no_logs:
+            run_folder_name, file_name = self.create_output_directory(output_dir, output)
+            self.write_output(output, run_folder_name, file_name)
+
+        return output
+
+    @staticmethod
+    def create_testproblem(testproblem, batch_size, weight_decay, random_seed):
+        """Sets up the deepobs.pytorch.testproblems.testproblem instance.
+        Args:
+            testproblem (str): The name of the testproblem.
+            batch_size (int): Batch size that is used for training
+            weight_decay (float): Regularization factor
+            random_seed (int): The random seed of the framework
+        Returns:
+            deepobs.pytorch.testproblems.testproblem: An instance of deepobs.pytorch.testproblems.testproblem
+        """
+        # set the seed and GPU determinism
+        if config.get_is_deterministic():
+            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.benchmark = False
+        else:
+            torch.backends.cudnn.deterministic = False
+            torch.backends.cudnn.benchmark = True
+        np.random.seed(random_seed)
+        torch.manual_seed(random_seed)
+
+        # Find testproblem by name and instantiate with batch size and weight decay.
+        try:
+            testproblem_mod = importlib.import_module(testproblem)
+            testproblem_cls = getattr(testproblem_mod, testproblem)
+            print("Loading local testproblem.")
+        except:
+            testproblem_cls = getattr(testproblems, testproblem)
+
+        # if the user specified a weight decay, use that one
+        if weight_decay is not None:
+            tproblem = testproblem_cls(batch_size, weight_decay)
+        # else use the default of the testproblem
+        else:
+            tproblem = testproblem_cls(batch_size)
+
+        # Set up the testproblem.
+        tproblem.set_up()
+        return tproblem
+
+    # Wrapper functions for the evaluation phase.
+    @staticmethod
+    def evaluate(tproblem, test=True):
+        """Evaluates the performance of the current state of the model
+        of the testproblem instance.
+        Has to be called in the beggining of every epoch within the
+        training method. Returns the losses and accuracies.
+        Args:
+            tproblem (testproblem): The testproblem instance to evaluate
+            test (bool): Whether tproblem is evaluated on the test set.
+            If false, it is evaluated on the train evaluation set.
+        Returns:
+            float: The loss of the current state.
+            float: The accuracy of the current state.
+        """
+
+        if test:
+            tproblem.test_init_op()
+            msg = "TEST:"
+        else:
+            tproblem.train_eval_init_op()
+            msg = "TRAIN:"
+
+        # evaluation loop over every batch of the corresponding evaluation set
+        loss = 0.0
+        accuracy = 0.0
+        batchCount = 0.0
+        while True:
+            try:
+                batch_loss, batch_accuracy = tproblem.get_batch_loss_and_accuracy()
+                batchCount += 1.0
+                loss += batch_loss.item()
+                accuracy += batch_accuracy
+            except StopIteration:
+                break
+
+        loss /= batchCount
+        accuracy /= batchCount
+
+        # if the testproblem has a regularization, add the regularization loss of the current network parameters.
+        if hasattr(tproblem, 'get_regularization_loss'):
+            loss += tproblem.get_regularization_loss().item()
+
+        if accuracy != 0.0:
+            print("{0:s} loss {1:g}, acc {2:f}".format(msg, loss, accuracy))
+        else:
+            print("{0:s} loss {1:g}".format(msg, loss))
+
+        return loss, accuracy
 
 
 class StandardRunner(PTRunner):
     """A standard runner. Can run a normal training loop with fixed
     hyperparams. It should be used as a template to implement custom runners.
 
+    Methods:
+        training: Performs the training on a testproblem instance.
     """
 
     def __init__(self, optimizer_class, hyperparameter_names):
@@ -24,6 +176,7 @@ class StandardRunner(PTRunner):
                  train_log_interval,
                  tb_log,
                  tb_log_dir):
+        """Some test docstring"""
 
         opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
 
