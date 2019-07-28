@@ -21,6 +21,7 @@ class PTRunner(Runner):
 
     @abc.abstractmethod
     def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params):
+        """sdfsd"""
         return
 
     def _run(self,
@@ -74,7 +75,7 @@ class PTRunner(Runner):
             weight_decay (float): Regularization factor
             random_seed (int): The random seed of the framework
         Returns:
-            tproblem: An instance of deepobs.pytorch.testproblems.testproblem
+            deepobs.pytorch.testproblems.testproblem: An instance of deepobs.pytorch.testproblems.testproblem
         """
         # set the seed and GPU determinism
         if config.get_is_deterministic():
@@ -117,8 +118,8 @@ class PTRunner(Runner):
             test (bool): Whether tproblem is evaluated on the test set.
             If false, it is evaluated on the train evaluation set.
         Returns:
-            loss (float): The loss of the current state.
-            accuracy (float): The accuracy of the current state.
+            float: The loss of the current state.
+            float: The accuracy of the current state.
         """
 
         if test:
@@ -167,10 +168,6 @@ class StandardRunner(PTRunner):
     def __init__(self, optimizer_class, hyperparameter_names):
         super(StandardRunner, self).__init__(optimizer_class, hyperparameter_names)
 
-    @staticmethod
-    def _add_training_params_to_argparse(parser, args, training_params):
-        pass
-
     def training(self,
                  tproblem,
                  hyperparams,
@@ -179,6 +176,7 @@ class StandardRunner(PTRunner):
                  train_log_interval,
                  tb_log,
                  tb_log_dir):
+        """Some test docstring"""
 
         opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
 
@@ -284,8 +282,7 @@ class LearningRateScheduleRunner(PTRunner):
 
         super(LearningRateScheduleRunner, self).__init__(optimizer_class, hyperparameter_names)
 
-    @staticmethod
-    def _add_training_params_to_argparse(parser, args, training_params):
+    def _add_training_params_to_argparse(self, parser, args, training_params):
         try:
             args['lr_sched_epochs'] = training_params['lr_sched_epochs']
         except KeyError:
@@ -328,7 +325,7 @@ class LearningRateScheduleRunner(PTRunner):
                 # the following are the training_params
                 lr_sched_epochs=None,
                 lr_sched_factors=None):
-        """
+        r"""
         **training_params are:
             lr_sched_epochs (list): The epochs where to adjust the learning rate.
             lr_sched_factors (list): The corresponding factors by which to adjust the learning rate.
@@ -380,7 +377,7 @@ class LearningRateScheduleRunner(PTRunner):
             ### Training ###
             if lr_sched_epochs is not None:
                 # get the next learning rate
-                lr_schedule.step()
+                lr_schedule.step(epoch_count)
                 if epoch_count in lr_sched_epochs:
                     print("Setting learning rate to {0}".format(lr_schedule.get_lr()))
 

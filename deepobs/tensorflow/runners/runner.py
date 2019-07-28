@@ -189,6 +189,7 @@ class TFRunner(Runner):
 
     @abc.abstractmethod
     def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params):
+        """asas"""
         return
 
 
@@ -198,12 +199,11 @@ class StandardRunner(TFRunner):
 
         super(StandardRunner, self).__init__(optimizer_class, hyperparameter_names)
 
-    @staticmethod
-    def _add_training_params_to_argparse(parser, args, training_params):
-        pass
-
     def training(self,
                  tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir):
+        """
+        asas
+        """
 
         loss = tf.reduce_mean(tproblem.losses) + tproblem.regularizer
 
@@ -340,8 +340,8 @@ class LearningRateScheduleRunner(TFRunner):
     def __init__(self, optimizer_class, hyperparameter_names):
 
         super(LearningRateScheduleRunner, self).__init__(optimizer_class, hyperparameter_names)
-    @staticmethod
-    def _add_training_params_to_argparse(parser, args, training_params):
+
+    def _add_training_params_to_argparse(self, parser, args, training_params):
         try:
             args['lr_sched_epochs'] = training_params['lr_sched_epochs']
         except KeyError:
@@ -384,6 +384,9 @@ class LearningRateScheduleRunner(TFRunner):
                  # the following are the training_params
                  lr_sched_epochs=None,
                  lr_sched_factors=None):
+        """
+        assa
+        """
 
         loss = tf.reduce_mean(tproblem.losses) + tproblem.regularizer
 
