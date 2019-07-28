@@ -21,7 +21,7 @@ class GP(Tuner):
                  runner_type='StandardRunner'):
 
         super(GP, self).__init__(optimizer_class, hyperparam_names, ressources, runner_type)
-        self._bounds = self._read_in_bounds(bounds)
+        self._bounds = bounds
 
     @staticmethod
     def _determine_cost_from_output_and_mode(output, mode):
@@ -40,22 +40,17 @@ class GP(Tuner):
             raise NotImplementedError('''Mode not available for this tuning method. Please use final or best.''')
         return cost
 
-    @staticmethod
-    def _read_in_bounds(bounds):
-        # TODO categoricals?
-#        bounds = _check_for_categorical(bounds)
-        return bounds
+    def _convert_categoricals_for_cost_function(self, **hyperparams):
+        """Overwrite this method if you want to read in categoricals in a different way, e.g. a mapping from integers to strings."""
+        for key, value in hyperparams.items():
+            if self._hyperparam_names[key]['type'] == bool or self._hyperparam_names[key]['type'] == int:
+                hyperparams[key] = round(value)
+        return hyperparams
 
-    @staticmethod
-    def _read_categorical(bounds):
-        for key, value in bounds.items():
-            if len(value) == 2 and type(value[0]) == bool and type(value[1]) == bool:
-                bounds[key] = (0,1)
-        return bounds
-    # TODO how to deal with discrete categoricals?
     def _generate_cost_function(self, testproblem, output_dir, mode, **kwargs):
         '''Factory to create the cost function depending on the testproblem and kwargs.'''
         def _cost_function(**hyperparams):
+            hyperparams = self._convert_categoricals_for_cost_function(**hyperparams)
             runner = self._runner(self._optimizer_class, self._hyperparam_names)
             output = runner.run(testproblem, hyperparams, output_dir=output_dir, **kwargs)
             cost = self._determine_cost_from_output_and_mode(output, mode)
@@ -102,7 +97,6 @@ class GP(Tuner):
         log_path = os.path.join(output_dir, testproblem, self._optimizer_name)
 
         cost_function = self._generate_cost_function(testproblem, output_dir, mode, **kwargs)
-        # TODO when to normalize the y values in gp ?
         op = bayes_opt.BayesianOptimization(f = None, pbounds = self._bounds, random_state=random_seed)
         if kernel is not None:
             op._gp.kernel = kernel

@@ -56,7 +56,6 @@ def plot_2d_bo_posterior(optimizer_path, step, resolution):
     return fig, ax
 
 
-# TODO 1d 2d plot share abstraction
 def plot_1d_bo_posterior(optimizer_path, step, resolution):
     op = _load_bo_optimizer_object(os.path.join(optimizer_path, 'obj'), str(step))
     acq_func = _load_bo_optimizer_object(os.path.join(optimizer_path, 'obj'), 'acq_func')
