@@ -191,15 +191,15 @@ class Runner(abc.ABC):
                 run_folder_name += "__{0:s}".format(tp_name)
                 run_folder_name += "__{0:s}".format(
                     float2str(tp_value) if isinstance(tp_value, float) else str(tp_value))
+        return run_folder_name
 
     def _add_hyperparams_to_output_dir_name(self, output, run_folder_name):
         """Overwrite this method to specify how your runner should format optimizer hyper_parameters in the run folder name."""
         for hp_name, hp_value in sorted(output['optimizer_hyperparams'].items()):
             run_folder_name += "__{0:s}".format(hp_name)
             run_folder_name += "__{0:s}".format(
-                float2str(hp_value) if isinstance(hp_value, float)
-                                    else str(hp_value)
-                                    )
+                float2str(hp_value) if isinstance(hp_value, float) else str(hp_value))
+        return run_folder_name
 
     def parse_args(self,
             testproblem,
@@ -388,10 +388,10 @@ class Runner(abc.ABC):
                 float2str(output['weight_decay']))
 
         # Add all hyperparameters to the name.
-        self._add_hyperparams_to_output_dir_name(output, run_folder_name)
+        run_folder_name = self._add_hyperparams_to_output_dir_name(output, run_folder_name)
 
         # Add training parameters to the name.
-        self._add_training_params_to_output_dir_name(output, run_folder_name)
+        run_folder_name = self._add_training_params_to_output_dir_name(output, run_folder_name)
 
         file_name = "random_seed__{0:d}__".format(output['random_seed'])
         file_name += time.strftime("%Y-%m-%d-%H-%M-%S")
