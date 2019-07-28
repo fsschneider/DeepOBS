@@ -8,3 +8,4 @@ Learning Rate Schedule Runner
     :members:
     :inherited-members:
     :show-inheritance:
+    :special-members: __init__

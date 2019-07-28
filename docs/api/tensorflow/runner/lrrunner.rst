@@ -6,3 +6,6 @@ Learning Rate Schedule Runner
 
 .. autoclass:: LearningRateScheduleRunner
     :members:
+    :inherited-members:
+    :show-inheritance:
+    :special-members: __init__

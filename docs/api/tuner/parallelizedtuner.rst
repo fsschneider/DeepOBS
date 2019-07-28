@@ -1,11 +1,10 @@
 =====================
-Random Search
+Parallelized Tuner
 =====================
 
-.. currentmodule:: deepobs.tuner
+.. currentmodule:: deepobs.tuner.tuner
 
-.. autoclass:: RandomSearch
+.. autoclass:: ParallelizedTuner
     :members:
     :inherited-members:
     :show-inheritance:
-    :special-members: __init__
