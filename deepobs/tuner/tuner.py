@@ -135,7 +135,9 @@ class ParallelizedTuner(Tuner):
         script.close()
         return self._optimizer_name + '.py'
 
-    def __generate_hyperparams_formate_for_command_line(self, hyperparams):
+    def _generate_hyperparams_format_for_command_line(self, hyperparams):
+        """Overwrite this method to specify how hyperparams should be represented in the command line string.
+        This is basically the inversion of your runner specific method ``_add_hyperparams_to_argparse``"""
         string = ''
         for key, value in hyperparams.items():
             if self._hyperparam_names[key]['type'] == bool:
@@ -144,14 +146,19 @@ class ParallelizedTuner(Tuner):
                 string += ' --' + key + ' ' + str(value)
         return string
 
-    @staticmethod
-    # TODO how to deal with the training_params dict?
-    def __generate_kwargs_format_for_command_line(**kwargs):
+    def _generate_kwargs_format_for_command_line(self, **kwargs):
+        """Overwrite this method to specify how additional training params should be represented in the command line string.
+        This is basically the inversion of your runner specific method ``_add_training_params_to_argparse``"""
         string = ''
         for key, value in kwargs.items():
-            string += ' --' + key + ' ' + str(value)
+            if key == 'lr_sched_factors' or key == 'lr_sched_epochs':
+                string += ' --' + key
+                for v in value:
+                    string += ' ' + str(v)
+            else:
+                string += ' --' + key + ' ' + str(value)
         return string
-
+        
     def tune(self, testproblem, output_dir='./results', random_seed=42, rerun_best_setting = False, **kwargs):
         self._set_seed(random_seed)
         params = self._sample()
@@ -163,7 +170,8 @@ class ParallelizedTuner(Tuner):
             optimizer_path = os.path.join(output_dir, testproblem, self._optimizer_name)
             rerun_setting(self._runner, self._optimizer_class, self._hyperparam_names, optimizer_path)
 
-    def generate_commands_script(self, testproblem, output_dir='./results', random_seed=42, generation_dir = './command_scripts', **kwargs):
+    def generate_commands_script(self, testproblem, output_dir='./results', random_seed=42,
+                                 generation_dir = './command_scripts', **kwargs):
         """
         Args:
             testproblem (str): Testproblem for which to generate commands.
@@ -172,15 +180,16 @@ class ParallelizedTuner(Tuner):
             generation_dir (str): The path to the directory where the generated scripts are written to.
 
         """
+
         script = self.__generate_python_script(generation_dir)
         file = open(os.path.join(generation_dir, 'jobs_' + self._optimizer_name + '_' + self._search_name + '_' + testproblem + '.txt'), 'w')
-        kwargs_string = self.__generate_kwargs_format_for_command_line(**kwargs)
+        kwargs_string = self._generate_kwargs_format_for_command_line(**kwargs)
         self._set_seed(random_seed)
         params = self._sample()
         for sample in params:
-            sample_string = self.__generate_hyperparams_formate_for_command_line(sample)
+            sample_string = self._generate_hyperparams_format_for_command_line(sample)
             file.write('python3 ' + script + ' ' + testproblem + ' ' + sample_string + ' --random_seed ' + str(
-                random_seed) + ' --output_dir' + output_dir + ' ' + kwargs_string + '\n')
+                random_seed) + ' --output_dir ' + output_dir + ' ' + kwargs_string + '\n')
         file.close()
 
     def generate_commands_script_for_testset(self, testset, *args, **kwargs):
