@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
 
-from . import abstract_runner
+from .abstract_runner import Runner
 from . import abstract_runner_utils

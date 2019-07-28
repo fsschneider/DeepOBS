@@ -21,7 +21,6 @@ class PTRunner(Runner):
 
     @abc.abstractmethod
     def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params):
-        """sdfsd"""
         return
 
     def _run(self,
@@ -160,9 +159,6 @@ class PTRunner(Runner):
 class StandardRunner(PTRunner):
     """A standard runner. Can run a normal training loop with fixed
     hyperparams. It should be used as a template to implement custom runners.
-
-    Methods:
-        training: Performs the training on a testproblem instance.
     """
 
     def __init__(self, optimizer_class, hyperparameter_names):
@@ -176,7 +172,6 @@ class StandardRunner(PTRunner):
                  train_log_interval,
                  tb_log,
                  tb_log_dir):
-        """Some test docstring"""
 
         opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
 
@@ -273,9 +268,6 @@ class StandardRunner(PTRunner):
 class LearningRateScheduleRunner(PTRunner):
     """A runner for learning rate schedules. Can run a normal training loop with fixed hyperparams or a learning rate
     schedule. It should be used as a template to implement custom runners.
-
-    Methods:
-        training: Performs the training on a testproblem instance.
     """
 
     def __init__(self, optimizer_class, hyperparameter_names):
@@ -326,21 +318,27 @@ class LearningRateScheduleRunner(PTRunner):
                 lr_sched_epochs=None,
                 lr_sched_factors=None):
         r"""
-        **training_params are:
-            lr_sched_epochs (list): The epochs where to adjust the learning rate.
-            lr_sched_factors (list): The corresponding factors by which to adjust the learning rate.
-            train_log_interval (int): When to log the minibatch loss/accuracy.
-            print_train_iter (bool): Whether to print the training progress at every train_log_interval
+        Performs the training and stores the metrices.
+            Args:
+                tproblem (deepobs.[tensorflow/pytorch].testproblems.testproblem): The testproblem instance to train on.
+                hyperparams (dict): The optimizer hyperparameters to use for the training.
+                num_epochs (int): The number of training epochs.
+                print_train_iter (bool): Whether to print the training progress at every train_log_interval
+                train_log_interval (int): Mini-batch interval for logging.
+                tb_log (bool): Whether to use tensorboard logging or not
+                tb_log_dir (str): The path where to save tensorboard events.
+                lr_sched_epochs (list): The epochs where to adjust the learning rate.
+                lr_sched_factors (list): The corresponding factors by which to adjust the learning rate.
 
-        Returns:
-            output (dict): The logged metrices. Is of the form:
-                {'test_losses' : test_losses
-                 'train_losses': train_losses,
-                 'test_accuracies': test_accuracies,
-                 'train_accuracies': train_accuracies
-                 }
+            Returns:
+                dict: The logged metrices. Is of the form:
+                    ```{'test_losses' : [...],
+                     'train_losses': [...],
+                     'test_accuracies': [...],
+                     'train_accuracies': [...]
+                     }```
 
-        where the metrices values are lists that were filled during training.
+            where the metrices values are lists that were filled during training.
         """
 
         opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
