@@ -12,6 +12,14 @@ def get_is_deterministic():
 
 
 def set_is_deterministic(is_deterministic):
+    """Sets whether PyTorch should try to run deterministic.
+    Args:
+        is_deterministic (bool): If ``True``, this flag sets:
+    ``torch.backends.cudnn.deterministic = True``
+    ``torch.backends.cudnn.benchmark = False``.
+    However, full determinism is not guaranteed. For more information, see:
+    <https://pytorch.org/docs/stable/notes/randomness.html>
+    """
     global IS_DETERMINISTIC
     IS_DETERMINISTIC = is_deterministic
 
@@ -21,6 +29,10 @@ def get_num_workers():
 
 
 def set_num_workers(num_workers):
+    """Sets the number of workers that are used in the torch DataLoaders.
+    Args:
+        num_workers (int): The number of workers that are used for data loading.
+        """
     global NUM_WORKERS
     NUM_WORKERS = num_workers
 
@@ -30,6 +42,10 @@ def get_data_dir():
 
 
 def set_data_dir(data_dir):
+    """Sets the data directory for the PyTorch runs.
+    Args:
+        data_dir (str): Path to the data folder.
+    """
     global DATA_DIR
     DATA_DIR = data_dir
 
@@ -39,5 +55,9 @@ def get_default_device():
 
 
 def set_default_device(device):
+    """Sets the device on which the PyTorch experiments are run.
+    Args:
+        device (str): Device on which to run the PyTorch test problems. E.g. 'cuda' or 'cuda:0'
+        """
     global DEFAULT_DEVICE
     DEFAULT_DEVICE = device
