@@ -21,10 +21,6 @@ class PTRunner(Runner):
 
     @abc.abstractmethod
     def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params):
-<<<<<<< HEAD
-=======
-        """sdfsd"""
->>>>>>> 7848cf08b4ab324291208998e735cc278de19757
         return
 
     def _run(self,
@@ -163,12 +159,6 @@ class PTRunner(Runner):
 class StandardRunner(PTRunner):
     """A standard runner. Can run a normal training loop with fixed
     hyperparams. It should be used as a template to implement custom runners.
-<<<<<<< HEAD
-=======
-
-    Methods:
-        training: Performs the training on a testproblem instance.
->>>>>>> 7848cf08b4ab324291208998e735cc278de19757
     """
 
     def __init__(self, optimizer_class, hyperparameter_names):
@@ -182,10 +172,6 @@ class StandardRunner(PTRunner):
                  train_log_interval,
                  tb_log,
                  tb_log_dir):
-<<<<<<< HEAD
-=======
-        """Some test docstring"""
->>>>>>> 7848cf08b4ab324291208998e735cc278de19757
 
         opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
 
@@ -282,12 +268,6 @@ class StandardRunner(PTRunner):
 class LearningRateScheduleRunner(PTRunner):
     """A runner for learning rate schedules. Can run a normal training loop with fixed hyperparams or a learning rate
     schedule. It should be used as a template to implement custom runners.
-<<<<<<< HEAD
-=======
-
-    Methods:
-        training: Performs the training on a testproblem instance.
->>>>>>> 7848cf08b4ab324291208998e735cc278de19757
     """
 
     def __init__(self, optimizer_class, hyperparameter_names):
@@ -338,7 +318,6 @@ class LearningRateScheduleRunner(PTRunner):
                 lr_sched_epochs=None,
                 lr_sched_factors=None):
         r"""
-<<<<<<< HEAD
         Performs the training and stores the metrices.
             Args:
                 tproblem (deepobs.[tensorflow/pytorch].testproblems.testproblem): The testproblem instance to train on.
@@ -360,23 +339,6 @@ class LearningRateScheduleRunner(PTRunner):
                      }```
 
             where the metrices values are lists that were filled during training.
-=======
-        **training_params are:
-            lr_sched_epochs (list): The epochs where to adjust the learning rate.
-            lr_sched_factors (list): The corresponding factors by which to adjust the learning rate.
-            train_log_interval (int): When to log the minibatch loss/accuracy.
-            print_train_iter (bool): Whether to print the training progress at every train_log_interval
-
-        Returns:
-            output (dict): The logged metrices. Is of the form:
-                {'test_losses' : test_losses
-                 'train_losses': train_losses,
-                 'test_accuracies': test_accuracies,
-                 'train_accuracies': train_accuracies
-                 }
-
-        where the metrices values are lists that were filled during training.
->>>>>>> 7848cf08b4ab324291208998e735cc278de19757
         """
 
         opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
