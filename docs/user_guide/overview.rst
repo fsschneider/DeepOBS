@@ -42,7 +42,7 @@ This includes
     The best way currently is to download and preprocess the `ImageNet` data set
     separately if needed and move it into the DeepOBS data folder.
 
-The automatic data preparation for the TensorFlow version script can be run using
+The automatic data preparation for the **TensorFlow** version script can be run using
 
 .. code-block:: bash
 
@@ -51,7 +51,9 @@ The automatic data preparation for the TensorFlow version script can be run usin
 and is described in the API section under
 :doc:`../api/scripts/deepobs_prepare_data`.
 
-For the PyTorch version the data preparation is done automatically (mostly with Torchvision).
+For the **PyTorch** version the data preparation is mostly done automatically by Torchvision. If you use a test problem
+where the data set is not available in Torchvision (e.g. Tolstoi's War and Peace) you can execute the above mentioned
+script for the PyTorch version as well.
 
 
 Data Loading
@@ -64,7 +66,8 @@ shuffling, batching and data augmentation. The data loading module can also be
 used to build new deep learning models that are not (yet) part of DeepOBS.
 
 The outputs of the data loading module is illustrated in the figure below and is
-further described in the API section for :doc: '../api/tensorflow/datasets' and :doc: '../api/pytorch/datasets' respectively.
+further described in the API section for TensorFlow (:doc:`../api/tensorflow/datasets`)
+and PyTorch (:doc:`../api/pytorch/datasets`) respectively.
 
 .. image:: ImageNetOutput.png
     :scale: 20%
@@ -102,7 +105,7 @@ optimizer’s hyperparameters. We provide a template for this, as well as an
 example of including a more sophisticated optimizer that can’t be described as
 a subclass of the TensorFlow or PyTorch optimizer API.
 
-In the API section, we described the :doc:`../api/tensorflow/runner/standardrunner` and :doc:`../api/pytorch/runner/standardrunner` in
+In the API section, we describe the runner for :doc:`../api/tensorflow` and :doc:`../api/pytorch` and in
 the :doc:`tutorial` we show an example of creating a run script for a new
 optimizer.
 

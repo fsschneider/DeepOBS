@@ -12,3 +12,4 @@ Tuner
   tuner/gp
   tuner/tuner
   tuner/parallelizedtuner
+  tuner/tuner_utils
