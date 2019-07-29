@@ -413,6 +413,7 @@ class LearningRateScheduleRunner(TFRunner):
             where the metrices values are lists that were filled during training.
         """
 
+
         loss = tf.reduce_mean(tproblem.losses) + tproblem.regularizer
 
         # Set up the optimizer and create learning rate schedule.

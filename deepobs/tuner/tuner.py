@@ -8,8 +8,9 @@ import copy
 
 
 class Tuner(abc.ABC):
-    """The base class for all tuning methods in DeepOBS.
-        """
+    """
+    The base class for all tuning methods in DeepOBS.
+    """
 
     def __init__(self,
                  optimizer_class,
@@ -26,7 +27,7 @@ class Tuner(abc.ABC):
             e.g. for torch.optim.SGD with momentum: \
             {'lr': {'type': float}, \
             'momentum': {'type': float, 'default': 0.99}, \
-            'uses_nesterov': {'type': bool, 'default': False}} \
+            'uses_nesterov': {'type': bool, 'default': False}}
             ressources (int): The number of evaluations the tuner is allowed to perform on each testproblem.
             runner_type (str): The DeepOBS runner type that the tuner uses for evaluation.
         """

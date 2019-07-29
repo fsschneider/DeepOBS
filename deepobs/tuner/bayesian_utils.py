@@ -30,6 +30,7 @@ def plot_2d_bo_posterior(optimizer_path, step, resolution):
     Returns:
         matplotlib.axes.Axes: The axes of the plot.
     """
+
     op = _load_bo_optimizer_object(os.path.join(optimizer_path, 'obj'), str(step))
     acq_func = _load_bo_optimizer_object(os.path.join(optimizer_path, 'obj'), 'acq_func')
     

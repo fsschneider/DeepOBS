@@ -51,10 +51,10 @@ The automatic data preparation for the **TensorFlow** version script can be run 
 and is described in the API section under
 :doc:`../api/scripts/deepobs_prepare_data`.
 
+
 For the **PyTorch** version the data preparation is mostly done automatically by Torchvision. If you use a test problem
 where the data set is not available in Torchvision (e.g. Tolstoi's War and Peace) you can execute the above mentioned
 script for the PyTorch version as well.
-
 
 Data Loading
 ============

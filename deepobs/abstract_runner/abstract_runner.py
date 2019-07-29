@@ -87,18 +87,14 @@ class Runner(abc.ABC):
             training_params (dict): Kwargs for the training method.
 
         Returns:
-            dict:
-            ..code-block:: python
-
-                {<...meta data...>,
-                'test_losses' : test_losses,
+            dict: {<...meta data...>
+                'test_losses' : test_losses
                  'train_losses': train_losses,
                  'test_accuracies': test_accuracies,
                  'train_accuracies': train_accuracies,
-                 'training_params': {...}
+                 'analyzable_training_params': {...}
                  }
-
-            where <...meta data...> stores the run args.
+            were <...meta data...> stores the run args.
 
         """
         args = self.parse_args(testproblem,
@@ -157,7 +153,6 @@ class Runner(abc.ABC):
                      'test_accuracies': [...],
                      'train_accuracies': [...]
                      }```
-
             where the metrices values are lists that were filled during training.
         """
         return
@@ -238,8 +233,8 @@ class Runner(abc.ABC):
                 tb_log (bool): Whether to use tensorboard logging or not
                 tb_log_dir (str): The path where to save tensorboard events.
                 training_params (dict): Kwargs for the training method.
-
-        Returns: dict: A dicionary of all arguments.
+        Returns:
+            dict: A dicionary of all arguments.
             """
         args = {}
         parser = argparse.ArgumentParser(description='Arguments for running optimizer script.')

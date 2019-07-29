@@ -92,7 +92,6 @@ class log_uniform():
             b (float): Range from lower bound.
             base (float): Base of the log.
         """
-
         self.loc = a
         self.scale = b - a
         self.base = base
