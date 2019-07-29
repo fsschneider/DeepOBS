@@ -4,13 +4,12 @@ from .tuner import ParallelizedTuner
 
 class RandomSearch(ParallelizedTuner):
     """A basic Random Search tuner.
-    Attributes:
-        _distributions (dict): Holds the distributions for each hyperparameter.
     """
     def __init__(self, optimizer_class, hyperparam_names, distributions, ressources, runner_type='StandardRunner'):
-        """Args:
-            distributions (dict): Holds the distributions for each hyperparameter.
-            Each distribution must implement an rvs() method to draw random variates.
+        """
+        Args:
+            distributions (dict): Holds the distributions for each hyperparameter.\
+            Each distribution must implement an rvs() method to draw random variates.\
             For instance, all scipy.stats.distribution distributions are applicable.
         """
         super(RandomSearch, self).__init__(optimizer_class, hyperparam_names, ressources, runner_type)

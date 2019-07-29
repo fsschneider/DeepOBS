@@ -6,8 +6,6 @@ from itertools import product
 class GridSearch(ParallelizedTuner):
     """
     A basic Grid Search tuner.
-    Attributes:
-        _grid (dict): Holds the discrete values for each hyperparameter.
     """
     def __init__(self, optimizer_class, hyperparam_names, grid, ressources, runner_type='StandardRunner'):
         """

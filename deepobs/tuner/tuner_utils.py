@@ -8,6 +8,9 @@ import os
 def rerun_setting(runner, optimizer_class, hyperparam_names, optimizer_path, seeds=np.arange(43, 52), rank=1, mode='final', metric='test_accuracies'):
     """Reruns a hyperparameter setting with several seeds after the tuning is finished. Defaults to rerun the best setting.
     Args:
+        runner (framework runner.runner): The runner which was used for the tuning.
+        optimizer_class (framework optimizer class): The optimizer class that was tuned.
+        hyperparam_names (dict): A nested dictionary that holds the names, the types and the default values of the hyperparams.
         optimizer_path (str): The path to the optimizer to analyse the best setting on.
         seeds (iterable): The seeds that are used to rerun the setting.
         rank (int): The ranking of the setting that is to rerun.
@@ -83,6 +86,13 @@ def generate_tuning_summary(optimizer_path, mode = 'final', metric = 'test_accur
 class log_uniform():
     """A log uniform distribution that takes an arbitrary base."""
     def __init__(self, a, b, base=10):
+        """
+        Args:
+            a (float): Lower bound.
+            b (float): Range from lower bound.
+            base (float): Base of the log.
+        """
+
         self.loc = a
         self.scale = b - a
         self.base = base

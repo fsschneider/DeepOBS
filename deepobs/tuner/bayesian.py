@@ -9,19 +9,26 @@ from .tuner_utils import rerun_setting
 
 class GP(Tuner):
     """A Bayesian optimization tuner that uses a Gaussian Process surrogate.
-    Attributes:
-         _bounds (dict): The bounds for each hyperparameter.
-    Methods:
-        _convert_categoricals_for_cost_function
     """
     def __init__(self, optimizer_class,
                  hyperparam_names,
                  bounds,
                  ressources,
+                 transformations = None,
                  runner_type='StandardRunner'):
-
+        """
+        Args:
+            optimizer_class (framework optimizer class): The optimizer to tune.
+            hyperparam_names (dict): Nested dictionary that holds the name, type and default values of the hyperparameters
+            bounds (dict): A dict where the key is the hyperparameter name and the value is a tuple of its bounds.
+            ressources (int): The number of total evaluations of the tuning process.
+            transformations (dict): A dict where the key is the hyperparameter name and the value is a callable that returns \
+            the transformed hyperparameter.
+            runner_type (str): The runner which is used for each evaluation.
+        """
         super(GP, self).__init__(optimizer_class, hyperparam_names, ressources, runner_type)
         self._bounds = bounds
+        self._transformations = transformations
 
     @staticmethod
     def _determine_cost_from_output_and_mode(output, mode):
@@ -40,25 +47,12 @@ class GP(Tuner):
             raise NotImplementedError('''Mode not available for this tuning method. Please use final or best.''')
         return cost
 
-    def _convert_categoricals_for_cost_function(self, **hyperparams_sample):
-        """This function edits a new proposed sample of hyperparameters before they are parsed to the runner. This way,
-        we can convert continous samples to discretes. Overwrite this method if you want to read in categoricals in a
-        different way, e.g. a mapping from integers to strings.
-        Args:
-            hyperparams_sample (dict): The sample of the optimizer hyperparams which is to evaluate next.
-        Returns:
-            dict: The transformed hyperparams sample that is evaluated next.
-            """
-
-        for key, value in hyperparams_sample.items():
-            if self._hyperparam_names[key]['type'] == bool or self._hyperparam_names[key]['type'] == int:
-                hyperparams_sample[key] = round(value)
-        return hyperparams_sample
-
     def _generate_cost_function(self, testproblem, output_dir, mode, **kwargs):
-        '''Factory to create the cost function depending on the testproblem and kwargs.'''
         def _cost_function(**hyperparams):
-            hyperparams = self._convert_categoricals_for_cost_function(**hyperparams)
+            # apply transformations if they exist
+            if self._transformations is not None:
+                for hp_name, hp_transform in self._transformations.items():
+                    hyperparams[hp_name] = hp_transform(hyperparams[hp_name])
             runner = self._runner(self._optimizer_class, self._hyperparam_names)
             output = runner.run(testproblem, hyperparams, output_dir=output_dir, **kwargs)
             cost = self._determine_cost_from_output_and_mode(output, mode)

@@ -20,20 +20,16 @@ def _reshape_posterior_and_domain_for_plotting(mean, std, domain, acq, resolutio
     return mean, std, new_domain, acq
 
 
-def plot_bo_posterior(optimizer_path, step, resolution):
-    # check whether the tuning run can be plotted (i.e. dim(GP)<=2)
-    with open(os.path.join(optimizer_path, 'bo_tuning_log.json'), 'r') as f:
-        first_line = json.loads(f.readline())
-    dim = len(first_line[0])
-    if dim == 1:
-        fig, ax = plot_1d_bo_posterior(optimizer_path, step, resolution)
-    elif dim ==2:
-        fig, ax = plot_2d_bo_posterior(optimizer_path, step, resolution)
-    else:
-        raise NotImplementedError
-
-
 def plot_2d_bo_posterior(optimizer_path, step, resolution):
+    """Plots the two dimensional GP posterior of the Bayesian tuning process. The tuning process must have been done
+    for exactly two hyperparameters (i.e. two dimensional).
+    Args:
+        optimizer_path (str): Path to the optimizer which was tuned.
+        step (int): The step of the tuning process for which the posterior is plotted.
+        resolution (int): Resolution of the plot, i.e. number of x-values.
+    Returns:
+        matplotlib.axes.Axes: The axes of the plot.
+    """
     op = _load_bo_optimizer_object(os.path.join(optimizer_path, 'obj'), str(step))
     acq_func = _load_bo_optimizer_object(os.path.join(optimizer_path, 'obj'), 'acq_func')
     
@@ -53,10 +49,19 @@ def plot_2d_bo_posterior(optimizer_path, step, resolution):
     
     ax[1].contourf(domain[0], domain[1], acq)
     plt.show()
-    return fig, ax
+    return ax
 
 
-def plot_1d_bo_posterior(optimizer_path, step, resolution):
+def plot_1d_bo_posterior(optimizer_path, step, resolution, xscale = 'linear'):
+    """Plots the one dimensional GP posterior of the Bayesian tuning process. The tuning process must have been done
+    for only one hyperparameter (i.e. one dimensional).
+    Args:
+        optimizer_path (str): Path to the optimizer which was tuned.
+        step (int): The step of the tuning process for which the posterior is plotted.
+        resolution (int): Resolution of the plot, i.e. number of x-values.
+    Returns:
+        matplotlib.axes.Axes: The axes of the plot.
+    """
     op = _load_bo_optimizer_object(os.path.join(optimizer_path, 'obj'), str(step))
     acq_func = _load_bo_optimizer_object(os.path.join(optimizer_path, 'obj'), 'acq_func')
     
@@ -73,11 +78,12 @@ def plot_1d_bo_posterior(optimizer_path, step, resolution):
     ax[0].set_xlabel(op.space.keys[0])
     ax[0].set_ylabel('target')
     ax[1].plot(domain, acq)
-    
+    ax[0].set_xscale(xscale)
+    ax[1].set_xscale(xscale)
     # add step points
     ax[0].scatter(op.space.params, op.space.target)
     plt.show()
-    return fig, ax
+    return ax
 
 
 def _generate_domain_from_op(op, resolution):
