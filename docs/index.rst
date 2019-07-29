@@ -44,6 +44,8 @@ on `GitHub`_.
   user_guide/tutorial
   user_guide/overview
   user_guide/suggested_protocol
+  user_guide/how_to_write_own_runner
+  user_guide/tuning_automation
 
 .. toctree::
   :maxdepth: 2
@@ -55,6 +57,7 @@ on `GitHub`_.
   api/abstract_runner
   api/tuner
   api/scripts
+  api/config
 
 Indices and tables
 ==================

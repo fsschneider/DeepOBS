@@ -1,3 +1,4 @@
+
 from __future__ import print_function
 import os
 import numpy as np
@@ -5,12 +6,43 @@ from matplotlib import pyplot as plt
 from .shared_utils import create_setting_analyzer_ranking, _determine_available_metric, _get_optimizer_name_and_testproblem_from_path
 from ..tuner.tuner_utils import generate_tuning_summary
 from .analyze_utils import _rescale_ax, _preprocess_path
+import pandas as pd
 
 
-# TODO
-def plot_performance_table(results_path):
-    """Creates a table as an overview over the best performance of that optimizer."""
-    pass
+def plot_results_table(results_path, mode='final', metric='test_accuracies', conv_perf_file=None):
+    """Summarizes the performance of the optimizer and prints it to a pandas data frame.
+
+            Args:
+                results_path (str): The path to the results directory.
+                mode (str): The mode by which to decide the best setting.
+                metric (str): The metric by which to decide the best setting.
+                conv_perf_file (str): Path to the convergence performance file. It is used to calculate the speed of the optimizer. Defaults to ``None`` in which case the speed measure is N.A.
+
+            Returns:
+                pandas.DataFrame: A data frame that summarizes the results.
+                """
+    table_dic = {}
+    testproblems = os.listdir(results_path)
+    metric_keys = ['Hyperparameters', 'Performance', 'Speed', 'Training Parameters']
+    for testproblem in testproblems:
+        # init new subdict for testproblem
+        for metric_key in metric_keys:
+            table_dic[(testproblem, metric_key)] = {}
+
+        testproblem_path = os.path.join(results_path, testproblem)
+        optimizers = os.listdir(testproblem_path)
+        for optimizer in optimizers:
+            optimizer_path = os.path.join(testproblem_path, optimizer)
+            optimizer_performance_dic = get_performance_dictionary(optimizer_path, mode, metric, conv_perf_file)
+
+            # invert inner dics for multiindexing
+            for metric_key in metric_keys:
+                table_dic[(testproblem, metric_key)][optimizer] = optimizer_performance_dic[metric_key]
+
+    # correct multiindexing
+    table = pd.DataFrame.from_dict(table_dic, orient='index')
+    print(table)
+    return table
 
 
 def plot_testset_performances(results_path, mode = 'final', metric = 'test_accuracies', reference_path = None):
@@ -83,22 +115,9 @@ def plot_hyperparameter_sensitivity_2d(optimizer_path, hyperparams, mode='final'
     return ax
 
 
-# TODO plot the sensitivity for several optimizer
-def plot_hyperparameter_sensitivity(optimizer_path, hyperparam, mode='final', metric = 'test_accuracies',
-                                    xscale='linear',
+def _plot_hyperparameter_sensitivity(optimizer_path, hyperparam, ax, mode='final', metric = 'test_accuracies',
                                     plot_std=False):
 
-    """Plots the hyperparameter sensitivtiy of the optimizer.
-    Args:
-        optimizer_path (str): The path to the optimizer to analyse.
-        hyperparam (str): The name of the hyperparameter that should be analyzed.
-        mode (str): The mode by which to decide the best setting.
-        metric (str): The metric by which to decide the best setting.
-        xscale (str): The scale for the parameter axes. Is passed to plt.xscale().
-        plot_std (bool): Whether to plot markers for individual seed runs or not. If `False`, only the mean is plotted.
-    Returns:
-        matplotlib.axes.Axes: The figure and axes of the plot.
-        """
     metric = _determine_available_metric(optimizer_path, metric)
     tuning_summary = generate_tuning_summary(optimizer_path, mode, metric)
 
@@ -109,13 +128,12 @@ def plot_hyperparameter_sensitivity(optimizer_path, hyperparam, mode='final', me
     target_means = [d['target_mean'] for d in tuning_summary]
     target_stds = [d['target_std'] for d in tuning_summary]
 
-    # sort the values synchronised for plotting
-    param_values, target_means, target_stds = (list(t) for t in zip(*sorted(zip(param_values, target_means, target_stds))))
+    param_values, target_means, target_stds = (list(t) for t in
+                                               zip(*sorted(zip(param_values, target_means, target_stds))))
 
-    _ , ax = plt.subplots()
     param_values = np.array(param_values)
     target_means = np.array(target_means)
-    ax.plot(param_values, target_means, linewidth=3)
+    ax.plot(param_values, target_means, linewidth=3, label=optimizer_name)
     if plot_std:
         ranks = create_setting_analyzer_ranking(optimizer_path, mode, metric)
         for rank in ranks:
@@ -124,11 +142,42 @@ def plot_hyperparameter_sensitivity(optimizer_path, hyperparam, mode='final', me
             for value in values:
                 ax.scatter(param_value, value, marker='x', color='b')
             ax.plot((param_value, param_value), (min(values), max(values)), color='grey', linestyle='--')
+    ax.set_title(testproblem, fontsize=20)
+    return ax
+
+
+def plot_hyperparameter_sensitivity(path, hyperparam, mode='final', metric = 'test_accuracies',
+                                    xscale='linear',
+                                    plot_std=False,
+                                    reference_path = None):
+
+    """Plots the hyperparameter sensitivtiy of the optimizer.
+    Args:
+        path (str): The path to the optimizer to analyse. Or to a whole testproblem. In that case, all optimizer sensitivities are plotted.
+        hyperparam (str): The name of the hyperparameter that should be analyzed.
+        mode (str): The mode by which to decide the best setting.
+        metric (str): The metric by which to decide the best setting.
+        xscale (str): The scale for the parameter axes. Is passed to plt.xscale().
+        plot_std (bool): Whether to plot markers for individual seed runs or not. If `False`, only the mean is plotted.
+        reference_path (str): Path to the reference optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are taken as reference).
+    Returns:
+        matplotlib.axes.Axes: The figure and axes of the plot.
+        """
+
+    _, ax = plt.subplots()
+    pathes = _preprocess_path(path)
+    for optimizer_path in pathes:
+        ax = _plot_hyperparameter_sensitivity(optimizer_path, hyperparam, ax, mode, metric, plot_std)
+    if reference_path is not None:
+        pathes = _preprocess_path(reference_path)
+        for reference_optimizer_path in pathes:
+            ax = _plot_hyperparameter_sensitivity(reference_optimizer_path, hyperparam, ax, mode, metric, plot_std)
+
     plt.xscale(xscale)
     plt.xlabel(hyperparam, fontsize=16)
-    plt.ylabel(metric, fontsize = 16)
-    ax.set_title(optimizer_name + ' on ' + testproblem, fontsize=20)
+    plt.ylabel(metric, fontsize=16)
     ax.tick_params(labelsize=14)
+    ax.legend()
     plt.show()
     return ax
 
@@ -231,7 +280,7 @@ def plot_optimizer_performance(path, ax = None, mode = 'final', metric = 'test_a
         ax (matplotlib.axes.Axes): The axes to plot the trainig curves for all metrices. Must have 4 subaxes (one for each metric).
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
-        reference_path(str): Path to the reference optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are taken as reference)
+        reference_path (str): Path to the reference optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are taken as reference).
 
     Returns:
         matplotlib.axes.Axes: The axes with the plots.
@@ -257,3 +306,4 @@ def plot_optimizer_performance(path, ax = None, mode = 'final', metric = 'test_a
 
     plt.show()
     return ax
+

@@ -10,3 +10,7 @@ Tuner
   tuner/gridsearch
   tuner/randomsearch
   tuner/gp
+  tuner/tuner
+  tuner/parallelizedtuner
+  tuner/tuner_utils
+

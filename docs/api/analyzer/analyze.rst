@@ -10,7 +10,8 @@ Plot Optimizer Performances
 =================
 Get the Best Runs
 =================
-.. autofunction:: plot_performance_table
+
+.. autofunction:: plot_results_table
 .. autofunction:: get_performance_dictionary
 
 ===============================

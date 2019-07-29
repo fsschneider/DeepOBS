@@ -8,20 +8,27 @@ from .tuner_utils import rerun_setting
 
 
 class GP(Tuner):
-    # TODO write docstrings
     """A Bayesian optimization tuner that uses a Gaussian Process surrogate.
-    Attributes:
-         _bounds (dict): The bounds for each hyperparameter.
-    Methods:
     """
     def __init__(self, optimizer_class,
                  hyperparam_names,
                  bounds,
                  ressources,
+                 transformations = None,
                  runner_type='StandardRunner'):
-
+        """
+        Args:
+            optimizer_class (framework optimizer class): The optimizer to tune.
+            hyperparam_names (dict): Nested dictionary that holds the name, type and default values of the hyperparameters
+            bounds (dict): A dict where the key is the hyperparameter name and the value is a tuple of its bounds.
+            ressources (int): The number of total evaluations of the tuning process.
+            transformations (dict): A dict where the key is the hyperparameter name and the value is a callable that returns \
+            the transformed hyperparameter.
+            runner_type (str): The runner which is used for each evaluation.
+        """
         super(GP, self).__init__(optimizer_class, hyperparam_names, ressources, runner_type)
-        self._bounds = self._read_in_bounds(bounds)
+        self._bounds = bounds
+        self._transformations = transformations
 
     @staticmethod
     def _determine_cost_from_output_and_mode(output, mode):
@@ -40,22 +47,13 @@ class GP(Tuner):
             raise NotImplementedError('''Mode not available for this tuning method. Please use final or best.''')
         return cost
 
-    @staticmethod
-    def _read_in_bounds(bounds):
-        # TODO categoricals?
-#        bounds = _check_for_categorical(bounds)
-        return bounds
 
-    @staticmethod
-    def _read_categorical(bounds):
-        for key, value in bounds.items():
-            if len(value) == 2 and type(value[0]) == bool and type(value[1]) == bool:
-                bounds[key] = (0,1)
-        return bounds
-    # TODO how to deal with discrete categoricals?
     def _generate_cost_function(self, testproblem, output_dir, mode, **kwargs):
-        '''Factory to create the cost function depending on the testproblem and kwargs.'''
         def _cost_function(**hyperparams):
+            # apply transformations if they exist
+            if self._transformations is not None:
+                for hp_name, hp_transform in self._transformations.items():
+                    hyperparams[hp_name] = hp_transform(hyperparams[hp_name])
             runner = self._runner(self._optimizer_class, self._hyperparam_names)
             output = runner.run(testproblem, hyperparams, output_dir=output_dir, **kwargs)
             cost = self._determine_cost_from_output_and_mode(output, mode)
@@ -90,7 +88,6 @@ class GP(Tuner):
              tuning_summary = True, 
              plotting_summary = True, 
              kernel = None,
-             alpha = None,
              acq_type = 'ucb', 
              acq_kappa = 2.576, 
              acq_xi = 0.0, 
@@ -98,17 +95,30 @@ class GP(Tuner):
              rerun_best_setting = False,
              **kwargs):
 
+        """Tunes the optimizer hyperparameters by evaluating a Gaussian process surrogate with an acquisition function.
+        Args:
+            testproblem (str): The test problem to tune the optimizer on.
+            output_dir (str): The output directory for the results.
+            random_seed (int): Random seed for the whole truning process. Every individual run is seeded by it.
+            n_init_samples (int): The number of random exploration samples in the beginning of the tuning process.
+            tuning_summary (bool): Whether to write an additional tuning summary. Can be used to get an overview over the tuning progress
+            plotting_summary (bool): Whether to store additional objects that can be used to plot the posterior.
+            kernel (Sklearn.gaussian_process.kernels.Kernel): The kernel of the GP.
+            acq_type (str): The type of acquisition function to use. Muste be one of ``ucb``, ``ei``, ``poi``.
+            acq_kappa (float): Scaling parameter of the acquisition function.
+            acq_xi (float): Scaling parameter of the acquisition function.
+            mode (str): The mode that is used to evaluate the cost. Must be one of ``final`` or ``best``.
+            rerun_best_setting (bool): Whether to automatically rerun the best setting with 10 different seeds.
+            """
+
         self._set_seed(random_seed)
         log_path = os.path.join(output_dir, testproblem, self._optimizer_name)
 
         cost_function = self._generate_cost_function(testproblem, output_dir, mode, **kwargs)
-        # TODO when to normalize the y values in gp ?
+
         op = bayes_opt.BayesianOptimization(f = None, pbounds = self._bounds, random_state=random_seed)
         if kernel is not None:
             op._gp.kernel = kernel
-        if alpha is not None:
-            # set noise level
-            op._gp.alpha = alpha
 
         utility_func = UtilityFunction(acq_type, kappa = acq_kappa, xi = acq_xi)
 

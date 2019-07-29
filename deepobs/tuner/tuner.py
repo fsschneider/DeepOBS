@@ -8,35 +8,25 @@ import copy
 
 
 class Tuner(abc.ABC):
-    """The base class for all tuning methods in DeepOBS.
-    Attributes:
-        _optimizer_class: See argument optimizer_class
-        _optimizer_name: The name of the optimizer class
-        _hyperparam_names: A nested dictionary that lists all hyperparameters of the optimizer,
-        their type and their default values
-        _ressources: The number of evaluations the tuner is allowed to perform on each testproblem.
-        _runner_type: The DeepOBS runner type that the tuner uses for evaluation.
-    Methods:
-        _set_seed: Sets all random seeds.
-        tune: Tunes the optimizer on a testproblem.
-        tune_on_testset: Tunes the optimizer on each testproblem of a testset.
-        """
+    """
+    The base class for all tuning methods in DeepOBS.
+    """
 
     def __init__(self,
                  optimizer_class,
                  hyperparam_names,
                  ressources,
                  runner_type='StandardRunner'):
-        """Args:
-            optimizer_class: The optimizer class of the optimizer that is run on
-            the testproblems. For PyTorch this must be a subclass of torch.optim.Optimizer. For
+        """
+        Args:
+            optimizer_class (framework optimizer class): The optimizer class of the optimizer that is run on \
+            the testproblems. For PyTorch this must be a subclass of torch.optim.Optimizer. For \
             TensorFlow a subclass of tf.train.Optimizer.
-
-            hyperparam_names (dict): A nested dictionary that lists all hyperparameters of the optimizer,
-            their type and their default values (if they have any) in the form: {'<name>': {'type': <type>, 'default': <default value>}},
-            e.g. for torch.optim.SGD with momentum:
-            {'lr': {'type': float},
-            'momentum': {'type': float, 'default': 0.99},
+            hyperparam_names (dict): A nested dictionary that lists all hyperparameters of the optimizer, \
+            their type and their default values (if they have any) in the form: {'<name>': {'type': <type>, 'default': <default value>}}, \
+            e.g. for torch.optim.SGD with momentum: \
+            {'lr': {'type': float}, \
+            'momentum': {'type': float, 'default': 0.99}, \
             'uses_nesterov': {'type': bool, 'default': False}}
             ressources (int): The number of evaluations the tuner is allowed to perform on each testproblem.
             runner_type (str): The DeepOBS runner type that the tuner uses for evaluation.
@@ -63,7 +53,6 @@ class Tuner(abc.ABC):
 
     @staticmethod
     def _set_seed(random_seed):
-        """Sets all relevant seeds for the tuning."""
         np_seed(random_seed)
 
     def tune_on_testset(self, testset, *args, **kwargs):
@@ -91,11 +80,8 @@ class Tuner(abc.ABC):
 
 
 class ParallelizedTuner(Tuner):
-    """The base class for all tuning methods which are uninformed and parallelizable, like Grid Search and Random Search.
-    Methods:
-        _sample: Creates a list of all hyperparameter settings that are to evaluate.
-        generate_commands_script: Generates commands to allow the user to execute each tuning job seperately.
-        generate_commands_script_for_testset: Generates commands for each testproblem in a testset.
+    """
+    The base class for all tuning methods which are uninformed and parallelizable, like Grid Search and Random Search.
     """
     def __init__(self,
                  optimizer_class,
@@ -135,7 +121,9 @@ class ParallelizedTuner(Tuner):
         script.close()
         return self._optimizer_name + '.py'
 
-    def __generate_hyperparams_formate_for_command_line(self, hyperparams):
+    def _generate_hyperparams_format_for_command_line(self, hyperparams):
+        """Overwrite this method to specify how hyperparams should be represented in the command line string.
+        This is basically the inversion of your runner specific method ``_add_hyperparams_to_argparse``"""
         string = ''
         for key, value in hyperparams.items():
             if self._hyperparam_names[key]['type'] == bool:
@@ -144,12 +132,18 @@ class ParallelizedTuner(Tuner):
                 string += ' --' + key + ' ' + str(value)
         return string
 
-    @staticmethod
-    # TODO how to deal with the training_params dict?
-    def __generate_kwargs_format_for_command_line(**kwargs):
+
+    def _generate_kwargs_format_for_command_line(self, **kwargs):
+        """Overwrite this method to specify how additional training params should be represented in the command line string.
+        This is basically the inversion of your runner specific method ``_add_training_params_to_argparse``"""
         string = ''
         for key, value in kwargs.items():
-            string += ' --' + key + ' ' + str(value)
+            if key == 'lr_sched_factors' or key == 'lr_sched_epochs':
+                string += ' --' + key
+                for v in value:
+                    string += ' ' + str(v)
+            else:
+                string += ' --' + key + ' ' + str(value)
         return string
 
     def tune(self, testproblem, output_dir='./results', random_seed=42, rerun_best_setting = False, **kwargs):
@@ -163,7 +157,9 @@ class ParallelizedTuner(Tuner):
             optimizer_path = os.path.join(output_dir, testproblem, self._optimizer_name)
             rerun_setting(self._runner, self._optimizer_class, self._hyperparam_names, optimizer_path)
 
-    def generate_commands_script(self, testproblem, output_dir='./results', random_seed=42, generation_dir = './command_scripts', **kwargs):
+
+    def generate_commands_script(self, testproblem, output_dir='./results', random_seed=42,
+                                 generation_dir = './command_scripts', **kwargs):
         """
         Args:
             testproblem (str): Testproblem for which to generate commands.
@@ -172,15 +168,16 @@ class ParallelizedTuner(Tuner):
             generation_dir (str): The path to the directory where the generated scripts are written to.
 
         """
+
         script = self.__generate_python_script(generation_dir)
         file = open(os.path.join(generation_dir, 'jobs_' + self._optimizer_name + '_' + self._search_name + '_' + testproblem + '.txt'), 'w')
-        kwargs_string = self.__generate_kwargs_format_for_command_line(**kwargs)
+        kwargs_string = self._generate_kwargs_format_for_command_line(**kwargs)
         self._set_seed(random_seed)
         params = self._sample()
         for sample in params:
-            sample_string = self.__generate_hyperparams_formate_for_command_line(sample)
+            sample_string = self._generate_hyperparams_format_for_command_line(sample)
             file.write('python3 ' + script + ' ' + testproblem + ' ' + sample_string + ' --random_seed ' + str(
-                random_seed) + ' --output_dir' + output_dir + ' ' + kwargs_string + '\n')
+                random_seed) + ' --output_dir ' + output_dir + ' ' + kwargs_string + '\n')
         file.close()
 
     def generate_commands_script_for_testset(self, testset, *args, **kwargs):

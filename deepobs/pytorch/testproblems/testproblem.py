@@ -47,7 +47,7 @@ class TestProblem(abc.ABC):
         self._batch_size = batch_size
         self._weight_decay = weight_decay
 
-        self._device = config.get_default_device()
+        self._device = torch.device(config.get_default_device())
 
         # Public attributes by which to interact with test problems. These have to
         # be created by the set_up function of sub-classes.

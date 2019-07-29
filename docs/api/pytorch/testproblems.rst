@@ -28,3 +28,4 @@ Each test problem inherits from the same base class with the following signature
   testproblems/fmnist
   testproblems/cifar10
   testproblems/cifar100
+  testproblems/svhn

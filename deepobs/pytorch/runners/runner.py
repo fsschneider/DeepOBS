@@ -74,7 +74,7 @@ class PTRunner(Runner):
             weight_decay (float): Regularization factor
             random_seed (int): The random seed of the framework
         Returns:
-            tproblem: An instance of deepobs.pytorch.testproblems.testproblem
+            deepobs.pytorch.testproblems.testproblem: An instance of deepobs.pytorch.testproblems.testproblem
         """
         # set the seed and GPU determinism
         if config.get_is_deterministic():
@@ -117,8 +117,8 @@ class PTRunner(Runner):
             test (bool): Whether tproblem is evaluated on the test set.
             If false, it is evaluated on the train evaluation set.
         Returns:
-            loss (float): The loss of the current state.
-            accuracy (float): The accuracy of the current state.
+            float: The loss of the current state.
+            float: The accuracy of the current state.
         """
 
         if test:
@@ -159,17 +159,10 @@ class PTRunner(Runner):
 class StandardRunner(PTRunner):
     """A standard runner. Can run a normal training loop with fixed
     hyperparams. It should be used as a template to implement custom runners.
-
-    Methods:
-        training: Performs the training on a testproblem instance.
     """
 
     def __init__(self, optimizer_class, hyperparameter_names):
         super(StandardRunner, self).__init__(optimizer_class, hyperparameter_names)
-
-    @staticmethod
-    def _add_training_params_to_argparse(parser, args, training_params):
-        pass
 
     def training(self,
                  tproblem,
@@ -275,17 +268,13 @@ class StandardRunner(PTRunner):
 class LearningRateScheduleRunner(PTRunner):
     """A runner for learning rate schedules. Can run a normal training loop with fixed hyperparams or a learning rate
     schedule. It should be used as a template to implement custom runners.
-
-    Methods:
-        training: Performs the training on a testproblem instance.
     """
 
     def __init__(self, optimizer_class, hyperparameter_names):
 
         super(LearningRateScheduleRunner, self).__init__(optimizer_class, hyperparameter_names)
 
-    @staticmethod
-    def _add_training_params_to_argparse(parser, args, training_params):
+    def _add_training_params_to_argparse(self, parser, args, training_params):
         try:
             args['lr_sched_epochs'] = training_params['lr_sched_epochs']
         except KeyError:
@@ -328,22 +317,28 @@ class LearningRateScheduleRunner(PTRunner):
                 # the following are the training_params
                 lr_sched_epochs=None,
                 lr_sched_factors=None):
-        """
-        **training_params are:
-            lr_sched_epochs (list): The epochs where to adjust the learning rate.
-            lr_sched_factors (list): The corresponding factors by which to adjust the learning rate.
-            train_log_interval (int): When to log the minibatch loss/accuracy.
-            print_train_iter (bool): Whether to print the training progress at every train_log_interval
+        r"""
+        Performs the training and stores the metrices.
+            Args:
+                tproblem (deepobs.[tensorflow/pytorch].testproblems.testproblem): The testproblem instance to train on.
+                hyperparams (dict): The optimizer hyperparameters to use for the training.
+                num_epochs (int): The number of training epochs.
+                print_train_iter (bool): Whether to print the training progress at every train_log_interval
+                train_log_interval (int): Mini-batch interval for logging.
+                tb_log (bool): Whether to use tensorboard logging or not
+                tb_log_dir (str): The path where to save tensorboard events.
+                lr_sched_epochs (list): The epochs where to adjust the learning rate.
+                lr_sched_factors (list): The corresponding factors by which to adjust the learning rate.
 
-        Returns:
-            output (dict): The logged metrices. Is of the form:
-                {'test_losses' : test_losses
-                 'train_losses': train_losses,
-                 'test_accuracies': test_accuracies,
-                 'train_accuracies': train_accuracies
-                 }
+            Returns:
+                dict: The logged metrices. Is of the form:
+                    ```{'test_losses' : [...],
+                     'train_losses': [...],
+                     'test_accuracies': [...],
+                     'train_accuracies': [...]
+                     }```
 
-        where the metrices values are lists that were filled during training.
+            where the metrices values are lists that were filled during training.
         """
 
         opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
@@ -380,7 +375,8 @@ class LearningRateScheduleRunner(PTRunner):
             ### Training ###
             if lr_sched_epochs is not None:
                 # get the next learning rate
-                lr_schedule.step()
+                lr_schedule.step(epoch_count)
+
                 if epoch_count in lr_sched_epochs:
                     print("Setting learning rate to {0}".format(lr_schedule.get_lr()))
 
@@ -419,15 +415,6 @@ class LearningRateScheduleRunner(PTRunner):
                 break
             else:
                 continue
-
-        # add interesting training params to the output if they were specified
-        if lr_sched_epochs is not None:
-            analyzable_training_params = {
-                    "lr_sched_epochs": lr_sched_epochs,
-                    "lr_sched_factors": lr_sched_factors
-                    }
-        else:
-            analyzable_training_params = {}
 
         # Put results into output dictionary.
         output = {

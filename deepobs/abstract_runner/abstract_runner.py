@@ -69,32 +69,31 @@ class Runner(abc.ABC):
             1. setup testproblem
             2. run the training (must be implemented by subclass)
             3. merge and write output
+        Args:
+            testproblem (str): Name of the testproblem.
+            hyperparams (dict): The explizit values of the hyperparameters of the optimizer that are used for training
+            batch_size (int): Mini-batch size for the training data.
+            num_epochs (int): The number of training epochs.
+            random_seed (int): The torch random seed.
+            data_dir (str): The path where the data is stored.
+            output_dir (str): Path of the folder where the results are written to.
+            weight_decay (float): Regularization factor for the testproblem.
+            no_logs (bool): Whether to write the output or not.
+            train_log_interval (int): Mini-batch interval for logging.
+            print_train_iter (bool): Whether to print the training progress at each train_log_interval.
+            tb_log (bool): Whether to use tensorboard logging or not
+            tb_log_dir (str): The path where to save tensorboard events.
+            training_params (dict): Kwargs for the training method.
 
-            Args:
-                testproblem (str): Name of the testproblem.
-                hyperparams (dict): The explizit values of the hyperparameters of the optimizer that are used for training
-                batch_size (int): Mini-batch size for the training data.
-                num_epochs (int): The number of training epochs.
-                random_seed (int): The torch random seed.
-                data_dir (str): The path where the data is stored.
-                output_dir (str): Path of the folder where the results are written to.
-                weight_decay (float): Regularization factor for the testproblem.
-                no_logs (bool): Whether to write the output or not.
-                train_log_interval (int): Mini-batch interval for logging.
-                print_train_iter (bool): Whether to print the training progress at each train_log_interval.
-                tb_log (bool): Whether to use tensorboard logging or not
-                tb_log_dir (str): The path where to save tensorboard events.
-                training_params (dict): Kwargs for the training method.
-            Returns:
-                output (dict):
-                    {<...meta data...>
-                    'test_losses' : test_losses
-                     'train_losses': train_losses,
-                     'test_accuracies': test_accuracies,
-                     'train_accuracies': train_accuracies,
-                     'analyzable_training_params': {...}
-                     }
-                were <...meta data...> stores the run args.
+        Returns:
+            dict: {<...meta data...>
+                'test_losses' : test_losses
+                 'train_losses': train_losses,
+                 'test_accuracies': test_accuracies,
+                 'train_accuracies': train_accuracies,
+                 'analyzable_training_params': {...}
+                 }
+            were <...meta data...> stores the run args.
 
         """
         args = self.parse_args(testproblem,
@@ -135,7 +134,7 @@ class Runner(abc.ABC):
 
     @abc.abstractmethod
     def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params):
-        """Must be implemented by the subclass. Performs the training and stores the metrices.
+        """Performs the training and stores the metrices.
             Args:
                 tproblem (deepobs.[tensorflow/pytorch].testproblems.testproblem): The testproblem instance to train on.
                 hyperparams (dict): The optimizer hyperparameters to use for the training.
@@ -147,19 +146,13 @@ class Runner(abc.ABC):
                 **training_params (dict): Kwargs for additional training parameters that are implemented by subclass.
 
             Returns:
-                output (dict): The logged metrices. Is of the form:
-                    {'test_losses' : test_losses
-                     'train_losses': train_losses,
-                     'test_accuracies': test_accuracies,
-                     'train_accuracies': train_accuracies,
-                     'analyzable_training_params': {...}
-                     }
-
-            where the metrices values are lists that were filled during training
-            and the key 'analyzable_training_params' holds a dict of training
-            parameters that should be taken into account in the analysis later on.
-            These can be, for example, learning rate schedules. Or in the easiest
-            case, this dict is empty.
+                dict: The logged metrices. Is of the form:
+                    ```{'test_losses' : [...],
+                     'train_losses': [...],
+                     'test_accuracies': [...],
+                     'train_accuracies': [...]
+                     }```
+            where the metrices values are lists that were filled during training.
         """
         return
 
@@ -173,11 +166,39 @@ class Runner(abc.ABC):
     def create_testproblem(*args, **kwargs):
         pass
 
-    @staticmethod
-    @abc.abstractmethod
-    def _add_training_params_to_argparse(parser, args, training_params):
+    def _add_training_params_to_argparse(self, parser, args, training_params):
         """Overwrite this method to specify how your runner should read in additional training_parameters and to add them to argparse"""
         pass
+
+    def _add_hyperparams_to_argparse(self, parser, args, hyperparams):
+        """Overwrite this method to specify how your runner should read in optimizer hyper_parameters and to add them to argparse"""
+        if hyperparams is None:    # if no hyperparams dict is passed to run()
+            for hp_name, hp_specification in self._hyperparameter_names.items():
+                _add_hp_to_argparse(parser, self._optimizer_name, hp_specification, hp_name)
+
+        else:     # if there is one, fill the missing params from command line
+            for hp_name, hp_specification in self._hyperparameter_names.items():
+                if hp_name in hyperparams:
+                    args[hp_name] = hyperparams[hp_name]
+                else:
+                    _add_hp_to_argparse(parser, self._optimizer_name, hp_specification, hp_name)
+
+    def _add_training_params_to_output_dir_name(self, output, run_folder_name):
+        """Overwrite this method to specify how your runner should format additional training_parameters in the run folder name."""
+        for tp_name, tp_value in sorted(output['training_params'].items()):
+            if tp_value is not None:
+                run_folder_name += "__{0:s}".format(tp_name)
+                run_folder_name += "__{0:s}".format(
+                    float2str(tp_value) if isinstance(tp_value, float) else str(tp_value))
+        return run_folder_name
+
+    def _add_hyperparams_to_output_dir_name(self, output, run_folder_name):
+        """Overwrite this method to specify how your runner should format optimizer hyper_parameters in the run folder name."""
+        for hp_name, hp_value in sorted(output['optimizer_hyperparams'].items()):
+            run_folder_name += "__{0:s}".format(hp_name)
+            run_folder_name += "__{0:s}".format(
+                float2str(hp_value) if isinstance(hp_value, float) else str(hp_value))
+        return run_folder_name
 
     def parse_args(self,
             testproblem,
@@ -211,8 +232,8 @@ class Runner(abc.ABC):
                 tb_log (bool): Whether to use tensorboard logging or not
                 tb_log_dir (str): The path where to save tensorboard events.
                 training_params (dict): Kwargs for the training method.
-
-        Returns: args (dict): A dicionary of all arguments.
+        Returns:
+            dict: A dicionary of all arguments.
             """
         args = {}
         parser = argparse.ArgumentParser(description='Arguments for running optimizer script.')
@@ -221,17 +242,6 @@ class Runner(abc.ABC):
             parser.add_argument('testproblem')
         else:
             args['testproblem'] = testproblem
-
-        if hyperparams is None:    # if no hyperparams dict is passed to run()
-            for hp_name, hp_specification in self._hyperparameter_names.items():
-                _add_hp_to_argparse(parser, self._optimizer_name, hp_specification, hp_name)
-
-        else:     # if there is one, fill the missing params from command line
-            for hp_name, hp_specification in self._hyperparameter_names.items():
-                if hp_name in hyperparams:
-                    args[hp_name] = hyperparams[hp_name]
-                else:
-                    _add_hp_to_argparse(parser, self._optimizer_name, hp_specification, hp_name)
 
         if weight_decay is None:
             parser.add_argument(
@@ -340,6 +350,8 @@ class Runner(abc.ABC):
         else:
             args['tb_log_dir'] = tb_log_dir
 
+        # add hyperparams and training params
+        self._add_hyperparams_to_argparse(parser, args, hyperparams)
         self._add_training_params_to_argparse(parser, args, training_params)
 
         cmdline_args = vars(parser.parse_args())
@@ -353,21 +365,17 @@ class Runner(abc.ABC):
 
         return args
 
-    @staticmethod
-    def create_output_directory(output_dir, output):
 
+    def create_output_directory(self, output_dir, output):
         """Creates the output directory of the run.
-        Input:
+        Args:
             output_dir (str): The path to the results folder
             output (dict): A dict than contains the metrices and main settings
             from the training run and a subdict called 'analyzable_training_params'
             that holds additional training_params that need to be analyzed.
-
         Returns:
-            run_directory (str): Path to the run directory which is named
-            after all relevant settings.
-            file_name (str): JSON file name of the run that is named after the
-            seed and terminating time of the run.
+            str: Path to the run directory which is named after all relevant settings.
+            str: JSON file name of the run that is named after the seed and terminating time of the run.
         """
 
         # add everything mandatory to the name
@@ -377,20 +385,11 @@ class Runner(abc.ABC):
             run_folder_name += "__weight_decay__{0:s}".format(
                 float2str(output['weight_decay']))
 
-        # Add all hyperparameters to the name (sorted alphabetically).
-        for hp_name, hp_value in sorted(output['optimizer_hyperparams'].items()):
-            run_folder_name += "__{0:s}".format(hp_name)
-            run_folder_name += "__{0:s}".format(
-                float2str(hp_value) if isinstance(hp_value, float)
-                                    else str(hp_value)
-                                    )
+        # Add all hyperparameters to the name.
+        run_folder_name = self._add_hyperparams_to_output_dir_name(output, run_folder_name)
 
-        # Add training parameters to the name (sorted alphabetically)
-        for tp_name, tp_value in sorted(output['training_params'].items()):
-            if tp_value is not None:
-                run_folder_name += "__{0:s}".format(tp_name)
-                run_folder_name += "__{0:s}".format(
-                    float2str(hp_value) if isinstance(tp_value, float) else str(tp_value))
+        # Add training parameters to the name.
+        run_folder_name = self._add_training_params_to_output_dir_name(output, run_folder_name)
 
         file_name = "random_seed__{0:d}__".format(output['random_seed'])
         file_name += time.strftime("%Y-%m-%d-%H-%M-%S")
@@ -440,7 +439,7 @@ class Runner(abc.ABC):
                        minibatch_train_losses):
         """A routine that is executed if a training run is aborted (loss is NaN or Inf)."""
 
-        warnings.warn('Breaking from run after epoch ' + str(epoch_count) + ' due to wrongly calibrated optimization (Loss is Nan or Inf)', RuntimeWarning)
+        warnings.warn('Breaking from run after epoch ' + str(epoch_count) + ' due to wrongly calibrated optimization (Loss is Nan or Inf). The metrices for the remaining epochs will be filled with the initial performance values.', RuntimeWarning)
 
         # fill the rest of the metrices with initial observations
         for i in range(epoch_count, num_epochs):

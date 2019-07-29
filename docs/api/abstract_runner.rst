@@ -1,11 +1,27 @@
-===============
-Abstract Runner
-===============
+================
+Abstract Runners
+================
 
-The base class for all runners in DeepOBS. I.e. it incorporates everything that is common to both TensorFlow and PyTorch.
-It reads in the arguments, makes the output consistent, creates the output folder structure and writes the output.
+The base classes for all runners in DeepOBS.
 
+Runner
+===========
   .. currentmodule:: deepobs.abstract_runner
+  .. autoclass:: Runner
+     :members:
+     :special-members: __init__
 
-  .. autoclass:: abstract_runner
-	:members:
+PTRunner
+========
+  .. currentmodule:: deepobs.pytorch.runners
+  .. autoclass:: PTRunner
+     :members:
+     :special-members: __init__
+
+TFRunner
+========
+  .. currentmodule:: deepobs.tensorflow.runners
+  .. autoclass:: TFRunner
+     :members:
+     :special-members: __init__
+
