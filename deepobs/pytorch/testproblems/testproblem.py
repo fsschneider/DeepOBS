@@ -83,7 +83,11 @@ class TestProblem(abc.ABC):
         """Returns the next batch from the iterator."""
         return next(self._iterator)
 
-    def get_batch_loss_and_accuracy(self, return_forward_func = False, reduction = 'mean'):
+    def get_batch_loss_and_accuracy(self,
+                                    return_forward_func = False,
+                                    reduction = 'mean',
+                                    add_regularization_if_available = True):
+
         """Gets a new batch and calculates the loss and accuracy (if available)
         on that batch. This is a default implementation for image classification.
         Testproblems with different calculation routines (e.g. RNNs) overwrite this method accordingly.
@@ -116,7 +120,17 @@ class TestProblem(abc.ABC):
             correct += (predicted == labels).sum().item()
 
             accuracy = correct/total
-            return loss, accuracy
+
+            if add_regularization_if_available:
+                # if the testproblem has a regularization, add the regularization loss.
+                if hasattr(self, 'get_regularization_loss'):
+                    regularizer_loss = self.get_regularization_loss()
+                else:
+                    regularizer_loss = 0
+            else:
+                regularizer_loss = 0
+
+            return loss + regularizer_loss, accuracy
 
         if return_forward_func:
             return _get_batch_loss_and_accuracy(), _get_batch_loss_and_accuracy

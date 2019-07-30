@@ -220,10 +220,6 @@ class StandardRunner(PTRunner):
                 try:
                     opt.zero_grad()
                     batch_loss, _ = tproblem.get_batch_loss_and_accuracy()
-                    # if the testproblem has a regularization, add the regularization loss.
-                    if hasattr(tproblem, 'get_regularization_loss'):
-                        regularizer_loss = tproblem.get_regularization_loss()
-                        batch_loss += regularizer_loss
 
                     batch_loss.backward()
                     opt.step()
