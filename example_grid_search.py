@@ -1,6 +1,11 @@
 from deepobs.tuner import GridSearch
 from torch.optim import SGD
 import numpy as np
+from deepobs import config
+
+# Ensures that the Tuner looks for Runner in the PyTorch submodule of DeepOBS
+# Put 'tensorflow' here, if you use TensorFlow
+config.set_framework('pytorch')
 
 optimizer_class = SGD
 hyperparams = {"lr": {"type": float},
