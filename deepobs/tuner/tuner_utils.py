@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from scipy.stats. distributions import uniform
-from ..analyzer.shared_utils import create_setting_analyzer_ranking, _clear_json, _append_json, _determine_available_metric
+from ..analyzer.shared_utils import create_setting_analyzer_ranking, _clear_json, _append_json, _determine_available_metric_in_case_of_validation
 import os
 
 
-def rerun_setting(runner, optimizer_class, hyperparam_names, optimizer_path, seeds=np.arange(43, 52), rank=1, mode='final', metric='test_accuracies'):
+def rerun_setting(runner, optimizer_class, hyperparam_names, optimizer_path, seeds=np.arange(43, 52), rank=1, mode='final', metric='valid_accuracies'):
     """Reruns a hyperparameter setting with several seeds after the tuning is finished. Defaults to rerun the best setting.
     Args:
         runner (framework runner.runner): The runner which was used for the tuning.
@@ -17,7 +17,7 @@ def rerun_setting(runner, optimizer_class, hyperparam_names, optimizer_path, see
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
     """
-    metric = _determine_available_metric(optimizer_path, metric)
+    metric = _determine_available_metric_in_case_of_validation(optimizer_path, metric)
     optimizer_path = os.path.join(optimizer_path)
 
     setting_analyzer_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
@@ -36,7 +36,7 @@ def rerun_setting(runner, optimizer_class, hyperparam_names, optimizer_path, see
                    batch_size=batch_size, output_dir=results_path, **training_params)
 
 
-def write_tuning_summary(optimizer_path, mode = 'final', metric = 'test_accuracies'):
+def write_tuning_summary(optimizer_path, mode = 'final', metric = 'valid_accuracies'):
     """Writes the tuning summary to a json file in the ``optimizer_path``.
     Args:
         optimizer_path (str): Path to the optimizer folder.
@@ -51,7 +51,7 @@ def write_tuning_summary(optimizer_path, mode = 'final', metric = 'test_accuraci
         _append_json(optimizer_path, 'tuning_log.json', line)
 
 
-def generate_tuning_summary(optimizer_path, mode = 'final', metric = 'test_accuracies'):
+def generate_tuning_summary(optimizer_path, mode = 'final', metric = 'valid_accuracies'):
     """Generates a list of dictionaries that holds an overview of the current tuning process.
     Should not be used for Bayesian tuning methods, since the order of evaluation is ignored in this summary. For
     Bayesian tuning methods use the tuning summary logging of the respective class.
@@ -65,7 +65,7 @@ def generate_tuning_summary(optimizer_path, mode = 'final', metric = 'test_accur
         of the tuning process and holds the hyperparameters and their performance.
         setting_analyzer_ranking (list): A ranked list of SettingAnalyzers that were used to generate the summary
         """
-    metric = _determine_available_metric(optimizer_path, metric)
+    metric = _determine_available_metric_in_case_of_validation(optimizer_path, metric)
     setting_analyzer_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
     tuning_summary = []
     for sett in setting_analyzer_ranking:

@@ -14,21 +14,25 @@ def aggregate_runs(setting_folder):
     runs = [run for run in os.listdir(setting_folder) if run.endswith(".json")]
     # metrices
     train_losses = []
-    train_accuracies = []
+    valid_losses = []
     test_losses = []
+    train_accuracies = []
+    valid_accuracies = []
     test_accuracies = []
 
     for run in runs:
         json_data = _load_json(setting_folder, run)
         train_losses.append(json_data['train_losses'])
+        valid_losses.append(json_data['valid_losses'])
         test_losses.append(json_data['test_losses'])
         # just add accuracies to the aggregate if they are available
         if 'train_accuracies' in json_data :
             train_accuracies.append(json_data['train_accuracies'])
+            valid_accuracies.append(json_data['valid_accuracies'])
             test_accuracies.append(json_data['test_accuracies'])
 
     aggregate = dict()
-    for metrics in ['train_losses', 'test_losses', 'train_accuracies', 'test_accuracies']:
+    for metrics in ['train_losses', 'valid_losses', 'test_losses', 'train_accuracies', 'valid_accuracies', 'test_accuracies']:
         # only add the metric if available
         if len(eval(metrics)) != 0:
             aggregate[metrics] = {
@@ -64,7 +68,7 @@ def _check_if_metric_is_available(optimizer_path, metric):
         return False
 
 
-def _determine_available_metric(optimizer_path, metric):
+def _determine_available_metric_in_case_of_testing(optimizer_path, metric):
     """Checks if the metric ``metric`` is availabe for the runs in ``optimizer_path``.
     If not, it returns the fallback metric 'test_losses',"""
     if _check_if_metric_is_available(optimizer_path, metric):
@@ -73,6 +77,17 @@ def _determine_available_metric(optimizer_path, metric):
         warnings.warn('Metric {0:s} does not exist for testproblem {1:s}. We now use fallback metric \'test_losses\''.format(
             metric, os.path.split(os.path.split(optimizer_path)[0])[1]), RuntimeWarning)
         return 'test_losses'
+
+
+def _determine_available_metric_in_case_of_validation(optimizer_path, metric):
+    """Checks if the metric ``metric`` is availabe for the runs in ``optimizer_path``.
+    If not, it returns the fallback metric 'test_losses',"""
+    if _check_if_metric_is_available(optimizer_path, metric):
+        return metric
+    else:
+        warnings.warn('Metric {0:s} does not exist for testproblem {1:s}. We now use fallback metric \'valid_losses\''.format(
+            metric, os.path.split(os.path.split(optimizer_path)[0])[1]), RuntimeWarning)
+        return 'valid_losses'
 
 
 def _dump_json(path, file, obj):
@@ -115,7 +130,7 @@ def _get_optimizer_name_and_testproblem_from_path(optimizer_path):
     return optimizer_name, testproblem
 
 
-def create_setting_analyzer_ranking(optimizer_path, mode = 'final', metric = 'test_accuracies'):
+def create_setting_analyzer_ranking(optimizer_path, mode = 'final', metric = 'valid_accuracies'):
     """Reads in all settings in ``optimizer_path`` and sets up a ranking by returning an ordered list of SettingAnalyzers.
     Args:
         optimizer_path (str): The path to the optimizer to analyse.
@@ -124,10 +139,10 @@ def create_setting_analyzer_ranking(optimizer_path, mode = 'final', metric = 'te
     Returns:
         An ordered list of SettingAnalyzers. I.e. the first item is considered 'the best one' etc.
     """
-    metric = _determine_available_metric(optimizer_path, metric)
+    metric = _determine_available_metric_in_case_of_validation(optimizer_path, metric)
     setting_analyzers = _get_all_setting_analyzer(optimizer_path)
 
-    if 'accuracies' in metric:
+    if 'acc' in metric:
         sgn = -1
     else:
         sgn = 1
@@ -178,9 +193,9 @@ class SettingAnalyzer:
     def get_best_value(self, metric):
         """Get the best (mean) value of the metric."""
         try:
-            if metric == 'test_losses' or metric == 'train_losses':
+            if 'loss' in metric:
                 return min(self.aggregate[metric]['mean'])
-            elif metric == 'test_accuracies' or metric == 'train_accuracies':
+            elif 'acc' in metric:
                 return max(self.aggregate[metric]['mean'])
             else:
                 raise NotImplementedError
