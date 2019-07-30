@@ -144,10 +144,6 @@ class PTRunner(Runner):
         loss /= batchCount
         accuracy /= batchCount
 
-        # if the testproblem has a regularization, add the regularization loss of the current network parameters.
-        if hasattr(tproblem, 'get_regularization_loss'):
-            loss += tproblem.get_regularization_loss().item()
-
         if accuracy != 0.0:
             print("{0:s} loss {1:g}, acc {2:f}".format(msg, loss, accuracy))
         else:
@@ -383,10 +379,6 @@ class LearningRateScheduleRunner(PTRunner):
                 try:
                     opt.zero_grad()
                     batch_loss, _ = tproblem.get_batch_loss_and_accuracy()
-                    # if the testproblem has a regularization, add the regularization loss.
-                    if hasattr(tproblem, 'get_regularization_loss'):
-                        regularizer_loss = tproblem.get_regularization_loss()
-                        batch_loss += regularizer_loss
 
                     batch_loss.backward()
                     opt.step()
