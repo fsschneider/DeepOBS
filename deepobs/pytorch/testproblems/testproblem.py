@@ -71,6 +71,16 @@ class TestProblem(abc.ABC):
         self.phase = "train_eval"
         self.net.eval()
 
+
+    def valid_init_op(self):
+        """Initializes the testproblem instance to validation mode. I.e.
+        sets the iterator to the validation set and sets the model to eval mode.
+        """
+        self._iterator = iter(self.data._valid_dataloader)
+        self.phase = "valid"
+        self.net.eval()
+
+
     def test_init_op(self):
         """Initializes the testproblem instance to test mode. I.e.
         sets the iterator to the test set and sets the model to eval mode.

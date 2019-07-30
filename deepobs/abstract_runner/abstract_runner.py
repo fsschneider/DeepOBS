@@ -409,6 +409,10 @@ class Runner(abc.ABC):
             if all(output['test_accuracies']) == 0:
                 del output['test_accuracies']
                 del output['train_accuracies']
+                try:
+                    del output['valid_accuracies']
+                except KeyError:
+                    pass
         
         # merge meta data to output dict
         output = {'testproblem': testproblem,
@@ -435,8 +439,9 @@ class Runner(abc.ABC):
             json.dump(output, f, indent=4)
 
     @staticmethod
-    def _abort_routine(epoch_count, num_epochs, train_losses, test_losses, train_accuracies, test_accuracies,
+    def _abort_routine(epoch_count, num_epochs, train_losses, valid_losses, test_losses, train_accuracies, valid_accuracies, test_accuracies,
                        minibatch_train_losses):
+        # TODO new valid signature will cause problems for tf version
         """A routine that is executed if a training run is aborted (loss is NaN or Inf)."""
 
         warnings.warn('Breaking from run after epoch ' + str(epoch_count) + ' due to wrongly calibrated optimization (Loss is Nan or Inf). The metrices for the remaining epochs will be filled with the initial performance values.', RuntimeWarning)
@@ -444,10 +449,12 @@ class Runner(abc.ABC):
         # fill the rest of the metrices with initial observations
         for i in range(epoch_count, num_epochs):
             train_losses.append(train_losses[0])
+            valid_losses.append(valid_losses[0])
             test_losses.append(test_losses[0])
             train_accuracies.append(train_accuracies[0])
+            valid_accuracies.append(valid_accuracies[0])
             test_accuracies.append(test_accuracies[0])
             minibatch_train_losses.append(minibatch_train_losses[0])
-        return train_losses, test_losses, train_accuracies, test_accuracies, minibatch_train_losses
+        return train_losses, valid_losses, test_losses, train_accuracies, valid_accuracies, test_accuracies, minibatch_train_losses
 
 

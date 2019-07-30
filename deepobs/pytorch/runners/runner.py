@@ -107,27 +107,29 @@ class PTRunner(Runner):
 
     # Wrapper functions for the evaluation phase.
     @staticmethod
-    def evaluate(tproblem, test=True):
+    def evaluate(tproblem, phase):
         """Evaluates the performance of the current state of the model
         of the testproblem instance.
         Has to be called in the beggining of every epoch within the
         training method. Returns the losses and accuracies.
         Args:
             tproblem (testproblem): The testproblem instance to evaluate
-            test (bool): Whether tproblem is evaluated on the test set.
+            phase (str): The phase of the evaluation. Must be one of 'TRAIN', 'VALID' or 'TEST'
             If false, it is evaluated on the train evaluation set.
         Returns:
             float: The loss of the current state.
             float: The accuracy of the current state.
         """
 
-        if test:
+        if phase == 'TEST':
             tproblem.test_init_op()
             msg = "TEST:"
-        else:
+        elif phase == 'TRAIN':
             tproblem.train_eval_init_op()
             msg = "TRAIN:"
-
+        elif phase == 'VALID':
+            tproblem.valid_init_op()
+            msg = "VALID:"
         # evaluation loop over every batch of the corresponding evaluation set
         loss = 0.0
         accuracy = 0.0
@@ -177,8 +179,10 @@ class StandardRunner(PTRunner):
 
         # Lists to log train/test loss and accuracy.
         train_losses = []
+        valid_losses = []
         test_losses = []
         train_accuracies = []
+        valid_accuracies = []
         test_accuracies = []
 
         minibatch_train_losses = []
@@ -197,11 +201,15 @@ class StandardRunner(PTRunner):
             print("********************************")
             print("Evaluating after {0:d} of {1:d} epochs...".format(epoch_count, num_epochs))
 
-            loss_, acc_ = self.evaluate(tproblem, test=False)
+            loss_, acc_ = self.evaluate(tproblem, phase='TRAIN')
             train_losses.append(loss_)
             train_accuracies.append(acc_)
 
-            loss_, acc_ = self.evaluate(tproblem, test=True)
+            loss_, acc_ = self.evaluate(tproblem, phase='VALID')
+            valid_losses.append(loss_)
+            valid_accuracies.append(acc_)
+
+            loss_, acc_ = self.evaluate(tproblem, phase='TEST')
             test_losses.append(loss_)
             test_accuracies.append(acc_)
 
@@ -242,13 +250,22 @@ class StandardRunner(PTRunner):
                     break
 
             if not np.isfinite(batch_loss.item()):
-                train_losses, test_losses, train_accuracies, test_accuracies, minibatch_train_losses = self._abort_routine(epoch_count,
-                                                                                                   num_epochs,
-                                                                                                   train_losses,
-                                                                                                   test_losses,
-                                                                                                   train_accuracies,
-                                                                                                   test_accuracies,
-                                                                                                minibatch_train_losses)
+                train_losses, \
+                valid_losses, \
+                test_losses, \
+                train_accuracies, \
+                valid_accuracies, \
+                test_accuracies, \
+                minibatch_train_losses = self._abort_routine(
+                    epoch_count,
+                    num_epochs,
+                    train_losses,
+                    valid_losses,
+                    test_losses,
+                    train_accuracies,
+                    valid_accuracies,
+                    test_accuracies,
+                    minibatch_train_losses)
                 break
             else:
                 continue
@@ -256,9 +273,11 @@ class StandardRunner(PTRunner):
         # Put results into output dictionary.
         output = {
             "train_losses": train_losses,
+            'valid_losses': valid_losses,
             "test_losses": test_losses,
             "minibatch_train_losses": minibatch_train_losses,
             "train_accuracies": train_accuracies,
+            'valid_accuracies': valid_accuracies,
             "test_accuracies": test_accuracies
         }
 
