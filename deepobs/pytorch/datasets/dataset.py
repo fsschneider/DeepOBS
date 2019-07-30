@@ -38,12 +38,12 @@ class DataSet(abc.ABC):
         else:
             self._pin_memory = False
         self._num_workers = config.get_num_workers()
-        self._train_dataloader = self._make_train_dataloader()
+        self._train_dataloader, self._valid_dataloader = self._make_train_and_valid_dataloader()
         self._train_eval_dataloader = self._make_train_eval_dataloader()
         self._test_dataloader = self._make_test_dataloader()
 
     @abc.abstractmethod
-    def _make_train_dataloader(self):
+    def _make_train_and_valid_dataloader(self):
         """Creates the training data loader.
 
     Returns:

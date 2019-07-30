@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 from deepobs.pytorch import datasets
 import deepobs.pytorch.config as config
-
+config.set_data_dir('/home/isenach/Desktop/Project/deepobs/data_deepobs')
 
 def denormalize_image(img):
     """Convert a normalized (float) image back to unsigned 8-bit images."""
@@ -38,9 +38,11 @@ def display_images(dataset_cls, grid_size=5, phase="train"):
         iterator = iter(dataset._train_eval_dataloader)
     elif phase == "test":
         iterator = iter(dataset._test_dataloader)
+    elif phase == 'valid':
+        iterator = iter(dataset._valid_dataloader)
     else:
         raise ValueError(
-            "Choose 'phase' from ['train', 'train_eval', 'test'].")
+            "Choose 'phase' from ['train', 'train_eval', 'test', 'valid'].")
 
     x, y = next(iterator)
     x = x.numpy()
@@ -110,25 +112,26 @@ class IdentityDict(dict):
 
 
 if __name__ == "__main__":
-    display_images(datasets.mnist, grid_size=5, phase="train")
-    display_images(datasets.mnist, grid_size=5, phase="train_eval")
-    display_images(datasets.mnist, grid_size=5, phase="test")
-
-    display_images(datasets.fmnist, grid_size=5, phase="train")
-    display_images(datasets.fmnist, grid_size=5, phase="train_eval")
-    display_images(datasets.fmnist, grid_size=5, phase="test")
+    # display_images(datasets.mnist, grid_size=5, phase="train")
+    # display_images(datasets.mnist, grid_size=5, phase="train_eval")
+    # display_images(datasets.mnist, grid_size=5, phase="test")
+    #
+    # display_images(datasets.fmnist, grid_size=5, phase="train")
+    # display_images(datasets.fmnist, grid_size=5, phase="train_eval")
+    # display_images(datasets.fmnist, grid_size=5, phase="test")
 
     display_images(datasets.cifar10, grid_size=5, phase="train")
     display_images(datasets.cifar10, grid_size=5, phase="train_eval")
     display_images(datasets.cifar10, grid_size=5, phase="test")
+    display_images(datasets.cifar10, grid_size=5, phase="valid")
 
-    display_images(datasets.cifar100, grid_size=5, phase="train")
-    display_images(datasets.cifar100, grid_size=5, phase="train_eval")
-    display_images(datasets.cifar100, grid_size=5, phase="test")
-
-    display_images(datasets.svhn, grid_size=5, phase="train")
-    display_images(datasets.svhn, grid_size=5, phase="train_eval")
-    display_images(datasets.svhn, grid_size=5, phase="test")
+    # display_images(datasets.cifar100, grid_size=5, phase="train")
+    # display_images(datasets.cifar100, grid_size=5, phase="train_eval")
+    # display_images(datasets.cifar100, grid_size=5, phase="test")
+    #
+    # display_images(datasets.svhn, grid_size=5, phase="train")
+    # display_images(datasets.svhn, grid_size=5, phase="train_eval")
+    # display_images(datasets.svhn, grid_size=5, phase="test")
 
 #    display_images(datasets.imagenet, grid_size=5, phase="train")
 #    display_images(datasets.imagenet, grid_size=5, phase="train_eval")
