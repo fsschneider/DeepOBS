@@ -422,7 +422,7 @@ class net_quadratic_deep(nn.Module):
 
         out_batched = 0.5*torch.bmm(qt, z)
 
-        return out_batched.mean()
+        return out_batched
 
 class net_mlp(nn.Sequential):
     """  A basic MLP architecture. The network is build as follows:

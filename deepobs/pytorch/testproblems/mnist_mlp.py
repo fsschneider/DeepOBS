@@ -52,6 +52,6 @@ class mnist_mlp(TestProblem):
     def set_up(self):
         """Sets up the vanilla CNN test problem on MNIST."""
         self.data = mnist(self._batch_size)
-        self.loss_function = nn.CrossEntropyLoss()
+        self.loss_function = nn.CrossEntropyLoss
         self.net = net_mlp(num_outputs=10)
         self.net.to(self._device)

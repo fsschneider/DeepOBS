@@ -7,14 +7,25 @@ from torch import nn
 from numpy.random import RandomState
 
 
-def vae_loss_function(outputs, targets, mean, std_dev):
+def vae_loss_function_factory(reduction='mean'):
     """The loss function for the VAE testproblems.
     It consists of the latent loss and the image reconstruction loss."""
-    outputs_flat = outputs.view(-1, 28 * 28)
-    targets_flat = targets.view(-1, 28 * 28)
-    image_loss = torch.mean((outputs_flat - targets_flat).pow(2).sum(dim=1))
-    latent_loss = -0.5 * torch.mean((1 + 2 * std_dev - mean.pow(2) - torch.exp(2 * std_dev)).sum(dim=1))
-    return image_loss + latent_loss
+    def vae_loss_function(outputs, targets, mean, std_dev):
+        outputs_flat = outputs.view(-1, 28 * 28)
+        targets_flat = targets.view(-1, 28 * 28)
+        if reduction == 'mean':
+            image_loss = torch.mean((outputs_flat - targets_flat).pow(2).sum(dim=1))
+            latent_loss = -0.5 * torch.mean((1 + 2 * std_dev - mean.pow(2) - torch.exp(2 * std_dev)).sum(dim=1))
+        elif reduction == 'sum':
+            image_loss = torch.sum((outputs_flat - targets_flat).pow(2).sum(dim=1))
+            latent_loss = -0.5 * torch.sum((1 + 2 * std_dev - mean.pow(2) - torch.exp(2 * std_dev)).sum(dim=1))
+        elif reduction == 'none':
+            image_loss = (outputs_flat - targets_flat).pow(2).sum(dim=1)
+            latent_loss = -0.5 * (1 + 2 * std_dev - mean.pow(2) - torch.exp(2 * std_dev)).sum(dim=1)
+        else:
+            raise NotImplementedError('Reduction ' + reduction + ' not implemented.')
+        return image_loss + latent_loss
+    return vae_loss_function
 
 
 def _determine_inverse_padding_from_tf_same(input_dimensions, kernel_dimensions, stride_dimensions):

@@ -5,7 +5,7 @@ import torch
 from .testproblems_modules import net_vae
 from ..datasets.fmnist import fmnist
 from .testproblem import TestProblem
-from .testproblems_utils import vae_loss_function
+from .testproblems_utils import vae_loss_function_factory
 import warnings
 
 
@@ -58,14 +58,14 @@ class fmnist_vae(TestProblem):
                 RuntimeWarning
             )
 
-        self.loss_function = vae_loss_function
+        self.loss_function = vae_loss_function_factory
 
     def set_up(self):
         self.data = fmnist(self._batch_size)
         self.net = net_vae(n_latent = 8)
         self.net.to(self._device)
 
-    def get_batch_loss_and_accuracy(self, return_forward_func = False):
+    def get_batch_loss_and_accuracy(self, return_forward_func = False, reduction='mean'):
         """Gets a new batch and calculates the loss and accuracy (if available)
         on that batch. This is a default implementation for image classification.
         Testproblems with different calculation routines (e.g. RNNs) overwrite this method accordingly.
@@ -83,10 +83,10 @@ class fmnist_vae(TestProblem):
             if self.phase in ["train_eval", "test"]:
                 with torch.no_grad():
                     outputs, means, std_devs = self.net(inputs)
-                    loss = self.loss_function(outputs, inputs, means, std_devs)
+                    loss = self.loss_function(reduction=reduction)(outputs, inputs, means, std_devs)
             else:
                 outputs, means, std_devs = self.net(inputs)
-                loss = self.loss_function(outputs, inputs, means, std_devs)
+                loss = self.loss_function(reduction=reduction)(outputs, inputs, means, std_devs)
 
             accuracy = 0
             return loss, accuracy

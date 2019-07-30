@@ -41,7 +41,7 @@ class svhn_wrn164(TestProblem):
     def set_up(self):
         """Set up the Wide ResNet 16-4 test problem on SVHN."""
         self.data = svhn(self._batch_size, data_augmentation=True)
-        self.loss_function = nn.CrossEntropyLoss()
+        self.loss_function = nn.CrossEntropyLoss
         self.net = net_wrn(num_outputs=10, num_residual_blocks=2, widening_factor=4)
         self.net.to(self._device)
 

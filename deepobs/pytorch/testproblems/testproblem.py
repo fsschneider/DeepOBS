@@ -83,7 +83,7 @@ class TestProblem(abc.ABC):
         """Returns the next batch from the iterator."""
         return next(self._iterator)
 
-    def get_batch_loss_and_accuracy(self, return_forward_func = False):
+    def get_batch_loss_and_accuracy(self, return_forward_func = False, reduction = 'mean'):
         """Gets a new batch and calculates the loss and accuracy (if available)
         on that batch. This is a default implementation for image classification.
         Testproblems with different calculation routines (e.g. RNNs) overwrite this method accordingly.
@@ -106,10 +106,10 @@ class TestProblem(abc.ABC):
             if self.phase in ["train_eval", "test"]:
                 with torch.no_grad():
                     outputs = self.net(inputs)
-                    loss = self.loss_function(outputs, labels)
+                    loss = self.loss_function(reduction=reduction)(outputs, labels)
             else:
                 outputs = self.net(inputs)
-                loss = self.loss_function(outputs, labels)
+                loss = self.loss_function(reduction=reduction)(outputs, labels)
 
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
