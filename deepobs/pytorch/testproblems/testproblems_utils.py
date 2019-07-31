@@ -156,67 +156,59 @@ def hook_factory_tf_inverse_padding_same(kernel_size, stride):
     return hook
 
 
-class tfmaxpool2d(nn.Sequential):
-    """Implements tf's padding 'same' for maxpooling"""
-
-    def __init__(self,
-                 kernel_size,
+def tfmaxpool2d(kernel_size,
                  stride=None,
                  dilation=1,
                  return_indices=False,
                  ceil_mode=False,
                  tf_padding_type = None):
+    """Implements tf's padding 'same' for maxpooling"""
+    modules = []
+    if tf_padding_type == 'same':
+        padding = nn.ZeroPad2d(0)
+        hook = hook_factory_tf_padding_same(kernel_size, stride)
+        padding.register_forward_pre_hook(hook)
+        modules.append(padding)
 
-        super(tfmaxpool2d, self).__init__()
+    modules.append(nn.MaxPool2d(kernel_size=kernel_size,
+             stride=stride,
+             padding=0,
+             dilation=dilation,
+             return_indices=return_indices,
+             ceil_mode=ceil_mode,
+             ))
 
-        if tf_padding_type == 'same':
-            self.add_module('padding', nn.ZeroPad2d(0))
-            hook = hook_factory_tf_padding_same(kernel_size, stride)
-            self.padding.register_forward_pre_hook(hook)
-
-        self.add_module('maxpool', nn.MaxPool2d(kernel_size=kernel_size,
-                 stride=stride,
-                 padding=0,
-                 dilation=dilation,
-                 return_indices=return_indices,
-                 ceil_mode=ceil_mode,
-                 ))
-
-
-class tfconv2d(nn.Sequential):
-    """Implements tf's padding 'same' for convolutions"""
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride=1,
-                 dilation=1,
-                 groups=1,
-                 bias=True,
-                 tf_padding_type=None):
-
-        super(tfconv2d, self).__init__()
-
-        if tf_padding_type == 'same':
-            self.add_module('padding', nn.ZeroPad2d(0))
-            hook = hook_factory_tf_padding_same(kernel_size, stride)
-            self.padding.register_forward_pre_hook(hook)
-
-        self.add_module('conv', nn.Conv2d(in_channels=in_channels,
-                                          out_channels=out_channels,
-                                          kernel_size=kernel_size,
-                                          stride=stride,
-                                          padding=0,
-                                          dilation=dilation,
-                                          groups=groups,
-                                          bias=bias))
+    return nn.Sequential(*modules)
 
 
-class tfconv2d_transpose(nn.Sequential):
-    """Implements tf's padding 'same' for transpose convolutions"""
-    def __init__(self,
-                 in_channels,
+def tfconv2d(in_channels,
+             out_channels,
+             kernel_size,
+             stride=1,
+             dilation=1,
+             groups=1,
+             bias=True,
+             tf_padding_type=None
+             ):
+    modules = []
+    if tf_padding_type == 'same':
+        padding = nn.ZeroPad2d(0)
+        hook = hook_factory_tf_padding_same(kernel_size, stride)
+        padding.register_forward_pre_hook(hook)
+        modules.append(padding)
+
+    modules.append(nn.Conv2d(in_channels=in_channels,
+                             out_channels=out_channels,
+                             kernel_size=kernel_size,
+                             stride=stride,
+                             padding=0,
+                             dilation=dilation,
+                             groups=groups,
+                             bias=bias))
+    return nn.Sequential(*modules)
+
+
+def tfconv2d_transpose(in_channels,
                  out_channels,
                  kernel_size,
                  stride=1,
@@ -225,29 +217,31 @@ class tfconv2d_transpose(nn.Sequential):
                  bias=True,
                  dilation=1,
                  tf_padding_type = None):
+    """Implements tf's padding 'same' for transpose convolutions"""
+    modules = []
+    if tf_padding_type == 'same':
+        padding = nn.ZeroPad2d(0)
+        hook = hook_factory_tf_inverse_padding_same(kernel_size, stride)
+        padding.register_forward_pre_hook(hook)
+        modules.append(padding)
 
-        super(tfconv2d_transpose, self).__init__()
+    # eliminate the effect of the in-build padding (is not capable of asymmeric padding)
+    if isinstance(kernel_size, int):
+        padding = kernel_size - 1
+    else:
+        padding = (kernel_size[0] - 1, kernel_size[1] - 1)
 
-        if tf_padding_type == 'same':
-            self.add_module('padding', nn.ZeroPad2d(0))
-            hook = hook_factory_tf_inverse_padding_same(kernel_size, stride)
-            self.padding.register_forward_pre_hook(hook)
+    modules.append(nn.ConvTranspose2d(in_channels,
+                                    out_channels,
+                                    kernel_size,
+                                    stride,
+                                    padding,
+                                    output_padding,
+                                    groups,
+                                    bias,
+                                    dilation))
 
-        # eliminate the effect of the in-build padding (is not capable of asymmeric padding)
-        if isinstance(kernel_size, int):
-            padding = kernel_size - 1
-        else:
-            padding = (kernel_size[0] - 1, kernel_size[1] - 1)
-
-        self.add_module('transconv', nn.ConvTranspose2d(in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 output_padding,
-                 groups,
-                 bias,
-                 dilation))
+    return nn.Sequential(*modules)
 
 
 class flatten(nn.Module):
