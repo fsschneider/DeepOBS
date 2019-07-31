@@ -122,13 +122,9 @@ class TestProblem(abc.ABC):
             accuracy = correct/total
 
             if add_regularization_if_available:
-                # if the testproblem has a regularization, add the regularization loss.
-                if hasattr(self, 'get_regularization_loss'):
-                    regularizer_loss = self.get_regularization_loss()
-                else:
-                    regularizer_loss = 0
+                regularizer_loss = self.get_regularization_loss()
             else:
-                regularizer_loss = 0
+                regularizer_loss = torch.tensor(0.0, device=torch.device(self._device))
 
             return loss + regularizer_loss, accuracy
 
@@ -136,6 +132,12 @@ class TestProblem(abc.ABC):
             return _get_batch_loss_and_accuracy(), _get_batch_loss_and_accuracy
         else:
             return _get_batch_loss_and_accuracy()
+
+    def get_regularization_loss(self):
+        """The dedault implementation for regularization loss (i.e. none). Testproblems that have a regularization
+        overwrite this method accorcdingly.
+        """
+        return torch.tensor(0.0, device=torch.device(self._device))
 
     @abc.abstractmethod
     def set_up(self):

@@ -135,13 +135,9 @@ class quadratic_deep(TestProblem):
             accuracy = 0.0
 
             if add_regularization_if_available:
-                # if the testproblem has a regularization, add the regularization loss.
-                if hasattr(self, 'get_regularization_loss'):
-                    regularizer_loss = self.get_regularization_loss()
-                else:
-                    regularizer_loss = 0
+                regularizer_loss = self.get_regularization_loss()
             else:
-                regularizer_loss = 0
+                torch.tensor(0.0, device=torch.device(self._device))
 
             return loss + regularizer_loss, accuracy
 
