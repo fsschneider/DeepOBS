@@ -31,7 +31,8 @@ class Runner(abc.ABC):
     """
 
     def __init__(self, optimizer_class, hyperparameter_names):
-        """
+        """ Creates a new Runner instance
+
         Args:
             optimizer_class: The optimizer class of the optimizer that is run on
             the testproblems. For PyTorch this must be a subclass of torch.optim.Optimizer. For
@@ -69,6 +70,7 @@ class Runner(abc.ABC):
             1. setup testproblem
             2. run the training (must be implemented by subclass)
             3. merge and write output
+
         Args:
             testproblem (str): Name of the testproblem.
             hyperparams (dict): The explizit values of the hyperparameters of the optimizer that are used for training
@@ -86,14 +88,14 @@ class Runner(abc.ABC):
             training_params (dict): Kwargs for the training method.
 
         Returns:
-            dict: {<...meta data...>
-                'test_losses' : test_losses
-                 'train_losses': train_losses,
-                 'test_accuracies': test_accuracies,
-                 'train_accuracies': train_accuracies,
-                 'analyzable_training_params': {...}
-                 }
-            were <...meta data...> stores the run args.
+            dict: {<...meta data...>, \
+                'test_losses' : test_losses, \
+                 'train_losses': train_losses, \
+                 'test_accuracies': test_accuracies, \
+                 'train_accuracies': train_accuracies, \
+                 'analyzable_training_params': {...} \
+                 } \
+            where <...meta data...> stores the run args.
 
         """
         args = self.parse_args(testproblem,
@@ -135,6 +137,7 @@ class Runner(abc.ABC):
     @abc.abstractmethod
     def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params):
         """Performs the training and stores the metrices.
+
             Args:
                 tproblem (deepobs.[tensorflow/pytorch].testproblems.testproblem): The testproblem instance to train on.
                 hyperparams (dict): The optimizer hyperparameters to use for the training.
@@ -146,12 +149,12 @@ class Runner(abc.ABC):
                 **training_params (dict): Kwargs for additional training parameters that are implemented by subclass.
 
             Returns:
-                dict: The logged metrices. Is of the form:
-                    ```{'test_losses' : [...],
-                     'train_losses': [...],
-                     'test_accuracies': [...],
-                     'train_accuracies': [...]
-                     }```
+                dict: The logged metrices. Is of the form: \
+                    {'test_losses' : [...], \
+                     'train_losses': [...],  \
+                     'test_accuracies': [...], \
+                     'train_accuracies': [...] \
+                     } \
             where the metrices values are lists that were filled during training.
         """
         return
@@ -217,6 +220,7 @@ class Runner(abc.ABC):
             training_params):
 
         """Constructs an argparse.ArgumentParser and parses the arguments from command line.
+
         Args:
                 testproblem (str): Name of the testproblem.
                 hyperparams (dict): The explizit values of the hyperparameters of the optimizer that are used for training
@@ -232,6 +236,7 @@ class Runner(abc.ABC):
                 tb_log (bool): Whether to use tensorboard logging or not
                 tb_log_dir (str): The path where to save tensorboard events.
                 training_params (dict): Kwargs for the training method.
+
         Returns:
             dict: A dicionary of all arguments.
             """
@@ -368,14 +373,18 @@ class Runner(abc.ABC):
 
     def create_output_directory(self, output_dir, output):
         """Creates the output directory of the run.
+
         Args:
             output_dir (str): The path to the results folder
             output (dict): A dict than contains the metrices and main settings
             from the training run and a subdict called 'analyzable_training_params'
             that holds additional training_params that need to be analyzed.
+
         Returns:
-            str: Path to the run directory which is named after all relevant settings.
-            str: JSON file name of the run that is named after the seed and terminating time of the run.
+            tuple: Tuple contaning:
+            
+                str: Path to the run directory which is named after all relevant settings.
+                str: JSON file name of the run that is named after the seed and terminating time of the run.
         """
 
         # add everything mandatory to the name
@@ -426,6 +435,7 @@ class Runner(abc.ABC):
     @staticmethod
     def write_output(output, run_folder_name, file_name):
         """Writes the JSON output.
+
         Args:
             output (dict): Output of the training loop of the runner.
             run_folder_name (str): The name of the output folder.

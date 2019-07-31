@@ -152,6 +152,7 @@ def plot_hyperparameter_sensitivity(path, hyperparam, mode='final', metric = 'te
                                     reference_path = None):
 
     """Plots the hyperparameter sensitivtiy of the optimizer.
+
     Args:
         path (str): The path to the optimizer to analyse. Or to a whole testproblem. In that case, all optimizer sensitivities are plotted.
         hyperparam (str): The name of the hyperparameter that should be analyzed.
@@ -160,6 +161,7 @@ def plot_hyperparameter_sensitivity(path, hyperparam, mode='final', metric = 'te
         xscale (str): The scale for the parameter axes. Is passed to plt.xscale().
         plot_std (bool): Whether to plot markers for individual seed runs or not. If `False`, only the mean is plotted.
         reference_path (str): Path to the reference optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are taken as reference).
+
     Returns:
         matplotlib.axes.Axes: The figure and axes of the plot.
         """
