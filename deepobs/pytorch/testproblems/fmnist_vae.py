@@ -80,7 +80,7 @@ class fmnist_vae(TestProblem):
 
         def _get_batch_loss_and_accuracy():
             # in evaluation phase is no gradient needed
-            if self.phase in ["train_eval", "test"]:
+            if self.phase in ["train_eval", "test", "valid"]:
                 with torch.no_grad():
                     outputs, means, std_devs = self.net(inputs)
                     loss = self.loss_function(outputs, inputs, means, std_devs)

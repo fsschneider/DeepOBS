@@ -111,7 +111,7 @@ class quadratic_deep(TestProblem):
 
         def _get_batch_loss_and_accuracy():
             # in evaluation phase is no gradient needed
-            if self.phase in ["train_eval", "test"]:
+            if self.phase in ["train_eval", "test", "valid"]:
                 with torch.no_grad():
                     loss = self.net(inputs)
             else:

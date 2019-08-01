@@ -113,7 +113,7 @@ class TestProblem(abc.ABC):
             total = 0.0
 
             # in evaluation phase is no gradient needed
-            if self.phase in ["train_eval", "test"]:
+            if self.phase in ["train_eval", "test", "valid"]:
                 with torch.no_grad():
                     outputs = self.net(inputs)
                     loss = self.loss_function(outputs, labels)
