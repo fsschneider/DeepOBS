@@ -8,6 +8,19 @@ from torchvision import datasets
 from torchvision import transforms
 from .datasets_utils import train_eval_sampler
 
+training_transform_augmented = transforms.Compose([
+        transforms.Pad(padding=2),
+        transforms.RandomCrop(size=(32, 32)),
+        transforms.ColorJitter(brightness=63. / 255., saturation=[0.5, 1.5], contrast=[0.2, 1.8]),
+        transforms.ToTensor(),
+        transforms.Normalize((0.4376821, 0.4437697, 0.47280442), (0.19803012, 0.20101562, 0.19703614))
+    ])
+
+training_transform_not_augmented = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.4376821, 0.4437697, 0.47280442), (0.19803012, 0.20101562, 0.19703614))
+    ])
+
 
 class svhn(dataset.DataSet):
     """DeepOBS data set class for the `Street View House Numbers (SVHN)\
@@ -33,32 +46,19 @@ class svhn(dataset.DataSet):
         self._train_eval_size = train_eval_size
         super(svhn, self).__init__(batch_size)
 
-    def _make_dataloader(self, split, shuffle=True, data_augmentation = False, sampler=None):
-        if data_augmentation:
-            transform = transforms.Compose([
-                    transforms.Pad(padding=2),
-                    transforms.RandomCrop(size=(32,32)),
-                    transforms.ColorJitter(brightness=63. / 255., saturation=[0.5,1.5], contrast=[0.2,1.8]),
-                    transforms.ToTensor(),
-                    transforms.Normalize((0.4376821,  0.4437697,  0.47280442), (0.19803012, 0.20101562, 0.19703614))
-                    ])
+    def _make_train_and_valid_dataloader(self):
+        if self._data_augmentation:
+            transform = training_transform_augmented
         else:
-            transform = transforms.Compose([
-                    transforms.ToTensor(),
-                    transforms.Normalize((0.4376821,  0.4437697,  0.47280442), (0.19803012, 0.20101562, 0.19703614))
-                    ])
-
-        dataset = datasets.SVHN(root = config.get_data_dir(), split = split, download = True, transform = transform)
-        loader = dat.DataLoader(dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory=self._pin_memory, num_workers=self._num_workers, sampler=sampler)
-        return loader
-
-    def _make_train_dataloader(self):
-        return self._make_dataloader(split='train', shuffle = True, data_augmentation = self._data_augmentation, sampler=None)
+            transform = training_transform_not_augmented
+        # TODO SVHN has actually an extra dataset for validation
+        train_dataset = datasets.SVHN(root=config.get_data_dir(), split='train', download=True, transform=transform)
+        valid_dataset = datasets.SVHN(root=config.get_data_dir(), split='train', download=True, transform=training_transform_not_augmented)
+        train_loader, valid_loader = self._make_train_and_valid_dataloader_helper(train_dataset, valid_dataset)
+        return train_loader, valid_loader
 
     def _make_test_dataloader(self):
-        return self._make_dataloader(split='test', shuffle = False, data_augmentation = False, sampler=None)
-
-    def _make_train_eval_dataloader(self):
-        size = len(self._train_dataloader.dataset)
-        sampler = train_eval_sampler(size, self._train_eval_size)
-        return self._make_dataloader(split='train', shuffle=False, data_augmentation=self._data_augmentation, sampler=sampler)
+        # TODO what are the transforms for the test set? what is the normalization? the one of train set? or all?
+        transform = training_transform_not_augmented
+        test_dataset = datasets.SVHN(root=config.get_data_dir(), split='test', download=True, transform=transform)
+        return self._make_dataloader(test_dataset, sampler=None)

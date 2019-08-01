@@ -47,23 +47,23 @@ class quadratic(dataset.DataSet):
         self._noise_level = noise_level
         super(quadratic, self).__init__(batch_size)
 
-    def _make_dataloader(self, X, shuffle=True):
-
-        dataset = dat.TensorDataset(torch.from_numpy(X))
-        loader = dat.DataLoader(dataset=dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory = self._pin_memory, num_workers = self._num_workers)
-        return loader
-
-    def _make_train_dataloader(self):
+    def _make_train_and_valid_dataloader(self):
         # Draw data from a random generator with a fixed seed to always get the
         # same data.
         rng = np.random.RandomState(42)
         X = rng.normal(0.0, self._noise_level, (self._train_size, self._dim))
         X = np.float32(X)
-        return self._make_dataloader(X, shuffle=True)
+        train_dataset = dat.TensorDataset(torch.from_numpy(X))
 
-    def _make_train_eval_dataloader(self):
-        # take whole train set for train evaluation
-        return self._train_dataloader
+        # TODO is it ok that I simply get the valid set from another random seed?
+        rng = np.random.RandomState(44)
+        X = rng.normal(0.0, self._noise_level, (self._train_size, self._dim))
+        X = np.float32(X)
+        valid_dataset = dat.TensorDataset(torch.from_numpy(X))
+
+        train_loader = self._make_dataloader(train_dataset)
+        valid_loader = self._make_dataloader(valid_dataset)
+        return train_loader, valid_loader
 
     def _make_test_dataloader(self):
         # Draw data from a random generator with a fixed seed to always get the
@@ -71,4 +71,8 @@ class quadratic(dataset.DataSet):
         rng = np.random.RandomState(43)
         X = rng.normal(0.0, self._noise_level, (self._train_size, self._dim))
         X = np.float32(X)
-        return self._make_dataloader(X, shuffle=False)
+        test_dataset = dat.TensorDataset(torch.from_numpy(X))
+        return self._make_dataloader(test_dataset)
+
+    def _make_train_eval_dataloader(self):
+        return self._train_dataloader

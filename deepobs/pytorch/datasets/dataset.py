@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 import abc
 from .. import config
+from torch.utils import data as dat
+from torch.utils.data.sampler import SubsetRandomSampler
+from .datasets_utils import train_eval_sampler
+
 """Base class for DeepOBS datasets."""
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods
@@ -42,21 +46,43 @@ class DataSet(abc.ABC):
         self._train_eval_dataloader = self._make_train_eval_dataloader()
         self._test_dataloader = self._make_test_dataloader()
 
+    def _make_dataloader(self, dataset, sampler = None):
+        loader = dat.DataLoader(dataset, batch_size=self._batch_size, drop_last=True,
+                                pin_memory=self._pin_memory, num_workers=self._num_workers, sampler=sampler)
+        return loader
+
+    def _make_train_eval_split_sampler(self, train_dataset):
+        """Generates SubSetRandomSamplers that can be used for splitting the training set."""
+        indices = list(range(len(train_dataset)))
+        train_indices, valid_indices = indices[self._train_eval_size:], indices[:self._train_eval_size]
+        train_sampler = SubsetRandomSampler(train_indices)
+        valid_sampler = SubsetRandomSampler(valid_indices)
+        return train_sampler, valid_sampler
+
+    def _make_train_and_valid_dataloader_helper(self, train_dataset, valid_dataset):
+        train_sampler, valid_sampler = self._make_train_eval_split_sampler(train_dataset)
+        # since random sampling, shuffle is useless
+        train_loader = self._make_dataloader(train_dataset, sampler=train_sampler)
+        valid_loader = self._make_dataloader(valid_dataset, sampler=valid_sampler)
+        return train_loader, valid_loader
+
+    def _make_train_eval_dataloader(self):
+        """Creates the training evaluation data loader.
+
+        Returns:
+          A torch.utils.data.DataLoader instance with batches of training evaluatoion data.
+        """
+        size = len(self._train_dataloader.dataset)
+        sampler = train_eval_sampler(size, self._train_eval_size)
+        return self._make_dataloader(self._train_dataloader.dataset, sampler=sampler)
+
+
     @abc.abstractmethod
     def _make_train_and_valid_dataloader(self):
         """Creates the training data loader.
 
     Returns:
       A torch.utils.data.DataLoader instance with batches of training data.
-    """
-        pass
-
-    @abc.abstractmethod
-    def _make_train_eval_dataloader(self):
-        """Creates the train eval data loader.
-
-    Returns:
-      A torch.utils.data.DataLoader instance with batches of training eval data.
     """
         pass
 

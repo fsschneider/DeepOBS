@@ -38,19 +38,14 @@ class fmnist(dataset.DataSet):
         self._train_eval_size = train_eval_size
         super(fmnist, self).__init__(batch_size)
 
-    def _make_dataloader(self, train, shuffle, sampler=None):
+    def _make_train_and_valid_dataloader(self):
         transform = transforms.ToTensor()
-        dataset = datasets.FashionMNIST(root = config.get_data_dir(), train = train, download = True, transform = transform)
-        loader = dat.DataLoader(dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory=self._pin_memory, num_workers=self._num_workers, sampler=sampler)
-        return loader
-
-    def _make_train_dataloader(self):
-        return self._make_dataloader(train=True, shuffle = True)
+        train_dataset = datasets.FashionMNIST(root=config.get_data_dir(), train=True, download=True, transform=transform)
+        valid_dataset = datasets.FashionMNIST(root=config.get_data_dir(), train=True, download=True, transform=transform)
+        train_loader, valid_loader = self._make_train_and_valid_dataloader_helper(train_dataset, valid_dataset)
+        return train_loader, valid_loader
 
     def _make_test_dataloader(self):
-        return self._make_dataloader(train=False, shuffle = False)
-
-    def _make_train_eval_dataloader(self):
-        size = len(self._train_dataloader.dataset)
-        sampler = train_eval_sampler(size, self._train_eval_size)
-        return self._make_dataloader(train=True, shuffle=False, sampler=sampler)
+        transform = transforms.ToTensor()
+        test_dataset = datasets.FashionMNIST(root=config.get_data_dir(), train=False, download=True, transform=transform)
+        return self._make_dataloader(test_dataset, sampler=None)

@@ -1,12 +1,25 @@
 # -*- coding: utf-8 -*-
 """CIFAR-100 DeepOBS dataset."""
-
 from . import dataset
 from .. import config
 from torch.utils import data as dat
 from torchvision import datasets
 from torchvision import transforms
 from .datasets_utils import train_eval_sampler
+
+training_transform_augmented = transforms.Compose([
+        transforms.Pad(padding=2),
+        transforms.RandomCrop(size=(32, 32)),
+        transforms.RandomHorizontalFlip(),
+        transforms.ColorJitter(brightness=63. / 255., saturation=[0.5, 1.5], contrast=[0.2, 1.8]),
+        transforms.ToTensor(),
+        transforms.Normalize((0.50707516, 0.48654887, 0.44091784), (0.26733429, 0.25643846, 0.27615047))
+    ])
+
+training_transform_not_augmented = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize((0.50707516, 0.48654887, 0.44091784), (0.26733429, 0.25643846, 0.27615047))
+])
 
 
 class cifar100(dataset.DataSet):
@@ -48,33 +61,18 @@ class cifar100(dataset.DataSet):
         self._train_eval_size = train_eval_size
         super(cifar100, self).__init__(batch_size)
 
-    def _make_dataloader(self, train, shuffle=True, data_augmentation = False, sampler=None):
-        if data_augmentation:
-            transform = transforms.Compose([
-                    transforms.Pad(padding=2),
-                    transforms.RandomCrop(size=(32,32)),
-                    transforms.RandomHorizontalFlip(),
-                    transforms.ColorJitter(brightness=63. / 255.,saturation=[0.5,1.5], contrast=[0.2,1.8]),
-                    transforms.ToTensor(),
-                    transforms.Normalize((0.50707516,  0.48654887,  0.44091784),(0.26733429,  0.25643846,  0.27615047))
-                    ])
+    def _make_train_and_valid_dataloader(self):
+        if self._data_augmentation:
+            transform = training_transform_augmented
         else:
-            transform = transforms.Compose([
-                    transforms.ToTensor(),
-                    transforms.Normalize((0.50707516,  0.48654887,  0.44091784),(0.26733429 , 0.25643846,  0.27615047))
-                    ])
+            transform = training_transform_not_augmented
 
-        dataset = datasets.CIFAR100(root = config.get_data_dir(), train = train, download = True, transform = transform)
-        loader = dat.DataLoader(dataset, batch_size=self._batch_size, shuffle=shuffle, drop_last=True, pin_memory=self._pin_memory, num_workers=self._num_workers, sampler=sampler)
-        return loader
-
-    def _make_train_dataloader(self):
-        return self._make_dataloader(train=True, shuffle = True, data_augmentation = self._data_augmentation, sampler=None)
+        train_dataset = datasets.CIFAR100(root=config.get_data_dir(), train=True, download=True, transform=transform)
+        valid_dataset = datasets.CIFAR100(root=config.get_data_dir(), train=True, download=True, transform=training_transform_not_augmented)
+        train_loader, valid_loader = self._make_train_and_valid_dataloader_helper(train_dataset, valid_dataset)
+        return train_loader, valid_loader
 
     def _make_test_dataloader(self):
-        return self._make_dataloader(train=False, shuffle = False, data_augmentation = False, sampler=None)
-
-    def _make_train_eval_dataloader(self):
-        size = len(self._train_dataloader.dataset)
-        sampler = train_eval_sampler(size, self._train_eval_size)
-        return self._make_dataloader(train=True, shuffle=False, data_augmentation=self._data_augmentation, sampler=sampler)
+        transform = training_transform_not_augmented
+        test_dataset = datasets.CIFAR100(root=config.get_data_dir(), train=False, download=True, transform=transform)
+        return self._make_dataloader(test_dataset, sampler=None)

@@ -3,11 +3,8 @@
 
 from . import dataset
 from .. import config
-from torch.utils import data as dat
 from torchvision import datasets
 from torchvision import transforms
-from torch.utils.data.sampler import SubsetRandomSampler
-from .datasets_utils import train_eval_sampler
 
 training_transform_not_augmented = transforms.Compose([
                     transforms.ToTensor(),
@@ -62,11 +59,6 @@ class cifar10(dataset.DataSet):
         self._train_eval_size = train_eval_size
         super(cifar10, self).__init__(batch_size)
 
-    def _make_dataloader(self, dataset, sampler = None):
-        loader = dat.DataLoader(dataset, batch_size=self._batch_size, drop_last=True,
-                                pin_memory=self._pin_memory, num_workers=self._num_workers, sampler=sampler)
-        return loader
-
     def _make_train_and_valid_dataloader(self):
         if self._data_augmentation:
             transform = training_transform_augmented
@@ -75,13 +67,7 @@ class cifar10(dataset.DataSet):
 
         train_dataset = datasets.CIFAR10(root=config.get_data_dir(), train=True, download=True, transform=transform)
         valid_dataset = datasets.CIFAR10(root=config.get_data_dir(), train=True, download=True, transform=training_transform_not_augmented)
-        indices = list(range(len(train_dataset)))
-        train_indices, valid_indices = indices[self._train_eval_size:], indices[:self._train_eval_size]
-        train_sampler = SubsetRandomSampler(train_indices)
-        valid_sampler = SubsetRandomSampler(valid_indices)
-        # since random sampling, shuffle is useless
-        train_loader = self._make_dataloader(train_dataset, sampler=train_sampler)
-        valid_loader = self._make_dataloader(valid_dataset, sampler=valid_sampler)
+        train_loader, valid_loader = self._make_train_and_valid_dataloader_helper(train_dataset, valid_dataset)
         return train_loader, valid_loader
 
     def _make_test_dataloader(self):
@@ -89,9 +75,3 @@ class cifar10(dataset.DataSet):
         transform = training_transform_not_augmented
         test_dataset = datasets.CIFAR10(root=config.get_data_dir(), train=False, download=True, transform=transform)
         return self._make_dataloader(test_dataset, sampler=None)
-
-    def _make_train_eval_dataloader(self):
-        size = len(self._train_dataloader.dataset)
-        sampler = train_eval_sampler(size, self._train_eval_size)
-        # TODO is it correct that train eval set is not augmented in the same way like the train set?
-        return self._make_dataloader(self._train_dataloader.dataset, sampler=sampler)
