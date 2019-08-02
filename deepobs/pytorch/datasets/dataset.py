@@ -46,9 +46,14 @@ class DataSet(abc.ABC):
         self._train_eval_dataloader = self._make_train_eval_dataloader()
         self._test_dataloader = self._make_test_dataloader()
 
-    def _make_dataloader(self, dataset, sampler = None):
-        loader = dat.DataLoader(dataset, batch_size=self._batch_size, drop_last=True,
-                                pin_memory=self._pin_memory, num_workers=self._num_workers, sampler=sampler)
+    def _make_dataloader(self, dataset, sampler = None, shuffle=False):
+        loader = dat.DataLoader(dataset,
+                                batch_size=self._batch_size,
+                                drop_last=True,
+                                pin_memory=self._pin_memory,
+                                num_workers=self._num_workers,
+                                sampler=sampler,
+                                shuffle=shuffle)
         return loader
 
     def _make_train_eval_split_sampler(self, train_dataset):

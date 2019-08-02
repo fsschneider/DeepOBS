@@ -51,14 +51,13 @@ class svhn(dataset.DataSet):
             transform = training_transform_augmented
         else:
             transform = training_transform_not_augmented
-        # TODO SVHN has actually an extra dataset for validation
         train_dataset = datasets.SVHN(root=config.get_data_dir(), split='train', download=True, transform=transform)
+        # we want the validation set to be of the same size as the test set, so we do NOT use the 'extra' dataset that is available for SVHN
         valid_dataset = datasets.SVHN(root=config.get_data_dir(), split='train', download=True, transform=training_transform_not_augmented)
         train_loader, valid_loader = self._make_train_and_valid_dataloader_helper(train_dataset, valid_dataset)
         return train_loader, valid_loader
 
     def _make_test_dataloader(self):
-        # TODO what are the transforms for the test set? what is the normalization? the one of train set? or all?
         transform = training_transform_not_augmented
         test_dataset = datasets.SVHN(root=config.get_data_dir(), split='test', download=True, transform=transform)
         return self._make_dataloader(test_dataset, sampler=None)

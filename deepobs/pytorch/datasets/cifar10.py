@@ -8,7 +8,7 @@ from torchvision import transforms
 
 training_transform_not_augmented = transforms.Compose([
                     transforms.ToTensor(),
-                    transforms.Normalize((0.49139968, 0.48215841, 0.44653091),(0.24703223, 0.24348513, 0.26158784))
+                    transforms.Normalize((0.49139968, 0.48215841, 0.44653091), (0.24703223, 0.24348513, 0.26158784))
                     ])
 
 training_transform_augmented = transforms.Compose([
@@ -19,6 +19,7 @@ training_transform_augmented = transforms.Compose([
                     transforms.ToTensor(),
                     transforms.Normalize((0.49139968, 0.48215841, 0.44653091),(0.24703223, 0.24348513, 0.26158784))
                     ])
+
 
 class cifar10(dataset.DataSet):
     """DeepOBS data set class for the `CIFAR-10\
@@ -71,7 +72,6 @@ class cifar10(dataset.DataSet):
         return train_loader, valid_loader
 
     def _make_test_dataloader(self):
-        # TODO what are the transforms for the test set? what is the normalization? the one of train set? or all?
         transform = training_transform_not_augmented
         test_dataset = datasets.CIFAR10(root=config.get_data_dir(), train=False, download=True, transform=transform)
         return self._make_dataloader(test_dataset, sampler=None)

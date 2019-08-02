@@ -55,13 +55,12 @@ class quadratic(dataset.DataSet):
         X = np.float32(X)
         train_dataset = dat.TensorDataset(torch.from_numpy(X))
 
-        # TODO is it ok that I simply get the valid set from another random seed?
         rng = np.random.RandomState(44)
         X = rng.normal(0.0, self._noise_level, (self._train_size, self._dim))
         X = np.float32(X)
         valid_dataset = dat.TensorDataset(torch.from_numpy(X))
 
-        train_loader = self._make_dataloader(train_dataset)
+        train_loader = self._make_dataloader(train_dataset, shuffle=True)
         valid_loader = self._make_dataloader(valid_dataset)
         return train_loader, valid_loader
 
