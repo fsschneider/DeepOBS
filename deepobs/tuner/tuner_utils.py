@@ -78,7 +78,7 @@ def generate_tuning_summary(optimizer_path, mode = 'final', metric = 'valid_accu
             target_std = sett.aggregate[metric]['std'][idx]
         else:
             raise RuntimeError('Mode not implemented.')
-        line = {'params': {**sett.aggregate['optimizer_hyperparams'], **sett.aggregate['training_params']}, 'target_mean': target_mean, 'target_std': target_std}
+        line = {'params': {**sett.aggregate['optimizer_hyperparams'], **sett.aggregate['training_params']}, metric + "_mean": target_mean, metric + '_std': target_std}
         tuning_summary.append(line)
     return tuning_summary
 

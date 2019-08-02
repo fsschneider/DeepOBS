@@ -151,7 +151,7 @@ def _plot_hyperparameter_sensitivity(optimizer_path, hyperparam, ax, mode='final
 
 def plot_hyperparameter_sensitivity(path, hyperparam, mode='final', metric = 'valid_accuracies',
                                     xscale='linear',
-                                    plot_std=False,
+                                    plot_std=True,
                                     reference_path = None):
 
     """Plots the hyperparameter sensitivtiy of the optimizer.

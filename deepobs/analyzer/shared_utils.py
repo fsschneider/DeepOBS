@@ -23,12 +23,24 @@ def aggregate_runs(setting_folder):
     for run in runs:
         json_data = _load_json(setting_folder, run)
         train_losses.append(json_data['train_losses'])
-        valid_losses.append(json_data['valid_losses'])
+
+        # TODO remove try-except once validation metrices are available for the baselines
+        try:
+            valid_losses.append(json_data['valid_losses'])
+        except KeyError:
+            pass
+
         test_losses.append(json_data['test_losses'])
         # just add accuracies to the aggregate if they are available
         if 'train_accuracies' in json_data :
             train_accuracies.append(json_data['train_accuracies'])
-            valid_accuracies.append(json_data['valid_accuracies'])
+
+            # TODO remove try-except once validation metrices are available for the baselines
+            try:
+                valid_accuracies.append(json_data['valid_accuracies'])
+            except KeyError:
+                pass
+
             test_accuracies.append(json_data['test_accuracies'])
 
     aggregate = dict()
@@ -74,9 +86,15 @@ def _determine_available_metric(optimizer_path, metric, default_metric = 'valid_
     if _check_if_metric_is_available(optimizer_path, metric):
         return metric
     else:
-        warnings.warn('Metric {0:s} does not exist for testproblem {1:s}. We now use fallback metric {2:s}'.format(
-            metric, os.path.split(os.path.split(optimizer_path)[0])[1]), default_metric, RuntimeWarning)
-        return default_metric
+
+        # TODO remove if-else once validation metrics are available for the baselines
+        if _check_if_metric_is_available(optimizer_path, default_metric):
+            warnings.warn('Metric {0:s} does not exist for testproblem {1:s}. We now use fallback metric {2:s}'.format(
+                metric, os.path.split(os.path.split(optimizer_path)[0])[1], default_metric), RuntimeWarning)
+            return default_metric
+        else:
+            warnings.warn('Cannot fallback to metric {0:s}. Will now fallback to metric test_losses'.format(default_metric), RuntimeWarning)
+            return 'test_losses'
 
 
 def _dump_json(path, file, obj):
@@ -141,7 +159,13 @@ def create_setting_analyzer_ranking(optimizer_path, mode = 'final', metric = 'va
     elif mode == 'best':
         setting_analyzers_ordered = sorted(setting_analyzers, key=lambda idx: sgn * idx.get_best_value(metric))
     elif mode == 'most':
-        setting_analyzers_ordered = sorted(setting_analyzers, key=lambda idx: idx.n_runs, reverse=True)
+        # if all have the same amount of runs, i.e. no 'most' avalaible, fall back to 'final'
+        if all(x.n_runs == setting_analyzers[0].n_runs for x in setting_analyzers):
+            optimizer_name, testproblem_name = _get_optimizer_name_and_testproblem_from_path(optimizer_path)
+            warnings.warn('All settings for {0:s} on test problem {1:s} have the same number of seeds runs. Mode \'most\' does not make sense and we use the fallback mode \'final\''.format(optimizer_path, testproblem_name), RuntimeWarning)
+            setting_analyzers_ordered = sorted(setting_analyzers, key=lambda idx: sgn * idx.get_final_value(metric))
+        else:
+            setting_analyzers_ordered = sorted(setting_analyzers, key=lambda idx: idx.n_runs, reverse=True)
     else:
         raise RuntimeError('Mode not implemented')
 
