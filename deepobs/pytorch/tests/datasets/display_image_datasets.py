@@ -120,18 +120,21 @@ if __name__ == "__main__":
     # display_images(datasets.fmnist, grid_size=5, phase="train_eval")
     # display_images(datasets.fmnist, grid_size=5, phase="test")
 
-    display_images(datasets.cifar10, grid_size=5, phase="train")
-    display_images(datasets.cifar10, grid_size=5, phase="train_eval")
-    display_images(datasets.cifar10, grid_size=5, phase="test")
-    display_images(datasets.cifar10, grid_size=5, phase="valid")
+    # display_images(datasets.cifar10, grid_size=5, phase="train")
+    # display_images(datasets.cifar10, grid_size=5, phase="train_eval")
+    # display_images(datasets.cifar10, grid_size=5, phase="test")
+    # display_images(datasets.cifar10, grid_size=5, phase="valid")
 
-    # display_images(datasets.cifar100, grid_size=5, phase="train")
-    # display_images(datasets.cifar100, grid_size=5, phase="train_eval")
-    # display_images(datasets.cifar100, grid_size=5, phase="test")
+    display_images(datasets.cifar100, grid_size=5, phase="train")
+    display_images(datasets.cifar100, grid_size=5, phase="train_eval")
+    display_images(datasets.cifar100, grid_size=5, phase="test")
+    display_images(datasets.cifar100, grid_size=5, phase="valid")
+
     #
-    # display_images(datasets.svhn, grid_size=5, phase="train")
-    # display_images(datasets.svhn, grid_size=5, phase="train_eval")
-    # display_images(datasets.svhn, grid_size=5, phase="test")
+    display_images(datasets.svhn, grid_size=5, phase="train")
+    display_images(datasets.svhn, grid_size=5, phase="train_eval")
+    display_images(datasets.svhn, grid_size=5, phase="test")
+    display_images(datasets.svhn, grid_size=5, phase="valid")
 
 #    display_images(datasets.imagenet, grid_size=5, phase="train")
 #    display_images(datasets.imagenet, grid_size=5, phase="train_eval")
