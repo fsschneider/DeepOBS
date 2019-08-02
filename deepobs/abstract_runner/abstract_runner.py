@@ -98,43 +98,44 @@ class Runner(abc.ABC):
 
         """
         args = self.parse_args(testproblem,
-            hyperparams,
-            batch_size,
-            num_epochs,
-            random_seed,
-            data_dir,
-            output_dir,
-            weight_decay,
-            no_logs,
-            train_log_interval,
-            print_train_iter,
-            tb_log,
-            tb_log_dir,
-            training_params)
+                               hyperparams,
+                               batch_size,
+                               num_epochs,
+                               random_seed,
+                               data_dir,
+                               output_dir,
+                               weight_decay,
+                               no_logs,
+                               train_log_interval,
+                               print_train_iter,
+                               tb_log,
+                               tb_log_dir,
+                               training_params)
 
         output = self._run(**args)
         return output
 
     @abc.abstractmethod
     def _run(self,
-            testproblem,
-            hyperparams,
-            batch_size,
-            num_epochs,
-            random_seed,
-            data_dir,
-            output_dir,
-            weight_decay,
-            no_logs,
-            train_log_interval,
-            print_train_iter,
-            tb_log,
-            tb_log_dir,
-            **training_params):
+             testproblem,
+             hyperparams,
+             batch_size,
+             num_epochs,
+             random_seed,
+             data_dir,
+             output_dir,
+             weight_decay,
+             no_logs,
+             train_log_interval,
+             print_train_iter,
+             tb_log,
+             tb_log_dir,
+             **training_params):
         return
 
     @abc.abstractmethod
-    def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params):
+    def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir,
+                 **training_params):
         """Performs the training and stores the metrices.
             Args:
                 tproblem (deepobs.[tensorflow/pytorch].testproblems.testproblem): The testproblem instance to train on.
@@ -168,11 +169,13 @@ class Runner(abc.ABC):
         pass
 
     def _add_training_params_to_argparse(self, parser, args, training_params):
-        """Overwrite this method to specify how your runner should read in additional training_parameters and to add them to argparse"""
+        """Overwrite this method to specify how your
+        runner should read in additional training_parameters and to add them to argparse"""
         pass
 
     def _add_hyperparams_to_argparse(self, parser, args, hyperparams):
-        """Overwrite this method to specify how your runner should read in optimizer hyper_parameters and to add them to argparse"""
+        """Overwrite this method to specify how your
+        runner should read in optimizer hyper_parameters and to add them to argparse"""
         if hyperparams is None:    # if no hyperparams dict is passed to run()
             for hp_name, hp_specification in self._hyperparameter_names.items():
                 _add_hp_to_argparse(parser, self._optimizer_name, hp_specification, hp_name)
@@ -185,7 +188,8 @@ class Runner(abc.ABC):
                     _add_hp_to_argparse(parser, self._optimizer_name, hp_specification, hp_name)
 
     def _add_training_params_to_output_dir_name(self, output, run_folder_name):
-        """Overwrite this method to specify how your runner should format additional training_parameters in the run folder name."""
+        """Overwrite this method to specify how your
+        runner should format additional training_parameters in the run folder name."""
         for tp_name, tp_value in sorted(output['training_params'].items()):
             if tp_value is not None:
                 run_folder_name += "__{0:s}".format(tp_name)
@@ -194,7 +198,8 @@ class Runner(abc.ABC):
         return run_folder_name
 
     def _add_hyperparams_to_output_dir_name(self, output, run_folder_name):
-        """Overwrite this method to specify how your runner should format optimizer hyper_parameters in the run folder name."""
+        """Overwrite this method to specify how your
+        runner should format optimizer hyper_parameters in the run folder name."""
         for hp_name, hp_value in sorted(output['optimizer_hyperparams'].items()):
             run_folder_name += "__{0:s}".format(hp_name)
             run_folder_name += "__{0:s}".format(
@@ -202,20 +207,20 @@ class Runner(abc.ABC):
         return run_folder_name
 
     def parse_args(self,
-            testproblem,
-            hyperparams,
-            batch_size,
-            num_epochs,
-            random_seed,
-            data_dir,
-            output_dir,
-            weight_decay,
-            no_logs,
-            train_log_interval,
-            print_train_iter,
-            tb_log,
-            tb_log_dir,
-            training_params):
+                   testproblem,
+                   hyperparams,
+                   batch_size,
+                   num_epochs,
+                   random_seed,
+                   data_dir,
+                   output_dir,
+                   weight_decay,
+                   no_logs,
+                   train_log_interval,
+                   print_train_iter,
+                   tb_log,
+                   tb_log_dir,
+                   training_params):
 
         """Constructs an argparse.ArgumentParser and parses the arguments from command line.
         Args:
@@ -439,12 +444,13 @@ class Runner(abc.ABC):
             json.dump(output, f, indent=4)
 
     @staticmethod
-    def _abort_routine(epoch_count, num_epochs, train_losses, valid_losses, test_losses, train_accuracies, valid_accuracies, test_accuracies,
-                       minibatch_train_losses):
-        # TODO new valid signature will cause problems for tf version
+    def _abort_routine(epoch_count, num_epochs, train_losses, valid_losses, test_losses, train_accuracies,
+                       valid_accuracies, test_accuracies, minibatch_train_losses):
         """A routine that is executed if a training run is aborted (loss is NaN or Inf)."""
 
-        warnings.warn('Breaking from run after epoch ' + str(epoch_count) + ' due to wrongly calibrated optimization (Loss is Nan or Inf). The metrices for the remaining epochs will be filled with the initial performance values.', RuntimeWarning)
+        warnings.warn('Breaking from run after epoch ' + str(
+            epoch_count) + 'due to wrongly calibrated optimization (Loss is Nan or Inf). The metrices for the remaining epochs will be filled with the initial performance values.',
+                      RuntimeWarning)
 
         # fill the rest of the metrices with initial observations
         for i in range(epoch_count, num_epochs):
@@ -456,5 +462,3 @@ class Runner(abc.ABC):
             test_accuracies.append(test_accuracies[0])
             minibatch_train_losses.append(minibatch_train_losses[0])
         return train_losses, valid_losses, test_losses, train_accuracies, valid_accuracies, test_accuracies, minibatch_train_losses
-
-
