@@ -5,7 +5,13 @@ from ..analyzer.shared_utils import create_setting_analyzer_ranking, _clear_json
 import os
 
 
-def rerun_setting(runner, optimizer_class, hyperparam_names, optimizer_path, seeds=np.arange(43, 52), rank=1, mode='final', metric='valid_accuracies'):
+def rerun_setting(runner,
+                  optimizer_class,
+                  hyperparam_names,
+                  optimizer_path,
+                  seeds=np.arange(43, 52),
+                  rank=1, mode='final',
+                  metric='valid_accuracies'):
     """Reruns a hyperparameter setting with several seeds after the tuning is finished. Defaults to rerun the best setting.
     Args:
         runner (framework runner.runner): The runner which was used for the tuning.
