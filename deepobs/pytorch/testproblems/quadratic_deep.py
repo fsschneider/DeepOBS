@@ -84,6 +84,19 @@ class quadratic_deep(TestProblem):
         """
         super(quadratic_deep, self).__init__(batch_size, weight_decay)
 
+    def quadratic_deep_loss_function_factory(self, reduction='mean'):
+        def quadratic_deep_loss_function(inputs):
+            batched_loss = self.net(inputs)
+            if reduction == 'mean':
+                return batched_loss.mean()
+            elif reduction == 'sum':
+                return torch.sum(batched_loss)
+            elif reduction == 'none':
+                return torch.squeeze(batched_loss)
+            else:
+                raise NotImplementedError('Reduction ' + reduction + ' not implemented')
+        return quadratic_deep_loss_function
+
     def set_up(self):
         eigenvalues = np.concatenate(
             (rng.uniform(0., 1., 90), rng.uniform(30., 60., 10)), axis=0)
@@ -96,8 +109,10 @@ class quadratic_deep(TestProblem):
         # for now always run it on cpu
         self._device = torch.device('cpu')
         self.net.to(self._device)
+        self.loss_function = self.quadratic_deep_loss_function_factory
 
-    def get_batch_loss_and_accuracy(self, return_forward_func = False):
+    def get_batch_loss_and_accuracy(self, return_forward_func = False, reduction='mean',
+                                    add_regularization_if_available=True):
         """Gets a new batch and calculates the loss and accuracy (if available)
         on that batch. This is a default implementation for image classification.
         Testproblems with different calculation routines (e.g. RNNs) overwrite this method accordingly.
@@ -113,12 +128,18 @@ class quadratic_deep(TestProblem):
             # in evaluation phase is no gradient needed
             if self.phase in ["train_eval", "test", "valid"]:
                 with torch.no_grad():
-                    loss = self.net(inputs)
+                    loss = self.loss_function(reduction=reduction)(inputs)
             else:
-                loss = self.net(inputs)
+                loss = self.loss_function(reduction=reduction)(inputs)
 
             accuracy = 0.0
-            return loss, accuracy
+
+            if add_regularization_if_available:
+                regularizer_loss = self.get_regularization_loss()
+            else:
+                torch.tensor(0.0, device=torch.device(self._device))
+
+            return loss + regularizer_loss, accuracy
 
         if return_forward_func:
             return _get_batch_loss_and_accuracy(), _get_batch_loss_and_accuracy

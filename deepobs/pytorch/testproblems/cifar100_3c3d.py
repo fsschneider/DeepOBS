@@ -43,7 +43,7 @@ class cifar100_3c3d(TestProblem):
     def set_up(self):
         """Set up the vanilla CNN test problem on Cifar-100."""
         self.data = cifar100(self._batch_size)
-        self.loss_function = nn.CrossEntropyLoss()
+        self.loss_function = nn.CrossEntropyLoss
         self.net = net_cifar10_3c3d(num_outputs=100)
         self.net.to(self._device)
 

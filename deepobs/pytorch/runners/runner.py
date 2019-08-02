@@ -68,11 +68,13 @@ class PTRunner(Runner):
     @staticmethod
     def create_testproblem(testproblem, batch_size, weight_decay, random_seed):
         """Sets up the deepobs.pytorch.testproblems.testproblem instance.
+
         Args:
             testproblem (str): The name of the testproblem.
             batch_size (int): Batch size that is used for training
             weight_decay (float): Regularization factor
             random_seed (int): The random seed of the framework
+
         Returns:
             deepobs.pytorch.testproblems.testproblem: An instance of deepobs.pytorch.testproblems.testproblem
         """
@@ -112,13 +114,14 @@ class PTRunner(Runner):
         of the testproblem instance.
         Has to be called in the beggining of every epoch within the
         training method. Returns the losses and accuracies.
+
         Args:
             tproblem (testproblem): The testproblem instance to evaluate
             phase (str): The phase of the evaluation. Must be one of 'TRAIN', 'VALID' or 'TEST'
-            If false, it is evaluated on the train evaluation set.
         Returns:
             float: The loss of the current state.
             float: The accuracy of the current state.
+
         """
 
         if phase == 'TEST':
@@ -145,10 +148,6 @@ class PTRunner(Runner):
 
         loss /= batchCount
         accuracy /= batchCount
-
-        # if the testproblem has a regularization, add the regularization loss of the current network parameters.
-        if hasattr(tproblem, 'get_regularization_loss'):
-            loss += tproblem.get_regularization_loss().item()
 
         if accuracy != 0.0:
             print("{0:s} loss {1:g}, acc {2:f}".format(msg, loss, accuracy))
@@ -228,10 +227,6 @@ class StandardRunner(PTRunner):
                 try:
                     opt.zero_grad()
                     batch_loss, _ = tproblem.get_batch_loss_and_accuracy()
-                    # if the testproblem has a regularization, add the regularization loss.
-                    if hasattr(tproblem, 'get_regularization_loss'):
-                        regularizer_loss = tproblem.get_regularization_loss()
-                        batch_loss += regularizer_loss
 
                     batch_loss.backward()
                     opt.step()
@@ -336,8 +331,8 @@ class LearningRateScheduleRunner(PTRunner):
                 # the following are the training_params
                 lr_sched_epochs=None,
                 lr_sched_factors=None):
-        r"""
-        Performs the training and stores the metrices.
+        r"""Performs the training and stores the metrices.
+
             Args:
                 tproblem (deepobs.[tensorflow/pytorch].testproblems.testproblem): The testproblem instance to train on.
                 hyperparams (dict): The optimizer hyperparameters to use for the training.
@@ -350,14 +345,14 @@ class LearningRateScheduleRunner(PTRunner):
                 lr_sched_factors (list): The corresponding factors by which to adjust the learning rate.
 
             Returns:
-                dict: The logged metrices. Is of the form:
-                    ```{'test_losses' : [...],
-                     'train_losses': [...],
-                     'test_accuracies': [...],
-                     'train_accuracies': [...]
-                     }```
+                dict: The logged metrices. Is of the form: \
+                    {'test_losses' : [...], \
+                     'train_losses': [...],  \
+                     'test_accuracies': [...], \
+                     'train_accuracies': [...] \
+                     } \
+                where the metrices values are lists that were filled during training.
 
-            where the metrices values are lists that were filled during training.
         """
 
         opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
@@ -395,6 +390,7 @@ class LearningRateScheduleRunner(PTRunner):
             if lr_sched_epochs is not None:
                 # get the next learning rate
                 lr_schedule.step(epoch_count)
+
                 if epoch_count in lr_sched_epochs:
                     print("Setting learning rate to {0}".format(lr_schedule.get_lr()))
 
@@ -405,10 +401,6 @@ class LearningRateScheduleRunner(PTRunner):
                 try:
                     opt.zero_grad()
                     batch_loss, _ = tproblem.get_batch_loss_and_accuracy()
-                    # if the testproblem has a regularization, add the regularization loss.
-                    if hasattr(tproblem, 'get_regularization_loss'):
-                        regularizer_loss = tproblem.get_regularization_loss()
-                        batch_loss += regularizer_loss
 
                     batch_loss.backward()
                     opt.step()

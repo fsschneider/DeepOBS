@@ -11,6 +11,7 @@ def get_framework():
 
 def set_framework(framework):
     """Sets the current used framework. This is relevant for the higher level Tuner module of DeepOBS.
+
     Args:
         framework (str): Can be ``pytorch`` or ``tensorflow``
     """
@@ -95,9 +96,14 @@ DEFAULT_TEST_PROBLEMS_SETTINGS = {
 
 def get_testproblem_default_setting(testproblem):
     """Returns default settings for the ``batch_size`` and the ``num_epochs`` for ``testproblem`` (if available).
+
     Args:
         testproblem (str): Test problem for which to return the default setting.
+
+    Returns:
+        dict: A dictionary with the default values for ``batch_size`` and ``num_epochs``
         """
+
     try:
         return DEFAULT_TEST_PROBLEMS_SETTINGS[testproblem]
     except KeyError:

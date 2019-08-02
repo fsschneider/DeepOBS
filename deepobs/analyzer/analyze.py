@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 from __future__ import print_function
 import os
@@ -132,7 +131,6 @@ def _plot_hyperparameter_sensitivity(optimizer_path, hyperparam, ax, mode='final
     target_means = [d['target_mean'] for d in tuning_summary]
     target_stds = [d['target_std'] for d in tuning_summary]
 
-    # sort the values synchronised for plotting
     param_values, target_means, target_stds = (list(t) for t in
                                                zip(*sorted(zip(param_values, target_means, target_stds))))
 
@@ -157,6 +155,7 @@ def plot_hyperparameter_sensitivity(path, hyperparam, mode='final', metric = 'va
                                     reference_path = None):
 
     """Plots the hyperparameter sensitivtiy of the optimizer.
+
     Args:
         path (str): The path to the optimizer to analyse. Or to a whole testproblem. In that case, all optimizer sensitivities are plotted.
         hyperparam (str): The name of the hyperparameter that should be analyzed.
@@ -165,6 +164,7 @@ def plot_hyperparameter_sensitivity(path, hyperparam, mode='final', metric = 'va
         xscale (str): The scale for the parameter axes. Is passed to plt.xscale().
         plot_std (bool): Whether to plot markers for individual seed runs or not. If `False`, only the mean is plotted.
         reference_path (str): Path to the reference optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are taken as reference).
+
     Returns:
         matplotlib.axes.Axes: The figure and axes of the plot.
         """
@@ -252,7 +252,6 @@ def _plot_optimizer_performance(path, ax = None, mode = 'most', metric = 'valid_
         ax (matplotlib.axes.Axes): The axes to plot the trainig curves for all metrices. Must have 4 subaxes.
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
-
     Returns:
         matplotlib.axes.Axes: The axes with the plots.
 
@@ -312,3 +311,4 @@ def plot_optimizer_performance(path, ax = None, mode = 'most', metric = 'valid_a
 
     plt.show()
     return ax
+

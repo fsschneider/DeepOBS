@@ -12,6 +12,7 @@ def get_data_dir():
 
 def set_data_dir(data_dir):
     """Sets the data directory for the TensorFlow runs.
+
     Args:
         data_dir (str): Path to the data folder.
     """

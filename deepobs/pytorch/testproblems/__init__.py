@@ -8,7 +8,9 @@ from .mnist_vae import mnist_vae
 from .cifar10_3c3d import cifar10_3c3d
 
 from .cifar100_3c3d import cifar100_3c3d
+
 from .cifar100_allcnnc import cifar100_allcnnc
+
 
 from .fmnist_2c2d import fmnist_2c2d
 from .fmnist_vae import fmnist_vae

@@ -60,6 +60,7 @@ def plot_1d_bo_posterior(optimizer_path, step, resolution, xscale = 'linear'):
         optimizer_path (str): Path to the optimizer which was tuned.
         step (int): The step of the tuning process for which the posterior is plotted.
         resolution (int): Resolution of the plot, i.e. number of x-values.
+        xscale (str): The scaling for the x-axis.
     Returns:
         matplotlib.axes.Axes: The axes of the plot.
     """

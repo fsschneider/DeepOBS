@@ -93,7 +93,11 @@ class TestProblem(abc.ABC):
         """Returns the next batch from the iterator."""
         return next(self._iterator)
 
-    def get_batch_loss_and_accuracy(self, return_forward_func = False):
+    def get_batch_loss_and_accuracy(self,
+                                    return_forward_func = False,
+                                    reduction = 'mean',
+                                    add_regularization_if_available = True):
+
         """Gets a new batch and calculates the loss and accuracy (if available)
         on that batch. This is a default implementation for image classification.
         Testproblems with different calculation routines (e.g. RNNs) overwrite this method accordingly.
@@ -116,22 +120,34 @@ class TestProblem(abc.ABC):
             if self.phase in ["train_eval", "test", "valid"]:
                 with torch.no_grad():
                     outputs = self.net(inputs)
-                    loss = self.loss_function(outputs, labels)
+                    loss = self.loss_function(reduction=reduction)(outputs, labels)
             else:
                 outputs = self.net(inputs)
-                loss = self.loss_function(outputs, labels)
+                loss = self.loss_function(reduction=reduction)(outputs, labels)
 
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
             accuracy = correct/total
-            return loss, accuracy
+
+            if add_regularization_if_available:
+                regularizer_loss = self.get_regularization_loss()
+            else:
+                regularizer_loss = torch.tensor(0.0, device=torch.device(self._device))
+
+            return loss + regularizer_loss, accuracy
 
         if return_forward_func:
             return _get_batch_loss_and_accuracy(), _get_batch_loss_and_accuracy
         else:
             return _get_batch_loss_and_accuracy()
+
+    def get_regularization_loss(self):
+        """The dedault implementation for regularization loss (i.e. none). Testproblems that have a regularization
+        overwrite this method accorcdingly.
+        """
+        return torch.tensor(0.0, device=torch.device(self._device))
 
     @abc.abstractmethod
     def set_up(self):

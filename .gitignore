@@ -33,4 +33,3 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-deepobs/tensorflow/tests/testproblems/data_deepobs/

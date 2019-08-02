@@ -9,4 +9,4 @@ hyperparams = {"learning_rate": {"type": float},
                "use_nesterov": {"type": bool, "default": False}}
 
 runner = tfobs.runners.StandardRunner(optimizer_class, hyperparams)
-runner.run(testproblem='quadratic_deep', hyperparams={'learning_rate': 0.1}, num_epochs=10)
+runner.run(testproblem='quadratic_deep', hyperparams={'learning_rate': 1e-2}, num_epochs=10)

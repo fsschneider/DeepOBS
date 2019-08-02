@@ -45,4 +45,3 @@ compatibility in the future.
 
 Further tutorials and a suggested protocol for benchmarking deep learning
 optimizers can be found on https://deepobs-with-pytorch.readthedocs.io/
-

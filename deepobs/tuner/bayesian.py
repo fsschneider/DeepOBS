@@ -47,6 +47,7 @@ class GP(Tuner):
             raise NotImplementedError('''Mode not available for this tuning method. Please use final or best.''')
         return cost
 
+
     def _generate_cost_function(self, testproblem, output_dir, mode, **kwargs):
         def _cost_function(**hyperparams):
             # apply transformations if they exist
@@ -114,6 +115,7 @@ class GP(Tuner):
         log_path = os.path.join(output_dir, testproblem, self._optimizer_name)
 
         cost_function = self._generate_cost_function(testproblem, output_dir, mode, **kwargs)
+
         op = bayes_opt.BayesianOptimization(f = None, pbounds = self._bounds, random_state=random_seed)
         if kernel is not None:
             op._gp.kernel = kernel
