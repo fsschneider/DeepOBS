@@ -4,7 +4,7 @@ from __future__ import print_function
 import os
 import numpy as np
 from matplotlib import pyplot as plt
-from .shared_utils import create_setting_analyzer_ranking, _determine_available_metric_in_case_of_testing, _get_optimizer_name_and_testproblem_from_path, _determine_available_metric_in_case_of_validation
+from .shared_utils import create_setting_analyzer_ranking, _determine_available_metric, _get_optimizer_name_and_testproblem_from_path
 from ..tuner.tuner_utils import generate_tuning_summary
 from .analyze_utils import _rescale_ax, _preprocess_path
 import pandas as pd
@@ -94,7 +94,7 @@ def plot_testset_performances(results_path, mode = 'most', metric = 'valid_accur
 
 def plot_hyperparameter_sensitivity_2d(optimizer_path, hyperparams, mode='final', metric = 'valid_accuracies', xscale='linear', yscale = 'linear'):
     param1, param2 = hyperparams
-    metric = _determine_available_metric_in_case_of_validation(optimizer_path, metric)
+    metric = _determine_available_metric(optimizer_path, metric)
     tuning_summary = generate_tuning_summary(optimizer_path, mode, metric)
 
     optimizer_name, testproblem = _get_optimizer_name_and_testproblem_from_path(optimizer_path)
@@ -122,7 +122,7 @@ def plot_hyperparameter_sensitivity_2d(optimizer_path, hyperparams, mode='final'
 def _plot_hyperparameter_sensitivity(optimizer_path, hyperparam, ax, mode='final', metric = 'valid_accuracies',
                                     plot_std=False):
 
-    metric = _determine_available_metric_in_case_of_validation(optimizer_path, metric)
+    metric = _determine_available_metric(optimizer_path, metric)
     tuning_summary = generate_tuning_summary(optimizer_path, mode, metric)
 
     optimizer_name, testproblem = _get_optimizer_name_and_testproblem_from_path(optimizer_path)
@@ -188,7 +188,7 @@ def plot_hyperparameter_sensitivity(path, hyperparam, mode='final', metric = 'va
 
 
 def plot_final_metric_vs_tuning_rank(optimizer_path, metric='valid_accuracies'):
-    metric = _determine_available_metric_in_case_of_testing(optimizer_path, metric)
+    metric = _determine_available_metric(optimizer_path, metric)
     ranks = create_setting_analyzer_ranking(optimizer_path, mode='final', metric=metric)
     means = []
     fig, ax = plt.subplots()
@@ -219,7 +219,7 @@ def get_performance_dictionary(optimizer_path, mode = 'most', metric = 'valid_ac
     Returns:
         dict: A dictionary that holds the best setting and it's performance.
         """
-    metric = _determine_available_metric_in_case_of_validation(optimizer_path, metric)
+    metric = _determine_available_metric(optimizer_path, metric)
     setting_analyzers_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
     sett = setting_analyzers_ranking[0]
 
@@ -244,7 +244,7 @@ def get_performance_dictionary(optimizer_path, mode = 'most', metric = 'valid_ac
     return perf_dict
 
 
-def _plot_optimizer_performance(path, ax = None, mode = 'most', metric = 'validation_accuracies'):
+def _plot_optimizer_performance(path, ax = None, mode = 'most', metric = 'valid_accuracies'):
     """Plots the training curve of an optimizer.
 
     Args:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from scipy.stats. distributions import uniform
-from ..analyzer.shared_utils import create_setting_analyzer_ranking, _clear_json, _append_json, _determine_available_metric_in_case_of_validation
+from ..analyzer.shared_utils import create_setting_analyzer_ranking, _clear_json, _append_json, _determine_available_metric
 import os
 
 
@@ -17,7 +17,7 @@ def rerun_setting(runner, optimizer_class, hyperparam_names, optimizer_path, see
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
     """
-    metric = _determine_available_metric_in_case_of_validation(optimizer_path, metric)
+    metric = _determine_available_metric(optimizer_path, metric)
     optimizer_path = os.path.join(optimizer_path)
 
     setting_analyzer_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
@@ -65,7 +65,7 @@ def generate_tuning_summary(optimizer_path, mode = 'final', metric = 'valid_accu
         of the tuning process and holds the hyperparameters and their performance.
         setting_analyzer_ranking (list): A ranked list of SettingAnalyzers that were used to generate the summary
         """
-    metric = _determine_available_metric_in_case_of_validation(optimizer_path, metric)
+    metric = _determine_available_metric(optimizer_path, metric)
     setting_analyzer_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
     tuning_summary = []
     for sett in setting_analyzer_ranking:

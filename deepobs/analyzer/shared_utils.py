@@ -68,26 +68,15 @@ def _check_if_metric_is_available(optimizer_path, metric):
         return False
 
 
-def _determine_available_metric_in_case_of_testing(optimizer_path, metric):
+def _determine_available_metric(optimizer_path, metric, default_metric = 'valid_losses'):
     """Checks if the metric ``metric`` is availabe for the runs in ``optimizer_path``.
     If not, it returns the fallback metric 'test_losses',"""
     if _check_if_metric_is_available(optimizer_path, metric):
         return metric
     else:
-        warnings.warn('Metric {0:s} does not exist for testproblem {1:s}. We now use fallback metric \'test_losses\''.format(
-            metric, os.path.split(os.path.split(optimizer_path)[0])[1]), RuntimeWarning)
-        return 'test_losses'
-
-
-def _determine_available_metric_in_case_of_validation(optimizer_path, metric):
-    """Checks if the metric ``metric`` is availabe for the runs in ``optimizer_path``.
-    If not, it returns the fallback metric 'test_losses',"""
-    if _check_if_metric_is_available(optimizer_path, metric):
-        return metric
-    else:
-        warnings.warn('Metric {0:s} does not exist for testproblem {1:s}. We now use fallback metric \'valid_losses\''.format(
-            metric, os.path.split(os.path.split(optimizer_path)[0])[1]), RuntimeWarning)
-        return 'valid_losses'
+        warnings.warn('Metric {0:s} does not exist for testproblem {1:s}. We now use fallback metric {2:s}'.format(
+            metric, os.path.split(os.path.split(optimizer_path)[0])[1]), default_metric, RuntimeWarning)
+        return default_metric
 
 
 def _dump_json(path, file, obj):
@@ -139,7 +128,7 @@ def create_setting_analyzer_ranking(optimizer_path, mode = 'final', metric = 'va
     Returns:
         An ordered list of SettingAnalyzers. I.e. the first item is considered 'the best one' etc.
     """
-    metric = _determine_available_metric_in_case_of_validation(optimizer_path, metric)
+    metric = _determine_available_metric(optimizer_path, metric)
     setting_analyzers = _get_all_setting_analyzer(optimizer_path)
 
     if 'acc' in metric:
