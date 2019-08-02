@@ -70,7 +70,7 @@ def _check_if_metric_is_available(optimizer_path, metric):
 
 def _determine_available_metric(optimizer_path, metric, default_metric = 'valid_losses'):
     """Checks if the metric ``metric`` is availabe for the runs in ``optimizer_path``.
-    If not, it returns the fallback metric 'test_losses',"""
+    If not, it returns the fallback metric ``default_metric``."""
     if _check_if_metric_is_available(optimizer_path, metric):
         return metric
     else:
