@@ -21,3 +21,5 @@ from .mnist_mlp import mnist_mlp
 from .fmnist_mlp import fmnist_mlp
 
 from .svhn_wrn164 import svhn_wrn164
+
+from .mnist_logreg import mnist_logreg
