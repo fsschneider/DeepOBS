@@ -337,9 +337,7 @@ class net_wrn(nn.Sequential):
 
         # loop over three residual groups
         for group_number in range(1, 4):
-            # first residual block of this group
-
-            # first residual block is special since it has to change the number of outout channels or the skip connection
+            # first residual block is special since it has to change the number of output channels for the skip connection
             self.add_module('res_unit' + str(group_number) + str(1),
                                 residual_block(in_channels=self._filters[group_number-1],
                                                out_channels=self._filters[group_number],
