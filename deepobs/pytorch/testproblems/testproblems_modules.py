@@ -13,6 +13,18 @@ from .testproblems_utils import residual_block
 from .testproblems_utils import _truncated_normal_init
 
 
+class net_mnist_logreg(nn.Sequential):
+    def __init__(self, num_outputs):
+        super(net_mnist_logreg, self).__init__()
+
+        self.add_module('flatten', flatten())
+        self.add_module('dense', nn.Linear(in_features=784, out_features=num_outputs))
+
+        # init
+        nn.init.constant_(self.dense.bias, 0.0)
+        nn.init.constant_(self.dense.weight, 0.0)
+
+
 class net_cifar10_3c3d(nn.Sequential):
     """  Basic conv net for cifar10/100. The network consists of
     - thre conv layers with ReLUs, each followed by max-pooling
