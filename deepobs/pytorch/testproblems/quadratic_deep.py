@@ -2,7 +2,7 @@
 """A simple N-Dimensional Noisy Quadratic Problem with Deep Learning eigenvalues."""
 
 import numpy as np
-from .testproblem import TestProblem
+from .testproblem import UnregularizedTestproblem
 import torch
 from .testproblems_modules import net_quadratic_deep
 from ..datasets.quadratic import quadratic
@@ -50,7 +50,7 @@ def random_rotation(D):
     return np.negative(R)
 
 
-class quadratic_deep(TestProblem):
+class quadratic_deep(UnregularizedTestproblem):
     r"""DeepOBS test problem class for a stochastic quadratic test problem ``100``\
     dimensions. The 90 % of the eigenvalues of the Hessian are drawn from the\
     interval :math:`(0.0, 1.0)` and the other 10 % are from :math:`(30.0, 60.0)` \
@@ -110,6 +110,7 @@ class quadratic_deep(TestProblem):
         self._device = torch.device('cpu')
         self.net.to(self._device)
         self.loss_function = self.quadratic_deep_loss_function_factory
+        self.regularization_groups = self.get_regularization_groups()
 
     def get_batch_loss_and_accuracy(self, return_forward_func = False, reduction='mean',
                                     add_regularization_if_available=True):

@@ -4,11 +4,11 @@
 import torch
 from .testproblems_modules import net_vae
 from ..datasets.mnist import mnist
-from .testproblem import TestProblem
+from .testproblem import UnregularizedTestproblem
 from .testproblems_utils import vae_loss_function_factory
 
 
-class mnist_vae(TestProblem):
+class mnist_vae(UnregularizedTestproblem):
     """DeepOBS test problem class for a variational autoencoder (VAE) on \
     MNIST.
 
@@ -63,6 +63,7 @@ class mnist_vae(TestProblem):
         self.data = mnist(self._batch_size)
         self.net = net_vae(n_latent = 8)
         self.net.to(self._device)
+        self.regularization_groups = self.get_regularization_groups()
 
     def get_batch_loss_and_accuracy(self, return_forward_func = False, reduction='mean',
                                     add_regularization_if_available=True):

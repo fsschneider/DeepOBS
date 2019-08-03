@@ -5,10 +5,10 @@ import warnings
 from torch import nn
 from .testproblems_modules import net_mnist_2c2d
 from ..datasets.mnist import mnist
-from .testproblem import TestProblem
+from .testproblem import UnregularizedTestproblem
 
 
-class mnist_2c2d(TestProblem):
+class mnist_2c2d(UnregularizedTestproblem):
     """DeepOBS test problem class for a two convolutional and two dense layered\
     neural network on MNIST.
 
@@ -51,10 +51,10 @@ class mnist_2c2d(TestProblem):
                 RuntimeWarning
             )
 
-
     def set_up(self):
         """Sets up the vanilla CNN test problem on MNIST."""
         self.data = mnist(self._batch_size)
         self.loss_function = nn.CrossEntropyLoss
         self.net = net_mnist_2c2d(num_outputs=10)
         self.net.to(self._device)
+        self.regularization_groups = self.get_regularization_groups()

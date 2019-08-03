@@ -57,17 +57,21 @@ class cifar10_3c3d(TestProblem):
         self.loss_function = nn.CrossEntropyLoss
         self.net = net_cifar10_3c3d(num_outputs=10)
         self.net.to(self._device)
+        self.regularization_groups = self.get_regularization_groups()
 
-    def get_regularization_loss(self):
-        """Returns the current regularization loss of the network. Only weights are penalized."""
-        # iterate through all layers
-        layer_norms = []
+    def get_regularization_groups(self):
+        """Creates regularization groups for the parameters.
+
+        Returns:
+            dict: A dictionary where the key is the regularization factor and the value is a list of parameters.
+        """
+        no, l2 = 0.0, self._weight_decay
+        group_dict = {no: [], l2: []}
+
         for parameters_name, parameters in self.net.named_parameters():
             # penalize only the non bias layer parameters
             if 'bias' not in parameters_name:
-                # L2 regularization
-                layer_norms.append(parameters.pow(2).sum())
-
-        regularization_loss = 0.5 * sum(layer_norms)
-
-        return self._weight_decay * regularization_loss
+                group_dict[l2].append(parameters)
+            else:
+                group_dict[no].append(parameters)
+        return group_dict

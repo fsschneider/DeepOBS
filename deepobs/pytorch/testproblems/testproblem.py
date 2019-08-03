@@ -54,6 +54,7 @@ class TestProblem(abc.ABC):
         self.data = None
         self.loss_function = None
         self.net = None
+        self.regularization_groups = None
 
     def train_init_op(self):
         """Initializes the testproblem instance to train mode. I.e.
@@ -71,7 +72,6 @@ class TestProblem(abc.ABC):
         self.phase = "train_eval"
         self.net.eval()
 
-
     def valid_init_op(self):
         """Initializes the testproblem instance to validation mode. I.e.
         sets the iterator to the validation set and sets the model to eval mode.
@@ -79,7 +79,6 @@ class TestProblem(abc.ABC):
         self._iterator = iter(self.data._valid_dataloader)
         self.phase = "valid"
         self.net.eval()
-
 
     def test_init_op(self):
         """Initializes the testproblem instance to test mode. I.e.
@@ -144,10 +143,55 @@ class TestProblem(abc.ABC):
             return _get_batch_loss_and_accuracy()
 
     def get_regularization_loss(self):
-        """The dedault implementation for regularization loss (i.e. none). Testproblems that have a regularization
-        overwrite this method accorcdingly.
+        """Returns the current regularization loss of the network based on the parameter groups."""
+        # iterate through all layers
+        layer_norms = []
+        for regularization, parameter_group in self.regularization_groups.items():
+            if regularization > 0.0:
+                # L2 regularization
+                for parameters in parameter_group:
+                    layer_norms.append(regularization * parameters.pow(2).sum())
+
+        regularization_loss = 0.5 * sum(layer_norms)
+        # TODO liste leer = kein tensor
+        return regularization_loss
+
+    @abc.abstractmethod
+    def get_regularization_groups(self):
+        """Creates regularization groups for the parameters.
+
+        Returns:
+            dict: A dictionary where the key is the regularization factor and the value is a list of parameters.
         """
-        return torch.tensor(0.0, device=torch.device(self._device))
+        return
+
+    @abc.abstractmethod
+    # TODO get rid of setup structure by parsing individual loss func, network and dataset
+    def set_up(self):
+        """Sets up the test problem.
+        """
+        pass
+
+
+class UnregularizedTestproblem(TestProblem):
+
+    def __init__(self, batch_size, weight_decay = None):
+        super(UnregularizedTestproblem, self).__init__(batch_size, weight_decay)
+
+    def get_regularization_groups(self):
+        """Creates regularization groups for the parameters. Default implementation for most testproblems. Testproblems
+        where the regularization is different overwrite this method accordingly.
+
+        Returns:
+            dict: A dictionary where the key is the regularization factor and the value is a list of parameters.
+        """
+        no = 0.0
+        group_dict = {no: []}
+
+        for parameters_name, parameters in self.net.named_parameters():
+            # penalize no parameters
+            group_dict[no].append(parameters)
+        return group_dict
 
     @abc.abstractmethod
     def set_up(self):

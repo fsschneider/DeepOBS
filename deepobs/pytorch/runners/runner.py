@@ -227,7 +227,6 @@ class StandardRunner(PTRunner):
                 try:
                     opt.zero_grad()
                     batch_loss, _ = tproblem.get_batch_loss_and_accuracy()
-
                     batch_loss.backward()
                     opt.step()
 

@@ -4,10 +4,10 @@
 from torch import nn
 from .testproblems_modules import net_mlp
 from ..datasets.mnist import mnist
-from .testproblem import TestProblem
+from .testproblem import UnregularizedTestproblem
 import warnings
 
-class mnist_mlp(TestProblem):
+class mnist_mlp(UnregularizedTestproblem):
     """DeepOBS test problem class for a multi-layer perceptron neural network\
     on Fashion-MNIST.
 
@@ -55,3 +55,4 @@ class mnist_mlp(TestProblem):
         self.loss_function = nn.CrossEntropyLoss
         self.net = net_mlp(num_outputs=10)
         self.net.to(self._device)
+        self.regularization_groups = self.get_regularization_groups()

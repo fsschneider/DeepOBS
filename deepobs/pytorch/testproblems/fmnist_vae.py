@@ -4,12 +4,12 @@
 import torch
 from .testproblems_modules import net_vae
 from ..datasets.fmnist import fmnist
-from .testproblem import TestProblem
+from .testproblem import UnregularizedTestproblem
 from .testproblems_utils import vae_loss_function_factory
 import warnings
 
 
-class fmnist_vae(TestProblem):
+class fmnist_vae(UnregularizedTestproblem):
     """DeepOBS test problem class for a variational autoencoder (VAE) on \
     Fashion-MNIST.
 
@@ -64,6 +64,7 @@ class fmnist_vae(TestProblem):
         self.data = fmnist(self._batch_size)
         self.net = net_vae(n_latent = 8)
         self.net.to(self._device)
+        self.regularization_groups = self.get_regularization_groups()
 
     def get_batch_loss_and_accuracy(self, return_forward_func = False, reduction='mean',
                                     add_regularization_if_available=True):
@@ -81,6 +82,7 @@ class fmnist_vae(TestProblem):
 
         def _get_batch_loss_and_accuracy():
             # in evaluation phase is no gradient needed
+            # TODO move this to evaluate in runner
             if self.phase in ["train_eval", "test", "valid"]:
                 with torch.no_grad():
                     outputs, means, std_devs = self.net(inputs)
