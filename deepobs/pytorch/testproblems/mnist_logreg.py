@@ -4,11 +4,11 @@
 from torch import nn
 from .testproblems_modules import net_mnist_logreg
 from ..datasets.mnist import mnist
-from .testproblem import TestProblem
+from .testproblem import UnregularizedTestproblem
 import warnings
 
 
-class mnist_logreg(TestProblem):
+class mnist_logreg(UnregularizedTestproblem):
     """DeepOBS test problem class for multinomial logistic regression on MNIST.
 
   No regularization is used and the weights and biases are initialized to ``0.0``.
@@ -42,3 +42,4 @@ class mnist_logreg(TestProblem):
         self.loss_function = nn.CrossEntropyLoss
         self.net = net_mnist_logreg(num_outputs=10)
         self.net.to(self._device)
+        self.regularization_groups = self.get_regularization_groups()
