@@ -101,8 +101,8 @@ def plot_hyperparameter_sensitivity_2d(optimizer_path, hyperparams, mode='final'
     param_values1 = np.array([d['params'][param1] for d in tuning_summary])
     param_values2 = np.array([d['params'][param2] for d in tuning_summary])
 
-    target_means = np.array([d['target_mean'] for d in tuning_summary])
-    target_stds = [d['target_std'] for d in tuning_summary]
+    target_means = np.array([d[metric + '_mean'] for d in tuning_summary])
+    target_stds = [d[metric + '_std'] for d in tuning_summary]
 
     _, ax = plt.subplots()
 
@@ -128,8 +128,8 @@ def _plot_hyperparameter_sensitivity(optimizer_path, hyperparam, ax, mode='final
 
     # create array for plotting
     param_values = [d['params'][hyperparam] for d in tuning_summary]
-    target_means = [d['target_mean'] for d in tuning_summary]
-    target_stds = [d['target_std'] for d in tuning_summary]
+    target_means = [d[metric +'_mean'] for d in tuning_summary]
+    target_stds = [d[metric +'_mean'] for d in tuning_summary]
 
     param_values, target_means, target_stds = (list(t) for t in
                                                zip(*sorted(zip(param_values, target_means, target_stds))))
