@@ -419,20 +419,14 @@ class net_quadratic_deep(nn.Module):
 
         super(net_quadratic_deep, self).__init__()
         self.theta = nn.Parameter(torch.ones(dim, requires_grad = True))
-        self.Hessian = torch.from_numpy(Hessian).to(torch.float32)
+        self.Hessian = Hessian
 
     def forward(self, x):
         q = self.theta - x
-
-        z = torch.mm(q, self.Hessian)
-
-        # prepare for batched matmul
-        qt = q.unsqueeze(1)
-        z = z.unsqueeze(2)
-
-        out_batched = 0.5*torch.bmm(qt, z)
+        out_batched = 0.5*torch.diag(torch.mm(q, torch.mm(self.Hessian, torch.transpose(q, 0, 1))))
 
         return out_batched
+
 
 class net_mlp(nn.Sequential):
     """  A basic MLP architecture. The network is build as follows:

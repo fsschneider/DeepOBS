@@ -7,6 +7,7 @@ import torch
 from .testproblems_modules import net_quadratic_deep
 from ..datasets.quadratic import quadratic
 
+
 rng = np.random.RandomState(42)
 
 
@@ -92,22 +93,22 @@ class quadratic_deep(UnregularizedTestproblem):
             elif reduction == 'sum':
                 return torch.sum(batched_loss)
             elif reduction == 'none':
-                return torch.squeeze(batched_loss)
+                return batched_loss
             else:
                 raise NotImplementedError('Reduction ' + reduction + ' not implemented')
         return quadratic_deep_loss_function
 
     def set_up(self):
+        rng = np.random.RandomState(42)
         eigenvalues = np.concatenate(
             (rng.uniform(0., 1., 90), rng.uniform(30., 60., 10)), axis=0)
         D = np.diag(eigenvalues)
         R = random_rotation(D.shape[0])
         Hessian = np.matmul(np.transpose(R), np.matmul(D, R))
-
+        Hessian = torch.from_numpy(Hessian).to(self._device, torch.float32)
         self.net = net_quadratic_deep(100, Hessian)
+
         self.data = quadratic(self._batch_size)
-        # for now always run it on cpu
-        self._device = torch.device('cpu')
         self.net.to(self._device)
         self.loss_function = self.quadratic_deep_loss_function_factory
         self.regularization_groups = self.get_regularization_groups()
@@ -124,7 +125,7 @@ class quadratic_deep(UnregularizedTestproblem):
             float, float, (callable): loss and accuracy of the model on the current batch. If ``return_forward_func`` is ``True`` it also returns the function that calculates the loss on the current batch.
             """
         inputs = self._get_next_batch()[0]
-
+        inputs = inputs.to(self._device)
         def _get_batch_loss_and_accuracy():
             # in evaluation phase is no gradient needed
             if self.phase in ["train_eval", "test", "valid"]:
