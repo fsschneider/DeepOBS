@@ -11,7 +11,7 @@ from . import runner_utils
 from deepobs.abstract_runner.abstract_runner import Runner
 import numpy as np
 import warnings
-
+from random import seed
 
 class PTRunner(Runner):
     """The abstract class for runner in the pytorch framework."""
@@ -85,6 +85,7 @@ class PTRunner(Runner):
         else:
             torch.backends.cudnn.deterministic = False
             torch.backends.cudnn.benchmark = True
+        seed(random_seed)
         np.random.seed(random_seed)
         torch.manual_seed(random_seed)
 
