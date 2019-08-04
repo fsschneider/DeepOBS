@@ -92,7 +92,7 @@ class GP(Tuner):
              acq_kappa = 2.576, 
              acq_xi = 0.0, 
              mode = 'final',
-             rerun_best_setting = False,
+             rerun_best_setting = True,
              **kwargs):
 
         """Tunes the optimizer hyperparameters by evaluating a Gaussian process surrogate with an acquisition function.

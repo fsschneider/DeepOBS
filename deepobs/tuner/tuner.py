@@ -68,7 +68,7 @@ class Tuner(abc.ABC):
             self.tune(testproblem, *args, **kwargs)
 
     @abc.abstractmethod
-    def tune(self, testproblem, *args, output_dir='./results', random_seed=42, rerun_best_setting = False, **kwargs):
+    def tune(self, testproblem, *args, output_dir='./results', random_seed=42, rerun_best_setting = True, **kwargs):
         """Tunes hyperparaneter of the optimizer_class on a testproblem.
         Args:
             testproblem (str): Testproblem for which to generate commands.
@@ -132,7 +132,6 @@ class ParallelizedTuner(Tuner):
                 string += ' --' + key + ' ' + str(value)
         return string
 
-
     def _generate_kwargs_format_for_command_line(self, **kwargs):
         """Overwrite this method to specify how additional training params should be represented in the command line string.
         This is basically the inversion of your runner specific method ``_add_training_params_to_argparse``"""
@@ -146,7 +145,7 @@ class ParallelizedTuner(Tuner):
                 string += ' --' + key + ' ' + str(value)
         return string
 
-    def tune(self, testproblem, output_dir='./results', random_seed=42, rerun_best_setting = False, **kwargs):
+    def tune(self, testproblem, output_dir='./results', random_seed=42, rerun_best_setting = True, **kwargs):
         self._set_seed(random_seed)
         params = self._sample()
         for sample in params:
@@ -156,7 +155,6 @@ class ParallelizedTuner(Tuner):
         if rerun_best_setting:
             optimizer_path = os.path.join(output_dir, testproblem, self._optimizer_name)
             rerun_setting(self._runner, self._optimizer_class, self._hyperparam_names, optimizer_path)
-
 
     def generate_commands_script(self, testproblem, output_dir='./results', random_seed=42,
                                  generation_dir = './command_scripts', **kwargs):
