@@ -37,7 +37,7 @@ class DataSet(abc.ABC):
     """
         self._batch_size = batch_size
 
-        if config.get_default_device() == 'cuda':
+        if 'cuda' in config.get_default_device():
             self._pin_memory = True
         else:
             self._pin_memory = False
