@@ -348,7 +348,7 @@ class LearningRateScheduleRunner(PTRunner):
                 lr_sched_factors (list): The corresponding factors by which to adjust the learning rate.
 
             Returns:
-                dict: The logged metrices. Is of the form: \
+                dict: The logged metrices. Is of the form \
                     {'test_losses' : [...], \
                     'valid_losses': [...], \
                      'train_losses': [...],  \
@@ -356,7 +356,7 @@ class LearningRateScheduleRunner(PTRunner):
                      'valid_accuracies': [...], \
                      'train_accuracies': [...] \
                      } \
-                where the metrices values are lists that were filled during training.
+                    where the metrices values are lists that were filled during training.
 
         """
 

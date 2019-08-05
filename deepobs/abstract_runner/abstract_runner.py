@@ -35,16 +35,19 @@ class Runner(abc.ABC):
 
         Args:
             optimizer_class: The optimizer class of the optimizer that is run on \
-            the testproblems. For PyTorch this must be a subclass of torch.optim.Optimizer. For
+            the testproblems. For PyTorch this must be a subclass of torch.optim.Optimizer. For \
             TensorFlow a subclass of tf.train.Optimizer. \
 
-            hyperparameter_names (dict): A nested dictionary that lists all hyperparameters of the optimizer, \
-            their type and their default values (if they have any) in the form: \
-            {'<name>': {'type': <type>, 'default': <default value>}}, \
-            e.g. for torch.optim.SGD with momentum: \
-            {'lr': {'type': float}, \
-            'momentum': {'type': float, 'default': 0.99}, \
-            'uses_nesterov': {'type': bool, 'default': False}} \
+            hyperparameter_names: A nested dictionary that lists all hyperparameters of the optimizer,\
+                their type and their default values (if they have any).
+
+        Example
+        -------
+        >>> optimizer_class = tf.train.MomentumOptimizer
+        >>> hyperparms = {'lr': {'type': float},
+        >>> 'momentum': {'type': float, 'default': 0.99},
+        >>> 'uses_nesterov': {'type': bool, 'default': False}}
+        >>> runner = StandardRunner(optimizer_class, hyperparms)
         """
         self._optimizer_class = optimizer_class
         self._optimizer_name = optimizer_class.__name__
@@ -176,12 +179,25 @@ class Runner(abc.ABC):
 
     def _add_training_params_to_argparse(self, parser, args, training_params):
         """Overwrite this method to specify how your
-        runner should read in additional training_parameters and to add them to argparse"""
+        runner should read in additional training_parameters and to add them to argparse.
+
+        Args:
+            parser (argparse.ArgumentParser): The argument parser object.
+            args (dict): The args that are parsed as locals to the run method.
+            training_params (dict): Training parameters that are to read in.
+            """
         pass
 
     def _add_hyperparams_to_argparse(self, parser, args, hyperparams):
         """Overwrite this method to specify how your
-        runner should read in optimizer hyper_parameters and to add them to argparse"""
+        runner should read in optimizer hyper_parameters and to add them to argparse.
+
+        Args:
+            parser (argparse.ArgumentParser): The argument parser object.
+            args (dict): The args that are parsed as locals to the run method.
+            hyperparams (dict): Hyperparameters that are to read in.
+
+        """
         if hyperparams is None:    # if no hyperparams dict is passed to run()
             for hp_name, hp_specification in self._hyperparameter_names.items():
                 _add_hp_to_argparse(parser, self._optimizer_name, hp_specification, hp_name)
@@ -195,7 +211,15 @@ class Runner(abc.ABC):
 
     def _add_training_params_to_output_dir_name(self, output, run_folder_name):
         """Overwrite this method to specify how your
-        runner should format additional training_parameters in the run folder name."""
+        runner should format additional training_parameters in the run folder name.
+
+        Args:
+            output (dict): The output from the run method.
+            run_folder_name (str): The current name of the run folder that the training parameters are added to.
+
+        Returns:
+            str: The new run folder name.
+        """
         for tp_name, tp_value in sorted(output['training_params'].items()):
             if tp_value is not None:
                 run_folder_name += "__{0:s}".format(tp_name)
@@ -205,7 +229,17 @@ class Runner(abc.ABC):
 
     def _add_hyperparams_to_output_dir_name(self, output, run_folder_name):
         """Overwrite this method to specify how your
-        runner should format optimizer hyper_parameters in the run folder name."""
+        runner should format optimizer hyper_parameters in the run folder name.
+
+        Args:
+            output (dict): The output from the run method.
+            run_folder_name (str): The current name of the run folder that the hyperparameters are added to.
+
+        Returns:
+            str: The new run folder name.
+
+        """
+
         for hp_name, hp_value in sorted(output['optimizer_hyperparams'].items()):
             run_folder_name += "__{0:s}".format(hp_name)
             run_folder_name += "__{0:s}".format(
