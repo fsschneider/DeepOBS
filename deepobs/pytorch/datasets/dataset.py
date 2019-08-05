@@ -4,6 +4,7 @@ from .. import config
 from torch.utils import data as dat
 from torch.utils.data.sampler import SubsetRandomSampler
 from .datasets_utils import train_eval_sampler
+from random import shuffle
 
 """Base class for DeepOBS datasets."""
 
@@ -59,6 +60,7 @@ class DataSet(abc.ABC):
     def _make_train_eval_split_sampler(self, train_dataset):
         """Generates SubSetRandomSamplers that can be used for splitting the training set."""
         indices = list(range(len(train_dataset)))
+        shuffle(indices)
         train_indices, valid_indices = indices[self._train_eval_size:], indices[:self._train_eval_size]
         train_sampler = SubsetRandomSampler(train_indices)
         valid_sampler = SubsetRandomSampler(valid_indices)
