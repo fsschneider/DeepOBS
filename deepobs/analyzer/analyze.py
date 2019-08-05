@@ -10,8 +10,6 @@ import pandas as pd
 
 
 def plot_results_table(results_path, mode='most', metric='valid_accuracies', conv_perf_file=None):
-    # TODO results table plots the valid metric, which is now what we want.
-    # TODO general solution: implement the valid metric only for the setting analyzer ranking
     
     """Summarizes the performance of the optimizer and prints it to a pandas data frame.
 
@@ -22,7 +20,7 @@ def plot_results_table(results_path, mode='most', metric='valid_accuracies', con
                 conv_perf_file (str): Path to the convergence performance file. It is used to calculate the speed of the optimizer. Defaults to ``None`` in which case the speed measure is N.A.
 
             Returns:
-                pandas.DataFrame: A data frame that summarizes the results.
+                pandas.DataFrame: A data frame that summarizes the results on the test set.
                 """
     table_dic = {}
     testproblems = os.listdir(results_path)
@@ -168,14 +166,15 @@ def plot_hyperparameter_sensitivity(path, hyperparam, mode='final', metric = 'va
     Returns:
         matplotlib.axes.Axes: The figure and axes of the plot.
         """
-
     _, ax = plt.subplots()
     pathes = _preprocess_path(path)
     for optimizer_path in pathes:
+        metric = _determine_available_metric(optimizer_path, metric)
         ax = _plot_hyperparameter_sensitivity(optimizer_path, hyperparam, ax, mode, metric, plot_std)
     if reference_path is not None:
         pathes = _preprocess_path(reference_path)
         for reference_optimizer_path in pathes:
+            metric = _determine_available_metric(reference_optimizer_path, metric)
             ax = _plot_hyperparameter_sensitivity(reference_optimizer_path, hyperparam, ax, mode, metric, plot_std)
 
     plt.xscale(xscale)
@@ -217,13 +216,14 @@ def get_performance_dictionary(optimizer_path, mode = 'most', metric = 'valid_ac
         conv_perf_file (str): Path to the convergence performance file. It is used to calculate the speed of the optimizer. Defaults to ``None`` in which case the speed measure is N.A.
 
     Returns:
-        dict: A dictionary that holds the best setting and it's performance.
+        dict: A dictionary that holds the best setting and it's performance on the test set.
         """
     metric = _determine_available_metric(optimizer_path, metric)
     setting_analyzers_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
     sett = setting_analyzers_ranking[0]
 
     perf_dict = dict()
+    metric = 'test_accuracies' if 'test_accuracies' in sett.aggregate else 'test_losses'
     if mode == 'final':
         perf_dict['Performance'] = sett.get_final_value(metric)
     elif mode == 'best':

@@ -83,6 +83,7 @@ def _check_if_metric_is_available(optimizer_path, metric):
 def _determine_available_metric(optimizer_path, metric, default_metric = 'valid_losses'):
     """Checks if the metric ``metric`` is availabe for the runs in ``optimizer_path``.
     If not, it returns the fallback metric ``default_metric``."""
+    optimizer_name, testproblem_name = _get_optimizer_name_and_testproblem_from_path(optimizer_path)
     if _check_if_metric_is_available(optimizer_path, metric):
         return metric
     else:
@@ -90,10 +91,11 @@ def _determine_available_metric(optimizer_path, metric, default_metric = 'valid_
         # TODO remove if-else once validation metrics are available for the baselines
         if _check_if_metric_is_available(optimizer_path, default_metric):
             warnings.warn('Metric {0:s} does not exist for testproblem {1:s}. We now use fallback metric {2:s}'.format(
-                metric, os.path.split(os.path.split(optimizer_path)[0])[1], default_metric), RuntimeWarning)
+                metric, testproblem_name, default_metric), RuntimeWarning)
             return default_metric
         else:
-            warnings.warn('Cannot fallback to metric {0:s}. Will now fallback to metric test_losses'.format(default_metric), RuntimeWarning)
+            warnings.warn('Cannot fallback to metric {0:s} for optimizer {1:s} on testproblem {2:s}. Will now fallback to metric test_losses'.format(
+                default_metric, optimizer_name, testproblem_name), RuntimeWarning)
             return 'test_losses'
 
 
