@@ -35,9 +35,8 @@ class Runner(abc.ABC):
 
         Args:
             optimizer_class: The optimizer class of the optimizer that is run on \
-            the testproblems. For PyTorch this must be a subclass of torch.optim.Optimizer. For \
-            TensorFlow a subclass of tf.train.Optimizer. \
-
+                the testproblems. For PyTorch this must be a subclass of torch.optim.Optimizer. For \
+                TensorFlow a subclass of tf.train.Optimizer.
             hyperparameter_names: A nested dictionary that lists all hyperparameters of the optimizer,\
                 their type and their default values (if they have any).
 
