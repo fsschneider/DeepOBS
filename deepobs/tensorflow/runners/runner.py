@@ -60,7 +60,6 @@ class TFRunner(Runner):
         
         return output
 
-
     @staticmethod
     def init_summary(loss,
                      learning_rate_var,
@@ -125,7 +124,6 @@ class TFRunner(Runner):
         per_iter_summary_ = sess.run(per_iter_summaries)
         summary_writer.add_summary(per_iter_summary_, current_step)
 
-
     @staticmethod
     def create_testproblem(testproblem, batch_size, weight_decay, random_seed):
         """Sets up the deepobs.tensorflow.testproblems.testproblem instance.
@@ -160,7 +158,13 @@ class TFRunner(Runner):
     # Wrapper functions for the evaluation phase.
     @staticmethod
     def evaluate(tproblem, sess, loss, phase):
-        """Computes average loss and accuracy in the evaluation phase."""
+        """Computes average loss and accuracy in the evaluation phase.
+        Args:
+            tproblem (deepobs.tensorflow.testproblems.testproblem): The testproblem instance.
+            sess (tensorflow.Session): The current TensorFlow Session.
+            loss: The TensorFlow operation that computes the loss.
+            phase (str): The phase of the evaluation. Muste be one of 'TRAIN', 'VALID' or 'TEST'
+        """
         if phase == 'TEST':
             sess.run(tproblem.test_init_op)
             msg = "TEST:"
@@ -207,7 +211,6 @@ class TFRunner(Runner):
         # Print and return the results.
         return loss_, acc_
 
-
     @abc.abstractmethod
     def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params):
         return
@@ -239,7 +242,7 @@ class StandardRunner(TFRunner):
         # TRAINABLE_VARIABLES collection (with a dependency on performing all ops
         # in the collection UPDATE_OPS collection for batch norm, etc).
         with tf.control_dependencies(
-            tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
+                tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
             step = opt.minimize(loss, global_step=global_step)
 
         # Lists to track train/test loss and accuracy.
@@ -442,8 +445,10 @@ class LearningRateScheduleRunner(TFRunner):
             Returns:
                 dict: The logged metrices. Is of the form: \
                     {'test_losses' : [...], \
+                     'valid_losses': [...], \
                      'train_losses': [...],  \
                      'test_accuracies': [...], \
+                     'valid_accuracies': [...], \
                      'train_accuracies': [...] \
                      } \
                 where the metrices values are lists that were filled during training.
