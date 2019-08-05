@@ -101,9 +101,13 @@ class TestProblem(abc.ABC):
         Testproblems with different calculation routines (e.g. RNNs) overwrite this method accordingly.
 
         Args:
-            return_forward_func (bool): If ``True``, the call also returns a function that calculates the loss on the current batch. Can be used if you need to access the forward path twice.
+            return_forward_func (bool): If ``True``, the call also returns a function that calculates the loss on the \
+            current batch. Can be used if you need to access the forward path twice.
+            reduction (str): The reduction that is used for returning the loss. Can be 'mean', 'sum' or 'none' in which \
+            case each indivual loss in the mini-batch is returned as a tensor.
         Returns:
-            float, float, (callable): loss and accuracy of the model on the current batch. If ``return_forward_func`` is ``True`` it also returns the function that calculates the loss on the current batch.
+            float/torch.tensor, float, (callable): loss and accuracy of the model on the current batch. \
+            If ``return_forward_func`` is ``True`` it also returns the function that calculates the loss on the current batch.
             """
 
         inputs, labels = self._get_next_batch()
@@ -182,8 +186,7 @@ class UnregularizedTestproblem(TestProblem):
         super(UnregularizedTestproblem, self).__init__(batch_size, weight_decay)
 
     def get_regularization_groups(self):
-        """Creates regularization groups for the parameters. Default implementation for most testproblems. Testproblems
-        where the regularization is different overwrite this method accordingly.
+        """Creates regularization groups for the parameters.
 
         Returns:
             dict: A dictionary where the key is the regularization factor and the value is a list of parameters.

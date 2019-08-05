@@ -19,7 +19,7 @@ def set_is_deterministic(is_deterministic):
     ``torch.backends.cudnn.deterministic = True`` \
     ``torch.backends.cudnn.benchmark = False``. \
     However, full determinism is not guaranteed. For more information, see: \
-    <https://pytorch.org/docs/stable/notes/randomness.html>
+    https://pytorch.org/docs/stable/notes/randomness.html
     """
     global IS_DETERMINISTIC
     IS_DETERMINISTIC = is_deterministic

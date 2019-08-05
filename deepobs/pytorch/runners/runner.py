@@ -13,6 +13,7 @@ import numpy as np
 import warnings
 from random import seed
 
+
 class PTRunner(Runner):
     """The abstract class for runner in the pytorch framework."""
 
@@ -20,23 +21,24 @@ class PTRunner(Runner):
         super(PTRunner, self).__init__(optimizer_class, hyperparameter_names)
 
     @abc.abstractmethod
-    def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params):
+    def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir,
+                 **training_params):
         return
 
     def _run(self,
-            testproblem = None,
-            hyperparams = None,
-            batch_size = None,
-            num_epochs = None,
-            random_seed=None,
-            data_dir=None,
-            output_dir=None,
-            weight_decay=None,
-            no_logs=None,
-            train_log_interval = None,
-            print_train_iter = None,
-            tb_log = None,
-            tb_log_dir = None,
+             testproblem=None,
+             hyperparams=None,
+             batch_size=None,
+             num_epochs=None,
+             random_seed=None,
+             data_dir=None,
+             output_dir=None,
+             weight_decay=None,
+             no_logs=None,
+             train_log_interval=None,
+             print_train_iter=None,
+             tb_log=None,
+             tb_log_dir=None,
              **training_params):
 
         if batch_size is None:
@@ -49,7 +51,8 @@ class PTRunner(Runner):
 
         tproblem = self.create_testproblem(testproblem, batch_size, weight_decay, random_seed)
 
-        output = self.training(tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params)
+        output = self.training(tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log,
+                               tb_log_dir, **training_params)
         output = self._post_process_output(output, 
                                            testproblem, 
                                            batch_size, 
@@ -328,9 +331,9 @@ class LearningRateScheduleRunner(PTRunner):
                  train_log_interval,
                  tb_log,
                  tb_log_dir,
-                # the following are the training_params
-                lr_sched_epochs=None,
-                lr_sched_factors=None):
+                 # the following are the training_params
+                 lr_sched_epochs=None,
+                 lr_sched_factors=None):
         r"""Performs the training and stores the metrices.
 
             Args:
@@ -347,8 +350,10 @@ class LearningRateScheduleRunner(PTRunner):
             Returns:
                 dict: The logged metrices. Is of the form: \
                     {'test_losses' : [...], \
+                    'valid_losses': [...], \
                      'train_losses': [...],  \
                      'test_accuracies': [...], \
+                     'valid_accuracies': [...], \
                      'train_accuracies': [...] \
                      } \
                 where the metrices values are lists that were filled during training.
@@ -361,8 +366,10 @@ class LearningRateScheduleRunner(PTRunner):
 
         # Lists to log train/test loss and accuracy.
         train_losses = []
+        valid_losses = []
         test_losses = []
         train_accuracies = []
+        valid_accuracies = []
         test_accuracies = []
 
         minibatch_train_losses = []
@@ -372,11 +379,15 @@ class LearningRateScheduleRunner(PTRunner):
             print("********************************")
             print("Evaluating after {0:d} of {1:d} epochs...".format(epoch_count, num_epochs))
 
-            loss_, acc_ = self.evaluate(tproblem, test=False)
+            loss_, acc_ = self.evaluate(tproblem, phase='TRAIN')
             train_losses.append(loss_)
             train_accuracies.append(acc_)
 
-            loss_, acc_ = self.evaluate(tproblem, test=True)
+            loss_, acc_ = self.evaluate(tproblem, phase='VALID')
+            valid_losses.append(loss_)
+            valid_accuracies.append(acc_)
+
+            loss_, acc_ = self.evaluate(tproblem, phase='TEST')
             test_losses.append(loss_)
             test_accuracies.append(acc_)
 
@@ -416,12 +427,19 @@ class LearningRateScheduleRunner(PTRunner):
 
             # break from training if it goes wrong
             if not np.isfinite(batch_loss.item()):
-                train_losses, test_losses, train_accuracies, test_accuracies = self._abort_routine(epoch_count,
-                                                                                                   num_epochs,
-                                                                                                   train_losses,
-                                                                                                   test_losses,
-                                                                                                   train_accuracies,
-                                                                                                   test_accuracies)
+                train_losses, \
+                valid_losses, \
+                test_losses, \
+                train_accuracies, \
+                valid_accuracies, \
+                test_accuracies = self._abort_routine(epoch_count,
+                                                      num_epochs,
+                                                      train_losses,
+                                                      valid_losses,
+                                                      test_losses,
+                                                      train_accuracies,
+                                                      valid_accuracies,
+                                                      test_accuracies)
                 break
             else:
                 continue
@@ -429,9 +447,11 @@ class LearningRateScheduleRunner(PTRunner):
         # Put results into output dictionary.
         output = {
             "train_losses": train_losses,
+            "valid_losses": valid_losses,
             "test_losses": test_losses,
             "minibatch_train_losses": minibatch_train_losses,
             "train_accuracies": train_accuracies,
+            'valid_accuracies': valid_accuracies,
             "test_accuracies": test_accuracies
         }
 

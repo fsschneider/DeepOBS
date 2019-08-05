@@ -34,16 +34,17 @@ class Runner(abc.ABC):
         """ Creates a new Runner instance
 
         Args:
-            optimizer_class: The optimizer class of the optimizer that is run on
+            optimizer_class: The optimizer class of the optimizer that is run on \
             the testproblems. For PyTorch this must be a subclass of torch.optim.Optimizer. For
-            TensorFlow a subclass of tf.train.Optimizer.
+            TensorFlow a subclass of tf.train.Optimizer. \
 
-            hyperparameter_names (dict): A nested dictionary that lists all hyperparameters of the optimizer,
-            their type and their default values (if they have any) in the form: {'<name>': {'type': <type>, 'default': <default value>}},
-            e.g. for torch.optim.SGD with momentum:
-            {'lr': {'type': float},
-            'momentum': {'type': float, 'default': 0.99},
-            'uses_nesterov': {'type': bool, 'default': False}}
+            hyperparameter_names (dict): A nested dictionary that lists all hyperparameters of the optimizer, \
+            their type and their default values (if they have any) in the form: \
+            {'<name>': {'type': <type>, 'default': <default value>}}, \
+            e.g. for torch.optim.SGD with momentum: \
+            {'lr': {'type': float}, \
+            'momentum': {'type': float, 'default': 0.99}, \
+            'uses_nesterov': {'type': bool, 'default': False}} \
         """
         self._optimizer_class = optimizer_class
         self._optimizer_name = optimizer_class.__name__
@@ -90,10 +91,11 @@ class Runner(abc.ABC):
         Returns:
             dict: {<...meta data...>, \
                 'test_losses' : test_losses, \
+                'valid_losses': valid_losses \
                  'train_losses': train_losses, \
                  'test_accuracies': test_accuracies, \
+                 'valid_accuracies': valid_accuracies \
                  'train_accuracies': train_accuracies, \
-                 'analyzable_training_params': {...} \
                  } \
             where <...meta data...> stores the run args.
 
@@ -152,8 +154,10 @@ class Runner(abc.ABC):
             Returns:
                 dict: The logged metrices. Is of the form: \
                     {'test_losses' : [...], \
+                    'valid_losses': [...], \
                      'train_losses': [...],  \
                      'test_accuracies': [...], \
+                     'valid_accuracies': [...], s\
                      'train_accuracies': [...] \
                      } \
             where the metrices values are lists that were filled during training.
@@ -375,21 +379,16 @@ class Runner(abc.ABC):
 
         return args
 
-
     def create_output_directory(self, output_dir, output):
         """Creates the output directory of the run.
 
         Args:
             output_dir (str): The path to the results folder
-            output (dict): A dict than contains the metrices and main settings
-            from the training run and a subdict called 'analyzable_training_params'
-            that holds additional training_params that need to be analyzed.
+            output (dict): A dict than contains the metrices and meta data from the training run.
 
         Returns:
-            tuple: Tuple contaning:
-            
-                str: Path to the run directory which is named after all relevant settings.
-                str: JSON file name of the run that is named after the seed and terminating time of the run.
+            str, str: The path to the run directory which is named after all relevant settings and the \
+            JSON file name of the run that is named after the seed and terminating time of the run.
         """
 
         # add everything mandatory to the name

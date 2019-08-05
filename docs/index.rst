@@ -7,7 +7,7 @@ Welcome to DeepOBS
 ===================
 
 .. WARNING::
-  This DeepOBS version is under continious development and NOT an official release. It is at most a beta version.
+  This DeepOBS version is under continious development and a beta version.
   Please report any bugs and comments to `Aaron Bahde`_
 .. _Aaron Bahde: https://github.com/abahde
 

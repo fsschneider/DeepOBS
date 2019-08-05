@@ -13,7 +13,7 @@ def set_framework(framework):
     """Sets the current used framework. This is relevant for the higher level Tuner module of DeepOBS.
 
     Args:
-        framework (str): Can be ``pytorch`` or ``tensorflow``
+        framework (str): Can be 'pytorch' or 'tensorflow'
     """
     global FRAMEWORK
     FRAMEWORK = framework

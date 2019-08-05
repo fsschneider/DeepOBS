@@ -11,9 +11,9 @@ Here, we describe in more detail what you have to do for that.
 Decide for a Framework
 ======================
 
-Since the latest DeepOBS version comes with TenorFLow and PyTorch implementations you first have to decide on the framework
-to use. If you decide for TensorFlow you Runner must inherite from the ``TFRunner`` class.
-If you decide for PyTorch you Runner must inherite from the ``PTRunner`` class. Both can be found in the API section
+Since the latest DeepOBS version comes with TensorFlow and PyTorch implementations you first have to decide on the framework
+to use. If you decide for TensorFlow your Runner must inherite from the ``TFRunner`` class.
+If you decide for PyTorch your Runner must inherite from the ``PTRunner`` class. Both can be found in the API section
 of :doc:`../api/abstract_runner`.
 
 Implement the Training Loop
@@ -22,12 +22,12 @@ Implement the Training Loop
 The most import implementation for your customized runner is the method ``training`` which runs the training loop
 on the testproblem. Its basic signature can be found in :doc:`../api/abstract_runner`. Concrete example implementations
 can be found in the Runner classes that come with DeepOBS. We recommend copying one of those and adapt it to your needs.
-In principle, simply make sure that the output dictionary is filled with the metrices ``test_accuracies``, ``test_losses``,
-``train_accuracies`` and ``tain_losses`` during training. Additionally, we distinguish between ``hyperparameters`` (which
-are the parameters that are used to initialize the optimizer) and ``training parameters`` (which are used as additional
-keyword arguments in the training loop).
+In principle, simply make sure that the output dictionary is filled with the metrices ``test_accuracies``,
+``valid_accuracies``, ``train_accuracies``, ``test_losses``, ``valid_losses`` and ``tain_losses`` during training.
+Additionally, we distinguish between ``hyperparameters`` (which are the parameters that are used to initialize
+the optimizer) and ``training parameters`` (which are used as additional keyword arguments in the training loop).
 
-For the PyTorch version we would like to give two useful hints:
+For the PyTorch version we would like to give some useful hints:
 
 1. A ``deepobs.pytorch.testproblems.testproblem`` instance holds the attribute ``net`` which is the model that is to be trained.
 This way, you have full access to the model parameters during training.
@@ -36,6 +36,9 @@ This way, you have full access to the model parameters during training.
 gets the next batch of the training set and evaluates the forward path. We implemented a closure such that you can
 call the forward path several times within the trainig loop (e.g. a second time after a parameter update). For this,
 simply set the argument ``return_forward_func = True`` of ``get_batch_loss_and_accuracy``.
+
+3. A ``deepobs.pytorch.testproblems.testproblem`` instance holds the attribute ``regularization_groups``. It can be used
+to modify the way your optimizer deals with the regularization.
 
 Read in Hyperparameters and Training Parameters from the Command Line
 =====================================================================

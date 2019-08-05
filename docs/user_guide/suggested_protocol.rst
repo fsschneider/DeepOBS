@@ -35,7 +35,7 @@ computational budget.
 
 .. NOTE::
   Alternatively, this DeepOBS version comes with a tuning automation module: :doc:`../api/tuner`.
-  However, at the moment we do not recommend using it, since it is highly experimental.
+  However, at the moment we do not provide a suggested protocol of how to use it.
 
 
 Repeated Runs with best Setting
