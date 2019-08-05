@@ -13,6 +13,8 @@ TensorFlow output files that can be plotted in real-time using `Tensorboard`.
   :maxdepth: 2
   :caption: Runner
 
+  runner/PTRunner
   runner/standardrunner
   runner/lrrunner
+
 

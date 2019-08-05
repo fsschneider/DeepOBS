@@ -54,7 +54,6 @@ on `GitHub`_.
   api/analyzer
   api/tensorflow
   api/pytorch
-  api/abstract_runner
   api/tuner
   api/scripts
   api/config

@@ -12,7 +12,9 @@ TensorFlow output files that can be plotted in real-time using `Tensorboard`.
 .. toctree::
   :maxdepth: 2
   :caption: Runner
-
+  
+  runner/TFRunner
   runner/standardrunner
   runner/lrrunner
+
 
