@@ -13,17 +13,17 @@ Decide for a Framework
 
 Since the latest DeepOBS version comes with TensorFlow and PyTorch implementations you first have to decide on the framework
 to use. If you decide for TensorFlow your Runner must inherite from the ``TFRunner`` class. It can be found in the API section
-:doc:``../api/tensorflow/runner/TFRunner``.
+:doc:`../api/tensorflow/runner/TFRunner`.
 
 If you decide for PyTorch your Runner must inherite from the ``PTRunner`` class. It can be found in the API section
-:doc:``../api/pytorch/runner/PTRunner``
+:doc:`../api/pytorch/runner/PTRunner`
 
 Implement the Training Loop
 ============================
 
 The most import implementation for your customized runner is the method ``training`` which runs the training loop
-on the testproblem. Its basic signature can be found in the API section for :doc:``../api/tensorflow/runner/TFRunner``
-and :doc:``../api/pytorch/runner/PTRunner`` respectively. Concrete example implementations
+on the testproblem. Its basic signature can be found in the API section for :doc:`../api/tensorflow/runner/TFRunner`
+and :doc:`../api/pytorch/runner/PTRunner` respectively. Concrete example implementations
 can be found in the Runner classes that come with DeepOBS. We recommend copying one of those and adapt it to your needs.
 In principle, simply make sure that the output dictionary is filled with the metrices ``test_accuracies``,
 ``valid_accuracies``, ``train_accuracies``, ``test_losses``, ``valid_losses`` and ``tain_losses`` during training.
