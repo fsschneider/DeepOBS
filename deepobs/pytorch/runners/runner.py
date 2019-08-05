@@ -334,30 +334,29 @@ class LearningRateScheduleRunner(PTRunner):
                  # the following are the training_params
                  lr_sched_epochs=None,
                  lr_sched_factors=None):
-        r"""Performs the training and stores the metrices.
+        """Performs the training and stores the metrices.
 
-            Args:
-                tproblem (deepobs.[tensorflow/pytorch].testproblems.testproblem): The testproblem instance to train on.
-                hyperparams (dict): The optimizer hyperparameters to use for the training.
-                num_epochs (int): The number of training epochs.
-                print_train_iter (bool): Whether to print the training progress at every train_log_interval
-                train_log_interval (int): Mini-batch interval for logging.
-                tb_log (bool): Whether to use tensorboard logging or not
-                tb_log_dir (str): The path where to save tensorboard events.
-                lr_sched_epochs (list): The epochs where to adjust the learning rate.
-                lr_sched_factors (list): The corresponding factors by which to adjust the learning rate.
+        Args:
+            tproblem (deepobs.[tensorflow/pytorch].testproblems.testproblem): The testproblem instance to train on.
+            hyperparams (dict): The optimizer hyperparameters to use for the training.
+            num_epochs (int): The number of training epochs.
+            print_train_iter (bool): Whether to print the training progress at every train_log_interval
+            train_log_interval (int): Mini-batch interval for logging.
+            tb_log (bool): Whether to use tensorboard logging or not
+            tb_log_dir (str): The path where to save tensorboard events.
+            lr_sched_epochs (list): The epochs where to adjust the learning rate.
+            lr_sched_factors (list): The corresponding factors by which to adjust the learning rate.
 
-            Returns:
-                dict: The logged metrices. Is of the form \
-                    {'test_losses' : [...], \
-                    'valid_losses': [...], \
-                     'train_losses': [...],  \
-                     'test_accuracies': [...], \
-                     'valid_accuracies': [...], \
-                     'train_accuracies': [...] \
-                     } \
-                    where the metrices values are lists that were filled during training.
-
+        Returns:
+            dict: The logged metrices. Is of the form: \
+                {'test_losses' : [...], \
+                'valid_losses': [...], \
+                 'train_losses': [...],  \
+                 'test_accuracies': [...], \
+                 'valid_accuracies': [...], \
+                 'train_accuracies': [...] \
+                 } \
+            where the metrices values are lists that were filled during training.
         """
 
         opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)

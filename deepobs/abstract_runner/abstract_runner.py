@@ -45,9 +45,10 @@ class Runner(abc.ABC):
         -------
         >>> optimizer_class = tf.train.MomentumOptimizer
         >>> hyperparms = {'lr': {'type': float},
-        >>> 'momentum': {'type': float, 'default': 0.99},
-        >>> 'uses_nesterov': {'type': bool, 'default': False}}
+        >>>    'momentum': {'type': float, 'default': 0.99},
+        >>>    'uses_nesterov': {'type': bool, 'default': False}}
         >>> runner = StandardRunner(optimizer_class, hyperparms)
+
         """
         self._optimizer_class = optimizer_class
         self._optimizer_name = optimizer_class.__name__
@@ -160,7 +161,7 @@ class Runner(abc.ABC):
                     'valid_losses': [...], \
                      'train_losses': [...],  \
                      'test_accuracies': [...], \
-                     'valid_accuracies': [...], s\
+                     'valid_accuracies': [...], \
                      'train_accuracies': [...] \
                      } \
             where the metrices values are lists that were filled during training.
