@@ -145,7 +145,14 @@ class ParallelizedTuner(Tuner):
                 string += ' --' + key + ' ' + str(value)
         return string
 
-    def tune(self, testproblem, output_dir='./results', random_seed=42, rerun_best_setting = True, **kwargs):
+    def tune(self, testproblem, output_dir='./results', random_seed=42, rerun_best_setting = False, **kwargs):
+        """Tunes the optimizer on the test problem.
+        Args:
+            testproblem (str): The test problem to tune the optimizer on.
+            output_dir (str): The output directory for the results.
+            random_seed (int): Random seed for the whole truning process. Every individual run is seeded by it.
+            rerun_best_setting (bool): Whether to automatically rerun the best setting with 10 different seeds.
+        """
         self._set_seed(random_seed)
         params = self._sample()
         for sample in params:
