@@ -142,7 +142,12 @@ class TestProblem(abc.ABC):
             return _get_batch_loss_and_accuracy()
 
     def get_regularization_loss(self):
-        """Returns the current regularization loss of the network based on the parameter groups."""
+        """Returns the current regularization loss of the network based on the parameter groups.
+
+        Returns:
+            int or torch.tensor: If no regularzations is applied, it returns the integer 0. Else a torch.tensor \
+            that holds the regularization loss.
+        """
         # iterate through all layers
         layer_norms = []
         for regularization, parameter_group in self.regularization_groups.items():
@@ -152,7 +157,6 @@ class TestProblem(abc.ABC):
                     layer_norms.append(regularization * parameters.pow(2).sum())
 
         regularization_loss = 0.5 * sum(layer_norms)
-        # TODO liste leer = kein tensor
         return regularization_loss
 
     @abc.abstractmethod
