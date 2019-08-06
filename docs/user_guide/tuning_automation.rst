@@ -23,7 +23,10 @@ way on the given hardware.
 If you want to parallelize the tuning process you can use the method ``generate_commands_script``.
 It generates commands than can be send to different nodes. If the format of the command string is not correct for your
 training or hyper parameters you have to overwrite the methods ``_generate_kwargs_format_for_command_line`` and
-``_generate_hyperparams_format_for_command_line`` of the ``ParallelizedTuner`` accordingly.
+``_generate_hyperparams_format_for_command_line`` of the ``ParallelizedTuner`` accordingly. Note that the generated
+commands refer to a run script that you have to specify on your own. Here, as an example, the generated commands refer to
+:download:`a standard SGD script\
+<../../SGD.py>`
 
 .. literalinclude:: ../../example_grid_search.py
 
