@@ -160,6 +160,34 @@ class PTRunner(Runner):
 
         return loss, accuracy
 
+    def evaluate_all(self,
+                     epoch_count,
+                     num_epochs,
+                     tproblem,
+                     train_losses,
+                     valid_losses,
+                     test_losses,
+                     train_accuracies,
+                     valid_accuracies,
+                     test_accuracies):
+
+        print("********************************")
+        print("Evaluating after {0:d} of {1:d} epochs...".format(epoch_count, num_epochs))
+
+        loss_, acc_ = self.evaluate(tproblem, phase='TRAIN')
+        train_losses.append(loss_)
+        train_accuracies.append(acc_)
+
+        loss_, acc_ = self.evaluate(tproblem, phase='VALID')
+        valid_losses.append(loss_)
+        valid_accuracies.append(acc_)
+
+        loss_, acc_ = self.evaluate(tproblem, phase='TEST')
+        test_losses.append(loss_)
+        test_accuracies.append(acc_)
+
+        print("********************************")
+
 
 class StandardRunner(PTRunner):
     """A standard runner. Can run a normal training loop with fixed
@@ -201,22 +229,15 @@ class StandardRunner(PTRunner):
 
         for epoch_count in range(num_epochs + 1):
             # Evaluate at beginning of epoch.
-            print("********************************")
-            print("Evaluating after {0:d} of {1:d} epochs...".format(epoch_count, num_epochs))
-
-            loss_, acc_ = self.evaluate(tproblem, phase='TRAIN')
-            train_losses.append(loss_)
-            train_accuracies.append(acc_)
-
-            loss_, acc_ = self.evaluate(tproblem, phase='VALID')
-            valid_losses.append(loss_)
-            valid_accuracies.append(acc_)
-
-            loss_, acc_ = self.evaluate(tproblem, phase='TEST')
-            test_losses.append(loss_)
-            test_accuracies.append(acc_)
-
-            print("********************************")
+            self.evaluate_all(epoch_count,
+                              num_epochs,
+                              tproblem,
+                              train_losses,
+                              valid_losses,
+                              test_losses,
+                              train_accuracies,
+                              valid_accuracies,
+                              test_accuracies)
 
             # Break from train loop after the last round of evaluation
             if epoch_count == num_epochs:
@@ -370,22 +391,15 @@ class LearningRateScheduleRunner(PTRunner):
 
         for epoch_count in range(num_epochs + 1):
             # Evaluate at beginning of epoch.
-            print("********************************")
-            print("Evaluating after {0:d} of {1:d} epochs...".format(epoch_count, num_epochs))
-
-            loss_, acc_ = self.evaluate(tproblem, phase='TRAIN')
-            train_losses.append(loss_)
-            train_accuracies.append(acc_)
-
-            loss_, acc_ = self.evaluate(tproblem, phase='VALID')
-            valid_losses.append(loss_)
-            valid_accuracies.append(acc_)
-
-            loss_, acc_ = self.evaluate(tproblem, phase='TEST')
-            test_losses.append(loss_)
-            test_accuracies.append(acc_)
-
-            print("********************************")
+            self.evaluate_all(epoch_count,
+                              num_epochs,
+                              tproblem,
+                              train_losses,
+                              valid_losses,
+                              test_losses,
+                              train_accuracies,
+                              valid_accuracies,
+                              test_accuracies)
 
             # Break from train loop after the last round of evaluation
             if epoch_count == num_epochs:

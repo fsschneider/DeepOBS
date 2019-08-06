@@ -20,20 +20,20 @@ class TFRunner(Runner):
         super(TFRunner, self).__init__(optimizer_class, hyperparameter_names)
 
     def _run(self,
-            testproblem = None,
-            hyperparams = None,
-            batch_size = None,
-            num_epochs = None,
-            random_seed=None,
-            data_dir=None,
-            output_dir=None,
-            weight_decay=None,
-            no_logs=None,
-            train_log_interval = None,
-            print_train_iter = None,
-            tb_log = None,
-            tb_log_dir = None,
-            **training_params):
+             testproblem=None,
+             hyperparams=None,
+             batch_size=None,
+             num_epochs=None,
+             random_seed=None,
+             data_dir=None,
+             output_dir=None,
+             weight_decay=None,
+             no_logs=None,
+             train_log_interval=None,
+             print_train_iter=None,
+             tb_log=None,
+             tb_log_dir=None,
+             **training_params):
 
         if batch_size is None:
             batch_size = global_config.get_testproblem_default_setting(testproblem)['batch_size']
@@ -211,6 +211,63 @@ class TFRunner(Runner):
         # Print and return the results.
         return loss_, acc_
 
+    def evaluate_all(self, n,
+                     num_epochs,
+                     tproblem,
+                     sess,
+                     loss,
+                     tb_log,
+                     per_epoch_summaries,
+                     summary_writer,
+                     train_losses,
+                     valid_losses,
+                     test_losses,
+                     train_accuracies,
+                     valid_accuracies,
+                     test_accuracies):
+        print("********************************")
+        print("Evaluating after {0:d} of {1:d} epochs...".format(n, num_epochs))
+
+        loss_, acc_ = self.evaluate(tproblem, sess, loss, phase='TRAIN')
+        if tb_log:
+            current_step = len(train_losses)
+            self.write_per_epoch_summary(sess,
+                                         loss_,
+                                         acc_,
+                                         current_step,
+                                         per_epoch_summaries,
+                                         summary_writer,
+                                         phase='TRAIN')
+        train_losses.append(loss_)
+        train_accuracies.append(acc_)
+
+        loss_, acc_ = self.evaluate(tproblem, sess, loss, phase='VALID')
+        if tb_log:
+            current_step = len(train_losses)
+            self.write_per_epoch_summary(sess,
+                                         loss_,
+                                         acc_,
+                                         current_step,
+                                         per_epoch_summaries,
+                                         summary_writer,
+                                         phase='VALID')
+        valid_losses.append(loss_)
+        valid_accuracies.append(acc_)
+
+        loss_, acc_ = self.evaluate(tproblem, sess, loss, phase='TEST')
+        if tb_log:
+            current_step = len(test_losses)
+            self.write_per_epoch_summary(sess,
+                                         loss_,
+                                         acc_,
+                                         current_step,
+                                         per_epoch_summaries,
+                                         summary_writer,
+                                         phase='TEST')
+        test_losses.append(loss_)
+        test_accuracies.append(acc_)
+        print("********************************")
+
     @abc.abstractmethod
     def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params):
         return
@@ -251,7 +308,7 @@ class StandardRunner(TFRunner):
         test_losses = []
         minibatch_train_losses = []
         train_accuracies = []
-        valid_accracies = []
+        valid_accuracies = []
         test_accuracies = []
 
         # Tensorboard summaries
@@ -261,6 +318,10 @@ class StandardRunner(TFRunner):
                                                                                         learning_rate_var,
                                                                                         batch_size,
                                                                                         tb_log_dir)
+        else:    # make sure that they are assigned for evaluate_all()
+            per_epoch_summaries = None,
+            summary_writer = None
+
         # Start tensorflow session and initialize variables.
         sess = tf.Session()
         sess.run(tf.global_variables_initializer())
@@ -268,48 +329,20 @@ class StandardRunner(TFRunner):
         # Start of training loop.
         for n in range(num_epochs + 1):
             # Evaluate at beginning of epoch.
-            print("********************************")
-            print("Evaluating after {0:d} of {1:d} epochs...".format(n, num_epochs))
-
-            loss_, acc_ = self.evaluate(tproblem, sess, loss, phase='TRAIN')
-            if tb_log:
-                current_step = len(train_losses)
-                self.write_per_epoch_summary(sess,
-                                         loss_,
-                                         acc_,
-                                         current_step,
-                                         per_epoch_summaries,
-                                         summary_writer,
-                                         phase='TRAIN')
-            train_losses.append(loss_)
-            train_accuracies.append(acc_)
-
-            loss_, acc_ = self.evaluate(tproblem, sess, loss, phase='VALID')
-            if tb_log:
-                current_step = len(train_losses)
-                self.write_per_epoch_summary(sess,
-                                         loss_,
-                                         acc_,
-                                         current_step,
-                                         per_epoch_summaries,
-                                         summary_writer,
-                                         phase='VALID')
-            valid_losses.append(loss_)
-            valid_accracies.append(acc_)
-
-            loss_, acc_ = self.evaluate(tproblem, sess, loss, phase='TEST')
-            if tb_log:
-                current_step = len(test_losses)
-                self.write_per_epoch_summary(sess,
-                                         loss_,
-                                         acc_,
-                                         current_step,
-                                         per_epoch_summaries,
-                                         summary_writer,
-                                         phase='TEST')
-            test_losses.append(loss_)
-            test_accuracies.append(acc_)
-            print("********************************")
+            self.evaluate_all(n,
+                              num_epochs,
+                              tproblem,
+                              sess,
+                              loss,
+                              tb_log,
+                              per_epoch_summaries,
+                              summary_writer,
+                              train_losses,
+                              valid_losses,
+                              test_losses,
+                              train_accuracies,
+                              valid_accuracies,
+                              test_accuracies)
 
             # Break from train loop after the last round of evaluation
             if n == num_epochs:
@@ -350,7 +383,7 @@ class StandardRunner(TFRunner):
                                     valid_losses,
                                     test_losses,
                                     train_accuracies,
-                                    valid_accracies,
+                                    valid_accuracies,
                                     test_accuracies,
                                     minibatch_train_losses)
                 break
@@ -366,7 +399,7 @@ class StandardRunner(TFRunner):
             "valid_losses": valid_losses,
             "test_losses": test_losses,
             "train_accuracies": train_accuracies,
-            "valid_accuracies": valid_accracies,
+            "valid_accuracies": valid_accuracies,
             "test_accuracies": test_accuracies,
             "minibatch_train_losses": minibatch_train_losses,
         }
@@ -486,6 +519,10 @@ class LearningRateScheduleRunner(TFRunner):
                                                                                         learning_rate_var,
                                                                                         batch_size,
                                                                                         tb_log_dir)
+        else:    # make sure that they are assigned for evaluate_all()
+            per_epoch_summaries = None,
+            summary_writer = None
+
         # Start tensorflow session and initialize variables.
         sess = tf.Session()
         sess.run(tf.global_variables_initializer())
@@ -493,48 +530,20 @@ class LearningRateScheduleRunner(TFRunner):
         # Start of training loop.
         for n in range(num_epochs + 1):
             # Evaluate at beginning of epoch.
-            print("********************************")
-            print("Evaluating after {0:d} of {1:d} epochs...".format(n, num_epochs))
-
-            loss_, acc_ = self.evaluate(tproblem, sess, loss, phase = 'TRAIN')
-            if tb_log:
-                current_step = len(train_losses)
-                self.write_per_epoch_summary(sess,
-                                             loss_,
-                                             acc_,
-                                             current_step,
-                                             per_epoch_summaries,
-                                             summary_writer,
-                                             phase='TRAIN')
-            train_losses.append(loss_)
-            train_accuracies.append(acc_)
-
-            loss_, acc_ = self.evaluate(tproblem, sess, loss, phase = 'VALID')
-            if tb_log:
-                current_step = len(train_losses)
-                self.write_per_epoch_summary(sess,
-                                             loss_,
-                                             acc_,
-                                             current_step,
-                                             per_epoch_summaries,
-                                             summary_writer,
-                                             phase='VALID')
-            valid_losses.append(loss_)
-            valid_accuracies.append(acc_)
-
-            loss_, acc_ = self.evaluate(tproblem, sess, loss, phase='TEST')
-            if tb_log:
-                current_step = len(test_losses)
-                self.write_per_epoch_summary(sess,
-                                             loss_,
-                                             acc_,
-                                             current_step,
-                                             per_epoch_summaries,
-                                             summary_writer,
-                                             phase='TEST')
-            test_losses.append(loss_)
-            test_accuracies.append(acc_)
-            print("********************************")
+            self.evaluate_all(n,
+                              num_epochs,
+                              tproblem,
+                              sess,
+                              loss,
+                              tb_log,
+                              per_epoch_summaries,
+                              summary_writer,
+                              train_losses,
+                              valid_losses,
+                              test_losses,
+                              train_accuracies,
+                              valid_accuracies,
+                              test_accuracies)
 
             # Break from train loop after the last round of evaluation
             if n == num_epochs:
