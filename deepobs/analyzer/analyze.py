@@ -7,6 +7,105 @@ from .shared_utils import create_setting_analyzer_ranking, _determine_available_
 from ..tuner.tuner_utils import generate_tuning_summary
 from .analyze_utils import _rescale_ax, _preprocess_path
 import pandas as pd
+import time
+
+
+def estimate_runtime(framework,
+                     runner_cls,
+                     optimizer_cls,
+                     optimizer_hp,
+                     n_runs = 5,
+                     sgd_lr=0.01,
+                     testproblem='mnist_mlp',
+                     num_epochs = 5,
+                     batch_size = 128,
+                     **kwargs):
+
+    """Can be used to estimates the runtime overhead of a new optimizer compared to SGD. Runs the new optimizer and
+    SGD seperately and calculates the fraction of wall clock overhead.
+
+    Args:
+        framework (str): Framework that you use. Must be 'pytorch' or 'tensorlfow'.
+        runner_cls: The runner class that your optimizer uses.
+        optimizer_cls: Your optimizer class.
+        optimizer_hp (dict): Its hyperparameter specification as it is used in the runner initialization.
+        n_runs (int): The number of run calls for which the overhead is averaged over.
+        sgd_lr (float): The vanilla SGD learning rate to use.
+        testproblem (str): The deepobs testproblem to run SGD and the new optimizer on.
+        num_epochs (int): The number of epochs to run for the testproblem.
+        batch_size (int): Batch size of the testproblem.
+
+    Returns:
+        str: The output that is printed to the console.
+    """
+
+    # get the standard runner with SGD
+    if framework == 'pytorch':
+        from deepobs import pytorch as ptobs
+        from torch.optim import SGD
+        optimizer_class = SGD
+        hp = {'lr': {'type': float}}
+        hyperparams = {"lr": sgd_lr}
+        runner = ptobs.runners.StandardRunner(optimizer_class, hp)
+
+    elif framework == 'tensorflow':
+        from deepobs import tensorflow as tfobs
+        import tensorflow as tf
+        optimizer_class = tf.train.GradientDescentOptimizer
+        hp = {'learning_rate': {'type': float}}
+        runner = tfobs.runners.StandardRunner(optimizer_class, hp)
+        hyperparams = {'learning_rate': sgd_lr}
+    else:
+        raise RuntimeError('Framework must be pytorch or tensorflow')
+
+    sgd_times = []
+    new_opt_times = []
+
+    for i in range(n_runs):
+        print("** Start Run: ", i + 1, "of", n_runs)
+
+        # SGD
+        print("Running SGD")
+        start_sgd = time.time()
+        runner.run(
+            testproblem=testproblem,
+            hyperparams=hyperparams,
+            batch_size=batch_size,
+            num_epochs=num_epochs,
+            no_logs=True,
+            **kwargs)
+        end_sgd = time.time()
+
+        sgd_times.append(end_sgd - start_sgd)
+        print("Time for SGD run ", i + 1, ": ", sgd_times[-1])
+
+        # New Optimizer
+        runner = runner_cls(optimizer_cls, optimizer_hp)
+        print("Running...", optimizer_class.__name__)
+        start_script = time.time()
+        runner.run(
+            testproblem=testproblem,
+            hyperparams=hyperparams,
+            batch_size=batch_size,
+            num_epochs=num_epochs,
+            no_logs=True,
+            **kwargs)
+        end_script = time.time()
+
+        new_opt_times.append(end_script - start_script)
+        print("Time for new optimizer run ", i + 1, ": ", new_opt_times[-1])
+
+    overhead = np.divide(new_opt_times, sgd_times)
+
+    output = "** Mean run time SGD: " + str(
+        np.mean(sgd_times)) + "\n" + "** Mean run time new optimizer: " + str(
+            np.mean(new_opt_times)) + "\n" + "** Overhead per run: " + str(
+                overhead) + "\n" + "** Mean overhead: " + str(
+                    np.mean(overhead)) + " Standard deviation: " + str(
+                        np.std(overhead))
+
+    print(output)
+    return output
 
 
 def plot_results_table(results_path, mode='most', metric='valid_accuracies', conv_perf_file=None):

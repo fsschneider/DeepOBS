@@ -18,3 +18,9 @@ Get the Best Runs
 Plot Hyperparameter Sensitivity
 ===============================
 .. autofunction:: plot_hyperparameter_sensitivity
+
+=================
+Estimate Runtime
+=================
+
+.. autofunction:: estimate_runtime
