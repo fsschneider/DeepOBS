@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import abc
-from .. import config
 from numpy.random import seed as np_seed
 import os
 from .tuner_utils import rerun_setting
-import copy
+from deepobs.analyzer.shared_utils import _dump_json
 
 
 class Tuner(abc.ABC):
@@ -16,7 +15,7 @@ class Tuner(abc.ABC):
                  optimizer_class,
                  hyperparam_names,
                  ressources,
-                 runner_type='StandardRunner'):
+                 runner):
         """
         Args:
             optimizer_class (framework optimizer class): The optimizer class of the optimizer that is run on \
@@ -29,27 +28,14 @@ class Tuner(abc.ABC):
             'momentum': {'type': float, 'default': 0.99}, \
             'uses_nesterov': {'type': bool, 'default': False}}
             ressources (int): The number of evaluations the tuner is allowed to perform on each testproblem.
-            runner_type (str): The DeepOBS runner type that the tuner uses for evaluation.
+            runner: The DeepOBS runner that the tuner uses for evaluation.
         """
 
         self._optimizer_class = optimizer_class
         self._optimizer_name = optimizer_class.__name__
         self._hyperparam_names = hyperparam_names
         self._ressources = ressources
-        self._runner_type = runner_type
-
-        if config.get_framework() == 'tensorflow':
-            from .. import tensorflow as fw
-        elif config.get_framework() == 'pytorch':
-            from .. import pytorch as fw
-        else:
-            raise RuntimeError('Framework not implemented.')
-        # check if requested runner is implemented as a class
-        try:
-            self._runner = getattr(fw.runners.runner, runner_type)
-        except AttributeError:
-            raise AttributeError('Runner type ', runner_type,
-                                 ' not implemented. If you really need it, you have to implement it on your own.')
+        self._runner = runner
 
     @staticmethod
     def _set_seed(random_seed):
@@ -87,39 +73,15 @@ class ParallelizedTuner(Tuner):
                  optimizer_class,
                  hyperparam_names,
                  ressources,
-                 runner_type='StandardRunner'):
+                 runner):
         super(ParallelizedTuner, self).__init__(optimizer_class,
                                                 hyperparam_names,
                                                 ressources,
-                                                runner_type)
+                                                runner)
 
     @abc.abstractmethod
     def _sample(self):
         return
-
-    def __formate_hyperparam_names_to_string(self):
-        str_dict = copy.deepcopy(self._hyperparam_names)
-        for hp in self._hyperparam_names:
-            str_dict[hp]['type'] = self._hyperparam_names[hp]['type'].__name__
-        return str(str_dict)
-
-    def __generate_python_script(self, generation_dir):
-        if not os.path.isdir(generation_dir):
-            os.makedirs(generation_dir, exist_ok=True)
-        script = open(os.path.join(generation_dir, self._optimizer_name + '.py'), 'w')
-        import_line1 = 'from deepobs.' + config.get_framework() + '.runners.runner import ' + self._runner_type
-        import_line2 = 'from ' + self._optimizer_class.__module__ + ' import ' + self._optimizer_class.__name__
-        script.write(import_line1 +
-                     '\n' +
-                     import_line2 +
-                     '\nrunner = ' +
-                     self._runner_type +
-                     '(' +
-                     self._optimizer_class.__name__ + ', '
-                     + self.__formate_hyperparam_names_to_string() +
-                     ')\nrunner.run()')
-        script.close()
-        return self._optimizer_name + '.py'
 
     def _generate_hyperparams_format_for_command_line(self, hyperparams):
         """Overwrite this method to specify how hyperparams should be represented in the command line string.
@@ -163,25 +125,25 @@ class ParallelizedTuner(Tuner):
             optimizer_path = os.path.join(output_dir, testproblem, self._optimizer_name)
             rerun_setting(self._runner, self._optimizer_class, self._hyperparam_names, optimizer_path)
 
-    def generate_commands_script(self, testproblem, output_dir='./results', random_seed=42,
+    def generate_commands_script(self, testproblem, run_script, output_dir='./results', random_seed=42,
                                  generation_dir = './command_scripts', **kwargs):
         """
         Args:
             testproblem (str): Testproblem for which to generate commands.
+            run_script (str): Name the run script that is used from the command line.
             output_dir (str): The output path where the execution results are written to.
             random_seed (int): The random seed for the tuning.
             generation_dir (str): The path to the directory where the generated scripts are written to.
 
         """
 
-        script = self.__generate_python_script(generation_dir)
         file = open(os.path.join(generation_dir, 'jobs_' + self._optimizer_name + '_' + self._search_name + '_' + testproblem + '.txt'), 'w')
         kwargs_string = self._generate_kwargs_format_for_command_line(**kwargs)
         self._set_seed(random_seed)
         params = self._sample()
         for sample in params:
             sample_string = self._generate_hyperparams_format_for_command_line(sample)
-            file.write('python3 ' + script + ' ' + testproblem + ' ' + sample_string + ' --random_seed ' + str(
+            file.write('python3 ' + run_script + ' ' + testproblem + ' ' + sample_string + ' --random_seed ' + str(
                 random_seed) + ' --output_dir ' + output_dir + ' ' + kwargs_string + '\n')
         file.close()
 
