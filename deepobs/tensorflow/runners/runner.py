@@ -344,21 +344,15 @@ class StandardRunner(TFRunner):
 
             # break from training if it goes wrong
             if not np.isfinite(loss_):
-                train_losses, \
-                valid_losses, \
-                test_losses, \
-                train_accuracies, \
-                valid_accracies, \
-                test_accuracies, \
-                minibatch_train_losses = self._abort_routine(n,
-                                                             num_epochs,
-                                                             train_losses,
-                                                             valid_losses,
-                                                             test_losses,
-                                                             train_accuracies,
-                                                             valid_accracies,
-                                                             test_accuracies,
-                                                             minibatch_train_losses)
+                self._abort_routine(n,
+                                    num_epochs,
+                                    train_losses,
+                                    valid_losses,
+                                    test_losses,
+                                    train_accuracies,
+                                    valid_accracies,
+                                    test_accuracies,
+                                    minibatch_train_losses)
                 break
             else:
                 continue
@@ -578,21 +572,15 @@ class LearningRateScheduleRunner(TFRunner):
 
             # break from training if it goes wrong
             if not np.isfinite(loss_):
-                train_losses, \
-                valid_losses, \
-                test_losses, \
-                train_accuracies, \
-                valid_accuracies, \
-                test_accuracies, \
-                minibatch_train_losses = self._abort_routine(n,
-                                                             num_epochs,
-                                                             train_losses,
-                                                             valid_losses,
-                                                             test_losses,
-                                                             train_accuracies,
-                                                             valid_accuracies,
-                                                             test_accuracies,
-                                                             minibatch_train_losses)
+                self._abort_routine(n,
+                                    num_epochs,
+                                    train_losses,
+                                    valid_losses,
+                                    test_losses,
+                                    train_accuracies,
+                                    valid_accuracies,
+                                    test_accuracies,
+                                    minibatch_train_losses)
 
                 break
             else:

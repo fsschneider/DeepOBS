@@ -53,12 +53,12 @@ class PTRunner(Runner):
 
         output = self.training(tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log,
                                tb_log_dir, **training_params)
-        output = self._post_process_output(output, 
-                                           testproblem, 
-                                           batch_size, 
-                                           num_epochs, 
-                                           random_seed, 
-                                           weight_decay, 
+        output = self._post_process_output(output,
+                                           testproblem,
+                                           batch_size,
+                                           num_epochs,
+                                           random_seed,
+                                           weight_decay,
                                            hyperparams,
                                            **training_params)
 
@@ -199,7 +199,7 @@ class StandardRunner(PTRunner):
                 tb_log = False
         global_step = 0
 
-        for epoch_count in range(num_epochs+1):
+        for epoch_count in range(num_epochs + 1):
             # Evaluate at beginning of epoch.
             print("********************************")
             print("Evaluating after {0:d} of {1:d} epochs...".format(epoch_count, num_epochs))
@@ -248,13 +248,7 @@ class StandardRunner(PTRunner):
                     break
 
             if not np.isfinite(batch_loss.item()):
-                train_losses, \
-                valid_losses, \
-                test_losses, \
-                train_accuracies, \
-                valid_accuracies, \
-                test_accuracies, \
-                minibatch_train_losses = self._abort_routine(
+                self._abort_routine(
                     epoch_count,
                     num_epochs,
                     train_losses,
@@ -361,7 +355,8 @@ class LearningRateScheduleRunner(PTRunner):
 
         opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
         if lr_sched_epochs is not None:
-            lr_schedule = runner_utils.make_lr_schedule(optimizer=opt, lr_sched_epochs=lr_sched_epochs, lr_sched_factors=lr_sched_factors)
+            lr_schedule = runner_utils.make_lr_schedule(optimizer=opt, lr_sched_epochs=lr_sched_epochs,
+                                                        lr_sched_factors=lr_sched_factors)
 
         # Lists to log train/test loss and accuracy.
         train_losses = []
@@ -373,7 +368,7 @@ class LearningRateScheduleRunner(PTRunner):
 
         minibatch_train_losses = []
 
-        for epoch_count in range(num_epochs+1):
+        for epoch_count in range(num_epochs + 1):
             # Evaluate at beginning of epoch.
             print("********************************")
             print("Evaluating after {0:d} of {1:d} epochs...".format(epoch_count, num_epochs))
@@ -426,19 +421,14 @@ class LearningRateScheduleRunner(PTRunner):
 
             # break from training if it goes wrong
             if not np.isfinite(batch_loss.item()):
-                train_losses, \
-                valid_losses, \
-                test_losses, \
-                train_accuracies, \
-                valid_accuracies, \
-                test_accuracies = self._abort_routine(epoch_count,
-                                                      num_epochs,
-                                                      train_losses,
-                                                      valid_losses,
-                                                      test_losses,
-                                                      train_accuracies,
-                                                      valid_accuracies,
-                                                      test_accuracies)
+                self._abort_routine(epoch_count,
+                                    num_epochs,
+                                    train_losses,
+                                    valid_losses,
+                                    test_losses,
+                                    train_accuracies,
+                                    valid_accuracies,
+                                    test_accuracies)
                 break
             else:
                 continue

@@ -504,4 +504,3 @@ class Runner(abc.ABC):
             valid_accuracies.append(valid_accuracies[0])
             test_accuracies.append(test_accuracies[0])
             minibatch_train_losses.append(minibatch_train_losses[0])
-        return train_losses, valid_losses, test_losses, train_accuracies, valid_accuracies, test_accuracies, minibatch_train_losses
