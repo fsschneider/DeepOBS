@@ -12,6 +12,7 @@ from deepobs.abstract_runner.abstract_runner import Runner
 import numpy as np
 import warnings
 from random import seed
+from copy import deepcopy
 
 
 class PTRunner(Runner):
@@ -41,6 +42,10 @@ class PTRunner(Runner):
              tb_log_dir=None,
              **training_params):
 
+        # Creates a backup copy of the initial parameters. Users might change the dicts during training.
+        hyperparams_before_training = deepcopy(hyperparams)
+        training_params_before_training = deepcopy(training_params)
+
         if batch_size is None:
             batch_size = global_config.get_testproblem_default_setting(testproblem)['batch_size']
         if num_epochs is None:
@@ -53,14 +58,15 @@ class PTRunner(Runner):
 
         output = self.training(tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log,
                                tb_log_dir, **training_params)
+
         output = self._post_process_output(output,
                                            testproblem,
                                            batch_size,
                                            num_epochs,
                                            random_seed,
                                            weight_decay,
-                                           hyperparams,
-                                           **training_params)
+                                           hyperparams_before_training,
+                                           **training_params_before_training)
 
         if not no_logs:
             run_folder_name, file_name = self.create_output_directory(output_dir, output)

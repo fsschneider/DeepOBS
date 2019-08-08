@@ -10,7 +10,6 @@ from .. import testproblems
 from . import runner_utils
 from copy import deepcopy
 from deepobs import config as global_config
-
 from deepobs.abstract_runner.abstract_runner import Runner
 
 
@@ -35,6 +34,10 @@ class TFRunner(Runner):
              tb_log_dir=None,
              **training_params):
 
+        # Creates a backup copy of the initial parameters. Users might change the dicts during training.
+        hyperparams_before_training = deepcopy(hyperparams)
+        training_params_before_training = deepcopy(training_params)
+
         if batch_size is None:
             batch_size = global_config.get_testproblem_default_setting(testproblem)['batch_size']
         if num_epochs is None:
@@ -52,8 +55,8 @@ class TFRunner(Runner):
                                            num_epochs, 
                                            random_seed, 
                                            weight_decay, 
-                                           hyperparams,
-                                           **training_params)
+                                           hyperparams_before_training,
+                                           **training_params_before_training)
         if not no_logs:
             run_folder_name, file_name = self.create_output_directory(output_dir, output)
             self.write_output(output, run_folder_name, file_name)
