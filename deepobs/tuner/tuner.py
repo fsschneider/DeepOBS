@@ -137,6 +137,7 @@ class ParallelizedTuner(Tuner):
 
         """
 
+        os.makedirs(generation_dir, exist_ok=True)
         file = open(os.path.join(generation_dir, 'jobs_' + self._optimizer_name + '_' + self._search_name + '_' + testproblem + '.txt'), 'w')
         kwargs_string = self._generate_kwargs_format_for_command_line(**kwargs)
         self._set_seed(random_seed)
