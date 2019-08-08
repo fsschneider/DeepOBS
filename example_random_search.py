@@ -3,10 +3,7 @@ from torch.optim import SGD
 from deepobs.tuner.tuner_utils import log_uniform
 from scipy.stats.distributions import uniform, binom
 from deepobs import config
-
-# Ensures that the Tuner looks for Runner in the PyTorch submodule of DeepOBS
-# Put 'tensorflow' here, if you use TensorFlow
-config.set_framework('pytorch')
+from deepobs.pytorch.runners import StandardRunner
 
 optimizer_class = SGD
 hyperparams = {"lr": {"type": float},
@@ -19,10 +16,10 @@ distributions = {'lr': log_uniform(-5, 2),
         'nesterov': binom(1, 0.5)}
 
 # Allow 36 random evaluations.
-tuner = RandomSearch(optimizer_class, hyperparams, distributions, ressources=36)
+tuner = RandomSearch(optimizer_class, hyperparams, distributions, runner=StandardRunner,ressources=36)
 
 # Tune (i.e. evaluate 36 different random samples) and rerun the best setting with 10 different seeds.
 tuner.tune('quadratic_deep', rerun_best_setting=True, num_epochs=2, output_dir='./random_search')
 
 # Optionally, generate commands for a parallelized execution
-tuner.generate_commands_script('quadratic_deep', num_epochs =2, output_dir='./random_search', generation_dir='./random_search_commands')
+tuner.generate_commands_script('quadratic_deep', run_script='../SGD.py', num_epochs =2, output_dir='./random_search', generation_dir='./random_search_commands')

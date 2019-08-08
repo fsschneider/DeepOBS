@@ -7,12 +7,12 @@ class GridSearch(ParallelizedTuner):
     """
     A basic Grid Search tuner.
     """
-    def __init__(self, optimizer_class, hyperparam_names, grid, ressources, runner_type='StandardRunner'):
+    def __init__(self, optimizer_class, hyperparam_names, grid, ressources, runner):
         """
         Args:
             grid (dict): Holds the discrete values for each hyperparameter as lists.
         """
-        super(GridSearch, self).__init__(optimizer_class, hyperparam_names, ressources, runner_type)
+        super(GridSearch, self).__init__(optimizer_class, hyperparam_names, ressources, runner)
         self.__check_if_grid_is_valid(grid, ressources)
         self._grid = grid
         self._search_name = 'grid_search'

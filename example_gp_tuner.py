@@ -2,10 +2,7 @@ from deepobs.tuner import GP
 from torch.optim import SGD
 from sklearn.gaussian_process.kernels import Matern
 from deepobs import config
-
-# Ensures that the Tuner looks for Runner in the PyTorch submodule of DeepOBS
-# Put 'tensorflow' here, if you use TensorFlow
-config.set_framework('pytorch')
+from deepobs.pytorch.runners import StandardRunner
 
 optimizer_class = SGD
 hyperparams = {"lr": {"type": float},
@@ -32,7 +29,7 @@ def nesterov_transform(nesterov):
 transformations = {'lr': lr_transform,
                    'nesterov': nesterov_transform}
 
-tuner = GP(optimizer_class, hyperparams, bounds, ressources=36, transformations=transformations)
+tuner = GP(optimizer_class, hyperparams, bounds, runner=StandardRunner, ressources=36, transformations=transformations)
 
 # Tune with a Matern kernel and rerun the best setting with 10 different seeds.
 tuner.tune('quadratic_deep', kernel=Matern(nu=2.5), rerun_best_setting=True, num_epochs=2, output_dir='./gp_tuner')

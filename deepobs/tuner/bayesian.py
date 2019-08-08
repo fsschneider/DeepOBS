@@ -14,8 +14,8 @@ class GP(Tuner):
                  hyperparam_names,
                  bounds,
                  ressources,
-                 transformations = None,
-                 runner_type='StandardRunner'):
+                 runner,
+                 transformations = None):
         """
         Args:
             optimizer_class (framework optimizer class): The optimizer to tune.
@@ -24,9 +24,9 @@ class GP(Tuner):
             ressources (int): The number of total evaluations of the tuning process.
             transformations (dict): A dict where the key is the hyperparameter name and the value is a callable that returns \
             the transformed hyperparameter.
-            runner_type (str): The runner which is used for each evaluation.
+            runner: The DeepOBS runner which is used for each evaluation.
         """
-        super(GP, self).__init__(optimizer_class, hyperparam_names, ressources, runner_type)
+        super(GP, self).__init__(optimizer_class, hyperparam_names, ressources, runner)
         self._bounds = bounds
         self._transformations = transformations
 
@@ -46,7 +46,6 @@ class GP(Tuner):
         else:
             raise NotImplementedError('''Mode not available for this tuning method. Please use final or best.''')
         return cost
-
 
     def _generate_cost_function(self, testproblem, output_dir, mode, **kwargs):
         def _cost_function(**hyperparams):
