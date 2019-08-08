@@ -126,6 +126,7 @@ class quadratic_deep(UnregularizedTestproblem):
             """
         inputs = self._get_next_batch()[0]
         inputs = inputs.to(self._device)
+        
         def _get_batch_loss_and_accuracy():
             # in evaluation phase is no gradient needed
             if self.phase in ["train_eval", "test", "valid"]:
@@ -139,7 +140,7 @@ class quadratic_deep(UnregularizedTestproblem):
             if add_regularization_if_available:
                 regularizer_loss = self.get_regularization_loss()
             else:
-                torch.tensor(0.0, device=torch.device(self._device))
+                regularizer_loss = torch.tensor(0.0, device=torch.device(self._device))
 
             return loss + regularizer_loss, accuracy
 
