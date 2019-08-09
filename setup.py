@@ -35,7 +35,6 @@ setuptools.setup(
     scripts=[
         'deepobs/scripts/deepobs_prepare_data.sh',
         'deepobs/scripts/deepobs_get_baselines.sh',
-        'deepobs/scripts/deepobs_plot_results.py',
-        'deepobs/scripts/deepobs_estimate_runtime.py'
+        'deepobs/scripts/deepobs_plot_results.py'
     ],
     zip_safe=False)
