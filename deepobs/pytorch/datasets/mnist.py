@@ -4,7 +4,7 @@
 from __future__ import print_function
 
 from . import dataset
-from .. import config
+from deepobs import config
 from torch.utils import data as dat
 from torchvision import datasets
 from torchvision import transforms

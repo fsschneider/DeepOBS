@@ -2,7 +2,7 @@
 """CIFAR-10 DeepOBS dataset."""
 
 from . import dataset
-from .. import config
+from deepobs import config
 from torchvision import datasets
 from torchvision import transforms
 
