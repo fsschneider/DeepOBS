@@ -138,15 +138,6 @@ class Runner(abc.ABC):
              tb_log_dir = None,
              **training_params):
 
-        run_directory, file_name = self.generate_output_directory_name(testproblem,
-                                                                       batch_size,
-                                                                       num_epochs,
-                                                                       weight_decay,
-                                                                       random_seed,
-                                                                       output_dir,
-                                                                       hyperparams,
-                                                                       **training_params)
-
         # Creates a backup copy of the initial parameters. Users might change the dicts during training.
         hyperparams_before_training = deepcopy(hyperparams)
         training_params_before_training = deepcopy(training_params)
@@ -158,6 +149,16 @@ class Runner(abc.ABC):
 
         if data_dir is not None:
             global_config.set_data_dir(data_dir)
+
+        run_directory, file_name = self.generate_output_directory_name(testproblem,
+                                                                       batch_size,
+                                                                       num_epochs,
+                                                                       weight_decay,
+                                                                       random_seed,
+                                                                       output_dir,
+                                                                       hyperparams,
+                                                                       **training_params)
+
         if tb_log:
             if tb_log_dir == 'none':
                 print('Tensorboard logging: No tb_log_dir specified, using settings folder {0:s} as default.'.format(run_directory))
