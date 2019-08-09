@@ -22,57 +22,15 @@ class PTRunner(Runner):
         super(PTRunner, self).__init__(optimizer_class, hyperparameter_names)
 
     @abc.abstractmethod
-    def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir,
+    def training(self, tproblem,
+                 hyperparams,
+                 num_epochs,
+                 print_train_iter,
+                 train_log_interval,
+                 tb_log,
+                 tb_log_dir,
                  **training_params):
         return
-
-    def _run(self,
-             testproblem=None,
-             hyperparams=None,
-             batch_size=None,
-             num_epochs=None,
-             random_seed=None,
-             data_dir=None,
-             output_dir=None,
-             weight_decay=None,
-             no_logs=None,
-             train_log_interval=None,
-             print_train_iter=None,
-             tb_log=None,
-             tb_log_dir=None,
-             **training_params):
-
-        # Creates a backup copy of the initial parameters. Users might change the dicts during training.
-        hyperparams_before_training = deepcopy(hyperparams)
-        training_params_before_training = deepcopy(training_params)
-
-        if batch_size is None:
-            batch_size = global_config.get_testproblem_default_setting(testproblem)['batch_size']
-        if num_epochs is None:
-            num_epochs = global_config.get_testproblem_default_setting(testproblem)['num_epochs']
-
-        if data_dir is not None:
-            config.set_data_dir(data_dir)
-
-        tproblem = self.create_testproblem(testproblem, batch_size, weight_decay, random_seed)
-
-        output = self.training(tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log,
-                               tb_log_dir, **training_params)
-
-        output = self._post_process_output(output,
-                                           testproblem,
-                                           batch_size,
-                                           num_epochs,
-                                           random_seed,
-                                           weight_decay,
-                                           hyperparams_before_training,
-                                           **training_params_before_training)
-
-        if not no_logs:
-            run_folder_name, file_name = self.create_output_directory(output_dir, output)
-            self.write_output(output, run_folder_name, file_name)
-
-        return output
 
     @staticmethod
     def create_testproblem(testproblem, batch_size, weight_decay, random_seed):
@@ -289,6 +247,8 @@ class StandardRunner(PTRunner):
             else:
                 continue
 
+        if tb_log:
+            summary_writer.close()
         # Put results into output dictionary.
         output = {
             "train_losses": train_losses,

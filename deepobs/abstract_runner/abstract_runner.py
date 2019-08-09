@@ -9,6 +9,8 @@ import time
 import abc
 import argparse
 import warnings
+from copy import deepcopy
+from deepobs import config as global_config
 
 
 class Runner(abc.ABC):
@@ -118,29 +120,87 @@ class Runner(abc.ABC):
                                tb_log_dir,
                                training_params)
 
-        output = self._run(**args)
+        return self._run(**args)
+
+    def _run(self,
+             testproblem = None,
+             hyperparams = None,
+             batch_size = None,
+             num_epochs = None,
+             random_seed = None,
+             data_dir = None,
+             output_dir = None,
+             weight_decay = None,
+             no_logs = None,
+             train_log_interval = None,
+             print_train_iter = None,
+             tb_log = None,
+             tb_log_dir = None,
+             **training_params):
+
+        run_directory, file_name = self.generate_output_directory_name(testproblem,
+                                                                       batch_size,
+                                                                       num_epochs,
+                                                                       weight_decay,
+                                                                       random_seed,
+                                                                       output_dir,
+                                                                       hyperparams,
+                                                                       **training_params)
+
+        # Creates a backup copy of the initial parameters. Users might change the dicts during training.
+        hyperparams_before_training = deepcopy(hyperparams)
+        training_params_before_training = deepcopy(training_params)
+
+        if batch_size is None:
+            batch_size = global_config.get_testproblem_default_setting(testproblem)['batch_size']
+        if num_epochs is None:
+            num_epochs = global_config.get_testproblem_default_setting(testproblem)['num_epochs']
+
+        if data_dir is not None:
+            global_config.set_data_dir(data_dir)
+        if tb_log:
+            if tb_log_dir == 'none':
+                print('Tensorboard logging: No tb_log_dir specified, using settings folder {0:s} as default.'.format(run_directory))
+                os.makedirs(run_directory, exist_ok=True)
+                tb_log_dir = run_directory
+
+        tproblem = self.create_testproblem(testproblem,
+                                           batch_size,
+                                           weight_decay,
+                                           random_seed)
+
+        output = self.training(tproblem,
+                               hyperparams,
+                               num_epochs,
+                               print_train_iter,
+                               train_log_interval,
+                               tb_log,
+                               tb_log_dir,
+                               **training_params)
+
+        output = self._post_process_output(output,
+                                           testproblem,
+                                           batch_size,
+                                           num_epochs,
+                                           random_seed,
+                                           weight_decay,
+                                           hyperparams_before_training,
+                                           **training_params_before_training)
+        if not no_logs:
+            os.makedirs(run_directory, exist_ok=True)
+            self.write_output(output, run_directory, file_name)
+
         return output
 
-    @abc.abstractmethod
-    def _run(self,
-             testproblem,
-             hyperparams,
-             batch_size,
-             num_epochs,
-             random_seed,
-             data_dir,
-             output_dir,
-             weight_decay,
-             no_logs,
-             train_log_interval,
-             print_train_iter,
-             tb_log,
-             tb_log_dir,
-             **training_params):
-        return
 
     @abc.abstractmethod
-    def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir,
+    def training(self,
+                 tproblem,
+                 hyperparams,
+                 num_epochs,
+                 print_train_iter,
+                 train_log_interval,
+                 tb_log, tb_log_dir,
                  **training_params):
         """Performs the training and stores the metrices.
 
@@ -209,30 +269,30 @@ class Runner(abc.ABC):
                 else:
                     _add_hp_to_argparse(parser, self._optimizer_name, hp_specification, hp_name)
 
-    def _add_training_params_to_output_dir_name(self, output, run_folder_name):
+    def _add_training_params_to_output_dir_name(self, training_params, run_folder_name):
         """Overwrite this method to specify how your
         runner should format additional training_parameters in the run folder name.
 
         Args:
-            output (dict): The output from the run method.
+            training_params (dict): The training parameters.
             run_folder_name (str): The current name of the run folder that the training parameters are added to.
 
         Returns:
             str: The new run folder name.
         """
-        for tp_name, tp_value in sorted(output['training_params'].items()):
+        for tp_name, tp_value in sorted(training_params.items()):
             if tp_value is not None:
                 run_folder_name += "__{0:s}".format(tp_name)
                 run_folder_name += "__{0:s}".format(
                     float2str(tp_value) if isinstance(tp_value, float) else str(tp_value))
         return run_folder_name
 
-    def _add_hyperparams_to_output_dir_name(self, output, run_folder_name):
+    def _add_hyperparams_to_output_dir_name(self, optimizer_hyperparams, run_folder_name):
         """Overwrite this method to specify how your
         runner should format optimizer hyper_parameters in the run folder name.
 
         Args:
-            output (dict): The output from the run method.
+            optimizer_hyperparams (dict): The optimizer hyperparameters.
             run_folder_name (str): The current name of the run folder that the hyperparameters are added to.
 
         Returns:
@@ -240,7 +300,7 @@ class Runner(abc.ABC):
 
         """
 
-        for hp_name, hp_value in sorted(output['optimizer_hyperparams'].items()):
+        for hp_name, hp_value in sorted(optimizer_hyperparams.items()):
             run_folder_name += "__{0:s}".format(hp_name)
             run_folder_name += "__{0:s}".format(
                 float2str(hp_value) if isinstance(hp_value, float) else str(hp_value))
@@ -393,7 +453,7 @@ class Runner(abc.ABC):
             parser.add_argument(
                 "--tb_log_dir",
                 type=str,
-                default="./tb_log",
+                default="none",
                 help="""Path to the directory where the tensorboard logs are saved.""")
         else:
             args['tb_log_dir'] = tb_log_dir
@@ -413,38 +473,34 @@ class Runner(abc.ABC):
 
         return args
 
-    def create_output_directory(self, output_dir, output):
-        """Creates the output directory of the run.
-
-        Args:
-            output_dir (str): The path to the results folder
-            output (dict): A dict than contains the metrices and meta data from the training run.
-
-        Returns:
-            str, str: The path to the run directory which is named after all relevant settings and the \
-            JSON file name of the run that is named after the seed and terminating time of the run.
-        """
-
+    def generate_output_directory_name(self,
+                                       testproblem,
+                                       batch_size,
+                                       num_epochs,
+                                       weight_decay,
+                                       random_seed,
+                                       output_dir,
+                                       optimizer_hyperparams,
+                                       **training_params
+                                       ):
         # add everything mandatory to the name
         run_folder_name = "num_epochs__" + str(
-            output['num_epochs']) + "__batch_size__" + str(output['batch_size'])
-        if output['weight_decay'] is not None:
+            num_epochs) + "__batch_size__" + str(batch_size)
+        if weight_decay is not None:
             run_folder_name += "__weight_decay__{0:s}".format(
-                float2str(output['weight_decay']))
+                float2str(weight_decay))
 
         # Add all hyperparameters to the name.
-        run_folder_name = self._add_hyperparams_to_output_dir_name(output, run_folder_name)
+        run_folder_name = self._add_hyperparams_to_output_dir_name(optimizer_hyperparams, run_folder_name)
 
         # Add training parameters to the name.
-        run_folder_name = self._add_training_params_to_output_dir_name(output, run_folder_name)
+        run_folder_name = self._add_training_params_to_output_dir_name(training_params, run_folder_name)
 
-        file_name = "random_seed__{0:d}__".format(output['random_seed'])
+        file_name = "random_seed__{0:d}__".format(random_seed)
         file_name += time.strftime("%Y-%m-%d-%H-%M-%S")
 
-        run_directory = os.path.join(output_dir, output['testproblem'], output['optimizer_name'],
+        run_directory = os.path.join(output_dir, testproblem, self._optimizer_name,
                                      run_folder_name)
-        if not os.path.exists(run_directory):
-            os.makedirs(run_directory)
 
         return run_directory, file_name
     

@@ -3,6 +3,21 @@ FRAMEWORK = 'pytorch'
 BASELINE_DIR = "baselines_deepobs"
 SMALL_TEST_SET = ['quadratic_deep', 'mnist_vae', 'fmnist_2c2d', 'cifar10_3c3d']
 LARGE_TEST_SET = ['fmnist_vae', 'cifar100_allcnnc', 'svhn_wrn_164', 'tolstoi_char_rnn']
+DATA_DIR = "data_deepobs"
+
+
+def get_data_dir():
+    return DATA_DIR
+
+
+def set_data_dir(data_dir):
+    """Sets the data directory.
+
+    Args:
+        data_dir (str): Path to the data folder.
+    """
+    global DATA_DIR
+    DATA_DIR = data_dir
 
 
 def get_framework():

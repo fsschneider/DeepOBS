@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import torch
 
-DATA_DIR = "data_deepobs/pytorch"
 DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else 'cpu'
 NUM_WORKERS = 0
 IS_DETERMINISTIC = True
@@ -37,20 +36,6 @@ def set_num_workers(num_workers):
         """
     global NUM_WORKERS
     NUM_WORKERS = num_workers
-
-
-def get_data_dir():
-    return DATA_DIR
-
-
-def set_data_dir(data_dir):
-    """Sets the data directory for the PyTorch runs.
-
-    Args:
-        data_dir (str): Path to the data folder.
-    """
-    global DATA_DIR
-    DATA_DIR = data_dir
 
 
 def get_default_device():
