@@ -284,7 +284,7 @@ class residual_block(nn.Module):
         self.conv2 = tfconv2d(in_channels = out_channels, out_channels=out_channels, kernel_size=kernel_size, stride = 1, tf_padding_type='same', bias=False)
 
     def forward(self, x):
-        if self._is_first_block:
+        if self.is_first_block:
             x = self.bn1(x)
             x = self.relu1(x)
             identity = self.convFirstBlock(x)
