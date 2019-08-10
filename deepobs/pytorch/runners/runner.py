@@ -187,7 +187,7 @@ class StandardRunner(PTRunner):
                 from torch.utils.tensorboard import SummaryWriter
                 summary_writer = SummaryWriter(log_dir=tb_log_dir)
             except ImportError as e:
-                warnings.warn('Not possible to use tensorboard for pytorch. Reason: ' + e, ImportWarning)
+                warnings.warn('Not possible to use tensorboard for pytorch. Reason: ' + e.msg, RuntimeWarning)
                 tb_log = False
         global_step = 0
 
