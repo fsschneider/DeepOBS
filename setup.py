@@ -2,6 +2,7 @@
 """Setup for the DeepOBS package"""
 
 import setuptools
+from deepobs import __version__
 
 install_requires_list = [
         'argparse', 'numpy', 'pandas', 'matplotlib', 'matplotlib2tikz',
@@ -16,7 +17,7 @@ def readme():
 
 setuptools.setup(
     name='deepobs',
-    version='1.1.1',
+    version=__version__,
     description='Deep Learning Optimizer Benchmark Suite',
     long_description=readme(),
     author='Frank Schneider, Lukas Balles and Philipp Hennig,',
