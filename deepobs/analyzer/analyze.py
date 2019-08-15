@@ -3,11 +3,42 @@ from __future__ import print_function
 import os
 import numpy as np
 from matplotlib import pyplot as plt
-from .shared_utils import create_setting_analyzer_ranking, _determine_available_metric, _get_optimizer_name_and_testproblem_from_path
+from .shared_utils import create_setting_analyzer_ranking, _determine_available_metric, _get_optimizer_name_and_testproblem_from_path, _check_output_structure, _check_setting_folder_is_not_empty
 from ..tuner.tuner_utils import generate_tuning_summary
 from .analyze_utils import _rescale_ax, _preprocess_path
 import pandas as pd
 import time
+from collections import Counter
+
+
+def check_output(results_path):
+    """Iterates through the results folder an checks all outputs for format and completeness. It checks for some basic
+    format in every json file and looks for setting folders which are empty.
+    It further gives an overview over the amount of different settings and seed runs for
+    each test problem and each optimizer. It does not return anything, but it prints an overview to the console.
+
+    Args:
+        results_path (str): Path to the results folder.
+    """
+    testproblems = os.listdir(results_path)
+    for testproblem in testproblems:
+        testproblem_path = os.path.join(results_path, testproblem)
+        optimizers = os.listdir(testproblem_path)
+        for optimizer in optimizers:
+            optimizer_path = os.path.join(testproblem_path, optimizer)
+            settings = [setting for setting in os.listdir(optimizer_path) if os.path.isdir(os.path.join(optimizer_path, setting)) and 'num_epochs' in setting]
+            n_runs_list = []
+            for setting in settings:
+                setting_path = os.path.join(optimizer_path, setting)
+                _check_setting_folder_is_not_empty(setting_path)
+                jsons_files = [file for file in os.listdir(setting_path) if 'json' in file]
+                n_runs_list.append(len(jsons_files))
+                for json_file in jsons_files:
+                    json_path = os.path.join(setting_path, json_file)
+                    _check_output_structure(setting_path, json_file)
+            counter = Counter(n_runs_list)
+            for n_runs, count in counter.items():
+                print('{0:s} | {1:s}: {2:d} setting(s) with {3:d} seed(s).'.format(testproblem, optimizer, count, n_runs))
 
 
 def estimate_runtime(framework,
