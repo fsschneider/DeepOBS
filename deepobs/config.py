@@ -62,51 +62,55 @@ def set_large_test_set(testset):
 
 
 DEFAULT_TEST_PROBLEMS_SETTINGS = {
-        'quadratic_deep': {
-            'batch_size': 128,
-            'num_epochs': 100
-            },
-        'mnist_vae': {
-            'batch_size': 64,
-            'num_epochs': 50
-            },
-        'fmnist_2c2d': {
-            'batch_size': 128,
-            'num_epochs': 100
-            },
-        'cifar10_3c3d': {
-            'batch_size': 128,
-            'num_epochs': 100
-            },
-        'fmnist_vae': {
-            'batch_size': 64,
-            'num_epochs': 100
-            },
-        'cifar100_allcnnc': {
-            'batch_size': 256,
-            'num_epochs': 350
-            },
-        'svhn_wrn164': {
-            'batch_size': 128,
-            'num_epochs': 160
-            },
-        'tolstoi_char_rnn': {
-            'batch_size': 50,
-            'num_epochs': 200
-            },
-        'mnist_2c2d': {
-                'batch_size': 128,
-                'num_epochs': 100
-                },
-        'mnist_mlp': {
-            'batch_size': 128,
-            'num_epochs': 100
-            },
-        'fmnist_mlp': {
-            'batch_size': 128,
-            'num_epochs': 100
-            }
-        }
+    'quadratic_deep': {
+        'batch_size': 128,
+        'num_epochs': 100
+    },
+    'mnist_vae': {
+        'batch_size': 64,
+        'num_epochs': 50
+    },
+    'fmnist_2c2d': {
+        'batch_size': 128,
+        'num_epochs': 100
+    },
+    'cifar10_3c3d': {
+        'batch_size': 128,
+        'num_epochs': 100
+    },
+    'fmnist_vae': {
+        'batch_size': 64,
+        'num_epochs': 100
+    },
+    'cifar100_allcnnc': {
+        'batch_size': 256,
+        'num_epochs': 350
+    },
+    'svhn_wrn164': {
+        'batch_size': 128,
+        'num_epochs': 160
+    },
+    'tolstoi_char_rnn': {
+        'batch_size': 50,
+        'num_epochs': 200
+    },
+    'mnist_2c2d': {
+        'batch_size': 128,
+        'num_epochs': 100
+    },
+    'mnist_mlp': {
+        'batch_size': 128,
+        'num_epochs': 100
+    },
+    'fmnist_mlp': {
+        'batch_size': 128,
+        'num_epochs': 100
+    },
+    'mnist_logreg': {
+        'batch_size': 128,
+        'num_epochs': 50
+    }
+}
 
 
 def get_testproblem_default_setting(testproblem):
