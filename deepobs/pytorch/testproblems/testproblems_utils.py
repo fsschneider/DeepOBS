@@ -254,13 +254,13 @@ class flatten(nn.Module):
         return x.view(-1, shape)
 
 
-class mean_allcnnc(nn.Module):
+def mean_allcnnc():
     """The all convolution layer implementation of torch.mean()."""
-    def __init__(self):
-        super(mean_allcnnc, self).__init__()
-
-    def forward(self, x):
-        return torch.mean(x, dim=(2,3))
+    # TODO implement pre forward hook to adapt to arbitary image size for other data sets than cifar100
+    return nn.Sequential(
+        nn.AvgPool2d(kernel_size=(6, 6)),
+        flatten()
+    )
 
 
 class residual_block(nn.Module):
