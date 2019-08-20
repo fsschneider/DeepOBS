@@ -135,10 +135,14 @@ class ParallelizedTuner(Tuner):
             random_seed (int): The random seed for the tuning.
             generation_dir (str): The path to the directory where the generated scripts are written to.
 
+        Returns:
+            str: The relative file path to the generated commands script.
+
         """
 
         os.makedirs(generation_dir, exist_ok=True)
-        file = open(os.path.join(generation_dir, 'jobs_' + self._optimizer_name + '_' + self._search_name + '_' + testproblem + '.txt'), 'w')
+        file_path = os.path.join(generation_dir, 'jobs_' + self._optimizer_name + '_' + self._search_name + '_' + testproblem + '.txt')
+        file = open(file_path, 'w')
         kwargs_string = self._generate_kwargs_format_for_command_line(**kwargs)
         self._set_seed(random_seed)
         params = self._sample()
@@ -147,6 +151,7 @@ class ParallelizedTuner(Tuner):
             file.write('python3 ' + run_script + ' ' + testproblem + ' ' + sample_string + ' --random_seed ' + str(
                 random_seed) + ' --output_dir ' + output_dir + ' ' + kwargs_string + '\n')
         file.close()
+        return file_path
 
     def generate_commands_script_for_testset(self, testset, *args, **kwargs):
         """Generates command scripts for a whole testset.
