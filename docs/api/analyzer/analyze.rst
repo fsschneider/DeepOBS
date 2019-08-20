@@ -1,4 +1,11 @@
 ===========================
+Validate Output
+===========================
+.. currentmodule:: deepobs.analyzer
+.. autofunction:: check_output
+
+
+===========================
 Plot Optimizer Performances
 ===========================
 

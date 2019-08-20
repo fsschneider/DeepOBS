@@ -4,6 +4,37 @@ import numpy as np
 import warnings
 
 
+def _check_setting_folder_is_not_empty(setting_path):
+    runs = [run for run in os.listdir(setting_path) if 'json' in run]
+    try:
+        assert len(runs) > 0
+    except AssertionError:
+        print('Found a setting folder with no runs inside: {0:s}'.format(setting_path))
+
+
+def _check_output_structure(path, file_name):
+    """Checks whether the output json is valid"""
+    json_data = _load_json(path, file_name)
+    try:
+        # meta data must be in output
+        assert 'num_epochs' in json_data
+        assert 'batch_size' in json_data
+        assert 'testproblem' in json_data
+        assert 'random_seed' in json_data
+        assert 'optimizer_name' in json_data
+        assert 'optimizer_hyperparams' in json_data
+
+        # must contain at least losses
+        assert 'train_losses' in json_data
+        assert 'valid_losses' in json_data
+        assert 'test_losses' in json_data
+
+        # all must have the same length
+        assert len(json_data['train_losses']) == len(json_data['test_losses']) == len(json_data['valid_losses']) == json_data['num_epochs']+1
+    except AssertionError as e:
+        print('Found corrupted output file: {0:s} in path: {1:s}'.format(file_name, path))
+
+
 def aggregate_runs(setting_folder):
     """Aggregates all seed runs for a setting.
     Args:
