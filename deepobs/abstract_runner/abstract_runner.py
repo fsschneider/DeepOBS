@@ -10,6 +10,7 @@ import argparse
 import warnings
 from copy import deepcopy
 from deepobs import config as global_config
+import glob
 
 
 class Runner(abc.ABC):
@@ -67,6 +68,7 @@ class Runner(abc.ABC):
             print_train_iter=None,
             tb_log=None,
             tb_log_dir=None,
+            skip_if_exists=False,
             **training_params):
         """Runs a testproblem with the optimizer_class. Has the following tasks:
             1. setup testproblem
@@ -87,6 +89,7 @@ class Runner(abc.ABC):
             print_train_iter (bool): Whether to print the training progress at each train_log_interval.
             tb_log (bool): Whether to use tensorboard logging or not
             tb_log_dir (str): The path where to save tensorboard events.
+            skip_if_exists (bool): Skip training if the output already exists.
             training_params (dict): Kwargs for the training method.
 
         Returns:
@@ -101,13 +104,44 @@ class Runner(abc.ABC):
             where <...meta data...> stores the run args.
 
         """
-        args = self.parse_args(testproblem, hyperparams, batch_size,
-                               num_epochs, random_seed, data_dir, output_dir,
-                               weight_decay, no_logs, train_log_interval,
-                               print_train_iter, tb_log, tb_log_dir,
-                               training_params)
+        exists = self.run_exists(testproblem=testproblem,
+                                 hyperparams=hyperparams,
+                                 batch_size=batch_size,
+                                 num_epochs=num_epochs,
+                                 random_seed=random_seed,
+                                 data_dir=data_dir,
+                                 output_dir=output_dir,
+                                 weight_decay=weight_decay,
+                                 no_logs=no_logs,
+                                 train_log_interval=train_log_interval,
+                                 print_train_iter=print_train_iter,
+                                 tb_log=tb_log,
+                                 tb_log_dir=tb_log_dir,
+                                 **training_params)
 
-        return self._run(**args)
+        require_run = not (exists and skip_if_exists)
+
+        if require_run:
+            args = self.parse_args(
+                testproblem,
+                hyperparams,
+                batch_size,
+                num_epochs,
+                random_seed,
+                data_dir,
+                output_dir,
+                weight_decay,
+                no_logs,
+                train_log_interval,
+                print_train_iter,
+                tb_log,
+                tb_log_dir,
+                training_params,
+            )
+
+            return self._run(**args)
+        else:
+            print("Skipping run")
 
     def _run(self,
              testproblem=None,
@@ -168,6 +202,85 @@ class Runner(abc.ABC):
             self.write_output(output, run_directory, file_name)
 
         return output
+
+    def run_exists(self,
+                   testproblem=None,
+                   hyperparams=None,
+                   batch_size=None,
+                   num_epochs=None,
+                   random_seed=None,
+                   data_dir=None,
+                   output_dir=None,
+                   weight_decay=None,
+                   no_logs=None,
+                   train_log_interval=None,
+                   print_train_iter=None,
+                   tb_log=None,
+                   tb_log_dir=None,
+                   **training_params):
+        """Return whether output file for this run already exists.
+
+        Args:
+            See `run` method.
+
+        Returns:
+            bool: `True` if `.json` output file already exists, else `False`.
+        """
+        args = self.parse_args(
+            testproblem,
+            hyperparams,
+            batch_size,
+            num_epochs,
+            random_seed,
+            data_dir,
+            output_dir,
+            weight_decay,
+            no_logs,
+            train_log_interval,
+            print_train_iter,
+            tb_log,
+            tb_log_dir,
+            training_params,
+        )
+        return self._run_exists(**args)
+
+    def _run_exists(self,
+                    testproblem=None,
+                    hyperparams=None,
+                    batch_size=None,
+                    num_epochs=None,
+                    random_seed=None,
+                    data_dir=None,
+                    output_dir=None,
+                    weight_decay=None,
+                    no_logs=None,
+                    train_log_interval=None,
+                    print_train_iter=None,
+                    tb_log=None,
+                    tb_log_dir=None,
+                    **training_params):
+        if batch_size is None:
+            batch_size = global_config.get_testproblem_default_setting(
+                testproblem)['batch_size']
+        if num_epochs is None:
+            num_epochs = global_config.get_testproblem_default_setting(
+                testproblem)['num_epochs']
+
+        if data_dir is not None:
+            global_config.set_data_dir(data_dir)
+
+        run_directory, _ = self.generate_output_directory_name(
+            testproblem, batch_size, num_epochs, weight_decay, random_seed,
+            output_dir, hyperparams, **training_params)
+
+        dir_exists = os.path.isdir(run_directory)
+        file_pattern = "random_seed__{}__*.json".format(random_seed)
+        file_pattern = os.path.join(run_directory, file_pattern)
+        file_matches = glob.glob(file_pattern)
+        seed_exists = len(file_matches) > 0
+
+        exists = dir_exists and seed_exists
+        return exists
 
     @abc.abstractmethod
     def training(self, tproblem, hyperparams, num_epochs, print_train_iter,
