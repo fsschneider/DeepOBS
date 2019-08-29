@@ -163,12 +163,10 @@ class Runner(abc.ABC):
         hyperparams_before_training = deepcopy(hyperparams)
         training_params_before_training = deepcopy(training_params)
 
-        if batch_size is None:
-            batch_size = global_config.get_testproblem_default_setting(
-                testproblem)['batch_size']
-        if num_epochs is None:
-            num_epochs = global_config.get_testproblem_default_setting(
-                testproblem)['num_epochs']
+        batch_size = self._use_default_batch_size_if_missing(
+            testproblem, batch_size)
+        num_epochs = self._use_default_num_epochs_if_missing(
+            testproblem, num_epochs)
 
         if data_dir is not None:
             global_config.set_data_dir(data_dir)
@@ -259,15 +257,11 @@ class Runner(abc.ABC):
                     tb_log=None,
                     tb_log_dir=None,
                     **training_params):
-        if batch_size is None:
-            batch_size = global_config.get_testproblem_default_setting(
-                testproblem)['batch_size']
-        if num_epochs is None:
-            num_epochs = global_config.get_testproblem_default_setting(
-                testproblem)['num_epochs']
 
-        if data_dir is not None:
-            global_config.set_data_dir(data_dir)
+        batch_size = self._use_default_batch_size_if_missing(
+            testproblem, batch_size)
+        num_epochs = self._use_default_num_epochs_if_missing(
+            testproblem, num_epochs)
 
         run_directory, _ = self.generate_output_directory_name(
             testproblem, batch_size, num_epochs, weight_decay, random_seed,
@@ -281,6 +275,22 @@ class Runner(abc.ABC):
 
         exists = dir_exists and seed_exists
         return exists
+
+    def _use_default_batch_size_if_missing(self, testproblem, batch_size):
+        fall_back_to_default = (batch_size is None)
+        if fall_back_to_default:
+            batch_size = self._use_default(testproblem, 'batch_size')
+        return batch_size
+
+    def _use_default_num_epochs_if_missing(self, testproblem, num_epochs):
+        fall_back_to_default = (num_epochs is None)
+        if fall_back_to_default:
+            num_epochs = self._use_default(testproblem, 'num_epochs')
+        return num_epochs
+
+    @staticmethod
+    def _use_default(testproblem, key):
+        return global_config.get_testproblem_default_setting(testproblem)[key]
 
     @abc.abstractmethod
     def training(self, tproblem, hyperparams, num_epochs, print_train_iter,
