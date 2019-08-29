@@ -104,20 +104,21 @@ class Runner(abc.ABC):
             where <...meta data...> stores the run args.
 
         """
-        exists = self.run_exists(testproblem=testproblem,
-                                 hyperparams=hyperparams,
-                                 batch_size=batch_size,
-                                 num_epochs=num_epochs,
-                                 random_seed=random_seed,
-                                 data_dir=data_dir,
-                                 output_dir=output_dir,
-                                 weight_decay=weight_decay,
-                                 no_logs=no_logs,
-                                 train_log_interval=train_log_interval,
-                                 print_train_iter=print_train_iter,
-                                 tb_log=tb_log,
-                                 tb_log_dir=tb_log_dir,
-                                 **training_params)
+        exists, matches = self.run_exists(
+            testproblem=testproblem,
+            hyperparams=hyperparams,
+            batch_size=batch_size,
+            num_epochs=num_epochs,
+            random_seed=random_seed,
+            data_dir=data_dir,
+            output_dir=output_dir,
+            weight_decay=weight_decay,
+            no_logs=no_logs,
+            train_log_interval=train_log_interval,
+            print_train_iter=print_train_iter,
+            tb_log=tb_log,
+            tb_log_dir=tb_log_dir,
+            **training_params)
 
         require_run = not (exists and skip_if_exists)
 
@@ -141,7 +142,7 @@ class Runner(abc.ABC):
 
             return self._run(**args)
         else:
-            print("Skipping run")
+            print("Found output file(s): {}\nSkipping run.".format(matches))
 
     def _run(self,
              testproblem=None,
@@ -222,7 +223,9 @@ class Runner(abc.ABC):
             See `run` method.
 
         Returns:
-            bool: `True` if `.json` output file already exists, else `False`.
+            bool, list(str): The first parameter is `True` if the `.json` \
+                output file already exists, else `False`. The list contains \
+                the paths to the files that match the run.
         """
         args = self.parse_args(
             testproblem,
@@ -271,7 +274,7 @@ class Runner(abc.ABC):
         matches = glob.glob(pattern)
 
         exists = bool(matches)
-        return exists
+        return exists, matches
 
     def _use_default_batch_size_if_missing(self, testproblem, batch_size):
         fall_back_to_default = (batch_size is None)
