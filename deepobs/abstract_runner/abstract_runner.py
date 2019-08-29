@@ -268,10 +268,10 @@ class Runner(abc.ABC):
             output_dir, hyperparams, **training_params)
 
         dir_exists = os.path.isdir(run_directory)
-        file_pattern = "random_seed__{}__*.json".format(random_seed)
-        file_pattern = os.path.join(run_directory, file_pattern)
-        file_matches = glob.glob(file_pattern)
-        seed_exists = len(file_matches) > 0
+        file_pattern = "{}*.json".format(self._filename_no_date(random_seed))
+        path_pattern = os.path.join(run_directory, file_pattern)
+        matches = glob.glob(path_pattern)
+        seed_exists = len(matches) > 0
 
         exists = dir_exists and seed_exists
         return exists
@@ -582,13 +582,17 @@ class Runner(abc.ABC):
         run_folder_name = self._add_training_params_to_output_dir_name(
             training_params, run_folder_name)
 
-        file_name = "random_seed__{0:d}__".format(random_seed)
+        file_name = self._filename_no_date(random_seed)
         file_name += time.strftime("%Y-%m-%d-%H-%M-%S")
 
         run_directory = os.path.join(output_dir, testproblem,
                                      self._optimizer_name, run_folder_name)
 
         return run_directory, file_name
+
+    @staticmethod
+    def _filename_no_date(random_seed):
+        return "random_seed__{0:d}__".format(random_seed)
 
     def _post_process_output(self, output, testproblem, batch_size, num_epochs,
                              random_seed, weight_decay, hyperparams,
