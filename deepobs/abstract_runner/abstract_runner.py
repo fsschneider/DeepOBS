@@ -266,14 +266,11 @@ class Runner(abc.ABC):
         run_directory, _ = self.generate_output_directory_name(
             testproblem, batch_size, num_epochs, weight_decay, random_seed,
             output_dir, hyperparams, **training_params)
+        file_regex = "{}*.json".format(self._filename_no_date(random_seed))
+        pattern = os.path.join(run_directory, file_regex)
+        matches = glob.glob(pattern)
 
-        dir_exists = os.path.isdir(run_directory)
-        file_pattern = "{}*.json".format(self._filename_no_date(random_seed))
-        path_pattern = os.path.join(run_directory, file_pattern)
-        matches = glob.glob(path_pattern)
-        seed_exists = len(matches) > 0
-
-        exists = dir_exists and seed_exists
+        exists = bool(matches)
         return exists
 
     def _use_default_batch_size_if_missing(self, testproblem, batch_size):
