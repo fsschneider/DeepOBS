@@ -1,14 +1,21 @@
-
 from __future__ import print_function
+
 import os
-import numpy as np
-from matplotlib import pyplot as plt
-from .shared_utils import create_setting_analyzer_ranking, _determine_available_metric, _get_optimizer_name_and_testproblem_from_path, _check_output_structure, _check_setting_folder_is_not_empty
-from ..tuner.tuner_utils import generate_tuning_summary
-from .analyze_utils import _rescale_ax, _preprocess_path
-import pandas as pd
 import time
 from collections import Counter
+
+import numpy as np
+import pandas as pd
+
+from matplotlib import pyplot as plt
+
+from ..tuner.tuner_utils import generate_tuning_summary
+from .analyze_utils import _preprocess_path, _rescale_ax
+from .shared_utils import (_check_output_structure,
+                           _check_setting_folder_is_not_empty,
+                           _determine_available_metric,
+                           _get_optimizer_name_and_testproblem_from_path,
+                           create_setting_analyzer_ranking)
 
 
 def check_output(results_path):
@@ -26,32 +33,38 @@ def check_output(results_path):
         optimizers = os.listdir(testproblem_path)
         for optimizer in optimizers:
             optimizer_path = os.path.join(testproblem_path, optimizer)
-            settings = [setting for setting in os.listdir(optimizer_path) if os.path.isdir(os.path.join(optimizer_path, setting)) and 'num_epochs' in setting]
+            settings = [
+                setting for setting in os.listdir(optimizer_path)
+                if os.path.isdir(os.path.join(optimizer_path, setting))
+                and 'num_epochs' in setting
+            ]
             n_runs_list = []
             for setting in settings:
                 setting_path = os.path.join(optimizer_path, setting)
                 _check_setting_folder_is_not_empty(setting_path)
-                jsons_files = [file for file in os.listdir(setting_path) if 'json' in file]
+                jsons_files = [
+                    file for file in os.listdir(setting_path) if 'json' in file
+                ]
                 n_runs_list.append(len(jsons_files))
                 for json_file in jsons_files:
                     json_path = os.path.join(setting_path, json_file)
                     _check_output_structure(setting_path, json_file)
             counter = Counter(n_runs_list)
             for n_runs, count in counter.items():
-                print('{0:s} | {1:s}: {2:d} setting(s) with {3:d} seed(s).'.format(testproblem, optimizer, count, n_runs))
+                print('{0:s} | {1:s}: {2:d} setting(s) with {3:d} seed(s).'.
+                      format(testproblem, optimizer, count, n_runs))
 
 
 def estimate_runtime(framework,
                      runner_cls,
                      optimizer_cls,
                      optimizer_hp,
-                     n_runs = 5,
+                     n_runs=5,
                      sgd_lr=0.01,
                      testproblem='mnist_mlp',
-                     num_epochs = 5,
-                     batch_size = 128,
+                     num_epochs=5,
+                     batch_size=128,
                      **kwargs):
-
     """Can be used to estimates the runtime overhead of a new optimizer compared to SGD. Runs the new optimizer and
     SGD seperately and calculates the fraction of wall clock overhead.
 
@@ -98,13 +111,12 @@ def estimate_runtime(framework,
         # SGD
         print("Running SGD")
         start_sgd = time.time()
-        runner.run(
-            testproblem=testproblem,
-            hyperparams=hyperparams,
-            batch_size=batch_size,
-            num_epochs=num_epochs,
-            no_logs=True,
-            **kwargs)
+        runner.run(testproblem=testproblem,
+                   hyperparams=hyperparams,
+                   batch_size=batch_size,
+                   num_epochs=num_epochs,
+                   no_logs=True,
+                   **kwargs)
         end_sgd = time.time()
 
         sgd_times.append(end_sgd - start_sgd)
@@ -114,13 +126,12 @@ def estimate_runtime(framework,
         runner = runner_cls(optimizer_cls, optimizer_hp)
         print("Running...", optimizer_class.__name__)
         start_script = time.time()
-        runner.run(
-            testproblem=testproblem,
-            hyperparams=hyperparams,
-            batch_size=batch_size,
-            num_epochs=num_epochs,
-            no_logs=True,
-            **kwargs)
+        runner.run(testproblem=testproblem,
+                   hyperparams=hyperparams,
+                   batch_size=batch_size,
+                   num_epochs=num_epochs,
+                   no_logs=True,
+                   **kwargs)
         end_script = time.time()
 
         new_opt_times.append(end_script - start_script)
@@ -139,8 +150,10 @@ def estimate_runtime(framework,
     return output
 
 
-def plot_results_table(results_path, mode='most', metric='valid_accuracies', conv_perf_file=None):
-    
+def plot_results_table(results_path,
+                       mode='most',
+                       metric='valid_accuracies',
+                       conv_perf_file=None):
     """Summarizes the performance of the optimizer and prints it to a pandas data frame.
 
             Args:
@@ -154,7 +167,9 @@ def plot_results_table(results_path, mode='most', metric='valid_accuracies', con
                 """
     table_dic = {}
     testproblems = os.listdir(results_path)
-    metric_keys = ['Hyperparameters', 'Performance', 'Speed', 'Training Parameters']
+    metric_keys = [
+        'Hyperparameters', 'Performance', 'Speed', 'Training Parameters'
+    ]
     for testproblem in testproblems:
         # init new subdict for testproblem
         for metric_key in metric_keys:
@@ -164,11 +179,14 @@ def plot_results_table(results_path, mode='most', metric='valid_accuracies', con
         optimizers = os.listdir(testproblem_path)
         for optimizer in optimizers:
             optimizer_path = os.path.join(testproblem_path, optimizer)
-            optimizer_performance_dic = get_performance_dictionary(optimizer_path, mode, metric, conv_perf_file)
+            optimizer_performance_dic = get_performance_dictionary(
+                optimizer_path, mode, metric, conv_perf_file)
 
             # invert inner dics for multiindexing
             for metric_key in metric_keys:
-                table_dic[(testproblem, metric_key)][optimizer] = optimizer_performance_dic[metric_key]
+                table_dic[(
+                    testproblem, metric_key
+                )][optimizer] = optimizer_performance_dic[metric_key]
 
     # correct multiindexing
     table = pd.DataFrame.from_dict(table_dic, orient='index')
@@ -176,7 +194,10 @@ def plot_results_table(results_path, mode='most', metric='valid_accuracies', con
     return table
 
 
-def plot_testset_performances(results_path, mode = 'most', metric = 'valid_accuracies', reference_path = None):
+def plot_testset_performances(results_path,
+                              mode='most',
+                              metric='valid_accuracies',
+                              reference_path=None):
     """Plots all optimizer performances for all testproblems.
 
     Args:
@@ -189,22 +210,33 @@ def plot_testset_performances(results_path, mode = 'most', metric = 'valid_accur
         matplotlib.axes.Axes: The axes with the plots.
 
         """
-    testproblems = [path for path in os.listdir(results_path) if os.path.isdir(os.path.join(results_path, path))]
+    testproblems = [
+        path for path in os.listdir(results_path)
+        if os.path.isdir(os.path.join(results_path, path))
+    ]
     if reference_path is not None:
         reference_path = os.path.join(reference_path)
-        reference_testproblems = [path for path in os.listdir(results_path) if os.path.isdir(os.path.join(reference_path, path))]
+        reference_testproblems = [
+            path for path in os.listdir(results_path)
+            if os.path.isdir(os.path.join(reference_path, path))
+        ]
     else:
         reference_testproblems = []
     n_testproblems = len(testproblems)
     __, ax = plt.subplots(4, n_testproblems, sharex='col')
     for idx, testproblem in enumerate(testproblems):
         testproblem_path = os.path.join(results_path, testproblem)
-        ax[:, idx] = _plot_optimizer_performance(testproblem_path, ax[:, idx], mode, metric)
+        ax[:, idx] = _plot_optimizer_performance(testproblem_path, ax[:, idx],
+                                                 mode, metric)
         if testproblem in reference_testproblems:
-            reference_testproblem_path = os.path.join(reference_path, testproblem)
-            ax[:, idx] = _plot_optimizer_performance(reference_testproblem_path, ax[:, idx], mode, metric)
+            reference_testproblem_path = os.path.join(reference_path,
+                                                      testproblem)
+            ax[:, idx] = _plot_optimizer_performance(
+                reference_testproblem_path, ax[:, idx], mode, metric)
 
-    metrices = ['test_losses', 'train_losses', 'test_accuracies', 'train_accuracies']
+    metrices = [
+        'test_losses', 'train_losses', 'test_accuracies', 'train_accuracies'
+    ]
     for idx, _metric in enumerate(metrices):
         # label y axes
         ax[idx, 0].set_ylabel(_metric)
@@ -219,12 +251,18 @@ def plot_testset_performances(results_path, mode = 'most', metric = 'valid_accur
     return ax
 
 
-def plot_hyperparameter_sensitivity_2d(optimizer_path, hyperparams, mode='final', metric = 'valid_accuracies', xscale='linear', yscale = 'linear'):
+def plot_hyperparameter_sensitivity_2d(optimizer_path,
+                                       hyperparams,
+                                       mode='final',
+                                       metric='valid_accuracies',
+                                       xscale='linear',
+                                       yscale='linear'):
     param1, param2 = hyperparams
     metric = _determine_available_metric(optimizer_path, metric)
     tuning_summary = generate_tuning_summary(optimizer_path, mode, metric)
 
-    optimizer_name, testproblem = _get_optimizer_name_and_testproblem_from_path(optimizer_path)
+    optimizer_name, testproblem = _get_optimizer_name_and_testproblem_from_path(
+        optimizer_path)
 
     param_values1 = np.array([d['params'][param1] for d in tuning_summary])
     param_values2 = np.array([d['params'][param2] for d in tuning_summary])
@@ -234,7 +272,11 @@ def plot_hyperparameter_sensitivity_2d(optimizer_path, hyperparams, mode='final'
 
     _, ax = plt.subplots()
 
-    con = ax.tricontourf(param_values1, param_values2, target_means, cmap = 'CMRmap', levels=len(target_means))
+    con = ax.tricontourf(param_values1,
+                         param_values2,
+                         target_means,
+                         cmap='CMRmap',
+                         levels=len(target_means))
     ax.scatter(param_values1, param_values2)
     ax.set_xscale(xscale)
     ax.set_yscale(yscale)
@@ -246,21 +288,27 @@ def plot_hyperparameter_sensitivity_2d(optimizer_path, hyperparams, mode='final'
     return ax
 
 
-def _plot_hyperparameter_sensitivity(optimizer_path, hyperparam, ax, mode='final', metric = 'valid_accuracies',
-                                    plot_std=False):
+def _plot_hyperparameter_sensitivity(optimizer_path,
+                                     hyperparam,
+                                     ax,
+                                     mode='final',
+                                     metric='valid_accuracies',
+                                     plot_std=False):
 
     metric = _determine_available_metric(optimizer_path, metric)
     tuning_summary = generate_tuning_summary(optimizer_path, mode, metric)
 
-    optimizer_name, testproblem = _get_optimizer_name_and_testproblem_from_path(optimizer_path)
+    optimizer_name, testproblem = _get_optimizer_name_and_testproblem_from_path(
+        optimizer_path)
 
     # create array for plotting
     param_values = [d['params'][hyperparam] for d in tuning_summary]
-    target_means = [d[metric +'_mean'] for d in tuning_summary]
-    target_stds = [d[metric +'_mean'] for d in tuning_summary]
+    target_means = [d[metric + '_mean'] for d in tuning_summary]
+    target_stds = [d[metric + '_mean'] for d in tuning_summary]
 
-    param_values, target_means, target_stds = (list(t) for t in
-                                               zip(*sorted(zip(param_values, target_means, target_stds))))
+    param_values, target_means, target_stds = (
+        list(t)
+        for t in zip(*sorted(zip(param_values, target_means, target_stds))))
 
     param_values = np.array(param_values)
     target_means = np.array(target_means)
@@ -272,16 +320,20 @@ def _plot_hyperparameter_sensitivity(optimizer_path, hyperparam, ax, mode='final
             param_value = rank.aggregate['optimizer_hyperparams'][hyperparam]
             for value in values:
                 ax.scatter(param_value, value, marker='x', color='b')
-            ax.plot((param_value, param_value), (min(values), max(values)), color='grey', linestyle='--')
+            ax.plot((param_value, param_value), (min(values), max(values)),
+                    color='grey',
+                    linestyle='--')
     ax.set_title(testproblem, fontsize=20)
     return ax
 
 
-def plot_hyperparameter_sensitivity(path, hyperparam, mode='final', metric = 'valid_accuracies',
+def plot_hyperparameter_sensitivity(path,
+                                    hyperparam,
+                                    mode='final',
+                                    metric='valid_accuracies',
                                     xscale='linear',
                                     plot_std=True,
-                                    reference_path = None):
-
+                                    reference_path=None):
     """Plots the hyperparameter sensitivtiy of the optimizer.
 
     Args:
@@ -300,12 +352,16 @@ def plot_hyperparameter_sensitivity(path, hyperparam, mode='final', metric = 'va
     pathes = _preprocess_path(path)
     for optimizer_path in pathes:
         metric = _determine_available_metric(optimizer_path, metric)
-        ax = _plot_hyperparameter_sensitivity(optimizer_path, hyperparam, ax, mode, metric, plot_std)
+        ax = _plot_hyperparameter_sensitivity(optimizer_path, hyperparam, ax,
+                                              mode, metric, plot_std)
     if reference_path is not None:
         pathes = _preprocess_path(reference_path)
         for reference_optimizer_path in pathes:
-            metric = _determine_available_metric(reference_optimizer_path, metric)
-            ax = _plot_hyperparameter_sensitivity(reference_optimizer_path, hyperparam, ax, mode, metric, plot_std)
+            metric = _determine_available_metric(reference_optimizer_path,
+                                                 metric)
+            ax = _plot_hyperparameter_sensitivity(reference_optimizer_path,
+                                                  hyperparam, ax, mode, metric,
+                                                  plot_std)
 
     plt.xscale(xscale)
     plt.xlabel(hyperparam, fontsize=16)
@@ -316,9 +372,12 @@ def plot_hyperparameter_sensitivity(path, hyperparam, mode='final', metric = 'va
     return ax
 
 
-def plot_final_metric_vs_tuning_rank(optimizer_path, metric='valid_accuracies'):
+def plot_final_metric_vs_tuning_rank(optimizer_path,
+                                     metric='valid_accuracies'):
     metric = _determine_available_metric(optimizer_path, metric)
-    ranks = create_setting_analyzer_ranking(optimizer_path, mode='final', metric=metric)
+    ranks = create_setting_analyzer_ranking(optimizer_path,
+                                            mode='final',
+                                            metric=metric)
     means = []
     fig, ax = plt.subplots()
     for idx, rank in enumerate(ranks):
@@ -326,9 +385,12 @@ def plot_final_metric_vs_tuning_rank(optimizer_path, metric='valid_accuracies'):
         values = rank.get_all_final_values(metric)
         for value in values:
             ax.scatter(idx, value, marker='x', color='b')
-        ax.plot((idx, idx), (min(values), max(values)), color= 'grey', linestyle='--')
+        ax.plot((idx, idx), (min(values), max(values)),
+                color='grey',
+                linestyle='--')
     ax.plot(range(len(ranks)), means)
-    optimizer, testproblem = _get_optimizer_name_and_testproblem_from_path(optimizer_path)
+    optimizer, testproblem = _get_optimizer_name_and_testproblem_from_path(
+        optimizer_path)
     ax.set_title(optimizer + ' on ' + testproblem)
     ax.set_xlabel('tuning rank')
     ax.set_ylabel(metric)
@@ -336,7 +398,10 @@ def plot_final_metric_vs_tuning_rank(optimizer_path, metric='valid_accuracies'):
     return fig, ax
 
 
-def get_performance_dictionary(optimizer_path, mode = 'most', metric = 'valid_accuracies', conv_perf_file = None):
+def get_performance_dictionary(optimizer_path,
+                               mode='most',
+                               metric='valid_accuracies',
+                               conv_perf_file=None):
     """Summarizes the performance of the optimizer.
 
     Args:
@@ -349,7 +414,8 @@ def get_performance_dictionary(optimizer_path, mode = 'most', metric = 'valid_ac
         dict: A dictionary that holds the best setting and it's performance on the test set.
         """
     metric = _determine_available_metric(optimizer_path, metric)
-    setting_analyzers_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
+    setting_analyzers_ranking = create_setting_analyzer_ranking(
+        optimizer_path, mode, metric)
     sett = setting_analyzers_ranking[0]
 
     perf_dict = dict()
@@ -374,7 +440,10 @@ def get_performance_dictionary(optimizer_path, mode = 'most', metric = 'valid_ac
     return perf_dict
 
 
-def _plot_optimizer_performance(path, ax = None, mode = 'most', metric = 'valid_accuracies'):
+def _plot_optimizer_performance(path,
+                                ax=None,
+                                mode='most',
+                                metric='valid_accuracies'):
     """Plots the training curve of an optimizer.
 
     Args:
@@ -386,13 +455,16 @@ def _plot_optimizer_performance(path, ax = None, mode = 'most', metric = 'valid_
         matplotlib.axes.Axes: The axes with the plots.
 
         """
-    metrices = ['test_losses', 'train_losses', 'test_accuracies', 'train_accuracies']
+    metrices = [
+        'test_losses', 'train_losses', 'test_accuracies', 'train_accuracies'
+    ]
     if ax is None:  # create default axis for all 4 metrices
         _, ax = plt.subplots(4, 1, sharex='col')
 
     pathes = _preprocess_path(path)
     for optimizer_path in pathes:
-        setting_analyzer_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
+        setting_analyzer_ranking = create_setting_analyzer_ranking(
+            optimizer_path, mode, metric)
         setting = setting_analyzer_ranking[0]
 
         optimizer_name = os.path.basename(optimizer_path)
@@ -401,13 +473,21 @@ def _plot_optimizer_performance(path, ax = None, mode = 'most', metric = 'valid_
                 mean = setting.aggregate[_metric]['mean']
                 std = setting.aggregate[_metric]['std']
                 ax[idx].plot(mean, label=optimizer_name)
-                ax[idx].fill_between(range(len(mean)), mean - std, mean + std, alpha=0.3)
-    _, testproblem = _get_optimizer_name_and_testproblem_from_path(optimizer_path)
+                ax[idx].fill_between(range(len(mean)),
+                                     mean - std,
+                                     mean + std,
+                                     alpha=0.3)
+    _, testproblem = _get_optimizer_name_and_testproblem_from_path(
+        optimizer_path)
     ax[0].set_title(testproblem, fontsize=18)
     return ax
 
 
-def plot_optimizer_performance(path, ax = None, mode = 'most', metric = 'valid_accuracies', reference_path = None):
+def plot_optimizer_performance(path,
+                               ax=None,
+                               mode='most',
+                               metric='valid_accuracies',
+                               reference_path=None):
     """Plots the training curve of optimizers and addionally plots reference results from the ``reference_path``
 
     Args:
@@ -426,10 +506,12 @@ def plot_optimizer_performance(path, ax = None, mode = 'most', metric = 'valid_a
     if reference_path is not None:
         ax = _plot_optimizer_performance(reference_path, ax, mode, metric)
 
-    metrices = ['test_losses', 'train_losses', 'test_accuracies', 'train_accuracies']
+    metrices = [
+        'test_losses', 'train_losses', 'test_accuracies', 'train_accuracies'
+    ]
     for idx, _metric in enumerate(metrices):
         # set y labels
-        ax[idx].set_ylabel(_metric, fontsize = 14)
+        ax[idx].set_ylabel(_metric, fontsize=14)
         # rescale plots
         # ax[idx] = _rescale_ax(ax[idx])
         ax[idx].tick_params(labelsize=12)
@@ -437,8 +519,7 @@ def plot_optimizer_performance(path, ax = None, mode = 'most', metric = 'valid_a
     # show optimizer legends
     ax[0].legend(fontsize=12)
 
-    ax[3].set_xlabel('epochs', fontsize = 14)
+    ax[3].set_xlabel('epochs', fontsize=14)
 
     plt.show()
     return ax
-
