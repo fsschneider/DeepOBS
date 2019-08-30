@@ -247,7 +247,6 @@ def plot_testset_performances(results_path,
     # show legend of optimizers
     ax[0, 0].legend()
     plt.tight_layout()
-    plt.show()
     return ax
 
 
@@ -284,7 +283,6 @@ def plot_hyperparameter_sensitivity_2d(optimizer_path,
     ax.set_ylabel(param2)
     cbar = plt.colorbar(con)
     cbar.set_label(metric)
-    plt.show()
     return ax
 
 
@@ -368,7 +366,6 @@ def plot_hyperparameter_sensitivity(path,
     plt.ylabel(metric, fontsize=16)
     ax.tick_params(labelsize=14)
     ax.legend()
-    plt.show()
     return ax
 
 
@@ -394,7 +391,6 @@ def plot_final_metric_vs_tuning_rank(optimizer_path,
     ax.set_title(optimizer + ' on ' + testproblem)
     ax.set_xlabel('tuning rank')
     ax.set_ylabel(metric)
-    plt.show()
     return fig, ax
 
 
@@ -521,5 +517,4 @@ def plot_optimizer_performance(path,
 
     ax[3].set_xlabel('epochs', fontsize=14)
 
-    plt.show()
     return ax
