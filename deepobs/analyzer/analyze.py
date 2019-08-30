@@ -448,7 +448,7 @@ def _plot_optimizer_performance(path,
         ax (matplotlib.axes.Axes): The axes to plot the trainig curves for all metrices. Must have 4 subaxes.
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
-        shade (str): ['std', 'quantile'] Use standard deviations or quantiles for shaded plot.
+        shade (str): ['std', 'quartiles'] Use standard deviations or quartiles for shaded plot.
     Returns:
         matplotlib.axes.Axes: The axes with the plots.
         """
@@ -473,9 +473,9 @@ def _plot_optimizer_performance(path,
                 if shade == 'std':
                     std = setting.aggregate[_metric]['std']
                     low, high = mean - std, mean + std
-                elif shade == 'quantile':
-                    low = setting.aggregate[_metric]['quantile_25']
-                    high = setting.aggregate[_metric]['quantile_75']
+                elif shade == 'quartiles':
+                    low = setting.aggregate[_metric]['lower_quartile']
+                    high = setting.aggregate[_metric]['upper_quartile']
 
                 ax[idx].fill_between(range(len(mean)), low, high, alpha=0.3)
 
@@ -499,7 +499,7 @@ def plot_optimizer_performance(path,
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
         reference_path (str): Path to the reference optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are taken as reference).
-        shade (str): ['std', 'quantile'] Use standard deviations or quantiles for shaded plot.
+        shade (str): ['std', 'quartiles'] Use standard deviations or quartiles for shaded plot.
 
     Returns:
         matplotlib.axes.Axes: The axes with the plots.

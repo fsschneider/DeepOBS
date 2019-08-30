@@ -91,8 +91,8 @@ def aggregate_runs(setting_folder):
                 'mean': np.mean(eval(metrics), axis=0),
                 'std': np.std(eval(metrics), axis=0),
                 'all_final_values': [met[-1] for met in eval(metrics)],
-                'quantile_25': np.quantile(eval(metrics), 0.25, axis=0),
-                'quantile_75': np.quantile(eval(metrics), 0.75, axis=0),
+                'lower_quartile': np.quantile(eval(metrics), 0.25, axis=0),
+                'upper_quartile': np.quantile(eval(metrics), 0.75, axis=0),
             }
     # merge meta data
     aggregate['optimizer_hyperparams'] = json_data['optimizer_hyperparams']
