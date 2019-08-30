@@ -477,6 +477,8 @@ def _plot_optimizer_performance(path,
                     center = setting.aggregate[_metric]['median']
                     low = setting.aggregate[_metric]['lower_quartile']
                     high = setting.aggregate[_metric]['upper_quartile']
+                else:
+                    raise ValueError("Unknown value which={}".format(which))
 
                 ax[idx].plot(center, label=optimizer_name)
                 ax[idx].fill_between(range(len(center)), low, high, alpha=0.3)
