@@ -439,7 +439,8 @@ def get_performance_dictionary(optimizer_path,
 def _plot_optimizer_performance(path,
                                 ax=None,
                                 mode='most',
-                                metric='valid_accuracies'):
+                                metric='valid_accuracies',
+                                shade='std'):
     """Plots the training curve of an optimizer.
 
     Args:
@@ -447,9 +448,9 @@ def _plot_optimizer_performance(path,
         ax (matplotlib.axes.Axes): The axes to plot the trainig curves for all metrices. Must have 4 subaxes.
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
+        shade (str): ['std', 'quantile'] Use standard deviations or quantiles for shaded plot.
     Returns:
         matplotlib.axes.Axes: The axes with the plots.
-
         """
     metrices = [
         'test_losses', 'train_losses', 'test_accuracies', 'train_accuracies'
@@ -467,12 +468,17 @@ def _plot_optimizer_performance(path,
         for idx, _metric in enumerate(metrices):
             if _metric in setting.aggregate:
                 mean = setting.aggregate[_metric]['mean']
-                std = setting.aggregate[_metric]['std']
                 ax[idx].plot(mean, label=optimizer_name)
-                ax[idx].fill_between(range(len(mean)),
-                                     mean - std,
-                                     mean + std,
-                                     alpha=0.3)
+
+                if shade == 'std':
+                    std = setting.aggregate[_metric]['std']
+                    low, high = mean - std, mean + std
+                elif shade == 'quantile':
+                    low = setting.aggregate[_metric]['quantile_25']
+                    high = setting.aggregate[_metric]['quantile_75']
+
+                ax[idx].fill_between(range(len(mean)), low, high, alpha=0.3)
+
     _, testproblem = _get_optimizer_name_and_testproblem_from_path(
         optimizer_path)
     ax[0].set_title(testproblem, fontsize=18)
@@ -483,7 +489,8 @@ def plot_optimizer_performance(path,
                                ax=None,
                                mode='most',
                                metric='valid_accuracies',
-                               reference_path=None):
+                               reference_path=None,
+                               shade='std'):
     """Plots the training curve of optimizers and addionally plots reference results from the ``reference_path``
 
     Args:
@@ -492,15 +499,20 @@ def plot_optimizer_performance(path,
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
         reference_path (str): Path to the reference optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are taken as reference).
+        shade (str): ['std', 'quantile'] Use standard deviations or quantiles for shaded plot.
 
     Returns:
         matplotlib.axes.Axes: The axes with the plots.
 
         """
 
-    ax = _plot_optimizer_performance(path, ax, mode, metric)
+    ax = _plot_optimizer_performance(path, ax, mode, metric, shade=shade)
     if reference_path is not None:
-        ax = _plot_optimizer_performance(reference_path, ax, mode, metric)
+        ax = _plot_optimizer_performance(reference_path,
+                                         ax,
+                                         mode,
+                                         metric,
+                                         shade=shade)
 
     metrices = [
         'test_losses', 'train_losses', 'test_accuracies', 'train_accuracies'
