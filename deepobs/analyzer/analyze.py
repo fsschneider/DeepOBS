@@ -197,7 +197,8 @@ def plot_results_table(results_path,
 def plot_testset_performances(results_path,
                               mode='most',
                               metric='valid_accuracies',
-                              reference_path=None):
+                              reference_path=None,
+                              which='mean_and_std'):
     """Plots all optimizer performances for all testproblems.
 
     Args:
@@ -205,6 +206,7 @@ def plot_testset_performances(results_path,
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
         reference_path(str): Path to the reference results folder. For each available reference testproblem, all optimizers are plotted as reference.
+        which (str): ['mean_and_std', 'median_and_quartiles'] Solid plot mean or median, shaded plots standard deviation or lower/upper quartiles.
 
     Returns:
         matplotlib.axes.Axes: The axes with the plots.
@@ -226,13 +228,20 @@ def plot_testset_performances(results_path,
     __, ax = plt.subplots(4, n_testproblems, sharex='col')
     for idx, testproblem in enumerate(testproblems):
         testproblem_path = os.path.join(results_path, testproblem)
-        ax[:, idx] = _plot_optimizer_performance(testproblem_path, ax[:, idx],
-                                                 mode, metric)
+        ax[:, idx] = _plot_optimizer_performance(testproblem_path,
+                                                 ax[:, idx],
+                                                 mode,
+                                                 metric,
+                                                 which=which)
         if testproblem in reference_testproblems:
             reference_testproblem_path = os.path.join(reference_path,
                                                       testproblem)
             ax[:, idx] = _plot_optimizer_performance(
-                reference_testproblem_path, ax[:, idx], mode, metric)
+                reference_testproblem_path,
+                ax[:, idx],
+                mode,
+                metric,
+                which=which)
 
     metrices = [
         'test_losses', 'train_losses', 'test_accuracies', 'train_accuracies'
