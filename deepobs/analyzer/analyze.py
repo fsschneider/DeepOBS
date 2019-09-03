@@ -45,6 +45,7 @@ def estimate_runtime(framework,
                      runner_cls,
                      optimizer_cls,
                      optimizer_hp,
+                     optimizer_hyperparams,
                      n_runs = 5,
                      sgd_lr=0.01,
                      testproblem='mnist_mlp',
@@ -60,6 +61,7 @@ def estimate_runtime(framework,
         runner_cls: The runner class that your optimizer uses.
         optimizer_cls: Your optimizer class.
         optimizer_hp (dict): Its hyperparameter specification as it is used in the runner initialization.
+        optimizer_hyperparams (dict): Optimizer hyperparameter values to run.
         n_runs (int): The number of run calls for which the overhead is averaged over.
         sgd_lr (float): The vanilla SGD learning rate to use.
         testproblem (str): The deepobs testproblem to run SGD and the new optimizer on.
@@ -74,18 +76,18 @@ def estimate_runtime(framework,
     if framework == 'pytorch':
         from deepobs import pytorch as ptobs
         from torch.optim import SGD
-        optimizer_class = SGD
-        hp = {'lr': {'type': float}}
-        hyperparams = {"lr": sgd_lr}
-        runner = ptobs.runners.StandardRunner(optimizer_class, hp)
+        runner_sgd = ptobs.runners.StandardRunner
+        optimizer_class_sgd = SGD
+        hp_sgd = {'lr': {'type': float}}
+        hyperparams_sgd = {"lr": sgd_lr}
 
     elif framework == 'tensorflow':
         from deepobs import tensorflow as tfobs
         import tensorflow as tf
-        optimizer_class = tf.train.GradientDescentOptimizer
-        hp = {'learning_rate': {'type': float}}
-        runner = tfobs.runners.StandardRunner(optimizer_class, hp)
-        hyperparams = {'learning_rate': sgd_lr}
+        optimizer_class_sgd = tf.train.GradientDescentOptimizer
+        hp_sgd = {'learning_rate': {'type': float}}
+        runner_sgd = tfobs.runners.StandardRunner
+        hyperparams_sgd = {'learning_rate': sgd_lr}
     else:
         raise RuntimeError('Framework must be pytorch or tensorflow')
 
@@ -98,9 +100,10 @@ def estimate_runtime(framework,
         # SGD
         print("Running SGD")
         start_sgd = time.time()
+        runner = runner_sgd(optimizer_class_sgd, hp_sgd)
         runner.run(
             testproblem=testproblem,
-            hyperparams=hyperparams,
+            hyperparams=hyperparams_sgd,
             batch_size=batch_size,
             num_epochs=num_epochs,
             no_logs=True,
@@ -112,11 +115,11 @@ def estimate_runtime(framework,
 
         # New Optimizer
         runner = runner_cls(optimizer_cls, optimizer_hp)
-        print("Running...", optimizer_class.__name__)
+        print("Running...", optimizer_cls.__name__)
         start_script = time.time()
         runner.run(
             testproblem=testproblem,
-            hyperparams=hyperparams,
+            hyperparams=optimizer_hyperparams,
             batch_size=batch_size,
             num_epochs=num_epochs,
             no_logs=True,
