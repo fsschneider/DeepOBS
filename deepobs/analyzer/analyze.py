@@ -186,11 +186,9 @@ def plot_testset_performances(results_path, mode = 'most', metric = 'valid_accur
         results_path (str): The path to the results folder.
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
-        reference_path(str): Path to the reference results folder. For each available reference testproblem, all optimizers are plotted as reference.
-
+        reference_path (str): Path to the reference results folder. For each available reference testproblem, all optimizers are plotted as reference.
     Returns:
-        matplotlib.axes.Axes: The axes with the plots.
-
+        Tuple: The figure and axes.
         """
     testproblems = [path for path in os.listdir(results_path) if os.path.isdir(os.path.join(results_path, path))]
     if reference_path is not None:
@@ -199,7 +197,7 @@ def plot_testset_performances(results_path, mode = 'most', metric = 'valid_accur
     else:
         reference_testproblems = []
     n_testproblems = len(testproblems)
-    __, ax = plt.subplots(4, n_testproblems, sharex='col')
+    fig, ax = plt.subplots(4, n_testproblems, sharex='col')
     for idx, testproblem in enumerate(testproblems):
         testproblem_path = os.path.join(results_path, testproblem)
         ax[:, idx] = _plot_optimizer_performance(testproblem_path, ax[:, idx], mode, metric)
@@ -219,7 +217,7 @@ def plot_testset_performances(results_path, mode = 'most', metric = 'valid_accur
     ax[0, 0].legend()
     plt.tight_layout()
     plt.show()
-    return ax
+    return fig, ax
 
 
 def plot_hyperparameter_sensitivity_2d(optimizer_path, hyperparams, mode='final', metric = 'valid_accuracies', xscale='linear', yscale = 'linear'):
@@ -235,7 +233,7 @@ def plot_hyperparameter_sensitivity_2d(optimizer_path, hyperparams, mode='final'
     target_means = np.array([d[metric + '_mean'] for d in tuning_summary])
     target_stds = [d[metric + '_std'] for d in tuning_summary]
 
-    _, ax = plt.subplots()
+    fig, ax = plt.subplots()
 
     con = ax.tricontourf(param_values1, param_values2, target_means, cmap = 'CMRmap', levels=len(target_means))
     ax.scatter(param_values1, param_values2)
@@ -246,7 +244,7 @@ def plot_hyperparameter_sensitivity_2d(optimizer_path, hyperparams, mode='final'
     cbar = plt.colorbar(con)
     cbar.set_label(metric)
     plt.show()
-    return ax
+    return fig, ax
 
 
 def _plot_hyperparameter_sensitivity(optimizer_path, hyperparam, ax, mode='final', metric = 'valid_accuracies',
@@ -297,9 +295,9 @@ def plot_hyperparameter_sensitivity(path, hyperparam, mode='final', metric = 'va
         reference_path (str): Path to the reference optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are taken as reference).
 
     Returns:
-        matplotlib.axes.Axes: The figure and axes of the plot.
+        Tuple: The figure and axes of the plot.
         """
-    _, ax = plt.subplots()
+    fig, ax = plt.subplots()
     pathes = _preprocess_path(path)
     for optimizer_path in pathes:
         metric = _determine_available_metric(optimizer_path, metric)
@@ -316,7 +314,7 @@ def plot_hyperparameter_sensitivity(path, hyperparam, mode='final', metric = 'va
     ax.tick_params(labelsize=14)
     ax.legend()
     plt.show()
-    return ax
+    return fig, ax
 
 
 def plot_final_metric_vs_tuning_rank(optimizer_path, metric='valid_accuracies'):
@@ -377,11 +375,12 @@ def get_performance_dictionary(optimizer_path, mode = 'most', metric = 'valid_ac
     return perf_dict
 
 
-def _plot_optimizer_performance(path, ax = None, mode = 'most', metric = 'valid_accuracies'):
+def _plot_optimizer_performance(path, fig=None, ax = None, mode = 'most', metric = 'valid_accuracies'):
     """Plots the training curve of an optimizer.
 
     Args:
         path (str): Path to the optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are plotted).
+        fig (matplotlib.Figure): Figure to plot the training curves in.
         ax (matplotlib.axes.Axes): The axes to plot the trainig curves for all metrices. Must have 4 subaxes.
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
@@ -391,7 +390,7 @@ def _plot_optimizer_performance(path, ax = None, mode = 'most', metric = 'valid_
         """
     metrices = ['test_losses', 'train_losses', 'test_accuracies', 'train_accuracies']
     if ax is None:  # create default axis for all 4 metrices
-        _, ax = plt.subplots(4, 1, sharex='col')
+        fig, ax = plt.subplots(4, 1, sharex='col')
 
     pathes = _preprocess_path(path)
     for optimizer_path in pathes:
@@ -407,27 +406,28 @@ def _plot_optimizer_performance(path, ax = None, mode = 'most', metric = 'valid_
                 ax[idx].fill_between(range(len(mean)), mean - std, mean + std, alpha=0.3)
     _, testproblem = _get_optimizer_name_and_testproblem_from_path(optimizer_path)
     ax[0].set_title(testproblem, fontsize=18)
-    return ax
+    return fig, ax
 
 
-def plot_optimizer_performance(path, ax = None, mode = 'most', metric = 'valid_accuracies', reference_path = None):
+def plot_optimizer_performance(path, fig = None, ax = None, mode = 'most', metric = 'valid_accuracies', reference_path = None):
     """Plots the training curve of optimizers and addionally plots reference results from the ``reference_path``
 
     Args:
         path (str): Path to the optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are plotted).
+        fig (matplotlib.Figure): Figure to plot the training curves in.
         ax (matplotlib.axes.Axes): The axes to plot the trainig curves for all metrices. Must have 4 subaxes (one for each metric).
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
         reference_path (str): Path to the reference optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are taken as reference).
 
     Returns:
-        matplotlib.axes.Axes: The axes with the plots.
+        Tuple: The figure and axes with the plots.
 
         """
 
-    ax = _plot_optimizer_performance(path, ax, mode, metric)
+    fig, ax = _plot_optimizer_performance(path, fig, ax, mode, metric)
     if reference_path is not None:
-        ax = _plot_optimizer_performance(reference_path, ax, mode, metric)
+        fig, ax = _plot_optimizer_performance(reference_path, fig, ax, mode, metric)
 
     metrices = ['test_losses', 'train_losses', 'test_accuracies', 'train_accuracies']
     for idx, _metric in enumerate(metrices):
@@ -443,5 +443,5 @@ def plot_optimizer_performance(path, ax = None, mode = 'most', metric = 'valid_a
     ax[3].set_xlabel('epochs', fontsize = 14)
 
     plt.show()
-    return ax
+    return fig, ax
 
