@@ -200,10 +200,10 @@ def plot_testset_performances(results_path, mode = 'most', metric = 'valid_accur
     fig, ax = plt.subplots(4, n_testproblems, sharex='col')
     for idx, testproblem in enumerate(testproblems):
         testproblem_path = os.path.join(results_path, testproblem)
-        ax[:, idx] = _plot_optimizer_performance(testproblem_path, ax[:, idx], mode, metric)
+        fig, ax[:, idx] = _plot_optimizer_performance(testproblem_path, fig=fig, ax=ax[:, idx], mode=mode, metric=metric)
         if testproblem in reference_testproblems:
             reference_testproblem_path = os.path.join(reference_path, testproblem)
-            ax[:, idx] = _plot_optimizer_performance(reference_testproblem_path, ax[:, idx], mode, metric)
+            fig, ax[:, idx] = _plot_optimizer_performance(reference_testproblem_path, fig=fig, ax=ax[:, idx], mode=mode, metric=metric)
 
     metrices = ['test_losses', 'train_losses', 'test_accuracies', 'train_accuracies']
     for idx, _metric in enumerate(metrices):
