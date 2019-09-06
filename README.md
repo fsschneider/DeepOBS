@@ -35,9 +35,10 @@ The paper describing DeepOBS has been accepted for ICLR 2019 and can be found
 here:
 https://openreview.net/forum?id=rJg6ssC5Y7
 
-We are actively working on a **PyTorch** version and will be releasing it in the
-next months. In the meantime, PyTorch users can still use parts of DeepOBS such
-as the data preprocessing scripts or the visualization features.
+We are currently working on a new and improved version of DeepOBS.
+It will support **PyTorch** as well as TensorFlow, has an easier interface, and
+many bugs ironed out. It will be released in a few weeks, until then you can
+check out the current working beta version of it over at https://github.com/abahde/DeepOBS.
 
 **If you find any bugs in DeepOBS, or find it hard to use, please let us know.
 We are always interested in feedback and ways to improve DeepOBS.**
