@@ -88,12 +88,21 @@ def aggregate_runs(setting_folder):
         if len(eval(metrics)) != 0:
 
             aggregate[metrics] = {
-                'mean': np.mean(eval(metrics), axis=0),
-                'std': np.std(eval(metrics), axis=0),
+                'mean':
+                np.mean(eval(metrics), axis=0),
+                'std':
+                np.std(eval(metrics), axis=0),
                 'all_final_values': [met[-1] for met in eval(metrics)],
-                'lower_quartile': np.quantile(eval(metrics), 0.25, axis=0),
-                'median': np.median(eval(metrics), axis=0),
-                'upper_quartile': np.quantile(eval(metrics), 0.75, axis=0),
+                'lower_quartile':
+                np.quantile(eval(metrics), 0.25, axis=0),
+                'median':
+                np.median(eval(metrics), axis=0),
+                'upper_quartile':
+                np.quantile(eval(metrics), 0.75, axis=0),
+                'mean_log':
+                np.power(10, np.mean(np.log10(eval(metrics), axis=0), axis=0)),
+                'std_log':
+                np.power(10, np.std(np.log10(eval(metrics), axis=0), axis=0)),
             }
     # merge meta data
     aggregate['optimizer_hyperparams'] = json_data['optimizer_hyperparams']

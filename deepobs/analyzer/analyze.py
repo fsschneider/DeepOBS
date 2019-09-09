@@ -454,18 +454,30 @@ def _plot_optimizer_performance(path,
 
     Args:
         path (str): Path to the optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are plotted).
-        ax (matplotlib.axes.Axes): The axes to plot the trainig curves for all metrices. Must have 4 subaxes.
+        ax (matplotlib.axes.Axes): The axes to plot the trainig curves for all metrics. Must have 4 subaxes.
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
-        which (str): ['mean_and_std', 'median_and_quartiles'] Solid plot mean or median, shaded plots standard deviation or lower/upper quartiles.
+        which (str): ['mean_and_std', 'median_and_quartiles', 'mean_and_std_log']
+            - Solid plot mean or median or exponentiated mean of log
+            - Shaded plots standard deviation or lower/upper quartiles or exponentiated std of log
 
     Returns:
         matplotlib.axes.Axes: The axes with the plots.
         """
-    metrices = [
-        'test_losses', 'train_losses', 'test_accuracies', 'train_accuracies'
+    loss_metrics = [
+        'test_losses',
+        'train_losses',
     ]
-    if ax is None:  # create default axis for all 4 metrices
+    accuracy_metrics = [
+        'test_accuracies',
+        'train_accuracies',
+    ]
+    metrics = loss_metrics + accuracy_metrics
+
+    def is_loss(metric):
+        return metric in loss_metrics
+
+    if ax is None:  # create default axis for all 4 metrics
         _, ax = plt.subplots(4, 1, sharex='col')
 
     pathes = _preprocess_path(path)
@@ -475,10 +487,19 @@ def _plot_optimizer_performance(path,
         setting = setting_analyzer_ranking[0]
 
         optimizer_name = os.path.basename(optimizer_path)
-        for idx, _metric in enumerate(metrices):
+        for idx, _metric in enumerate(metrics):
             if _metric in setting.aggregate:
-
-                if which == 'mean_and_std':
+                if which == 'mean_and_std_log':
+                    if is_loss(_metric):
+                        ax[idx].set_yscale('log')
+                        center = setting.aggregate[_metric]['mean_log']
+                        std = setting.aggregate[_metric]['std_log']
+                        low, high = center - std, center + std
+                    else:
+                        center = setting.aggregate[_metric]['mean']
+                        std = setting.aggregate[_metric]['std']
+                        low, high = center - std, center + std
+                elif which == 'mean_and_std':
                     center = setting.aggregate[_metric]['mean']
                     std = setting.aggregate[_metric]['std']
                     low, high = center - std, center + std
@@ -512,7 +533,9 @@ def plot_optimizer_performance(path,
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
         reference_path (str): Path to the reference optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are taken as reference).
-        which (str): ['mean_and_std', 'median_and_quartiles'] Solid plot mean or median, shaded plots standard deviation or lower/upper quartiles.
+        which (str): ['mean_and_std', 'median_and_quartiles', 'mean_and_std_log']
+            - Solid plot mean or median or exponentiated mean of log
+            - Shaded plots standard deviation or lower/upper quartiles or exponentiated std of log
 
     Returns:
         matplotlib.axes.Axes: The axes with the plots.
