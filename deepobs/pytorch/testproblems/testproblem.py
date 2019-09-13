@@ -96,6 +96,7 @@ class TestProblem(abc.ABC):
 
     def get_batch_loss_and_accuracy(self,
                                     return_forward_func = False,
+                                    evaluate_forward_func = True,
                                     reduction = 'mean',
                                     add_regularization_if_available = True):
 
@@ -144,7 +145,10 @@ class TestProblem(abc.ABC):
             return loss + regularizer_loss, accuracy
 
         if return_forward_func:
-            return _get_batch_loss_and_accuracy(), _get_batch_loss_and_accuracy
+            if evaluate_forward_func is True:
+                return _get_batch_loss_and_accuracy(), _get_batch_loss_and_accuracy
+            else:
+                return _get_batch_loss_and_accuracy
         else:
             return _get_batch_loss_and_accuracy()
 
