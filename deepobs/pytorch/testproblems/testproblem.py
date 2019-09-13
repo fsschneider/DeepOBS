@@ -48,6 +48,8 @@ class TestProblem(abc.ABC):
         self._weight_decay = weight_decay
         self._device = torch.device(config.get_default_device())
 
+        self._batch_count = 0
+
         # Public attributes by which to interact with test problems. These have to
         # be created by the set_up function of sub-classes.
         self.data = None
@@ -89,6 +91,7 @@ class TestProblem(abc.ABC):
 
     def _get_next_batch(self):
         """Returns the next batch from the iterator."""
+        self._batch_count += 1
         return next(self._iterator)
 
     def get_batch_loss_and_accuracy(self,
