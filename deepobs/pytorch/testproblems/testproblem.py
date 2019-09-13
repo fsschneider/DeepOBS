@@ -95,11 +95,10 @@ class TestProblem(abc.ABC):
         return next(self._iterator)
 
     def get_batch_loss_and_accuracy(self,
-                                    return_forward_func = False,
-                                    evaluate_forward_func = True,
-                                    reduction = 'mean',
-                                    add_regularization_if_available = True):
-
+                                    return_forward_func=False,
+                                    reduction='mean',
+                                    add_regularization_if_available=True,
+                                    evaluate_forward_func=True):
         """Gets a new batch and calculates the loss and accuracy (if available)
         on that batch. This is a default implementation for image classification.
         Testproblems with different calculation routines (e.g. RNNs) overwrite this method accordingly.
