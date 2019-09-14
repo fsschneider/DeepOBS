@@ -95,7 +95,7 @@ def aggregate_runs(setting_folder):
 def _read_all_settings_folders(optimizer_path):
     """Returns a list of all setting folders in ``optimizer_path``"""
     optimizer_path = os.path.join(optimizer_path)
-    return [f for f in os.listdir(optimizer_path) if os.path.isdir(os.path.join(optimizer_path, f)) and 'num_epochs' in f]
+    return sorted([f for f in os.listdir(optimizer_path) if os.path.isdir(os.path.join(optimizer_path, f)) and 'num_epochs' in f])
 
 
 def _check_if_metric_is_available(optimizer_path, metric):

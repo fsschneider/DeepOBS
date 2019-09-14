@@ -20,18 +20,18 @@ def check_output(results_path):
     Args:
         results_path (str): Path to the results folder.
     """
-    testproblems = os.listdir(results_path)
+    testproblems = sorted(os.listdir(results_path))
     for testproblem in testproblems:
         testproblem_path = os.path.join(results_path, testproblem)
-        optimizers = os.listdir(testproblem_path)
+        optimizers = sorted(os.listdir(testproblem_path))
         for optimizer in optimizers:
             optimizer_path = os.path.join(testproblem_path, optimizer)
-            settings = [setting for setting in os.listdir(optimizer_path) if os.path.isdir(os.path.join(optimizer_path, setting)) and 'num_epochs' in setting]
+            settings = sorted([setting for setting in os.listdir(optimizer_path) if os.path.isdir(os.path.join(optimizer_path, setting)) and 'num_epochs' in setting])
             n_runs_list = []
             for setting in settings:
                 setting_path = os.path.join(optimizer_path, setting)
                 _check_setting_folder_is_not_empty(setting_path)
-                jsons_files = [file for file in os.listdir(setting_path) if 'json' in file]
+                jsons_files = sorted([file for file in os.listdir(setting_path) if 'json' in file])
                 n_runs_list.append(len(jsons_files))
                 for json_file in jsons_files:
                     json_path = os.path.join(setting_path, json_file)
@@ -156,7 +156,7 @@ def plot_results_table(results_path, mode='most', metric='valid_accuracies', con
                 pandas.DataFrame: A data frame that summarizes the results on the test set.
                 """
     table_dic = {}
-    testproblems = os.listdir(results_path)
+    testproblems = sorted(os.listdir(results_path))
     metric_keys = ['Hyperparameters', 'Performance', 'Speed', 'Training Parameters']
     for testproblem in testproblems:
         # init new subdict for testproblem
@@ -164,7 +164,7 @@ def plot_results_table(results_path, mode='most', metric='valid_accuracies', con
             table_dic[(testproblem, metric_key)] = {}
 
         testproblem_path = os.path.join(results_path, testproblem)
-        optimizers = os.listdir(testproblem_path)
+        optimizers = sorted(os.listdir(testproblem_path))
         for optimizer in optimizers:
             optimizer_path = os.path.join(testproblem_path, optimizer)
             optimizer_performance_dic = get_performance_dictionary(optimizer_path, mode, metric, conv_perf_file)
@@ -190,10 +190,10 @@ def plot_testset_performances(results_path, mode = 'most', metric = 'valid_accur
     Returns:
         Tuple: The figure and axes.
         """
-    testproblems = [path for path in os.listdir(results_path) if os.path.isdir(os.path.join(results_path, path))]
+    testproblems = sorted([path for path in os.listdir(results_path) if os.path.isdir(os.path.join(results_path, path))])
     if reference_path is not None:
         reference_path = os.path.join(reference_path)
-        reference_testproblems = [path for path in os.listdir(results_path) if os.path.isdir(os.path.join(reference_path, path))]
+        reference_testproblems = sorted([path for path in os.listdir(results_path) if os.path.isdir(os.path.join(reference_path, path))])
     else:
         reference_testproblems = []
     n_testproblems = len(testproblems)
