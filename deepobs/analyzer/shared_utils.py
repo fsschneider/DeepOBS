@@ -40,66 +40,53 @@ def _check_output_structure(path, file_name):
             file_name, path))
 
 
-def aggregate_runs(setting_folder):
+def aggregate_runs(setting_folder, custom_metrics=None):
     """Aggregates all seed runs for a setting.
     Args:
         setting_folder (str): The path to the setting folder.
+        custom_metrics (list(str)): Additional metrics that will be extracted if available
     Returns:
         A dictionary that contains the aggregated mean and std of all metrices, as well as the meta data.
         """
+    dobs_metrics = [
+        'train_losses', 'valid_losses', 'test_losses', 'train_accuracies',
+        'valid_accuracies', 'test_accuracies'
+    ]
+    if custom_metrics is None:
+        custom_metrics = []
+
     runs = [run for run in os.listdir(setting_folder) if run.endswith(".json")]
-    # metrices
-    train_losses = []
-    valid_losses = []
-    test_losses = []
-    train_accuracies = []
-    valid_accuracies = []
-    test_accuracies = []
+
+    def no_data():
+        return []
+
+    all_metrics = dobs_metrics + custom_metrics
+    all_metrics_data = {m: no_data() for m in all_metrics}
 
     for run in runs:
         json_data = _load_json(setting_folder, run)
-        train_losses.append(json_data['train_losses'])
-
-        # TODO remove try-except once validation metrices are available for the baselines
-        try:
-            valid_losses.append(json_data['valid_losses'])
-        except KeyError:
-            pass
-
-        test_losses.append(json_data['test_losses'])
-        # just add accuracies to the aggregate if they are available
-        if 'train_accuracies' in json_data:
-            train_accuracies.append(json_data['train_accuracies'])
-
-            # TODO remove try-except once validation metrices are available for the baselines
+        for metric in all_metrics:
             try:
-                valid_accuracies.append(json_data['valid_accuracies'])
+                all_metrics_data[metric].append(json_data[metric])
             except KeyError:
-                pass
-
-            test_accuracies.append(json_data['test_accuracies'])
+                all_metrics_data[metric] = no_data()
 
     aggregate = dict()
-    for metrics in [
-            'train_losses', 'valid_losses', 'test_losses', 'train_accuracies',
-            'valid_accuracies', 'test_accuracies'
-    ]:
+    for metric in all_metrics:
+        data = all_metrics_data[metric]
         # only add the metric if available
-        if len(eval(metrics)) != 0:
-
-            aggregate[metrics] = {
-                'mean': np.mean(eval(metrics), axis=0),
-                'std': np.std(eval(metrics), axis=0),
-                'all_final_values': [met[-1] for met in eval(metrics)],
-                'lower_quartile': np.quantile(eval(metrics), 0.25, axis=0),
-                'median': np.median(eval(metrics), axis=0),
-                'upper_quartile': np.quantile(eval(metrics), 0.75, axis=0),
-                'mean_log': np.power(10,
-                                     np.mean(np.log10(eval(metrics)), axis=0)),
-                'std_log': np.power(10, np.std(np.log10(eval(metrics)),
-                                               axis=0)),
-                'min': np.min(eval(metrics), axis=0),
-                'max': np.max(eval(metrics), axis=0),
+        if len(data) != 0:
+            aggregate[m] = {
+                'mean': np.mean(data, axis=0),
+                'std': np.std(data, axis=0),
+                'all_final_values': [met[-1] for met in data],
+                'lower_quartile': np.quantile(data, 0.25, axis=0),
+                'median': np.median(data, axis=0),
+                'upper_quartile': np.quantile(data, 0.75, axis=0),
+                'mean_log': np.power(10, np.mean(np.log10(data), axis=0)),
+                'std_log': np.power(10, np.std(np.log10(data), axis=0)),
+                'min': np.min(data, axis=0),
+                'max': np.max(data, axis=0),
             }
     # merge meta data
     aggregate['optimizer_hyperparams'] = json_data['optimizer_hyperparams']
