@@ -168,14 +168,18 @@ def _load_json(path, file_name):
     return json_data
 
 
-def _get_all_setting_analyzer(optimizer_path):
+def _get_all_setting_analyzer(optimizer_path, custom_metrics=None):
     """Creates a list of SettingAnalyzers (one for each setting in ``optimizer_path``)"""
+    if custom_metrics is None:
+        custom_metrics = []
+
     optimizer_path = os.path.join(optimizer_path)
     setting_folders = _read_all_settings_folders(optimizer_path)
     setting_analyzers = []
     for sett in setting_folders:
         sett_path = os.path.join(optimizer_path, sett)
-        setting_analyzers.append(SettingAnalyzer(sett_path))
+        setting_analyzers.append(
+            SettingAnalyzer(sett_path, custom_metrics=custom_metrics))
     return setting_analyzers
 
 
@@ -187,7 +191,8 @@ def _get_optimizer_name_and_testproblem_from_path(optimizer_path):
 
 def create_setting_analyzer_ranking(optimizer_path,
                                     mode='final',
-                                    metric='valid_accuracies'):
+                                    metric='valid_accuracies',
+                                    custom_metrics=None):
     """Reads in all settings in ``optimizer_path`` and sets up a ranking by returning an ordered list of SettingAnalyzers.
     Args:
         optimizer_path (str): The path to the optimizer to analyse.
@@ -196,8 +201,12 @@ def create_setting_analyzer_ranking(optimizer_path,
     Returns:
         An ordered list of SettingAnalyzers. I.e. the first item is considered 'the best one' etc.
     """
+    if custom_metrics is None:
+        custom_metrics = []
+
     metric = _determine_available_metric(optimizer_path, metric)
-    setting_analyzers = _get_all_setting_analyzer(optimizer_path)
+    setting_analyzers = _get_all_setting_analyzer(
+        optimizer_path, custom_metrics=custom_metrics)
 
     if 'acc' in metric:
         sgn = -1
@@ -242,16 +251,18 @@ class SettingAnalyzer:
         aggregate (dictionary): Contains the mean and std of the runs as well as the meta data.
         n_runs (int): The number of seed runs that were performed for this setting.
     """
-    def __init__(self, path):
+    def __init__(self, path, custom_metrics=None):
         """Initializes a new SettingAnalyzer instance.
 
         Args:
             path (str): String to the setting folder.
         """
+        if custom_metrics is None:
+            custom_metrics = []
 
         self.path = path
         self.n_runs = self.__get_number_of_runs()
-        self.aggregate = aggregate_runs(path)
+        self.aggregate = aggregate_runs(path, custom_metrics=custom_metrics)
 
     def __get_number_of_runs(self):
         """Calculates the total number of seed runs."""
