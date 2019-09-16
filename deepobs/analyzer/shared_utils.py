@@ -76,7 +76,7 @@ def aggregate_runs(setting_folder, custom_metrics=None):
         data = all_metrics_data[metric]
         # only add the metric if available
         if len(data) != 0:
-            aggregate[m] = {
+            aggregate[metric] = {
                 'mean': np.mean(data, axis=0),
                 'std': np.std(data, axis=0),
                 'all_final_values': [met[-1] for met in data],
