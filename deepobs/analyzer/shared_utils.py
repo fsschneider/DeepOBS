@@ -98,6 +98,8 @@ def aggregate_runs(setting_folder):
                                      np.mean(np.log10(eval(metrics)), axis=0)),
                 'std_log': np.power(10, np.std(np.log10(eval(metrics)),
                                                axis=0)),
+                'min': np.min(eval(metrics), axis=0),
+                'max': np.max(eval(metrics), axis=0),
             }
     # merge meta data
     aggregate['optimizer_hyperparams'] = json_data['optimizer_hyperparams']
