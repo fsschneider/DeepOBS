@@ -3,58 +3,111 @@ Suggested Protocol
 ==================
 
 Here we provide a suggested protocol for more rigorously benchmarking deep
-learning optimizer. It follows the same steps as the baseline results presented
-in the `DeepOBS`_ paper
+learning optimizer. Some of the steps were discussed in the `DeepOBS`_ paper. Others were
+derived in the Master's thesis of Aaron Bahde.
 
 .. _DeepOBS: https://openreview.net/forum?id=rJg6ssC5Y7
+
+Decide for a Framework
+======================
+DeepOBS versions >= 1.2.0 support TensorFlow and PyTorch. We ran some basic experiments
+to check whether these two frameworks can be used interchangeably. So far, we strongly
+recommend to NOT compare benchmarks (with DeepOBS) across these frameworks. Currently,
+we only provide baselines for PyTorch.
+
+You can choose between PyTorch and TensorFlow by switching the import statements:
+
+.. literalinclude:: framework_import.py
 
 Create new Run Script
 =====================
 
 In order to benchmark a new optimization method a new run script has to be
 written. A more detailed description can be found in the :doc:`tutorial` and
-the the API section for TensorFlow (:doc:`../api/tensorflow/runner/standardrunner`) and PyTorch (:doc:`../api/tensorflow/runner/standardrunner`) respecitvely
+the API section for TensorFlow (:doc:`../api/tensorflow/runner/standardrunner`)
+and PyTorch (:doc:`../api/tensorflow/runner/standardrunner`).
 Essentially, all which is needed is the optimizer itself and a list of its hyperparameters. For example
 for the Momentum optimizer in **Tensorlow** this will be:
+
 .. literalinclude:: ../../example_momentum_runner_tensorflow.py
+
 And in **PyTorch**:
+
 .. literalinclude:: ../../example_momentum_runner_pytorch.py
 
-Hyperparameter Search
-=====================
+(Possibly) Write Your Own Runner
+================================
+You should at first try to execute your optimizer with one of the implemented runner classes.
+If this does not work out, because your optimizer needs additional access to the training loop,
+you have to write your own runner class. We provide a description how to do this:
+:doc:`./how_to_write_own_runner`
 
-Once the optimizer has been defined it is recommended to do a hyperparameter
-search for each test problem. For optimizers with only the ``learning rate`` as
-a free parameter a simple grid search can be done.
+Identify Tunable Hyperparameters
+================================
+We suggest that you decide which hyperparameters of your optimizer needs to be tuned *before* starting the benchmark.
+For every test problem you should tune exactly the same hyperparameters with the
+same resources and the same tuning method. This avoids overfitting of hyperparameters on specific test problems.
 
-For the baselines, we tuned the ``learning rate`` for each optimizer and test
-problem individually, by evaluating on a logarithmic grid from ``10e−5``
-to ``10e2`` with ``36`` samples. If the same tuning method is used for a new
-optimizer no re-running of the baselines is needed saving valuable
-computational budget.
+Decide for a Tuning Method
+==========================
+We provide three tuning classes in DeepOBS. You should use one of them:
 
-.. NOTE::
-  Alternatively, this DeepOBS version comes with a tuning automation module: :doc:`../api/tuner`.
-  However, at the moment we do not provide a suggested protocol of how to use it.
+.. literalinclude:: tuner_import.py
 
+Ideally, you use the same tuning method that we used for the baselines. At the moment this is grid search.
 
-Repeated Runs with best Setting
-===============================
+Specify the Tuning Domain
+=========================
+Prospective users of your optimizer expect you to provide information about how to tune
+your optimizer in *any* application. Therefore, you should provide promising search domains.
+They should be the same for *all* test problems since the users do not know the link between
+your optimizer's hyperparameters and the application.
+In DeepOBS you can user the tuning specifications of each tuner class. This is an example
+for the Momentum optimizer in PyTorch:
 
-In order to get a sense of the optimziers consistency, we suggest repeating
-runs with the best hyperparameter setting multiple times. This allows an
-assessment of the variance of the optimizer's performance.
+.. literalinclude:: tuner_specifications.py
 
-For the baselines we determined the best learning rate looking at the final
-performance of each run, which can be done using :doc:`../api/analyzer`,
-and then running the best performing setting again using ten different random
-seeds.
+Bound the Tuning Resources
+==========================
+The tuning of your optimizer's hyperparameters should *never* exceed the number of instances
+that were used for the baselines. Less is always better. For our current baselines we used 20 instances for each optimizer
+on each test problem. Use the ``ressources`` argument in the tuner class instantiation to limit them.
+
+Report Stochasticity
+====================
+To get an understanding of the robustness of the optimizer against training noise we
+recommend to rerun the best hyperparameter instance of your optimizer with 10 different random seeds.
+The tuning classes can automatically take care of it:
+
+.. literalinclude:: rerun_setting.py
+
+Run on a Variety of Test Problems
+=================================
+Benchmark results might vary a lot for different test problems. We recommend to run
+your optimizer on as many test problems as possible but (of course) focus on the ones
+we use for the baselines. We provide a 'small' test set and a 'large' test set that, in our opinion,
+reflects a good variety of test problems. They are accessible as global variables in DeepOBS.
+One way to use them is to automatically tune your optimizer on the recommendations:
+
+.. literalinclude:: testset_globals.py
 
 Plot Results
 ============
 
 To visualize the final results, the user can use the :doc:`../api/analyzer` API.
-For most functionalities, if the path to the baseline folder is given, DeepOBS will automatically compare
-the results with the baselines for ``SGD``, ``Momentum``, and ``Adam``.
+We recommend to include a plot about the hyperparameter sensitivity and to plot your
+optimizer performance against the baselines:
 
+.. literalinclude:: analyze.py
 
+Report Measures for Speed
+==========================
+DeepOBS calculates the speed of your optimizer as a fraction of epochs that it needs
+to reach the convergence performance of the baselines. This measure is included
+automatically in the overview table generated by the Analyzer. Additionally, you can calculate an estimate
+for wall-clock time performance in comparison to SGD. More details can be found in
+the `DeepOBS`_ paper
+
+.. _DeepOBS: https://openreview.net/forum?id=rJg6ssC5Y7
+
+.. literalinclude:: estimate_speed.py
