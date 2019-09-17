@@ -67,9 +67,28 @@ def aggregate_runs(setting_folder, custom_metrics=None):
         json_data = _load_json(setting_folder, run)
         for metric in all_metrics:
             try:
-                all_metrics_data[metric].append(json_data[metric])
+                run_data = json_data[metric]
             except KeyError:
-                all_metrics_data[metric] = no_data()
+                run_data = no_data()
+            all_metrics_data[metric].append(run_data)
+
+    # custom metrics: fill with nans if run quit earlier
+    metrics_require_nans = set()
+    nans_inserted = 0
+    for metric in custom_metrics:
+        max_num_points = max(
+            len(run_data) for run_data in all_metrics_data[metric])
+        # fill up with nans
+        for run_data in all_metrics_data[metric]:
+            while len(run_data) < max_num_points:
+                metrics_require_nans.add(metric)
+                nans_inserted += 1
+                run_data.append(float('nan'))
+    if nans_inserted > 0:
+        print(
+            "[CUSTOM METRICS]: Needed to insert {} NaNs".format(nans_inserted))
+        print("[CUSTOM METRICS]: Affected metrics {}".format(
+            metrics_require_nans))
 
     aggregate = dict()
     for metric in all_metrics:
