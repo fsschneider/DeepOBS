@@ -13,22 +13,26 @@ All results obtained with the same MAJOR.MINOR version of DEEPOBS will be direct
 
 ## [Unreleased] - Version 1.2.0
 ### Added
+- Changelog, documenting all current and future changes.
 ### Changed
 ### Removed
 ### Fixed
 
 ## [1.1.1] - 2019-03-13
 ### Added
+- MIT License
 ### Changed
+- Setup.py to add more descriptions for PyPI.
+- Do not ship the baselines with DeepOBS, but keep them in a [separate repo](https://github.com/fsschneider/DeepOBS_Baselines).
 ### Removed
+- Removed baselines from package. They are now shipped separately.
 ### Fixed
+- Fixed check for non-existing labels in test_quadratic.py [see this commit](https://github.com/fsschneider/DeepOBS/commit/2c287a89a9197a9880cbb00ff13516c128cc26f2).
+- Fixed 
 
 ## [1.1.0] - 2019-03-01
 ### Added
-### Changed
-### Removed
-### Fixed
-
+- First release version of DeepOBS.
 
 
 [Unreleased]: https://github.com/fsschneider/DeepOBS/compare/v1.1.1...version-1.2.0
