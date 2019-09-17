@@ -2,3 +2,5 @@ sphinx==1.8.1
 sphinx-rtd-theme==0.4.2
 sphinx-argparse==0.2.3
 tensorflow==1.13.1
+numpy
+bayes_opt
