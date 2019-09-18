@@ -92,9 +92,10 @@ def aggregate_runs(setting_folder, custom_metrics=None):
 
     aggregate = dict()
     for metric in all_metrics:
-        data = all_metrics_data[metric]
+        data = np.array(all_metrics_data[metric])
         # only add the metric if available
-        if len(data) != 0:
+        is_empty = data.shape[1] == 0
+        if not is_empty:
             aggregate[metric] = {
                 'mean': np.mean(data, axis=0),
                 'std': np.std(data, axis=0),
