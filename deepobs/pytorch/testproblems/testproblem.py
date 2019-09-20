@@ -55,6 +55,8 @@ class TestProblem(abc.ABC):
         self.net = None
         self.regularization_groups = None
 
+        self._batch_count = 0
+
     def train_init_op(self):
         """Initializes the testproblem instance to train mode. I.e.
         sets the iterator to the training set and sets the model to train mode.
@@ -89,7 +91,9 @@ class TestProblem(abc.ABC):
 
     def _get_next_batch(self):
         """Returns the next batch from the iterator."""
-        return next(self._iterator)
+        batch = next(self._iterator)
+        self._batch_count += 1
+        return batch
 
     def get_batch_loss_and_accuracy(self,
                                     return_forward_func = False,
