@@ -95,30 +95,24 @@ class TestProblem(abc.ABC):
         self._batch_count += 1
         return batch
 
-    def get_batch_loss_and_accuracy(self,
-                                    return_forward_func = False,
-                                    reduction = 'mean',
-                                    add_regularization_if_available = True):
-
-        """Gets a new batch and calculates the loss and accuracy (if available)
-        on that batch. This is a default implementation for image classification.
-        Testproblems with different calculation routines (e.g. RNNs) overwrite this method accordingly.
+    def get_batch_loss_and_accuracy_func(self,
+                                         reduction='mean',
+                                         add_regularization_if_available=True):
+        """Get new batch and create forward function that calculates loss and accuracy (if available)
+        on that batch.
 
         Args:
-            return_forward_func (bool): If ``True``, the call also returns a function that calculates the loss on the \
-            current batch. Can be used if you need to access the forward path twice.
             reduction (str): The reduction that is used for returning the loss. Can be 'mean', 'sum' or 'none' in which \
             case each indivual loss in the mini-batch is returned as a tensor.
         Returns:
-            float/torch.tensor, float, (callable): loss and accuracy of the model on the current batch. \
-            If ``return_forward_func`` is ``True`` it also returns the function that calculates the loss on the current batch.
-            """
+            function:  The function that calculates the loss/accuracy on the current batch.
+        """
 
         inputs, labels = self._get_next_batch()
         inputs = inputs.to(self._device)
         labels = labels.to(self._device)
 
-        def _get_batch_loss_and_accuracy():
+        def forward_func():
             correct = 0.0
             total = 0.0
 
@@ -144,10 +138,26 @@ class TestProblem(abc.ABC):
 
             return loss + regularizer_loss, accuracy
 
-        if return_forward_func:
-            return _get_batch_loss_and_accuracy(), _get_batch_loss_and_accuracy
-        else:
-            return _get_batch_loss_and_accuracy()
+        return forward_func
+
+    def get_batch_loss_and_accuracy(self,
+                                    reduction='mean',
+                                    add_regularization_if_available=True):
+        """Gets a new batch and calculates the loss and accuracy (if available)
+        on that batch. This is a default implementation for image classification.
+        Testproblems with different calculation routines (e.g. RNNs) overwrite this method accordingly.
+
+        Args:
+            reduction (str): The reduction that is used for returning the loss. Can be 'mean', 'sum' or 'none' in which \
+            case each indivual loss in the mini-batch is returned as a tensor.
+        Returns:
+            float/torch.tensor, float, (callable): loss and accuracy of the model on the current batch.
+        """
+        forward_func = self.get_batch_loss_and_accuracy_func(
+            reduction=reduction,
+            add_regularization_if_available=add_regularization_if_available)
+
+        return forward_func()
 
     def get_regularization_loss(self):
         """Returns the current regularization loss of the network based on the parameter groups.
