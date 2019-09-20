@@ -57,6 +57,10 @@ def aggregate_runs(setting_folder, custom_metrics=None):
 
     runs = [run for run in os.listdir(setting_folder) if run.endswith(".json")]
 
+    runs = [run for run in os.listdir(setting_folder) if run.endswith(".json")]
+    if not runs:
+        raise RuntimeError(f"No .json file in {setting_folder}")
+
     def no_data():
         return []
 
