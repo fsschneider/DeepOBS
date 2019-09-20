@@ -179,7 +179,7 @@ def plot_results_table(results_path, mode='most', metric='valid_accuracies', con
     return table
 
 
-def plot_testset_performances(results_path, mode = 'most', metric = 'valid_accuracies', reference_path = None):
+def plot_testset_performances(results_path, mode = 'most', metric = 'valid_accuracies', reference_path = None, show=True):
     """Plots all optimizer performances for all testproblems.
 
     Args:
@@ -187,8 +187,9 @@ def plot_testset_performances(results_path, mode = 'most', metric = 'valid_accur
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
         reference_path (str): Path to the reference results folder. For each available reference testproblem, all optimizers are plotted as reference.
+        show (bool): Whether to show the plot or not.
     Returns:
-        Tuple: The figure and axes.
+        tuple: The figure and axes.
         """
     testproblems = sorted([path for path in os.listdir(results_path) if os.path.isdir(os.path.join(results_path, path))])
     if reference_path is not None:
@@ -216,11 +217,12 @@ def plot_testset_performances(results_path, mode = 'most', metric = 'valid_accur
     # show legend of optimizers
     ax[0, 0].legend()
     plt.tight_layout()
-    plt.show()
+    if show:
+        plt.show()
     return fig, ax
 
 
-def plot_hyperparameter_sensitivity_2d(optimizer_path, hyperparams, mode='final', metric = 'valid_accuracies', xscale='linear', yscale = 'linear'):
+def plot_hyperparameter_sensitivity_2d(optimizer_path, hyperparams, mode='final', metric = 'valid_accuracies', xscale='linear', yscale = 'linear', show=True):
     param1, param2 = hyperparams
     metric = _determine_available_metric(optimizer_path, metric)
     tuning_summary = generate_tuning_summary(optimizer_path, mode, metric)
@@ -243,7 +245,8 @@ def plot_hyperparameter_sensitivity_2d(optimizer_path, hyperparams, mode='final'
     ax.set_ylabel(param2)
     cbar = plt.colorbar(con)
     cbar.set_label(metric)
-    plt.show()
+    if show:
+        plt.show()
     return fig, ax
 
 
@@ -281,7 +284,8 @@ def _plot_hyperparameter_sensitivity(optimizer_path, hyperparam, ax, mode='final
 def plot_hyperparameter_sensitivity(path, hyperparam, mode='final', metric = 'valid_accuracies',
                                     xscale='linear',
                                     plot_std=True,
-                                    reference_path = None):
+                                    reference_path = None,
+                                    show=True):
 
     """Plots the hyperparameter sensitivtiy of the optimizer.
 
@@ -293,9 +297,10 @@ def plot_hyperparameter_sensitivity(path, hyperparam, mode='final', metric = 'va
         xscale (str): The scale for the parameter axes. Is passed to plt.xscale().
         plot_std (bool): Whether to plot markers for individual seed runs or not. If `False`, only the mean is plotted.
         reference_path (str): Path to the reference optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are taken as reference).
+        show (bool): Whether to show the plot or not.
 
     Returns:
-        Tuple: The figure and axes of the plot.
+        tuple: The figure and axes of the plot.
         """
     fig, ax = plt.subplots()
     pathes = _preprocess_path(path)
@@ -313,11 +318,12 @@ def plot_hyperparameter_sensitivity(path, hyperparam, mode='final', metric = 'va
     plt.ylabel(metric, fontsize=16)
     ax.tick_params(labelsize=14)
     ax.legend()
-    plt.show()
+    if show:
+        plt.show()
     return fig, ax
 
 
-def plot_final_metric_vs_tuning_rank(optimizer_path, metric='valid_accuracies'):
+def plot_final_metric_vs_tuning_rank(optimizer_path, metric='valid_accuracies', show=True):
     metric = _determine_available_metric(optimizer_path, metric)
     ranks = create_setting_analyzer_ranking(optimizer_path, mode='final', metric=metric)
     means = []
@@ -333,7 +339,8 @@ def plot_final_metric_vs_tuning_rank(optimizer_path, metric='valid_accuracies'):
     ax.set_title(optimizer + ' on ' + testproblem)
     ax.set_xlabel('tuning rank')
     ax.set_ylabel(metric)
-    plt.show()
+    if show:
+        plt.show()
     return fig, ax
 
 
@@ -409,7 +416,7 @@ def _plot_optimizer_performance(path, fig=None, ax = None, mode = 'most', metric
     return fig, ax
 
 
-def plot_optimizer_performance(path, fig = None, ax = None, mode = 'most', metric = 'valid_accuracies', reference_path = None):
+def plot_optimizer_performance(path, fig = None, ax = None, mode = 'most', metric = 'valid_accuracies', reference_path = None, show=True):
     """Plots the training curve of optimizers and addionally plots reference results from the ``reference_path``
 
     Args:
@@ -419,9 +426,10 @@ def plot_optimizer_performance(path, fig = None, ax = None, mode = 'most', metri
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
         reference_path (str): Path to the reference optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are taken as reference).
+        show (bool): Whether to show the plot or not.
 
     Returns:
-        Tuple: The figure and axes with the plots.
+        tuple: The figure and axes with the plots.
 
         """
 
@@ -442,6 +450,7 @@ def plot_optimizer_performance(path, fig = None, ax = None, mode = 'most', metri
 
     ax[3].set_xlabel('epochs', fontsize = 14)
 
-    plt.show()
+    if show:
+        plt.show()
     return fig, ax
 

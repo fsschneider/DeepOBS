@@ -20,15 +20,16 @@ def _reshape_posterior_and_domain_for_plotting(mean, std, domain, acq, resolutio
     return mean, std, new_domain, acq
 
 
-def plot_2d_bo_posterior(optimizer_path, step, resolution):
+def plot_2d_bo_posterior(optimizer_path, step, resolution, show=True):
     """Plots the two dimensional GP posterior of the Bayesian tuning process. The tuning process must have been done
     for exactly two hyperparameters (i.e. two dimensional).
     Args:
         optimizer_path (str): Path to the optimizer which was tuned.
         step (int): The step of the tuning process for which the posterior is plotted.
         resolution (int): Resolution of the plot, i.e. number of x-values.
+        show (bool): Whether to show the plot or not.
     Returns:
-        matplotlib.axes.Axes: The axes of the plot.
+        tuple: Figure and axes of the plot.
     """
 
     op = _load_bo_optimizer_object(os.path.join(optimizer_path, 'obj'), str(step))
@@ -49,11 +50,12 @@ def plot_2d_bo_posterior(optimizer_path, step, resolution):
     ax[0].scatter(op.space.params[:, 0], op.space.params[:, 1])
     
     ax[1].contourf(domain[0], domain[1], acq)
-    plt.show()
-    return ax
+    if show:
+        plt.show()
+    return fig, ax
 
 
-def plot_1d_bo_posterior(optimizer_path, step, resolution, xscale = 'linear'):
+def plot_1d_bo_posterior(optimizer_path, step, resolution, xscale = 'linear', show=True):
     """Plots the one dimensional GP posterior of the Bayesian tuning process. The tuning process must have been done
     for only one hyperparameter (i.e. one dimensional).
     Args:
@@ -61,8 +63,9 @@ def plot_1d_bo_posterior(optimizer_path, step, resolution, xscale = 'linear'):
         step (int): The step of the tuning process for which the posterior is plotted.
         resolution (int): Resolution of the plot, i.e. number of x-values.
         xscale (str): The scaling for the x-axis.
+        show (bool): Whether to show the plot or not.
     Returns:
-        matplotlib.axes.Axes: The axes of the plot.
+        tuple: The figure and axes of the plot.
     """
     op = _load_bo_optimizer_object(os.path.join(optimizer_path, 'obj'), str(step))
     acq_func = _load_bo_optimizer_object(os.path.join(optimizer_path, 'obj'), 'acq_func')
@@ -84,8 +87,9 @@ def plot_1d_bo_posterior(optimizer_path, step, resolution, xscale = 'linear'):
     ax[1].set_xscale(xscale)
     # add step points
     ax[0].scatter(op.space.params, op.space.target)
-    plt.show()
-    return ax
+    if show:
+        plt.show()
+    return fig, ax
 
 
 def _generate_domain_from_op(op, resolution):
