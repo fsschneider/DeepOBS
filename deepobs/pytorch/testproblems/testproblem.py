@@ -99,13 +99,15 @@ class TestProblem(abc.ABC):
                                          reduction='mean',
                                          add_regularization_if_available=True):
         """Get new batch and create forward function that calculates loss and accuracy (if available)
-        on that batch.
+        on that batch. This is a default implementation for image classification.
+        Testproblems with different calculation routines (e.g. RNNs) overwrite this method accordingly.
 
         Args:
             reduction (str): The reduction that is used for returning the loss. Can be 'mean', 'sum' or 'none' in which \
             case each indivual loss in the mini-batch is returned as a tensor.
+            add_regularization_if_available (bool): If true, regularization is added to the loss.
         Returns:
-            function:  The function that calculates the loss/accuracy on the current batch.
+            callable:  The function that calculates the loss/accuracy on the current batch.
         """
 
         inputs, labels = self._get_next_batch()
@@ -144,14 +146,15 @@ class TestProblem(abc.ABC):
                                     reduction='mean',
                                     add_regularization_if_available=True):
         """Gets a new batch and calculates the loss and accuracy (if available)
-        on that batch. This is a default implementation for image classification.
-        Testproblems with different calculation routines (e.g. RNNs) overwrite this method accordingly.
+        on that batch.
 
         Args:
             reduction (str): The reduction that is used for returning the loss. Can be 'mean', 'sum' or 'none' in which \
             case each indivual loss in the mini-batch is returned as a tensor.
+            add_regularization_if_available (bool): If true, regularization is added to the loss.
+
         Returns:
-            float/torch.tensor, float, (callable): loss and accuracy of the model on the current batch.
+            float/torch.tensor, float: loss and accuracy of the model on the current batch.
         """
         forward_func = self.get_batch_loss_and_accuracy_func(
             reduction=reduction,
