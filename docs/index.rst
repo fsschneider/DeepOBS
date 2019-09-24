@@ -6,6 +6,11 @@
 Welcome to DeepOBS
 ===================
 
+.. WARNING::
+  This DeepOBS version is under continious development and a beta version.
+  Please report any bugs and comments to `Aaron Bahde`_
+.. _Aaron Bahde: https://github.com/abahde
+
 .. figure:: deepobs_banner.png
 
 **DeepOBS** is a benchmarking suite that drastically simplifies, automates and
@@ -22,38 +27,36 @@ DeepOBS automates several steps when benchmarking deep learning optimizers:
     deep learning architectures.
   - Running the optimizers on multiple test problems and logging relevant
     metrics.
+  - Automatic tuning of optimizer hyperparameters.
   - Reporting and visualization the results of the optimizer benchmark.
 
 .. figure:: deepobs.jpg
     :scale: 40%
 
-The code for the current implementation working with **TensorFlow** can be found
+The code for the current implementation working with **TensorFlow** and **PyTorch** can be found
 on `GitHub`_.
-
-We are actively working on a **PyTorch** version and will be releasing it in the
-next months. In the meantime, PyTorch users can still use parts of DeepOBS such
-as the data preprocessing scripts or the visualization features.
 
 .. toctree::
   :maxdepth: 2
   :caption: User Guide
 
   user_guide/quick_start
-  user_guide/overview
   user_guide/tutorial
+  user_guide/overview
   user_guide/suggested_protocol
+  user_guide/how_to_write_own_runner
+  user_guide/tuning_automation
 
 .. toctree::
   :maxdepth: 2
   :caption: API Reference
-
-  api/datasets
-  api/testproblems
-  api/runner
+  
   api/analyzer
+  api/tensorflow
+  api/pytorch
+  api/tuner
   api/scripts
-
-
+  api/config
 
 Indices and tables
 ==================
@@ -62,4 +65,4 @@ Indices and tables
 * :ref:`search`
 
 
-.. _GitHub: https://github.com/fsschneider/DeepOBS
+.. _GitHub: https://github.com/abahde/DeepOBS

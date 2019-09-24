@@ -5,7 +5,7 @@ import os
 import numpy as np
 import tensorflow as tf
 from . import dataset
-from .. import config
+from deepobs import config
 
 
 class tolstoi(dataset.DataSet):
