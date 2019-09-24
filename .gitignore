@@ -33,3 +33,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# ToDo.md file
+
+ToDo.md
