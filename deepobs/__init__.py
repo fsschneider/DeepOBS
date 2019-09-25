@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__version__ = '1.2.0'
+from .version import __version__
 
 from . import analyzer
 from . import scripts

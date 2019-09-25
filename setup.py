@@ -2,27 +2,33 @@
 """Setup for the DeepOBS package"""
 
 import setuptools
-from deepobs import __version__
 
 install_requires_list = [
-        'argparse', 'numpy', 'pandas', 'matplotlib', 'matplotlib2tikz',
-        'seaborn', 'bayesian-optimization'
-    ]
+    "argparse",
+    "numpy",
+    "pandas",
+    "matplotlib",
+    "matplotlib2tikz",
+    "seaborn",
+    "bayesian-optimization",
+]
 
 
 def readme():
-    with open('README.md') as f:
+    with open("README.md") as f:
         return f.read()
 
 
+exec(open("deepobs/version.py").read())
+
 setuptools.setup(
-    name='deepobs',
+    name="deepobs",
     version=__version__,
-    description='Deep Learning Optimizer Benchmark Suite',
+    description="Deep Learning Optimizer Benchmark Suite",
     long_description=readme(),
-    author='Frank Schneider, Lukas Balles and Philipp Hennig,',
-    author_email='frank.schneider@tue.mpg.de',
-    license='MIT',
+    author="Frank Schneider, Aaron Bahde, Lukas Balles, and Philipp Hennig,",
+    author_email="frank.schneider@tue.mpg.de",
+    license="MIT",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3.6",
@@ -34,8 +40,9 @@ setuptools.setup(
     ],
     install_requires=install_requires_list,
     scripts=[
-        'deepobs/scripts/deepobs_prepare_data.sh',
-        'deepobs/scripts/deepobs_get_baselines.sh',
-        'deepobs/scripts/deepobs_plot_results.py'
+        "deepobs/scripts/deepobs_prepare_data.sh",
+        "deepobs/scripts/deepobs_get_baselines.sh",
+        "deepobs/scripts/deepobs_plot_results.py",
     ],
-    zip_safe=False)
+    zip_safe=False,
+)
