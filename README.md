@@ -27,6 +27,7 @@ DeepOBS automates several steps when benchmarking deep learning optimizers:
 
 The code for the current implementation working with **TensorFlow** can be found
 on [Github](https://github.com/fsschneider/DeepOBS).
+A PyTorch version is currently developed (see News section below).
 
 The full documentation is available on readthedocs:
 https://deepobs.readthedocs.io/
@@ -35,13 +36,18 @@ The paper describing DeepOBS has been accepted for ICLR 2019 and can be found
 here:
 https://openreview.net/forum?id=rJg6ssC5Y7
 
-We are currently working on a new and improved version of DeepOBS.
-It will support **PyTorch** as well as TensorFlow, has an easier interface, and
-many bugs ironed out. It will be released in a few weeks, until then you can
-check out the current working beta version of it over at https://github.com/abahde/DeepOBS.
-
 **If you find any bugs in DeepOBS, or find it hard to use, please let us know.
 We are always interested in feedback and ways to improve DeepOBS.**
+
+## News
+
+We are currently working on a new and improved version of DeepOBS, version 1.2.0.
+It will support **PyTorch** in addition to TensorFlow, has an easier interface, and
+many bugs ironed out. You can find the latest version of it in [this branch](https://github.com/fsschneider/DeepOBS/tree/v1.2.0-beta0).
+
+A pre-release, version 1.2.0-beta0, will be available shortly and a full release is expected in a few weeks.
+
+Many thanks to [Aaron Bahde](https://github.com/abahde) for spearheading the developement of DeepOBS 1.2.0.
 
 ## Installation
 
@@ -50,6 +56,17 @@ We are always interested in feedback and ways to improve DeepOBS.**
 We tested the package with Python 3.6 and TensorFlow version 1.12. Other
 versions of Python and TensorFlow (>= 1.4.0) might work, and we plan to expand
 compatibility in the future.
+
+If you want to create a local and modifiable version of DeepOBS, you can do this directly from this repo via
+
+	pip install -e git+https://github.com/fsschneider/DeepOBS.git#egg=DeepOBS
+
+for the latest stable version, or 
+
+	pip install -e git+https://github.com/fsschneider/DeepOBS.git@v1.2.0-beta0#egg=DeepOBS
+
+to get the preview of DeepOBS 1.2.0.
+
 
 Further tutorials and a suggested protocol for benchmarking deep learning
 optimizers can be found on https://deepobs.readthedocs.io/
