@@ -30,17 +30,18 @@ class svhn(dataset.DataSet):
         training phase.
     train_eval_init_op: A tensorflow operation initializing the testproblem for
         evaluating on training data.
+    valid_init_op: A tensorflow operation initializing the testproblem for
+        evaluating on validation data.
     test_init_op: A tensorflow operation initializing the testproblem for
         evaluating on test data.
-    phase: A string-value tf.Variable that is set to ``train``, ``train_eval``
-        or ``test``, depending on the current phase. This can be used by testproblems
-        to adapt their behavior to this phase.
+    phase: A string-value tf.Variable that is set to ``train``, ``train_eval``,
+        ``valid``, or ``test``, depending on the current phase. This can be used
+        by testproblems to adapt their behavior to this phase.
   """
 
-    def __init__(self,
-                 batch_size,
-                 data_augmentation=True,
-                 train_eval_size=26032):
+    def __init__(
+        self, batch_size, data_augmentation=True, train_eval_size=26032
+    ):
         """Creates a new SVHN instance.
 
     Args:
@@ -58,15 +59,12 @@ class svhn(dataset.DataSet):
         self._train_eval_size = train_eval_size
         super(svhn, self).__init__(batch_size)
 
-    def _make_dataset(self,
-                      binaries_fname_pattern,
-                      data_augmentation=False,
-                      shuffle=True):
+    def _make_dataset(self, data, data_augmentation=False, shuffle=True):
         """Creates a SVHN dataset (helper used by ``.make_*_datset`` below).
 
     Args:
-        binaries_fname_pattern (str): Pattern of the ``.bin`` files from which
-            to load images and labels (e.g. ``some/path/data_batch_*.bin``).
+        data (tf.data.Dataset): A tf.data.Dataset with SVHN (train or test)
+            data
         data_augmentation (bool): Whether to apply data augmentation operations.
         shuffle (bool):  Switch to turn on or off shuffling of the data set.
             Defaults to ``True``.
@@ -87,20 +85,26 @@ class svhn(dataset.DataSet):
             """Function parsing data from raw binary records."""
             # Decode raw_record.
             record = tf.reshape(
-                tf.decode_raw(raw_record, tf.uint8), [record_bytes])
+                tf.decode_raw(raw_record, tf.uint8), [record_bytes]
+            )
             label = tf.cast(
-                tf.slice(record, [label_offset], [label_bytes]), tf.int32)
+                tf.slice(record, [label_offset], [label_bytes]), tf.int32
+            )
             image = tf.reshape(
                 tf.slice(record, [label_bytes], [image_bytes]),
-                [image_size, image_size, depth])
+                [image_size, image_size, depth],
+            )
             image = tf.cast(image, tf.float32)
 
             # Add image pre-processing.
             if data_augmentation:
                 image = tf.image.resize_image_with_crop_or_pad(
-                    image, image_size + 4, image_size + 4)
+                    image, image_size + 4, image_size + 4
+                )
                 image = tf.random_crop(image, [32, 32, 3])
-                image = tf.image.random_brightness(image, max_delta=63. / 255.)
+                image = tf.image.random_brightness(
+                    image, max_delta=63.0 / 255.0
+                )
                 image = tf.image.random_saturation(image, lower=0.5, upper=1.5)
                 image = tf.image.random_contrast(image, lower=0.2, upper=1.8)
             else:
@@ -111,39 +115,76 @@ class svhn(dataset.DataSet):
             return image, label
 
         with tf.name_scope(self._name):
-            with tf.device('/cpu:0'):
-                filenames = tf.matching_files(binaries_fname_pattern)
-                filenames = tf.random_shuffle(filenames)
-                data = tf.data.FixedLengthRecordDataset(
-                    filenames=filenames, record_bytes=record_bytes)
+            with tf.device("/cpu:0"):
                 data = data.map(
                     parse_func,
-                    num_parallel_calls=(8 if data_augmentation else 4))
+                    num_parallel_calls=(8 if data_augmentation else 4),
+                )
                 if shuffle:
                     data = data.shuffle(buffer_size=20000)
                 data = data.batch(self._batch_size, drop_remainder=True)
                 data = data.prefetch(buffer_size=4)
                 return data
 
-    def _make_train_dataset(self):
-        """Creates the SVHN training dataset.
+    def _load_dataset(self, binaries_fname_pattern):
+        """Creates a SVHN data set (helper used by ``.make_*_datset`` below).
+
+    Args:
+        binaries_fname_pattern (str): Pattern of the ``.bin`` files from which
+            to load images and labels (e.g. ``some/path/data_batch_*.bin``).
+
+    Returns:
+        A tf.data.Dataset yielding SVHN data.
+    """
+        # Set number of bytes to read.
+        label_bytes = 1
+        label_offset = 0
+        num_classes = 10
+        depth = 3
+        image_size = 32
+        image_bytes = image_size * image_size * depth
+        record_bytes = label_bytes + label_offset + image_bytes
+
+        with tf.name_scope(self._name):
+            with tf.device("/cpu:0"):
+                filenames = tf.matching_files(binaries_fname_pattern)
+                filenames = tf.random_shuffle(filenames)
+                data = tf.data.FixedLengthRecordDataset(
+                    filenames=filenames, record_bytes=record_bytes
+                )
+
+        return data
+
+    def _make_train_datasets(self):
+        """Creates the three SVHN datasets stemming from the training
+        part of the data set, i.e. the training set, the training
+        evaluation set, and the validation set.
 
     Returns:
       A tf.data.Dataset instance with batches of training data.
-    """
-        pattern = os.path.join(config.get_data_dir(), "svhn",
-                               "data_batch_*.bin")
-        return self._make_dataset(
-            pattern, data_augmentation=self._data_augmentation, shuffle=True)
-
-    def _make_train_eval_dataset(self):
-        """Creates the SVHN train eval dataset.
-
-    Returns:
       A tf.data.Dataset instance with batches of training eval data.
+      A tf.data.Dataset instance with batches of validation data.
     """
-        return self._train_dataset.take(
-            self._train_eval_size // self._batch_size)
+        pattern = os.path.join(
+            config.get_data_dir(), "svhn", "data_batch_*.bin"
+        )
+
+        data = self._load_dataset(pattern)
+        valid_data = data.take(self._train_eval_size)
+        train_data = data.skip(self._train_eval_size)
+
+        train_data = self._make_dataset(
+            train_data, data_augmentation=self._data_augmentation, shuffle=True
+        )
+        train_eval_data = train_data.take(
+            self._train_eval_size // self._batch_size
+        )
+
+        valid_data = self._make_dataset(
+            valid_data, data_augmentation=False, shuffle=False
+        )
+
+        return train_data, train_eval_data, valid_data
 
     def _make_test_dataset(self):
         """Creates the SVHN test dataset.
@@ -152,5 +193,9 @@ class svhn(dataset.DataSet):
       A tf.data.Dataset instance with batches of test data.
     """
         pattern = os.path.join(config.get_data_dir(), "svhn", "test_batch.bin")
+
+        test_data = self._load_dataset(pattern)
+
         return self._make_dataset(
-            pattern, data_augmentation=False, shuffle=False)
+            test_data, data_augmentation=False, shuffle=False
+        )

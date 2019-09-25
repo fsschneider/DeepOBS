@@ -4,7 +4,7 @@
 import os
 import tensorflow as tf
 from . import dataset
-from .. import config
+from deepobs import config
 
 
 class imagenet(dataset.DataSet):
@@ -34,17 +34,18 @@ class imagenet(dataset.DataSet):
         training phase.
     train_eval_init_op: A tensorflow operation initializing the testproblem for
         evaluating on training data.
+    valid_init_op: A tensorflow operation initializing the testproblem for
+        evaluating on validation data.
     test_init_op: A tensorflow operation initializing the testproblem for
         evaluating on test data.
-    phase: A string-value tf.Variable that is set to ``train``, ``train_eval``
-        or ``test``, depending on the current phase. This can be used by testproblems
-        to adapt their behavior to this phase.
+    phase: A string-value tf.Variable that is set to ``train``, ``train_eval``,
+        ``valid``, or ``test``, depending on the current phase. This can be used
+        by testproblems to adapt their behavior to this phase.
   """
 
-    def __init__(self,
-                 batch_size,
-                 data_augmentation=True,
-                 train_eval_size=50000):
+    def __init__(
+        self, batch_size, data_augmentation=True, train_eval_size=50000
+    ):
         """Creates a new ImageNet instance.
 
     Args:
@@ -61,18 +62,20 @@ class imagenet(dataset.DataSet):
         self._train_eval_size = train_eval_size
         super(imagenet, self).__init__(batch_size)
 
-    def _make_dataset(self,
-                      pattern,
-                      per_image_standardization=True,
-                      random_crop=False,
-                      random_flip_left_right=False,
-                      distort_color=False,
-                      shuffle=True):
+    def _make_dataset(
+        self,
+        data,
+        per_image_standardization=True,
+        random_crop=False,
+        random_flip_left_right=False,
+        distort_color=False,
+        shuffle=True,
+    ):
         """Creates an ImageNet data set (helper used by ``.make_*_datset`` below).
 
         Args:
-            pattern (str): Pattern of the files from which
-                to load images and labels (e.g. ``some/path/train-00000-of-01024``).
+            data (tf.data.Dataset): A tf.data.Dataset with ImageNet (train or test)
+                data
             per_image_standardization (bool): Switch to standardize each image
                 to have zero mean and unit norm. Defaults to ``True``.
             random_crop (bool): Switch if random crops should be used.
@@ -95,10 +98,12 @@ class imagenet(dataset.DataSet):
             """
             # Parse example proto, decode image and resize while preserving aspect
             image_buffer, label, _ = self._parse_example_proto(
-                example_serialized)
+                example_serialized
+            )
             image = self._decode_jpeg(image_buffer)
             image = self._aspect_preserving_resize(
-                image, target_smaller_side=256)
+                image, target_smaller_side=256
+            )
 
             # Crop to 224x224, either randomly or centered according to arguments
             if random_crop:
@@ -128,42 +133,74 @@ class imagenet(dataset.DataSet):
             return image, label
 
         with tf.name_scope(self._name):
-            with tf.device('/cpu:0'):
-                filenames = tf.matching_files(pattern)
-                filenames = tf.random_shuffle(filenames)
-                data = tf.data.TFRecordDataset(filenames)
+            with tf.device("/cpu:0"):
                 data = data.map(
                     parse_func,
-                    num_parallel_calls=(8 if self._data_augmentation else 4))
+                    num_parallel_calls=(8 if self._data_augmentation else 4),
+                )
                 if shuffle:
-                    data = data.shuffle(buffer_size=20000)
+                    data = data.shuffle(buffer_size=10000)
                 data = data.batch(self._batch_size, drop_remainder=True)
                 data = data.prefetch(buffer_size=4)
                 return data
 
-    def _make_train_dataset(self):
-        """Creates the ImageNet training dataset.
+    def _load_dataset(self, binaries_fname_pattern):
+        """Creates an ImageNet data set (helper used by ``.make_*_datset`` below).
+
+    Args:
+        pattern (str): Pattern of the files from which
+            to load images and labels (e.g. ``some/path/train-00000-of-01024``).
+
+    Returns:
+        A tf.data.Dataset yielding ImageNet data.
+    """
+
+        with tf.name_scope(self._name):
+            with tf.device("/cpu:0"):
+                filenames = tf.matching_files(binaries_fname_pattern)
+                filenames = tf.random_shuffle(filenames)
+                data = tf.data.TFRecordDataset(filenames)
+
+        return data
+
+    def _make_train_datasets(self):
+        """Creates the three ImageNet datasets stemming from the training
+        part of the data set, i.e. the training set, the training
+        evaluation set, and the validation set.
 
     Returns:
       A tf.data.Dataset instance with batches of training data.
+      A tf.data.Dataset instance with batches of training eval data.
+      A tf.data.Dataset instance with batches of validation data.
     """
         pattern = os.path.join(config.get_data_dir(), "imagenet", "train-*")
-        return self._make_dataset(
-            pattern,
+
+        data = self._load_dataset(pattern)
+        valid_data = data.take(self._train_eval_size)
+        train_data = data.skip(self._train_eval_size)
+
+        train_data = self._make_dataset(
+            train_data,
             per_image_standardization=True,
             random_crop=self._data_augmentation,
             random_flip_left_right=self._data_augmentation,
             distort_color=False,
-            shuffle=True)
+            shuffle=True,
+        )
+        train_eval_data = train_data.take(
+            self._train_eval_size // self._batch_size
+        )
 
-    def _make_train_eval_dataset(self):
-        """Creates the ImageNet train eval dataset.
+        valid_data = self._make_dataset(
+            valid_data,
+            per_image_standardization=True,
+            random_crop=False,
+            random_flip_left_right=False,
+            distort_color=False,
+            shuffle=False,
+        )
 
-    Returns:
-      A tf.data.Dataset instance with batches of training eval data.
-    """
-        return self._train_dataset.take(
-            self._train_eval_size // self._batch_size)
+        return train_data, train_eval_data, valid_data
 
     def _make_test_dataset(self):
         """Creates the ImageNet test dataset.
@@ -171,15 +208,20 @@ class imagenet(dataset.DataSet):
     Returns:
       A tf.data.Dataset instance with batches of test data.
     """
-        pattern = os.path.join(config.get_data_dir(), "imagenet",
-                               "validation-*")
+        pattern = os.path.join(
+            config.get_data_dir(), "imagenet", "validation-*"
+        )
+
+        test_data = self._load_dataset(pattern)
+
         return self._make_dataset(
-            pattern,
+            test_data,
             per_image_standardization=True,
             random_crop=False,
             random_flip_left_right=False,
             distort_color=False,
-            shuffle=False)
+            shuffle=False,
+        )
 
     def _parse_example_proto(self, example_serialized):
         """Parses an Example proto containing a training example of an image.
@@ -208,18 +250,21 @@ class imagenet(dataset.DataSet):
         """
         # Dense features in Example proto.
         feature_map = {
-            'image/encoded':
-            tf.FixedLenFeature([], dtype=tf.string, default_value=''),
-            'image/class/label':
-            tf.FixedLenFeature([1], dtype=tf.int64, default_value=-1),
-            'image/class/text':
-            tf.FixedLenFeature([], dtype=tf.string, default_value=''),
+            "image/encoded": tf.FixedLenFeature(
+                [], dtype=tf.string, default_value=""
+            ),
+            "image/class/label": tf.FixedLenFeature(
+                [1], dtype=tf.int64, default_value=-1
+            ),
+            "image/class/text": tf.FixedLenFeature(
+                [], dtype=tf.string, default_value=""
+            ),
         }
 
         features = tf.parse_single_example(example_serialized, feature_map)
-        label = tf.cast(features['image/class/label'], dtype=tf.int32)
+        label = tf.cast(features["image/class/label"], dtype=tf.int32)
 
-        return features['image/encoded'], label, features['image/class/text']
+        return features["image/encoded"], label, features["image/class/text"]
 
     def _decode_jpeg(self, image_buffer, scope=None):
         """Decode a JPEG string into one 3-D float image Tensor.
@@ -231,7 +276,8 @@ class imagenet(dataset.DataSet):
           tf.Tensor: 3-D float Tensor with values ranging from [0, 1).
         """
         with tf.name_scope(
-            values=[image_buffer], name=scope, default_name='decode_jpeg'):
+            values=[image_buffer], name=scope, default_name="decode_jpeg"
+        ):
             # Decode the string as an RGB JPEG.
             # Note that the resulting image contains an unknown height and width
             # that is set dynamically by _decode_jpeg. In other words, the height
@@ -279,8 +325,9 @@ class imagenet(dataset.DataSet):
           tf.Tensor: The color-distorted image.
         """
         with tf.name_scope(
-            values=[image], name=scope, default_name='distort_color'):
-            image = tf.image.random_brightness(image, max_delta=32. / 255.)
+            values=[image], name=scope, default_name="distort_color"
+        ):
+            image = tf.image.random_brightness(image, max_delta=32.0 / 255.0)
             image = tf.image.random_saturation(image, lower=0.5, upper=1.5)
             image = tf.image.random_hue(image, max_delta=0.2)
             image = tf.image.random_contrast(image, lower=0.5, upper=1.5)
