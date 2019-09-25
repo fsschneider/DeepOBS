@@ -14,9 +14,30 @@ All results obtained with the same MAJOR.MINOR version of DEEPOBS will be direct
 ## [Unreleased] - Version 1.2.0
 ### Added
 - Changelog, documenting all current and future changes.
+- Version info available via `deepobs.__version__`
+- PyTorch support (currently not all test problems).
+- A Tuning module automating the hyperparamter tuning process.
+- Added a separate hold-out validation set for hyperparameter tuning. This reduces the size of the training data.
 ### Changed
+- Refactored Analyzer module (more flexible and interpretable).
+- Smaller training data set due to additional validation set.
+- Runners break from the training loop if the loss becomes NaN.
+- Runners now return the output dictionary.
+- Additional training parameters can be passed as kwargs to the `run()` method.
+- The small and large benchmark sets are now global variables.
+- Default test problem settings (`batch size`, `num_epochs`,...) for are now global variables.
+- `JSON` output is now dumped in human readable format.
+- The accuracy is now only printed if available.
+- Simplified the API of the Runner module.
+- The runner with a learning rate schedule is now an extra class.
+- Extra folder with extensive examples.
 ### Removed
+- Currently no baselines! Since the training set is smaller, and we made other changes, we need to re-compute the baselines, which will happen soon.
 ### Fixed
+- `fmnist_mlp` was not using Fashion-MNIST but MNIST data.
+- Training set of `SVHN` was limited to `64,000` examples. Now it is the full training set.
+- Various other small bugfixes.
+- `Numpy` is now also seeded.
 
 ## [1.1.1] - 2019-03-13
 ### Added
