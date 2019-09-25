@@ -29,11 +29,11 @@ and PyTorch (:doc:`../api/tensorflow/runner/standardrunner`).
 Essentially, all which is needed is the optimizer itself and a list of its hyperparameters. For example
 for the Momentum optimizer in **Tensorlow** this will be:
 
-.. literalinclude:: ../../example_momentum_runner_tensorflow.py
+.. literalinclude:: ../../examples/runner_momentum_tensorflow.py
 
 And in **PyTorch**:
 
-.. literalinclude:: ../../example_momentum_runner_pytorch.py
+.. literalinclude:: ../../examples/runner_momentum_pytorch.py
 
 (Possibly) Write Your Own Runner
 ================================

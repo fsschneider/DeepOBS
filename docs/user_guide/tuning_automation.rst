@@ -26,22 +26,22 @@ training or hyper parameters you have to overwrite the methods ``_generate_kwarg
 ``_generate_hyperparams_format_for_command_line`` of the ``ParallelizedTuner`` accordingly. Note that the generated
 commands refer to a run script that you have to specify on your own. Here, as an example, the generated commands refer to
 :download:`a standard SGD script\
-<../../SGD.py>`
+<../../examples/runner_momentum_pytorch.py>`
 
-.. literalinclude:: ../../example_grid_search.py
+.. literalinclude:: ../../examples/tuner_gridsearch_pytorch.py
 
 You can download this :download:`example\
-<../../example_grid_search.py>` and use it as a template.
+<../../examples/tuner_gridsearch_pytorch.py>` and use it as a template.
 
 Random Search
 =============
 For the random search, you have to give a dictionary that holds the
 distributions for each hyperparameter:
 
-.. literalinclude:: ../../example_random_search.py
+.. literalinclude:: ../../examples/tuner_randomsearch_pytorch.py
 
 You can download this :download:`example\
-<../../example_random_search.py>` and use it as a template.
+<../../examples/tuner_randomsearch_pytorch.py>` and use it as a template.
 
 Bayesian Optimization (GP)
 ==========================
@@ -50,8 +50,8 @@ The Bayesian optimization method with a Gaussian process surrogate is more compl
 bounds of the suggestions. Additionally, you can set the transformation of the search space. In combination with the
 bounds, this can be used for a rescaling of the kernel or for optimization of discrete values:
 
-.. literalinclude:: ../../example_gp_tuner.py
+.. literalinclude:: ../../examples/tuner_bayes_pytorch.py
 
 You can download this :download:`example\
-<../../example_gp_tuner.py>` and use it as a template. Since Bayesian optimization is sequential by nature, we do not
+<../../examples/tuner_bayes_pytorch.py>` and use it as a template. Since Bayesian optimization is sequential by nature, we do not
 offer a parallelized version of it.
