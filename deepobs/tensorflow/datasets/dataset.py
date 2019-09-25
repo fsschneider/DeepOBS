@@ -19,6 +19,8 @@ class DataSet(object):
         training phase.
     train_eval_init_op: A tensorflow operation initializing the testproblem for
         evaluating on training data.
+    valid_init_op: A tensorflow operation initializing the dataset for the
+        validation phase.
     test_init_op: A tensorflow operation initializing the testproblem for
         evaluating on test data.
     phase: A string-value tf.Variable that is set to ``train``, ``train_eval``, ``valid``,
