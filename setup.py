@@ -19,11 +19,9 @@ def readme():
         return f.read()
 
 
-exec(open("deepobs/version.py").read())
-
 setuptools.setup(
     name="deepobs",
-    version=__version__,
+    version=exec(open("deepobs/version.py").read()),
     description="Deep Learning Optimizer Benchmark Suite",
     long_description=readme(),
     author="Frank Schneider, Aaron Bahde, Lukas Balles, and Philipp Hennig",
