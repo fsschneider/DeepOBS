@@ -26,7 +26,7 @@ setuptools.setup(
     version=__version__,
     description="Deep Learning Optimizer Benchmark Suite",
     long_description=readme(),
-    author="Frank Schneider, Aaron Bahde, Lukas Balles, and Philipp Hennig,",
+    author="Frank Schneider, Aaron Bahde, Lukas Balles, and Philipp Hennig",
     author_email="frank.schneider@tue.mpg.de",
     license="MIT",
     packages=setuptools.find_packages(),
