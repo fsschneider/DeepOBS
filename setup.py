@@ -8,7 +8,7 @@ install_requires_list = [
     "numpy",
     "pandas",
     "matplotlib",
-    "matplotlib2tikz",
+    "tikzplotlib",
     "seaborn",
     "bayesian-optimization",
 ]

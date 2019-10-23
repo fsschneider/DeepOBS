@@ -31,8 +31,10 @@ All results obtained with the same MAJOR.MINOR version of DEEPOBS will be direct
 - Simplified the API of the Runner module.
 - The runner with a learning rate schedule is now an extra class.
 - Extra folder with extensive examples.
+- Switched from `matplotlib2tikz` (discontinued) to `tikzplotlib`.
 ### Removed
 - Currently no baselines! Since the training set is smaller, and we made other changes, we need to re-compute the baselines, which will happen soon.
+- Currently no LaTeX Output
 ### Fixed
 - `fmnist_mlp` was not using Fashion-MNIST but MNIST data.
 - Training set of `SVHN` was limited to `64,000` examples. Now it is the full training set.
