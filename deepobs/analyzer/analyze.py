@@ -316,6 +316,7 @@ def plot_testset_performances(
     # show legend of optimizers
     ax[0, 0].legend()
     plt.tight_layout()
+    plt.subplots_adjust(wspace=0.2, hspace=0.15)
     if show:
         plt.show()
     return fig, ax
@@ -648,6 +649,9 @@ def plot_optimizer_performance(
     ax[0].legend(fontsize=12)
 
     ax[3].set_xlabel("Epochs", fontsize=14)
+
+    plt.tight_layout()
+    plt.subplots_adjust(wspace=0.2, hspace=0.15)
 
     if show:
         plt.show()
