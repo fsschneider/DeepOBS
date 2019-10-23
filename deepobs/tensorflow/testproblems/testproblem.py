@@ -45,6 +45,7 @@ class TestProblem(object):
         self.dataset = None
         self.train_init_op = None
         self.train_eval_init_op = None
+        self.valid_init_op = None
         self.test_init_op = None
         self.losses = None
         self.regularizer = None
@@ -59,4 +60,5 @@ class TestProblem(object):
     """
         raise NotImplementedError(
             """'TestProblem' is an abstract base class, please
-        use one of the sub-classes.""")
+        use one of the sub-classes."""
+        )

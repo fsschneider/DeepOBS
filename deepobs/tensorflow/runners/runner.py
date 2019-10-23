@@ -19,25 +19,25 @@ class TFRunner(Runner):
         super(TFRunner, self).__init__(optimizer_class, hyperparameter_names)
 
     @staticmethod
-    def init_summary(loss,
-                     learning_rate_var,
-                     batch_size,
-                     tb_log_dir):
+    def init_summary(loss, learning_rate_var, batch_size, tb_log_dir):
         """Initializes the tensorboard summaries"""
         # per iteration
         mb_train_loss_summary = tf.summary.scalar(
             "training/minibatch_train_losses",
             loss,
-            collections=[tf.GraphKeys.SUMMARIES, "per_iteration"])
+            collections=[tf.GraphKeys.SUMMARIES, "per_iteration"],
+        )
         # per epoch
         lr_summary = tf.summary.scalar(
             "hyperparams/learning_rate",
             learning_rate_var,
-            collections=[tf.GraphKeys.SUMMARIES, "per_epoch"])
+            collections=[tf.GraphKeys.SUMMARIES, "per_epoch"],
+        )
         batch_summary = tf.summary.scalar(
             "hyperparams/batch_size",
             batch_size,
-            collections=[tf.GraphKeys.SUMMARIES, "per_epoch"])
+            collections=[tf.GraphKeys.SUMMARIES, "per_epoch"],
+        )
 
         per_iter_summaries = tf.summary.merge_all(key="per_iteration")
         per_epoch_summaries = tf.summary.merge_all(key="per_epoch")
@@ -46,13 +46,14 @@ class TFRunner(Runner):
 
     @staticmethod
     def write_per_epoch_summary(
-                                sess,
-                                loss_,
-                                acc_,
-                                current_step,
-                                per_epoch_summaries,
-                                summary_writer,
-                                phase):
+        sess,
+        loss_,
+        acc_,
+        current_step,
+        per_epoch_summaries,
+        summary_writer,
+        phase,
+    ):
         """Writes the tensorboard epoch summary"""
         if phase == "TEST":
             tag = "epoch/test_"
@@ -61,23 +62,22 @@ class TFRunner(Runner):
         elif phase == "VALID":
             tag = "epoch/valid_"
         else:
-            raise NotImplementedError("Phase " + phase + ' not implemented for write_epoch_summary().')
+            raise NotImplementedError(
+                "Phase " + phase + " not implemented for write_epoch_summary()."
+            )
         summary = tf.Summary()
         summary.value.add(tag=tag + "loss_", simple_value=loss_)
         summary.value.add(tag=tag + "acc_", simple_value=acc_)
         per_epoch_summary_ = sess.run(per_epoch_summaries)
-        summary_writer.add_summary(per_epoch_summary_,
-                                   current_step)
+        summary_writer.add_summary(per_epoch_summary_, current_step)
         summary_writer.add_summary(summary, current_step)
         summary_writer.flush()
         return
 
     @staticmethod
     def write_per_iter_summary(
-                               sess,
-                               per_iter_summaries,
-                               summary_writer,
-                               current_step):
+        sess, per_iter_summaries, summary_writer, current_step
+    ):
         """Writes the tensorboard iteration summary"""
         per_iter_summary_ = sess.run(per_iter_summaries)
         summary_writer.add_summary(per_iter_summary_, current_step)
@@ -123,19 +123,19 @@ class TFRunner(Runner):
             loss: The TensorFlow operation that computes the loss.
             phase (str): The phase of the evaluation. Muste be one of 'TRAIN', 'VALID' or 'TEST'
         """
-        if phase == 'TEST':
+        if phase == "TEST":
             sess.run(tproblem.test_init_op)
             msg = "TEST:"
-        elif phase == 'TRAIN':
+        elif phase == "TRAIN":
             sess.run(tproblem.train_eval_init_op)
             msg = "TRAIN:"
-        elif phase == 'VALID':
-            # TODO !!!!!! IS CURRENTLY USING TEST_INIT_OP. CHANGE THIS TO VALID_INIT_OP ONCE THEY ARE IMPLEMENTED !!!!!!
-            # sess.run(tproblem.valid_init_op)
-            sess.run(tproblem.test_init_op)
-            msg = "VALID: WARNING: THIS IS CURRENTLY ALSO THE EVALUATION ON THE TEST DATA SET!!: "
+        elif phase == "VALID":
+            sess.run(tproblem.valid_init_op)
+            msg = "VALID:"
         else:
-            raise NotImplementedError("Phase " + phase + ' not implemented for evaluate().')
+            raise NotImplementedError(
+                "Phase " + phase + " not implemented for evaluate()."
+            )
         # Compute average loss and (if applicable) accuracy.
         loss_ = 0.0
         num_iters = 0.0
@@ -160,7 +160,7 @@ class TFRunner(Runner):
                     break
         loss_ /= num_iters
         acc_ /= num_iters
-#
+        #
         if acc_ != 0.0:
             print("{0:s} loss {1:g}, acc {2:f}".format(msg, loss_, acc_))
         else:
@@ -169,76 +169,104 @@ class TFRunner(Runner):
         # Print and return the results.
         return loss_, acc_
 
-    def evaluate_all(self, n,
-                     num_epochs,
-                     tproblem,
-                     sess,
-                     loss,
-                     tb_log,
-                     per_epoch_summaries,
-                     summary_writer,
-                     train_losses,
-                     valid_losses,
-                     test_losses,
-                     train_accuracies,
-                     valid_accuracies,
-                     test_accuracies):
+    def evaluate_all(
+        self,
+        n,
+        num_epochs,
+        tproblem,
+        sess,
+        loss,
+        tb_log,
+        per_epoch_summaries,
+        summary_writer,
+        train_losses,
+        valid_losses,
+        test_losses,
+        train_accuracies,
+        valid_accuracies,
+        test_accuracies,
+    ):
         print("********************************")
         print("Evaluating after {0:d} of {1:d} epochs...".format(n, num_epochs))
 
-        loss_, acc_ = self.evaluate(tproblem, sess, loss, phase='TRAIN')
+        loss_, acc_ = self.evaluate(tproblem, sess, loss, phase="TRAIN")
         if tb_log:
             current_step = len(train_losses)
-            self.write_per_epoch_summary(sess,
-                                         loss_,
-                                         acc_,
-                                         current_step,
-                                         per_epoch_summaries,
-                                         summary_writer,
-                                         phase='TRAIN')
+            self.write_per_epoch_summary(
+                sess,
+                loss_,
+                acc_,
+                current_step,
+                per_epoch_summaries,
+                summary_writer,
+                phase="TRAIN",
+            )
         train_losses.append(loss_)
         train_accuracies.append(acc_)
 
-        loss_, acc_ = self.evaluate(tproblem, sess, loss, phase='VALID')
+        loss_, acc_ = self.evaluate(tproblem, sess, loss, phase="VALID")
         if tb_log:
             current_step = len(train_losses)
-            self.write_per_epoch_summary(sess,
-                                         loss_,
-                                         acc_,
-                                         current_step,
-                                         per_epoch_summaries,
-                                         summary_writer,
-                                         phase='VALID')
+            self.write_per_epoch_summary(
+                sess,
+                loss_,
+                acc_,
+                current_step,
+                per_epoch_summaries,
+                summary_writer,
+                phase="VALID",
+            )
         valid_losses.append(loss_)
         valid_accuracies.append(acc_)
 
-        loss_, acc_ = self.evaluate(tproblem, sess, loss, phase='TEST')
+        loss_, acc_ = self.evaluate(tproblem, sess, loss, phase="TEST")
         if tb_log:
             current_step = len(test_losses)
-            self.write_per_epoch_summary(sess,
-                                         loss_,
-                                         acc_,
-                                         current_step,
-                                         per_epoch_summaries,
-                                         summary_writer,
-                                         phase='TEST')
+            self.write_per_epoch_summary(
+                sess,
+                loss_,
+                acc_,
+                current_step,
+                per_epoch_summaries,
+                summary_writer,
+                phase="TEST",
+            )
         test_losses.append(loss_)
         test_accuracies.append(acc_)
         print("********************************")
 
     @abc.abstractmethod
-    def training(self, tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir, **training_params):
+    def training(
+        self,
+        tproblem,
+        hyperparams,
+        num_epochs,
+        print_train_iter,
+        train_log_interval,
+        tb_log,
+        tb_log_dir,
+        **training_params
+    ):
         return
 
 
 class StandardRunner(TFRunner):
-
     def __init__(self, optimizer_class, hyperparameter_names):
 
-        super(StandardRunner, self).__init__(optimizer_class, hyperparameter_names)
+        super(StandardRunner, self).__init__(
+            optimizer_class, hyperparameter_names
+        )
 
-    def training(self,
-                 tproblem, hyperparams, num_epochs, print_train_iter, train_log_interval, tb_log, tb_log_dir):
+    def training(
+        self,
+        tproblem,
+        hyperparams,
+        num_epochs,
+        print_train_iter,
+        train_log_interval,
+        tb_log,
+        tb_log_dir,
+    ):
 
         loss = tf.reduce_mean(tproblem.losses) + tproblem.regularizer
 
@@ -246,10 +274,10 @@ class StandardRunner(TFRunner):
         global_step = tf.Variable(0, trainable=False)
 
         # this is neccesary to apply the lr_sched later.
-        learning_rate = hyperparams['learning_rate']
+        learning_rate = hyperparams["learning_rate"]
         learning_rate_var = tf.Variable(learning_rate, trainable=False)
         hyperparams_ = deepcopy(hyperparams)
-        hyperparams_.pop('learning_rate')
+        hyperparams_.pop("learning_rate")
 
         opt = self._optimizer_class(learning_rate_var, **hyperparams_)
 
@@ -257,7 +285,8 @@ class StandardRunner(TFRunner):
         # TRAINABLE_VARIABLES collection (with a dependency on performing all ops
         # in the collection UPDATE_OPS collection for batch norm, etc).
         with tf.control_dependencies(
-                tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
+            tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        ):
             step = opt.minimize(loss, global_step=global_step)
 
         # Lists to track train/test loss and accuracy.
@@ -272,12 +301,11 @@ class StandardRunner(TFRunner):
         # Tensorboard summaries
         if tb_log:
             batch_size = tproblem._batch_size
-            per_iter_summaries, per_epoch_summaries, summary_writer = self.init_summary(loss,
-                                                                                        learning_rate_var,
-                                                                                        batch_size,
-                                                                                        tb_log_dir)
-        else:    # make sure that they are assigned for evaluate_all()
-            per_epoch_summaries = None,
+            per_iter_summaries, per_epoch_summaries, summary_writer = self.init_summary(
+                loss, learning_rate_var, batch_size, tb_log_dir
+            )
+        else:  # make sure that they are assigned for evaluate_all()
+            per_epoch_summaries = (None,)
             summary_writer = None
 
         # Start tensorflow session and initialize variables.
@@ -287,20 +315,22 @@ class StandardRunner(TFRunner):
         # Start of training loop.
         for n in range(num_epochs + 1):
             # Evaluate at beginning of epoch.
-            self.evaluate_all(n,
-                              num_epochs,
-                              tproblem,
-                              sess,
-                              loss,
-                              tb_log,
-                              per_epoch_summaries,
-                              summary_writer,
-                              train_losses,
-                              valid_losses,
-                              test_losses,
-                              train_accuracies,
-                              valid_accuracies,
-                              test_accuracies)
+            self.evaluate_all(
+                n,
+                num_epochs,
+                tproblem,
+                sess,
+                loss,
+                tb_log,
+                per_epoch_summaries,
+                summary_writer,
+                train_losses,
+                valid_losses,
+                test_losses,
+                train_accuracies,
+                valid_accuracies,
+                test_accuracies,
+            )
 
             # Break from train loop after the last round of evaluation
             if n == num_epochs:
@@ -318,15 +348,20 @@ class StandardRunner(TFRunner):
 
                         if tb_log:
                             current_step = sess.run(global_step)
-                            self.write_per_iter_summary(sess,
-                                                        per_iter_summaries,
-                                                        summary_writer,
-                                                        current_step)
+                            self.write_per_iter_summary(
+                                sess,
+                                per_iter_summaries,
+                                summary_writer,
+                                current_step,
+                            )
 
                         minibatch_train_losses.append(loss_.astype(float))
                         if print_train_iter:
-                            print("Epoch {0:d}, step {1:d}: loss {2:g}".format(
-                                n, s, loss_))
+                            print(
+                                "Epoch {0:d}, step {1:d}: loss {2:g}".format(
+                                    n, s, loss_
+                                )
+                            )
                     else:
                         sess.run(step)
                     s += 1
@@ -335,15 +370,17 @@ class StandardRunner(TFRunner):
 
             # break from training if it goes wrong
             if not np.isfinite(loss_):
-                self._abort_routine(n,
-                                    num_epochs,
-                                    train_losses,
-                                    valid_losses,
-                                    test_losses,
-                                    train_accuracies,
-                                    valid_accuracies,
-                                    test_accuracies,
-                                    minibatch_train_losses)
+                self._abort_routine(
+                    n,
+                    num_epochs,
+                    train_losses,
+                    valid_losses,
+                    test_losses,
+                    train_accuracies,
+                    valid_accuracies,
+                    test_accuracies,
+                    minibatch_train_losses,
+                )
                 break
             else:
                 continue
@@ -361,19 +398,20 @@ class StandardRunner(TFRunner):
             "test_accuracies": test_accuracies,
             "minibatch_train_losses": minibatch_train_losses,
         }
-            
+
         return output
 
 
 class LearningRateScheduleRunner(TFRunner):
-
     def __init__(self, optimizer_class, hyperparameter_names):
 
-        super(LearningRateScheduleRunner, self).__init__(optimizer_class, hyperparameter_names)
+        super(LearningRateScheduleRunner, self).__init__(
+            optimizer_class, hyperparameter_names
+        )
 
     def _add_training_params_to_argparse(self, parser, args, training_params):
         try:
-            args['lr_sched_epochs'] = training_params['lr_sched_epochs']
+            args["lr_sched_epochs"] = training_params["lr_sched_epochs"]
         except KeyError:
             parser.add_argument(
                 "--lr_sched_epochs",
@@ -385,35 +423,38 @@ class LearningRateScheduleRunner(TFRunner):
           via '--lr_sched_factors'. Example: '--lr 0.3 --lr_sched_epochs 50 100
           --lr_sched_factors 0.1 0.01' will start with a learning rate of 0.3,
           then decrease to 0.1*0.3=0.03 after training for 50 epochs, and
-          decrease to 0.01*0.3=0.003' after training for 100 epochs.""")
+          decrease to 0.01*0.3=0.003' after training for 100 epochs.""",
+            )
 
         try:
-            args['lr_sched_factors'] = training_params['lr_sched_factors']
+            args["lr_sched_factors"] = training_params["lr_sched_factors"]
         except KeyError:
             parser.add_argument(
                 "--lr_sched_factors",
                 nargs="+",
                 type=float,
-                help=
-                """One or more factors (floats) by which to change the learning
+                help="""One or more factors (floats) by which to change the learning
           rate. The base learning rate has to be passed via '--learing_rate' and
           the epochs at which to change the learning rate have to be passed via
           '--lr_sched_factors'. Example: '--lr 0.3 --lr_sched_epochs 50 100
           --lr_sched_factors 0.1 0.01' will start with a learning rate of 0.3,
           then decrease to 0.1*0.3=0.03 after training for 50 epochs, and
-          decrease to 0.01*0.3=0.003' after training for 100 epochs.""")
+          decrease to 0.01*0.3=0.003' after training for 100 epochs.""",
+            )
 
-    def training(self,
-                 tproblem,
-                 hyperparams,
-                 num_epochs,
-                 print_train_iter,
-                 train_log_interval,
-                 tb_log,
-                 tb_log_dir,
-                 # the following are the training_params
-                 lr_sched_epochs=None,
-                 lr_sched_factors=None):
+    def training(
+        self,
+        tproblem,
+        hyperparams,
+        num_epochs,
+        print_train_iter,
+        train_log_interval,
+        tb_log,
+        tb_log_dir,
+        # the following are the training_params
+        lr_sched_epochs=None,
+        lr_sched_factors=None,
+    ):
         """Performs the training and stores the metrices.
 
         Args:
@@ -445,20 +486,22 @@ class LearningRateScheduleRunner(TFRunner):
         global_step = tf.Variable(0, trainable=False)
 
         # this is neccesary to apply the lr_sched later.
-        learning_rate = hyperparams['learning_rate']
+        learning_rate = hyperparams["learning_rate"]
         learning_rate_var = tf.Variable(learning_rate, trainable=False)
         hyperparams_ = deepcopy(hyperparams)
-        hyperparams_.pop('learning_rate')
+        hyperparams_.pop("learning_rate")
 
         opt = self._optimizer_class(learning_rate_var, **hyperparams_)
         lr_schedule = runner_utils.make_lr_schedule(
-            learning_rate, lr_sched_epochs, lr_sched_factors)
+            learning_rate, lr_sched_epochs, lr_sched_factors
+        )
 
         # Call optimizer's minimize on loss to update all variables in the
         # TRAINABLE_VARIABLES collection (with a dependency on performing all ops
         # in the collection UPDATE_OPS collection for batch norm, etc).
         with tf.control_dependencies(
-                tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
+            tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        ):
             step = opt.minimize(loss, global_step=global_step)
 
         # Lists to track train/test loss and accuracy.
@@ -473,12 +516,11 @@ class LearningRateScheduleRunner(TFRunner):
         # Tensorboard summaries
         if tb_log:
             batch_size = tproblem._batch_size
-            per_iter_summaries, per_epoch_summaries, summary_writer = self.init_summary(loss,
-                                                                                        learning_rate_var,
-                                                                                        batch_size,
-                                                                                        tb_log_dir)
-        else:    # make sure that they are assigned for evaluate_all()
-            per_epoch_summaries = None,
+            per_iter_summaries, per_epoch_summaries, summary_writer = self.init_summary(
+                loss, learning_rate_var, batch_size, tb_log_dir
+            )
+        else:  # make sure that they are assigned for evaluate_all()
+            per_epoch_summaries = (None,)
             summary_writer = None
 
         # Start tensorflow session and initialize variables.
@@ -488,20 +530,22 @@ class LearningRateScheduleRunner(TFRunner):
         # Start of training loop.
         for n in range(num_epochs + 1):
             # Evaluate at beginning of epoch.
-            self.evaluate_all(n,
-                              num_epochs,
-                              tproblem,
-                              sess,
-                              loss,
-                              tb_log,
-                              per_epoch_summaries,
-                              summary_writer,
-                              train_losses,
-                              valid_losses,
-                              test_losses,
-                              train_accuracies,
-                              valid_accuracies,
-                              test_accuracies)
+            self.evaluate_all(
+                n,
+                num_epochs,
+                tproblem,
+                sess,
+                loss,
+                tb_log,
+                per_epoch_summaries,
+                summary_writer,
+                train_losses,
+                valid_losses,
+                test_losses,
+                train_accuracies,
+                valid_accuracies,
+                test_accuracies,
+            )
 
             # Break from train loop after the last round of evaluation
             if n == num_epochs:
@@ -522,15 +566,20 @@ class LearningRateScheduleRunner(TFRunner):
 
                         if tb_log:
                             current_step = sess.run(global_step)
-                            self.write_per_iter_summary(sess,
-                                                        per_iter_summaries,
-                                                        summary_writer,
-                                                        current_step)
+                            self.write_per_iter_summary(
+                                sess,
+                                per_iter_summaries,
+                                summary_writer,
+                                current_step,
+                            )
 
                         minibatch_train_losses.append(loss_.astype(float))
                         if print_train_iter:
-                            print("Epoch {0:d}, step {1:d}: loss {2:g}".format(
-                                n, s, loss_))
+                            print(
+                                "Epoch {0:d}, step {1:d}: loss {2:g}".format(
+                                    n, s, loss_
+                                )
+                            )
                     else:
                         sess.run(step)
                     s += 1
@@ -539,15 +588,17 @@ class LearningRateScheduleRunner(TFRunner):
 
             # break from training if it goes wrong
             if not np.isfinite(loss_):
-                self._abort_routine(n,
-                                    num_epochs,
-                                    train_losses,
-                                    valid_losses,
-                                    test_losses,
-                                    train_accuracies,
-                                    valid_accuracies,
-                                    test_accuracies,
-                                    minibatch_train_losses)
+                self._abort_routine(
+                    n,
+                    num_epochs,
+                    train_losses,
+                    valid_losses,
+                    test_losses,
+                    train_accuracies,
+                    valid_accuracies,
+                    test_accuracies,
+                    minibatch_train_losses,
+                )
 
                 break
             else:
