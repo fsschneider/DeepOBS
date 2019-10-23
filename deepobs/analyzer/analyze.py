@@ -23,7 +23,17 @@ from .shared_utils import (
 sns.set()
 sns.set_style(
     "whitegrid",
-    {"axes.grid": False, "axes.spines.top": False, "axes.spines.right": False},
+    {
+        "axes.grid": False,
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+        "xtick.bottom": True,
+        "ytick.left": True,
+        "xtick.direction": "in",
+        "ytick.direction": "in",
+        "xtick.color": ".5",
+        "ytick.color": ".5",
+    },
 )
 
 
@@ -293,19 +303,16 @@ def plot_testset_performances(
                 which=which,
             )
 
-    metrices = [
-        "test_losses",
-        "train_losses",
-        "test_accuracies",
-        "train_accuracies",
-    ]
+    metrices = ["Test Loss", "Train Loss", "Test Accuracy", "Train Accuracy"]
     for idx, _metric in enumerate(metrices):
         # label y axes
         ax[idx, 0].set_ylabel(_metric)
         # rescale
         for idx2 in range(n_testproblems):
             ax[idx, idx2] = _rescale_ax(ax[idx, idx2])
-            ax[3, idx2].set_xlabel("epochs")
+            ax[idx, idx2].xaxis.set_ticks_position("none")
+            ax[3, idx2].set_xlabel("Epochs")
+            ax[3, idx2].xaxis.set_ticks_position("bottom")
     # show legend of optimizers
     ax[0, 0].legend()
     plt.tight_layout()
@@ -628,14 +635,10 @@ def plot_optimizer_performance(
             reference_path, fig, ax, mode, metric, which=which
         )
 
-    metrices = [
-        "test_losses",
-        "train_losses",
-        "test_accuracies",
-        "train_accuracies",
-    ]
+    metrices = ["Test Loss", "Train Loss", "Test Accuracy", "Train Accuracy"]
     for idx, _metric in enumerate(metrices):
         # set y labels
+
         ax[idx].set_ylabel(_metric, fontsize=14)
         # rescale plots
         # ax[idx] = _rescale_ax(ax[idx])
@@ -644,7 +647,7 @@ def plot_optimizer_performance(
     # show optimizer legends
     ax[0].legend(fontsize=12)
 
-    ax[3].set_xlabel("epochs", fontsize=14)
+    ax[3].set_xlabel("Epochs", fontsize=14)
 
     if show:
         plt.show()
