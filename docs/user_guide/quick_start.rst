@@ -25,7 +25,7 @@ You can install the latest try-out version of DeepOBS using `pip`:
   - numpy
   - pandas
   - matplotlib
-  - matplotlib2tikz
+  - tikzplotlib
   - seaborn
 
   TensorFlow is not a required package to allow for both the CPU and GPU version. Make sure that one of those is installed. Additionally, you have to install torch/torchvision if you want to use the PyTorch framework.
