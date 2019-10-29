@@ -11,7 +11,7 @@ PATCHES will not affect the benchmark results
 
 All results obtained with the same MAJOR.MINOR version of DEEPOBS will be directly comparable.
 
-## [Unreleased] - Version 1.2.0
+## [Beta] - Version 1.2.0-beta0
 ### Added
 - Changelog, documenting all current and future changes.
 - Version info available via `deepobs.__version__`
@@ -33,7 +33,7 @@ All results obtained with the same MAJOR.MINOR version of DEEPOBS will be direct
 - Extra folder with extensive examples.
 - Switched from `matplotlib2tikz` (discontinued) to `tikzplotlib`.
 ### Removed
-- Currently no baselines! Since the training set is smaller, and we made other changes, we need to re-compute the baselines, which will happen soon.
+- Currently no baselines! Changes to the training data set (smaller, due to the validation set) and other changed require us to recompute the baselines. We are currently doing a more extensive generation of the baseline, with many more optimizers.
 - Currently no LaTeX Output
 ### Fixed
 - `fmnist_mlp` was not using Fashion-MNIST but MNIST data.
@@ -58,7 +58,7 @@ All results obtained with the same MAJOR.MINOR version of DEEPOBS will be direct
 - First release version of DeepOBS.
 
 
-[Unreleased]: https://github.com/fsschneider/DeepOBS/compare/v1.1.1...version-1.2.0
+[Unreleased]: https://github.com/fsschneider/DeepOBS/compare/v1.1.1...v1.2.0-beta0
 
 [1.1.1]: https://github.com/fsschneider/DeepOBS/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/fsschneider/DeepOBS/releases/tag/v1.1.0
