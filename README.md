@@ -62,11 +62,11 @@ If you want to create a local and modifiable version of DeepOBS, you can do this
 
 	pip install -e git+https://github.com/fsschneider/DeepOBS.git#egg=DeepOBS
 
-for the latest stable version, or 
+for the stable version, or 
 
-	pip install -e git+https://github.com/fsschneider/DeepOBS.git@v1.2.0-beta0#egg=DeepOBS
+	pip install -e git+https://github.com/fsschneider/DeepOBS.git@develop#egg=DeepOBS
 
-to get the preview of DeepOBS 1.2.0.
+for the latest development version.
 
 
 Further tutorials and a suggested protocol for benchmarking deep learning
