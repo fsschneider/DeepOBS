@@ -27,7 +27,7 @@ DeepOBS automates several steps when benchmarking deep learning optimizers:
 
 The code for the current implementation working with **TensorFlow** can be found
 on [Github](https://github.com/fsschneider/DeepOBS).
-A PyTorch version is currently developed (see News section below).
+A PyTorch version is currently developed and can be accessed via the pre-release or the develop branch (see News section below).
 
 The full documentation is available on readthedocs:
 https://deepobs.readthedocs.io/
@@ -43,9 +43,10 @@ We are always interested in feedback and ways to improve DeepOBS.**
 
 We are currently working on a new and improved version of DeepOBS, version 1.2.0.
 It will support **PyTorch** in addition to TensorFlow, has an easier interface, and
-many bugs ironed out. You can find the latest version of it in [this branch](https://github.com/fsschneider/DeepOBS/tree/v1.2.0-beta0).
+many bugs ironed out. You can find the latest version of it in [this branch](https://github.com/fsschneider/DeepOBS/tree/develop).
 
-A pre-release, version 1.2.0-beta0, will be available shortly and a full release is expected in a few weeks.
+A [pre-release](https://github.com/fsschneider/DeepOBS/releases/tag/v1.2.0-beta0) is available now. 
+The full release is expected in a few weeks.
 
 Many thanks to [Aaron Bahde](https://github.com/abahde) for spearheading the developement of DeepOBS 1.2.0.
 
