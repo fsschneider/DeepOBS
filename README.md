@@ -14,7 +14,6 @@
 >
 > It contains the latest changes planed for the release of DeepOBS 1.2.0, including support for **PyTorch**. Not all features are implemented and most notably we currently don't provide baselines for this version. We continuously make changes to this version, so things can break if you update. If you want a more stable preview, checkout our pre-releases.
 
-
 **DeepOBS** is a benchmarking suite that drastically simplifies, automates and
 improves the evaluation of deep learning optimizers.
 
@@ -25,10 +24,8 @@ It can evaluate the performance of new optimizers on a variety of
 DeepOBS automates several steps when benchmarking deep learning optimizers:
 
 - Downloading and preparing data sets.
-- Setting up test problems consisting of contemporary data sets and realistic
-  deep learning architectures.
-- Running the optimizers on multiple test problems and logging relevant
-  metrics.
+- Setting up test problems consisting of contemporary data sets and realistic deep learning architectures.
+- Running the optimizers on multiple test problems and logging relevant metrics.
 - Reporting and visualization the results of the optimizer benchmark.
 
 ![DeepOBS Output](docs/deepobs.jpg "DeepOBS_output")
