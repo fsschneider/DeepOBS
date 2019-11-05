@@ -2,11 +2,15 @@
 
 ![DeepOBS](docs/deepobs_banner.png "DeepOBS")
 
-[![PyPI version](https://badge.fury.io/py/deepobs.svg)](https://badge.fury.io/py/deepobs)
-[![Documentation Status](https://readthedocs.org/projects/deepobs/badge/?version=latest)](https://deepobs.readthedocs.io/en/latest/?badge=latest)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/github/license/fsschneider/deepobs?style=flat-square)](https://opensource.org/licenses/MIT)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/deepobs?style=flat-square)
+[![PyPI version](https://img.shields.io/pypi/v/deepobs.svg?style=flat-square)](https://pypi.org/project/deepobs)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/deepobs?style=flat-square)
+[![Documentation Status](https://readthedocs.org/projects/deepobs/badge/?version=v1.2.0-beta0_a&style=flat-square)](https://deepobs.readthedocs.io/en/v1.2.0-beta0_a/?badge=v1.2.0-beta0_a)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
-> **This branch contains the beta of version 1.2.0**: <br> It contains the latest changes planed for the release of DeepOBS 1.2.0, including support for **PyTorch**.
+
+> :warning: **This branch contains the beta of version 1.2.0**: <br> It contains the latest changes planed for the release of DeepOBS 1.2.0, including support for **PyTorch**.
 Not all features are implemented and most notably we currently don't provide baselines for this version.
 
 **DeepOBS** is a benchmarking suite that drastically simplifies, automates and
