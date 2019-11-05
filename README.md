@@ -7,8 +7,8 @@
 [![PyPI version](https://img.shields.io/pypi/v/deepobs.svg?style=flat-square)](https://pypi.org/project/deepobs)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/deepobs?style=flat-square)
 [![Documentation Status](https://readthedocs.org/projects/deepobs/badge/?version=v1.2.0-beta0_a&style=flat-square)](https://deepobs.readthedocs.io/en/v1.2.0-beta0_a/?badge=v1.2.0-beta0_a)
-<!---![Codacy grade](https://img.shields.io/codacy/grade/0b6cb61af02745af8ed9126c7d0779e6?logo=codacy&style=flat-square) Currently the master branch. Add only if Code Grade is A-->
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+<!---![Codacy branch grade](https://img.shields.io/codacy/grade/0b6cb61af02745af8ed9126c7d0779e6/develop?logo=codacy&style=flat-square). Add in later.-->
 
 > :warning: **This branch contains the beta of version 1.2.0**
 >
