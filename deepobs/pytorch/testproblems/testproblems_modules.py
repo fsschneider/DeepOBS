@@ -402,30 +402,35 @@ class net_char_rnn(nn.Module):
         x = self.dense(x)
         return x, new_state
 
-class net_quadratic_deep(nn.Module):
-    r"""This arhcitecture creates an output which corresponds to a loss functions of the form
 
-    :math:`0.5* (\theta - x)^T * Q * (\theta - x)`
+class net_quadratic_deep(nn.Sequential):
+    r"""This architecture creates an output which corresponds to a loss functions of the form
+
+    :math:`(\theta - x)^T * Q * (\theta - x)`
 
     with Hessian ``Q`` and "data" ``x`` coming from the quadratic data set, i.e.,
     zero-mean normal.
     The parameters are initialized to 1.
 """
-
-    def __init__(self, dim, Hessian):
+    def __init__(self, hessian):
         """Args:
-            dim (int): Number of parameters of the network (Dimension of the quadratic problem).
-            Hessian (np.array): The matrix for the quadratic form."""
+            hessian (np.array): The matrix for the quadratic form."""
+        super().__init__()
 
-        super(net_quadratic_deep, self).__init__()
-        self.theta = nn.Parameter(torch.ones(dim, requires_grad = True))
-        self.Hessian = Hessian
+        # for init
+        dim = hessian.size(0)
+        sqrt_hessian = torch.cholesky(hessian)
 
-    def forward(self, x):
-        q = self.theta - x
-        out_batched = 0.5*torch.diag(torch.mm(q, torch.mm(self.Hessian, torch.transpose(q, 0, 1))))
+        self.add_module("shift", nn.Linear(dim, dim, bias=True))
+        self.add_module("scale", nn.Linear(dim, dim, bias=False))
 
-        return out_batched
+        # init
+        nn.init.eye_(self.shift.weight)
+        self.shift.weight.requires_grad = False
+        nn.init.ones_(self.shift.bias)
+
+        self.scale.weight = sqrt_hessian
+        self.scale.weight.requires_grad = False
 
 
 class net_mlp(nn.Sequential):

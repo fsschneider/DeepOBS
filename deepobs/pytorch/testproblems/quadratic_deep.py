@@ -85,33 +85,22 @@ class quadratic_deep(UnregularizedTestproblem):
         """
         super(quadratic_deep, self).__init__(batch_size, weight_decay)
 
-    def quadratic_deep_loss_function_factory(self, reduction='mean'):
-        def quadratic_deep_loss_function(inputs):
-            batched_loss = self.net(inputs)
-            if reduction == 'mean':
-                return batched_loss.mean()
-            elif reduction == 'sum':
-                return torch.sum(batched_loss)
-            elif reduction == 'none':
-                return batched_loss
-            else:
-                raise NotImplementedError('Reduction ' + reduction + ' not implemented')
-        return quadratic_deep_loss_function
-
     def set_up(self):
+        hessian = self._make_hessian()
+        self.net = net_quadratic_deep(hessian)
+        self.data = quadratic(self._batch_size)
+        self.net.to(self._device)
+        self.loss_function = nn.MSELoss
+        self.regularization_groups = self.get_regularization_groups()
+
+    def _make_hessian(self):
         rng = np.random.RandomState(42)
         eigenvalues = np.concatenate(
             (rng.uniform(0., 1., 90), rng.uniform(30., 60., 10)), axis=0)
         D = np.diag(eigenvalues)
         R = random_rotation(D.shape[0])
         Hessian = np.matmul(np.transpose(R), np.matmul(D, R))
-        Hessian = torch.from_numpy(Hessian).to(self._device, torch.float32)
-        self.net = net_quadratic_deep(100, Hessian)
-
-        self.data = quadratic(self._batch_size)
-        self.net.to(self._device)
-        self.loss_function = self.quadratic_deep_loss_function_factory
-        self.regularization_groups = self.get_regularization_groups()
+        return torch.from_numpy(Hessian).to(self._device, torch.float32)
 
     def get_batch_loss_and_accuracy_func(self,
                                          reduction='mean',
