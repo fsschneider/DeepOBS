@@ -60,7 +60,7 @@ class mnist_vae(TestProblem):
         if weight_decay is not None:
             print(
                 "WARNING: Weight decay is non-zero but no weight decay is used",
-                "for this model."
+                "for this model.",
             )
 
     def set_up(self):
@@ -68,22 +68,20 @@ class mnist_vae(TestProblem):
         self.dataset = mnist(self._batch_size)
         self.train_init_op = self.dataset.train_init_op
         self.train_eval_init_op = self.dataset.train_eval_init_op
+        self.valid_init_op = self.dataset.valid_init_op
         self.test_init_op = self.dataset.test_init_op
 
         training = tf.equal(self.dataset.phase, "train")
         x, _ = self.dataset.batch
-        img, mean, std_dev = _vae(
-            x,
-            training,
-            n_latent=8)
+        img, mean, std_dev = _vae(x, training, n_latent=8)
 
         # Define Loss
         flatten_img = tf.reshape(img, [-1, 28 * 28])
         x_flat = tf.reshape(x, shape=[-1, 28 * 28])
         img_loss = tf.reduce_sum(tf.squared_difference(flatten_img, x_flat), 1)
-        latent_loss = -0.5 * \
-            tf.reduce_sum(1.0 + 2.0 * std_dev - tf.square(mean) -
-                          tf.exp(2.0 * std_dev), 1)
+        latent_loss = -0.5 * tf.reduce_sum(
+            1.0 + 2.0 * std_dev - tf.square(mean) - tf.exp(2.0 * std_dev), 1
+        )
         self.losses = img_loss + latent_loss
 
         self.regularizer = tf.losses.get_regularization_loss()

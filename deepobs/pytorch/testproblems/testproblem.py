@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """Base class for DeepOBS test problems."""
-import torch
 import abc
+
+import torch
+
 from .. import config
 
 
@@ -33,7 +35,6 @@ class TestProblem(abc.ABC):
     get_batch_loss_and_accuracy: Calculates the loss and accuracy of net on the next batch of the current phase.
     set_up: Sets all public attributes.
   """
-
     def __init__(self, batch_size, weight_decay=None):
         """Creates a new test problem instance.
 
@@ -56,6 +57,8 @@ class TestProblem(abc.ABC):
         self.loss_function = None
         self.net = None
         self.regularization_groups = None
+
+        self._batch_count = 0
 
     def train_init_op(self):
         """Initializes the testproblem instance to train mode. I.e.
@@ -91,34 +94,30 @@ class TestProblem(abc.ABC):
 
     def _get_next_batch(self):
         """Returns the next batch from the iterator."""
+        batch = next(self._iterator)
         self._batch_count += 1
-        return next(self._iterator)
+        return batch
 
-    def get_batch_loss_and_accuracy(self,
-                                    return_forward_func = False,
-                                    evaluate_forward_func = True,
-                                    reduction = 'mean',
-                                    add_regularization_if_available = True):
-
-        """Gets a new batch and calculates the loss and accuracy (if available)
+    def get_batch_loss_and_accuracy_func(self,
+                                         reduction='mean',
+                                         add_regularization_if_available=True):
+        """Get new batch and create forward function that calculates loss and accuracy (if available)
         on that batch. This is a default implementation for image classification.
         Testproblems with different calculation routines (e.g. RNNs) overwrite this method accordingly.
 
         Args:
-            return_forward_func (bool): If ``True``, the call also returns a function that calculates the loss on the \
-            current batch. Can be used if you need to access the forward path twice.
             reduction (str): The reduction that is used for returning the loss. Can be 'mean', 'sum' or 'none' in which \
             case each indivual loss in the mini-batch is returned as a tensor.
+            add_regularization_if_available (bool): If true, regularization is added to the loss.
         Returns:
-            float/torch.tensor, float, (callable): loss and accuracy of the model on the current batch. \
-            If ``return_forward_func`` is ``True`` it also returns the function that calculates the loss on the current batch.
-            """
+            callable:  The function that calculates the loss/accuracy on the current batch.
+        """
 
         inputs, labels = self._get_next_batch()
         inputs = inputs.to(self._device)
         labels = labels.to(self._device)
 
-        def _get_batch_loss_and_accuracy():
+        def forward_func():
             correct = 0.0
             total = 0.0
 
@@ -126,7 +125,8 @@ class TestProblem(abc.ABC):
             if self.phase in ["train_eval", "test", "valid"]:
                 with torch.no_grad():
                     outputs = self.net(inputs)
-                    loss = self.loss_function(reduction=reduction)(outputs, labels)
+                    loss = self.loss_function(reduction=reduction)(outputs,
+                                                                   labels)
             else:
                 outputs = self.net(inputs)
                 loss = self.loss_function(reduction=reduction)(outputs, labels)
@@ -135,22 +135,38 @@ class TestProblem(abc.ABC):
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-            accuracy = correct/total
+            accuracy = correct / total
 
             if add_regularization_if_available:
                 regularizer_loss = self.get_regularization_loss()
             else:
-                regularizer_loss = torch.tensor(0.0, device=torch.device(self._device))
+                regularizer_loss = torch.tensor(0.0,
+                                                device=torch.device(
+                                                    self._device))
 
             return loss + regularizer_loss, accuracy
 
-        if return_forward_func:
-            if evaluate_forward_func is True:
-                return _get_batch_loss_and_accuracy(), _get_batch_loss_and_accuracy
-            else:
-                return _get_batch_loss_and_accuracy
-        else:
-            return _get_batch_loss_and_accuracy()
+        return forward_func
+
+    def get_batch_loss_and_accuracy(self,
+                                    reduction='mean',
+                                    add_regularization_if_available=True):
+        """Gets a new batch and calculates the loss and accuracy (if available)
+        on that batch.
+
+        Args:
+            reduction (str): The reduction that is used for returning the loss. Can be 'mean', 'sum' or 'none' in which \
+            case each indivual loss in the mini-batch is returned as a tensor.
+            add_regularization_if_available (bool): If true, regularization is added to the loss.
+
+        Returns:
+            float/torch.tensor, float: loss and accuracy of the model on the current batch.
+        """
+        forward_func = self.get_batch_loss_and_accuracy_func(
+            reduction=reduction,
+            add_regularization_if_available=add_regularization_if_available)
+
+        return forward_func()
 
     def get_regularization_loss(self):
         """Returns the current regularization loss of the network based on the parameter groups.
@@ -161,11 +177,13 @@ class TestProblem(abc.ABC):
         """
         # iterate through all layers
         layer_norms = []
-        for regularization, parameter_group in self.regularization_groups.items():
+        for regularization, parameter_group in self.regularization_groups.items(
+        ):
             if regularization > 0.0:
                 # L2 regularization
                 for parameters in parameter_group:
-                    layer_norms.append(regularization * parameters.pow(2).sum())
+                    layer_norms.append(regularization *
+                                       parameters.pow(2).sum())
 
         regularization_loss = 0.5 * sum(layer_norms)
         return regularization_loss
@@ -188,9 +206,9 @@ class TestProblem(abc.ABC):
 
 
 class UnregularizedTestproblem(TestProblem):
-
-    def __init__(self, batch_size, weight_decay = None):
-        super(UnregularizedTestproblem, self).__init__(batch_size, weight_decay)
+    def __init__(self, batch_size, weight_decay=None):
+        super(UnregularizedTestproblem, self).__init__(batch_size,
+                                                       weight_decay)
 
     def get_regularization_groups(self):
         """Creates regularization groups for the parameters.

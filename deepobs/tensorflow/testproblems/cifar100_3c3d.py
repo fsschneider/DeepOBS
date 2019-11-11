@@ -58,16 +58,17 @@ class cifar100_3c3d(TestProblem):
         self.dataset = cifar100(self._batch_size)
         self.train_init_op = self.dataset.train_init_op
         self.train_eval_init_op = self.dataset.train_eval_init_op
+        self.valid_init_op = self.dataset.valid_init_op
         self.test_init_op = self.dataset.test_init_op
 
         x, y = self.dataset.batch
         linear_outputs = _3c3d(
-            x,
-            num_outputs=100,
-            weight_decay=self._weight_decay)
+            x, num_outputs=100, weight_decay=self._weight_decay
+        )
 
         self.losses = tf.nn.softmax_cross_entropy_with_logits_v2(
-            labels=y, logits=linear_outputs)
+            labels=y, logits=linear_outputs
+        )
 
         y_pred = tf.argmax(linear_outputs, 1)
         y_correct = tf.argmax(y, 1)

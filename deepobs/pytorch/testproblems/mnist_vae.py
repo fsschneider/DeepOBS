@@ -65,21 +65,24 @@ class mnist_vae(UnregularizedTestproblem):
         self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
 
-    def get_batch_loss_and_accuracy(self, return_forward_func = False, reduction='mean',
+    def get_batch_loss_and_accuracy_func(self,
+                                    reduction='mean',
                                     add_regularization_if_available=True):
-        """Gets a new batch and calculates the loss and accuracy (if available)
-        on that batch. This is a default implementation for image classification.
-        Testproblems with different calculation routines (e.g. RNNs) overwrite this method accordingly.
+        """Get new batch and create forward function that calculates loss and accuracy (if available)
+        on that batch.
 
         Args:
-            return_forward_func (bool): If ``True``, the call also returns a function that calculates the loss on the current batch. Can be used if you need to access the forward path twice.
+            reduction (str): The reduction that is used for returning the loss. Can be 'mean', 'sum' or 'none' in which \
+            case each indivual loss in the mini-batch is returned as a tensor.
+            add_regularization_if_available (bool): If true, regularization is added to the loss.
         Returns:
-            float, float, (callable): loss and accuracy of the model on the current batch. If ``return_forward_func`` is ``True`` it also returns the function that calculates the loss on the current batch.
-            """
+            callable:  The function that calculates the loss/accuracy on the current batch.
+        """
+
         inputs, _ = self._get_next_batch()
         inputs = inputs.to(self._device)
 
-        def _get_batch_loss_and_accuracy():
+        def forward_func():
             # in evaluation phase is no gradient needed
             if self.phase in ["train_eval", "test", "valid"]:
                 with torch.no_grad():
@@ -98,8 +101,4 @@ class mnist_vae(UnregularizedTestproblem):
 
             return loss + regularizer_loss, accuracy
 
-        if return_forward_func:
-            return _get_batch_loss_and_accuracy(), _get_batch_loss_and_accuracy
-        else:
-            return _get_batch_loss_and_accuracy()
-
+        return forward_func

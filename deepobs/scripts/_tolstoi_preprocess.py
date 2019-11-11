@@ -12,13 +12,11 @@ by the --data_dir argument."""
 import codecs
 import os
 import collections
-from six.moves import cPickle
+import six
 import numpy as np
 
 
-def preprocess(file_path="",
-               encoding="utf-8",
-               test_size=0.2):
+def preprocess(file_path="", encoding="utf-8", test_size=0.2):
     """Short summary.
 
     Args:
@@ -53,10 +51,10 @@ def preprocess(file_path="",
     vocab = dict(zip(chars, range(len(chars))))
 
     # Save vocabulary file
-    with open(vocab_file, 'wb') as voc_file:
-        cPickle.dump(chars, voc_file)
+    with open(vocab_file, "wb") as voc_file:
+        six.moves.cPickle.dump(chars, voc_file)
 
-    # Create array of chharacter ids
+    # Create array of character ids
     array = np.array(list(map(vocab.get, data)))
 
     # Split in train and test and save to .npy files

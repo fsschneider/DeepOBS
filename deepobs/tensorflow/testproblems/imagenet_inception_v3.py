@@ -67,13 +67,14 @@ class imagenet_inception_v3(TestProblem):
         self.dataset = imagenet(self._batch_size)
         self.train_init_op = self.dataset.train_init_op
         self.train_eval_init_op = self.dataset.train_eval_init_op
-        self.test_init_op = self.dataset.test_init_op\
-
+        self.valid_init_op = self.dataset.valid_init_op
+        self.test_init_op = self.dataset.test_init_op
         training = tf.equal(self.dataset.phase, "train")
         x, y = self.dataset.batch
 
         linear_outputs, aux_linear_outputs = _inception_v3(
-            x, training, weight_decay=self._weight_decay)
+            x, training, weight_decay=self._weight_decay
+        )
 
         # Compute two components of losses
         # reduction=tf.losses.Reduction.None means output will have size
@@ -83,19 +84,22 @@ class imagenet_inception_v3(TestProblem):
             logits=aux_linear_outputs,
             weights=0.4,
             label_smoothing=0.1,
-            reduction=tf.losses.Reduction.NONE)
+            reduction=tf.losses.Reduction.NONE,
+        )
         main_losses = tf.losses.softmax_cross_entropy(
             onehot_labels=y,
             logits=linear_outputs,
             label_smoothing=0.1,
-            reduction=tf.losses.Reduction.NONE)
+            reduction=tf.losses.Reduction.NONE,
+        )
 
         # Add main_loss and aux_loss if we are training
         self.losses = tf.cond(
             training,
             lambda: tf.add(main_losses, aux_losses),
             lambda: tf.add(main_losses, 0.0),
-            name="losses")
+            name="losses",
+        )
 
         y_pred = tf.argmax(linear_outputs, 1)
         y_correct = tf.argmax(y, 1)

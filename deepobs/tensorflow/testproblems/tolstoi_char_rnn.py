@@ -59,7 +59,7 @@ class tolstoi_char_rnn(TestProblem):
         if weight_decay is not None:
             print(
                 "WARNING: Weight decay is non-zero but no weight decay is used",
-                "for this model."
+                "for this model.",
             )
 
     def set_up(self):
@@ -76,10 +76,14 @@ class tolstoi_char_rnn(TestProblem):
 
         input_keep_prob = tf.cond(
             tf.equal(self.dataset.phase, tf.constant("train")),
-            lambda: tf.constant(0.8), lambda: tf.constant(1.0))
+            lambda: tf.constant(0.8),
+            lambda: tf.constant(1.0),
+        )
         output_keep_prob = tf.cond(
             tf.equal(self.dataset.phase, tf.constant("train")),
-            lambda: tf.constant(0.8), lambda: tf.constant(1.0))
+            lambda: tf.constant(0.8),
+            lambda: tf.constant(1.0),
+        )
 
         # Create an embedding matrix, look up embedding of input
         embedding = tf.get_variable("embedding", [vocab_size, rnn_size])
@@ -98,20 +102,24 @@ class tolstoi_char_rnn(TestProblem):
             cell = tf.contrib.rnn.DropoutWrapper(
                 cell,
                 input_keep_prob=input_keep_prob,
-                output_keep_prob=output_keep_prob)
+                output_keep_prob=output_keep_prob,
+            )
             cells.append(cell)
         cell = tf.contrib.rnn.MultiRNNCell(cells, state_is_tuple=True)
 
         # Create RNN using the cell defined above, (including operations that store)
         # the state in variables
         self.state_variables, self.zero_states = self._get_state_variables(
-            self._batch_size, cell)
+            self._batch_size, cell
+        )
 
         outputs, new_states = tf.nn.static_rnn(
-            cell, inputs, initial_state=self.state_variables)
+            cell, inputs, initial_state=self.state_variables
+        )
         with tf.control_dependencies(outputs):
-            state_update_op = self._get_state_update_op(self.state_variables,
-                                                       new_states)
+            state_update_op = self._get_state_update_op(
+                self.state_variables, new_states
+            )
 
         # Reshape RNN output for multiplication with softmax layer
         # print "Shape of outputs", [output.get_shape() for output in outputs]
@@ -128,7 +136,8 @@ class tolstoi_char_rnn(TestProblem):
 
         # Reshape logits to batch_size x seq_length x vocab size
         reshaped_logits = tf.reshape(
-            logits, [self._batch_size, seq_length, vocab_size])
+            logits, [self._batch_size, seq_length, vocab_size]
+        )
         # print "Shape of reshaped logits", reshaped_logits.get_shape()
 
         # Create vector of losses
@@ -137,7 +146,8 @@ class tolstoi_char_rnn(TestProblem):
             y,
             weights=tf.ones([self._batch_size, seq_length], dtype=tf.float32),
             average_across_timesteps=True,
-            average_across_batch=False)
+            average_across_batch=False,
+        )
 
         predictions = tf.argmax(reshaped_logits, 2)
         correct_prediction = tf.equal(predictions, y)
@@ -145,18 +155,38 @@ class tolstoi_char_rnn(TestProblem):
 
         self.regularizer = tf.losses.get_regularization_loss()
 
-        self.train_init_op = tf.group([
-            self.dataset.train_init_op,
-            self._get_state_update_op(self.state_variables, self.zero_states)
-        ])
-        self.train_eval_init_op = tf.group([
-            self.dataset.train_eval_init_op,
-            self._get_state_update_op(self.state_variables, self.zero_states)
-        ])
-        self.test_init_op = tf.group([
-            self.dataset.test_init_op,
-            self._get_state_update_op(self.state_variables, self.zero_states)
-        ])
+        self.train_init_op = tf.group(
+            [
+                self.dataset.train_init_op,
+                self._get_state_update_op(
+                    self.state_variables, self.zero_states
+                ),
+            ]
+        )
+        self.train_eval_init_op = tf.group(
+            [
+                self.dataset.train_eval_init_op,
+                self._get_state_update_op(
+                    self.state_variables, self.zero_states
+                ),
+            ]
+        )
+        self.train_eval_init_op = tf.group(
+            [
+                self.dataset.valid_init_op,
+                self._get_state_update_op(
+                    self.state_variables, self.zero_states
+                ),
+            ]
+        )
+        self.test_init_op = tf.group(
+            [
+                self.dataset.test_init_op,
+                self._get_state_update_op(
+                    self.state_variables, self.zero_states
+                ),
+            ]
+        )
 
     def _get_state_variables(self, batch_size, cell):
         """For each layer, get the initial state and make a variable out of it
@@ -178,7 +208,9 @@ class tolstoi_char_rnn(TestProblem):
             state_variables.append(
                 tf.contrib.rnn.LSTMStateTuple(
                     tf.Variable(state_c, trainable=False),
-                    tf.Variable(state_h, trainable=False)))
+                    tf.Variable(state_h, trainable=False),
+                )
+            )
         # Return as a tuple, so that it can be fed to dynamic_rnn as an initial state
         return tuple(state_variables), zero_state
 
@@ -198,10 +230,12 @@ class tolstoi_char_rnn(TestProblem):
         update_ops = []
         for state_variable, new_state in zip(state_variables, new_states):
             # Assign the new state to the state variables on this layer
-            update_ops.extend([
-                state_variable[0].assign(new_state[0]),
-                state_variable[1].assign(new_state[1])
-            ])
+            update_ops.extend(
+                [
+                    state_variable[0].assign(new_state[0]),
+                    state_variable[1].assign(new_state[1]),
+                ]
+            )
         # Return a tuple in order to combine all update_ops into a single operation.
         # The tuple's actual value should not be used.
         return tf.tuple(update_ops)

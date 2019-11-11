@@ -66,8 +66,9 @@ class fmnist_vae(UnregularizedTestproblem):
         self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
 
-    def get_batch_loss_and_accuracy(self, return_forward_func = False, reduction='mean',
-                                    add_regularization_if_available=True):
+    def get_batch_loss_and_accuracy_func(self,
+                                         reduction='mean',
+                                         add_regularization_if_available=True):
         """Gets a new batch and calculates the loss and accuracy (if available)
         on that batch. This is a default implementation for image classification.
         Testproblems with different calculation routines (e.g. RNNs) overwrite this method accordingly.
@@ -80,9 +81,9 @@ class fmnist_vae(UnregularizedTestproblem):
         inputs, _ = self._get_next_batch()
         inputs = inputs.to(self._device)
 
-        def _get_batch_loss_and_accuracy():
+        def forward_func():
             # in evaluation phase is no gradient needed
-            # TODO move this to evaluate in runner
+            # TODO move phase distinction to evaluate in runner?
             if self.phase in ["train_eval", "test", "valid"]:
                 with torch.no_grad():
                     outputs, means, std_devs = self.net(inputs)
@@ -99,8 +100,4 @@ class fmnist_vae(UnregularizedTestproblem):
 
             return loss + regularizer_loss, accuracy
 
-        if return_forward_func:
-            return _get_batch_loss_and_accuracy(), _get_batch_loss_and_accuracy
-        else:
-            return _get_batch_loss_and_accuracy()
-
+        return forward_func

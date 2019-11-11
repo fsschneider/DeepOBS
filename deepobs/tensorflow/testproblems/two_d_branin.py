@@ -56,7 +56,7 @@ class two_d_branin(TestProblem):
         if weight_decay is not None:
             print(
                 "WARNING: Weight decay is non-zero but no weight decay is used",
-                "for this model."
+                "for this model.",
             )
 
     def set_up(self):
@@ -67,6 +67,7 @@ class two_d_branin(TestProblem):
         self.dataset = two_d(self._batch_size)
         self.train_init_op = self.dataset.train_init_op
         self.train_eval_init_op = self.dataset.train_eval_init_op
+        self.valid_init_op = self.dataset.valid_init_op
         self.test_init_op = self.dataset.test_init_op
 
         x, y = self.dataset.batch
@@ -78,21 +79,28 @@ class two_d_branin(TestProblem):
         u = tf.get_variable(
             "weight",
             shape=(),
-            initializer=tf.constant_initializer(starting_point[0]))
+            initializer=tf.constant_initializer(starting_point[0]),
+        )
         v = tf.get_variable(
             "bias",
             shape=(),
-            initializer=tf.constant_initializer(starting_point[1]))
+            initializer=tf.constant_initializer(starting_point[1]),
+        )
 
         # Define some constants.
-        a = 1.
-        b = 5.1 / (4. * np.pi**2)
+        a = 1.0
+        b = 5.1 / (4.0 * np.pi ** 2)
         c = 5 / np.pi
-        r = 6.
-        s = 10.
-        t = 1 / (8. * np.pi)
+        r = 6.0
+        s = 10.0
+        t = 1 / (8.0 * np.pi)
 
-        self.losses = a * (v - b * u**2 + c * u - r)**2 + s * (
-            1 - t) * tf.cos(u) + s + u * x + v * y
+        self.losses = (
+            a * (v - b * u ** 2 + c * u - r) ** 2
+            + s * (1 - t) * tf.cos(u)
+            + s
+            + u * x
+            + v * y
+        )
 
         self.regularizer = tf.losses.get_regularization_loss()

@@ -16,17 +16,17 @@ Create new Run Script
 The easiest way to use DeepOBS with a new optimizer is to write a run script for
 it. This run script will import the optimizer and list its hyperparameters. For the Momentum optimizer in **TensorFlow** this is
 
-.. literalinclude:: ../../example_momentum_runner_tensorflow.py
+.. literalinclude:: ../../examples/runner_momentum_tensorflow.py
 
 You can download this :download:`example run script tensorflow\
-<../../example_momentum_runner_tensorflow.py>` and use it as a template.
+<../../examples/runner_momentum_tensorflow.py>` and use it as a template.
 
 For the Momentum optimizer in **PyTorch** it is
 
-.. literalinclude:: ../../example_momentum_runner_pytorch.py
+.. literalinclude:: ../../examples/runner_momentum_pytorch.py
 
 You can download this :download:`example run script pytorch\
-<../../example_momentum_runner_pytorch.py>` and use it as a template.
+<../../examples/runner_momentum_pytorch.py>` and use it as a template.
 
 The DeepOBS runner needs access to an optimizer class with the same API
 as the TensorFlow/PyTorch optimizers and a list of additional hyperparameters for this
@@ -42,29 +42,29 @@ For **TensorFlow** this would look like this:
 
 .. code-block:: bash
 
-  python example_momentum_runner_tensorflow.py quadratic_deep --bs 128 --learning_rate 1e-2 --momentum 0.99 --num_epochs 10
+  python runner_momentum_tensorflow.py quadratic_deep --bs 128 --learning_rate 1e-2 --momentum 0.99 --num_epochs 10
 
 We will run it a couple times more this time with different ``learning_rates``
 
 .. code-block:: bash
 
-  python example_momentum_runner_tensorflow.py quadratic_deep --bs 128 --learning_rate 1e-3 --momentum 0.99 --num_epochs 10
-  python example_momentum_runner_tensorflow.py quadratic_deep --bs 128 --learning_rate 1e-4 --momentum 0.99 --num_epochs 10
-  python example_momentum_runner_tensorflow.py quadratic_deep --bs 128 --learning_rate 1e-5 --momentum 0.99 --num_epochs 10
+  python runner_momentum_tensorflow.py quadratic_deep --bs 128 --learning_rate 1e-3 --momentum 0.99 --num_epochs 10
+  python runner_momentum_tensorflow.py quadratic_deep --bs 128 --learning_rate 1e-4 --momentum 0.99 --num_epochs 10
+  python runner_momentum_tensorflow.py quadratic_deep --bs 128 --learning_rate 1e-5 --momentum 0.99 --num_epochs 10
 
 For **PyTorch** this would look like this:
 
 .. code-block:: bash
 
-  python example_momentum_runner_pytorch.py quadratic_deep --bs 128 --lr 1e-2 --momentum 0.99 --num_epochs 10
+  python runner_momentum_pytorch.py quadratic_deep --bs 128 --lr 1e-2 --momentum 0.99 --num_epochs 10
 
 We will run it a couple times more this time with different ``lr``
 
 .. code-block:: bash
 
-  python example_momentum_runner_pytorch.py quadratic_deep --bs 128 --lr 1e-3 --momentum 0.99 --num_epochs 10
-  python example_momentum_runner_pytorch.py quadratic_deep --bs 128 --lr 1e-4 --momentum 0.99 --num_epochs 10
-  python example_momentum_runner_pytorch.py quadratic_deep --bs 128 --lr 1e-5 --momentum 0.99 --num_epochs 10
+  python runner_momentum_pytorch.py quadratic_deep --bs 128 --lr 1e-3 --momentum 0.99 --num_epochs 10
+  python runner_momentum_pytorch.py quadratic_deep --bs 128 --lr 1e-4 --momentum 0.99 --num_epochs 10
+  python runner_momentum_pytorch.py quadratic_deep --bs 128 --lr 1e-5 --momentum 0.99 --num_epochs 10
 
 
 Analyzing the Runs
@@ -74,7 +74,7 @@ We can use DeepOBS's ``analyzer`` module to automatically find the best hyperpar
 
 <results_name>/<testproblem>/<optimizer>/<hyperparameter_setting>/
 
-In the above example, the directory of the run outputs for **TenorFlow** would be:
+In the above example, the directory of the run outputs for **TensorFlow** would be:
 
 ./results/quadratic_deep/MomentumOptimizer/...
 
@@ -84,20 +84,27 @@ And for **PyTorch**:
 
 We pass the path to the optimizer directory to the analyzer functions. This way, we can get the best performance setting, a plot for the corresponding training curve and a plot that visualizes the hyperparameter sensitivity.
 
-For **TensorFlow**:
+For **TensorFlow** and **PyTorch**:
 
-.. literalinclude:: ../../example_analyze_tensorflow.py
+.. literalinclude:: ../../examples/analyzer.py
 
+You need to change the results directory accordingly, i.e. in our example it would be 
 
-For **PyTorch**:
+.. code-block:: python
 
-.. literalinclude:: ../../example_analyze_pytorch.py
+   './results/quadratic_deep/SGD'
 
-You can download both scripts and use them as templates for further analysis:
+for TensorFlow (as in the example above) and 
+
+.. code-block:: python
+
+   './results/quadratic_deep/MomentumOptimizer'
+
+for PyTorch.
+
+You can download the script and use it as a template for further analysis:
 :download:`example analyze script tensorflow\
-<../../example_analyze_tensorflow.py>`,
-:download:`example analyze script pytorch\
-<../../example_analyze_pytorch.py>`
+<../../examples/analyzer.py>`.
 
 Note that you can also select a reference path (here the deepobs baselines for **TensorFlow**) to plot reference results as well. You can download the latest baselines from `GitHub`_
 

@@ -3,13 +3,16 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. role:: raw-html(raw)
+    :format: html
+
 Welcome to DeepOBS
 ===================
 
 .. WARNING::
-  This DeepOBS version is under continious development and a beta version.
-  Please report any bugs and comments to `Aaron Bahde`_
-.. _Aaron Bahde: https://github.com/abahde
+  This DeepOBS version is under continious development and a beta of DeepOBS 1.2.0.
+  :raw-html:`<br />`
+  Many thanks to Aaron Bahde for spearheading the developement of DeepOBS 1.2.0.
 
 .. figure:: deepobs_banner.png
 
@@ -65,4 +68,4 @@ Indices and tables
 * :ref:`search`
 
 
-.. _GitHub: https://github.com/abahde/DeepOBS
+.. _GitHub: https://github.com/fsschneider/DeepOBS/tree/v1.2.0-beta0

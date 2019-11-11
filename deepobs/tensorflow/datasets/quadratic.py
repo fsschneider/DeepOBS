@@ -73,7 +73,7 @@ class quadratic(dataset.DataSet):
             A tf.data.Dataset yielding batches of quadratic data.
         """
         with tf.name_scope(self._name):
-            with tf.device('/cpu:0'):
+            with tf.device("/cpu:0"):
                 data = tf.data.Dataset.from_tensor_slices(X)
                 if shuffle:
                     data = data.shuffle(buffer_size=20000)
@@ -81,36 +81,51 @@ class quadratic(dataset.DataSet):
                 data = data.prefetch(buffer_size=4)
                 return data
 
-    def _make_train_dataset(self):
-        """Creates the quadratic training dataset.
+    def _make_train_datasets(self):
+        """Creates the three quadratic datasets stemming from the training
+        part of the data set, i.e. the training set, the training
+        evaluation set, and the validation set.
 
     Returns:
       A tf.data.Dataset instance with batches of training data.
+      A tf.data.Dataset instance with batches of training eval data.
+      A tf.data.Dataset instance with batches of validation data.
     """
         # Draw data from a random generator with a fixed seed to always get the
         # same data.
         rng = np.random.RandomState(42)
-        X = rng.normal(0.0, self._noise_level, (self._train_size, self._dim))
-        X = np.float32(X)
-        return self._make_dataset(X, shuffle=True)
+        X_train = rng.normal(
+            0.0, self._noise_level, (self._train_size, self._dim)
+        )
+        X_train = np.float32(X_train)
+        train_data = self._make_dataset(X_train, shuffle=True)
 
-    def _make_train_eval_dataset(self):
-        """Creates the quadratic train eval dataset.
+        train_eval_data = train_data.take(self._train_size // self._batch_size)
 
-        Returns:
-            A tf.data.Dataset instance with batches of training eval data.
-        """
-        return self._train_dataset.take(-1)  # Take all.
+        # Draw data from a random generator with a fixed seed to always get the
+        # same data.
+        rng = np.random.RandomState(44)
+        X_valid = rng.normal(
+            0.0, self._noise_level, (self._train_size, self._dim)
+        )
+        X_valid = np.float32(X_valid)
+        valid_data = self._make_dataset(X_valid, shuffle=False)
+
+        return train_data, train_eval_data, valid_data
 
     def _make_test_dataset(self):
         """Creates the quadratic test dataset.
 
-        Returns:
-            A tf.data.Dataset instance with batches of test data.
-        """
+    Returns:
+      A tf.data.Dataset instance with batches of test data.
+    """
         # Draw data from a random generator with a fixed seed to always get the
         # same data.
         rng = np.random.RandomState(43)
-        X = rng.normal(0.0, self._noise_level, (self._train_size, self._dim))
-        X = np.float32(X)
-        return self._make_dataset(X, shuffle=False)
+        X_test = rng.normal(
+            0.0, self._noise_level, (self._train_size, self._dim)
+        )
+        X_test = np.float32(X_test)
+
+        return self._make_dataset(X_test, shuffle=False)
+

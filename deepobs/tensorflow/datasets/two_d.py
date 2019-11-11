@@ -18,7 +18,7 @@ class two_d(dataset.DataSet):
         is not a divider of the dataset size (``1000`` for train and test) the
         remainder is dropped in each epoch (after shuffling).
     train_size (int): Size of the training data set. This will also be used as
-        the train_eval and test set size. Defaults to ``1000``.
+        the train_eval and test set size. Defaults to ``10000``.
     noise_level (float): Standard deviation of the data points around the mean.
         The data points are drawn from a Gaussian distribution. Defaults to
         ``1.0``.
@@ -46,7 +46,7 @@ class two_d(dataset.DataSet):
           is not a divider of the dataset size (1k for train and test) the
           remainder is dropped in each epoch (after shuffling).
       train_size (int): Size of the training data set. This will also be used as
-          the train_eval and test set size. Defaults to ``1000``.
+          the train_eval and test set size. Defaults to ``10000``.
       noise_level (float): Standard deviation of the data points around the mean.
           The data points are drawn from a Gaussian distribution. Defaults to
           ``1.0``.
@@ -71,7 +71,7 @@ class two_d(dataset.DataSet):
             A tf.data.Dataset yielding batches of 2D data.
         """
         with tf.name_scope(self._name):
-            with tf.device('/cpu:0'):
+            with tf.device("/cpu:0"):
                 data = tf.data.Dataset.from_tensor_slices((data_x, data_y))
                 if shuffle:
                     data = data.shuffle(buffer_size=20000)
@@ -79,37 +79,47 @@ class two_d(dataset.DataSet):
                 data = data.prefetch(buffer_size=4)
                 return data
 
-    def _make_train_dataset(self):
-        """Creates the 2D training dataset.
+    def _make_train_datasets(self):
+        """Creates the three 2D datasets stemming from the training
+        part of the data set, i.e. the training set, the training
+        evaluation set, and the validation set.
 
     Returns:
       A tf.data.Dataset instance with batches of training data.
+      A tf.data.Dataset instance with batches of training eval data.
+      A tf.data.Dataset instance with batches of validation data.
     """
         # Draw data from a random generator with a fixed seed to always get the
         # same data.
         rng = np.random.RandomState(42)
-        data_x = rng.normal(0.0, self._noise_level, self._train_size)
-        data_y = rng.normal(0.0, self._noise_level, self._train_size)
-        data_x = np.float32(data_x)
-        data_y = np.float32(data_y)
-        return self._make_dataset(data_x, data_y, shuffle=True)
+        train_x = rng.normal(0.0, self._noise_level, self._train_size)
+        train_y = rng.normal(0.0, self._noise_level, self._train_size)
+        train_x = np.float32(train_x)
+        train_y = np.float32(train_y)
+        train_data = self._make_dataset(train_x, train_y, shuffle=True)
 
-    def _make_train_eval_dataset(self):
-        """Creates the 2D train eval dataset.
+        train_eval_data = train_data.take(self._train_size // self._batch_size)
 
-    Returns:
-      A tf.data.Dataset instance with batches of training eval data.
-    """
-        return self._train_dataset.take(self._train_size // self._batch_size)
+        # Draw data from a random generator with a fixed seed to always get the
+        # same data.
+        rng = np.random.RandomState(44)
+        valid_x = rng.normal(0.0, self._noise_level, self._train_size)
+        valid_y = rng.normal(0.0, self._noise_level, self._train_size)
+        valid_x = np.float32(valid_x)
+        valid_y = np.float32(valid_y)
+        valid_data = self._make_dataset(valid_x, valid_y, shuffle=False)
+
+        return train_data, train_eval_data, valid_data
 
     def _make_test_dataset(self):
-        """Creates the 2D test dataset.
+        """Creates the quadratic test dataset.
 
     Returns:
       A tf.data.Dataset instance with batches of test data.
     """
         # recovers the deterministic 2D function using zeros
-        data_x, data_y = np.zeros(self._train_size), np.zeros(self._train_size)
-        data_x = np.float32(data_x)
-        data_y = np.float32(data_y)
-        return self._make_dataset(data_x, data_y, shuffle=False)
+        test_x, test_y = np.zeros(self._train_size), np.zeros(self._train_size)
+        test_x = np.float32(test_x)
+        test_y = np.float32(test_y)
+
+        return self._make_dataset(test_x, test_y, shuffle=False)

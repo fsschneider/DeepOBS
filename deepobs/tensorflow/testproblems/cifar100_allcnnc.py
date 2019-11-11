@@ -62,9 +62,12 @@ class cifar100_allcnnc(TestProblem):
         self.dataset = cifar100(self._batch_size)
         self.train_init_op = self.dataset.train_init_op
         self.train_eval_init_op = self.dataset.train_eval_init_op
+        self.valid_init_op = self.dataset.valid_init_op
         self.test_init_op = self.dataset.test_init_op
 
-        def conv2d(inputs, filters, kernel_size=3, strides=(1, 1), padding="same"):
+        def conv2d(
+            inputs, filters, kernel_size=3, strides=(1, 1), padding="same"
+        ):
             """Convenience wrapper for conv layers."""
             return tf.layers.conv2d(
                 inputs,
@@ -75,7 +78,10 @@ class cifar100_allcnnc(TestProblem):
                 activation=tf.nn.relu,
                 bias_initializer=tf.initializers.constant(0.1),
                 kernel_initializer=tf.keras.initializers.glorot_normal(),
-                kernel_regularizer=tf.contrib.layers.l2_regularizer(self._weight_decay))
+                kernel_regularizer=tf.contrib.layers.l2_regularizer(
+                    self._weight_decay
+                ),
+            )
 
         training = tf.equal(self.dataset.phase, "train")
         x, y = self.dataset.batch
@@ -101,7 +107,8 @@ class cifar100_allcnnc(TestProblem):
         linear_outputs = tf.reduce_mean(x, axis=[1, 2])
 
         self.losses = tf.nn.softmax_cross_entropy_with_logits_v2(
-            labels=y, logits=linear_outputs)
+            labels=y, logits=linear_outputs
+        )
 
         y_pred = tf.argmax(linear_outputs, 1)
         y_correct = tf.argmax(y, 1)

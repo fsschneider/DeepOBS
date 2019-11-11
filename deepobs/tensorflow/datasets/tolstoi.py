@@ -55,7 +55,7 @@ class tolstoi(dataset.DataSet):
         self._train_eval_size = train_eval_size
         super(tolstoi, self).__init__(batch_size)
 
-    def _make_dataset(self, filepath):
+    def _make_dataset(self, arr):
         """Creates a Tolstoi data set (helper used by ``.make_*_datset`` below).
 
     Args:
@@ -65,20 +65,20 @@ class tolstoi(dataset.DataSet):
         A tf.data.Dataset yielding batches of Tolstoi data.
     """
         # Load the array of character ids, determine the number of batches that
-        # can be produced, given batch size and sequence lengh
-        arr = np.load(filepath)
+        # can be produced, given batch size and sequence length
         num_batches = int(
-            np.floor(
-                (np.size(arr) - 1) / (self._batch_size * self._seq_length)))
+            np.floor((np.size(arr) - 1) / (self._batch_size * self._seq_length))
+        )
         if num_batches == 0:
             raise ValueError(
                 "This dataset is to small to use with this batch size "
-                "and sequence length.")
+                "and sequence length."
+            )
 
         # Create input and output, where output is the text shifted by one
         # character
-        x = arr[:num_batches * self._batch_size * self._seq_length]
-        y = arr[1:num_batches * self._batch_size * self._seq_length + 1]
+        x = arr[: num_batches * self._batch_size * self._seq_length]
+        y = arr[1 : num_batches * self._batch_size * self._seq_length + 1]
 
         # Split into batches and put into arrays X, Y, such that X[i,:] is the
         # i-th batch
@@ -88,28 +88,36 @@ class tolstoi(dataset.DataSet):
         Y = np.array(y_batches)
 
         with tf.name_scope(self._name):
-            with tf.device('/cpu:0'):
+            with tf.device("/cpu:0"):
                 data = tf.data.Dataset.from_tensor_slices((X, Y))
                 data = data.prefetch(buffer_size=4)
                 return data
 
-    def _make_train_dataset(self):
-        """Creates the Tolstoi training dataset.
+    def _make_train_datasets(self):
+        """Creates the three Tolstoi datasets stemming from the training
+        part of the data set, i.e. the training set, the training
+        evaluation set, and the validation set.
 
     Returns:
       A tf.data.Dataset instance with batches of training data.
+      A tf.data.Dataset instance with batches of training eval data.
+      A tf.data.Dataset instance with batches of validation data.
     """
         filepath = os.path.join(config.get_data_dir(), "tolstoi", "train.npy")
-        return self._make_dataset(filepath)
 
-    def _make_train_eval_dataset(self):
-        """Creates the Tolstoi train eval dataset.
+        data = np.load(filepath)
 
-    Returns:
-      A tf.data.Dataset instance with batches of training eval data.
-    """
-        return self._train_dataset.take(
-            self._train_eval_size // self._batch_size)
+        valid_data = data[0 : self._train_eval_size]
+        train_data = data[self._train_eval_size :]
+
+        train_data = self._make_dataset(train_data)
+        train_eval_data = train_data.take(
+            self._train_eval_size // (self._batch_size * self._seq_length)
+        )
+
+        valid_data = self._make_dataset(valid_data)
+
+        return train_data, train_eval_data, valid_data
 
     def _make_test_dataset(self):
         """Creates the Tolstoi test dataset.
@@ -118,4 +126,8 @@ class tolstoi(dataset.DataSet):
       A tf.data.Dataset instance with batches of test data.
     """
         filepath = os.path.join(config.get_data_dir(), "tolstoi", "test.npy")
-        return self._make_dataset(filepath)
+
+        data = np.load(filepath)
+
+        return self._make_dataset(data)
+
