@@ -419,7 +419,7 @@ class net_quadratic_deep(nn.Sequential):
 
         # for init
         dim = hessian.size(0)
-        sqrt_hessian = torch.cholesky(hessian)
+        sqrt_hessian = self._compute_and_check_sqrt(hessian)
 
         self.add_module("shift", nn.Linear(dim, dim, bias=True))
         self.add_module("scale", nn.Linear(dim, dim, bias=False))
@@ -431,6 +431,16 @@ class net_quadratic_deep(nn.Sequential):
 
         self.scale.weight = sqrt_hessian
         self.scale.weight.requires_grad = False
+
+    @staticmethod
+    def _compute_and_check_sqrt(mat):
+        sqrt = torch.cholesky(mat)
+
+        # TODO: Remove for integration
+        check_mat = torch.einsum("ij,kj->ik", (sqrt, sqrt))
+        assert torch.allclose(mat, check_mat, rtol=1e-4)
+
+        return sqrt
 
 
 class net_mlp(nn.Sequential):
