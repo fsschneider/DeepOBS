@@ -425,11 +425,11 @@ class net_quadratic_deep(nn.Sequential):
         self.add_module("scale", nn.Linear(dim, dim, bias=False))
 
         # init
-        nn.init.eye_(self.shift.weight)
+        self.shift.weight.data = - torch.eye(dim, dim)
         self.shift.weight.requires_grad = False
         nn.init.ones_(self.shift.bias)
 
-        self.scale.weight = sqrt_hessian
+        self.scale.weight.data = sqrt_hessian
         self.scale.weight.requires_grad = False
 
     @staticmethod
