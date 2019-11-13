@@ -25,7 +25,45 @@ class Quadratic_DeepTest(unittest.TestCase):
         torch.manual_seed(42)
         self.quadratic_deep.set_up()
         for parameter in self.quadratic_deep.net.parameters():
-            self.assertEqual(parameter.numel(), 100)
+            if parameter.requires_grad:
+                self.assertEqual(parameter.numel(), 100)
+
+    def test_forward(self):
+        quadratic_deep = testproblems.quadratic_deep(self.batch_size)
+        # prob = self.quadratic_deep
+        prob = quadratic_deep
+
+        prob.set_up()
+        prob.train_init_op()
+
+        inputs, labels = prob._get_next_batch()
+        num_inputs = inputs.numel()
+        net, loss_function = prob.net, prob.loss_function
+
+        # from test problem
+        outputs = net(inputs)
+        loss = loss_function(reduction="mean")(outputs, labels)
+
+        # manual re-computation of the model output
+        shifted = -inputs + net.shift.bias.data
+        sqrt = testproblems.testproblems_modules.net_quadratic_deep._compute_sqrt(
+            prob._hessian)
+        outputs_check = torch.einsum('ji,bj->bi', (sqrt, shifted))
+        assert torch.allclose(outputs, outputs_check, atol=1e-6, rtol=1e-6)
+
+        # check Hessian initialization
+        hessian_check = torch.einsum(
+            "ki,kj->ij", (net.scale.weight.data, net.scale.weight.data))
+        assert torch.allclose(prob._hessian,
+                              hessian_check,
+                              atol=1e-6,
+                              rtol=1e-6)
+
+        # manual recomputation of the loss
+        loss_check = torch.einsum(
+            "bi,ij,bj", (shifted, prob._hessian, shifted)) / num_inputs
+        assert torch.allclose(loss, loss_check)
+
     def test_hessian_sqrt(self):
         hessian = testproblems.quadratic_deep._make_hessian()
         sqrt = testproblems.testproblems_modules.net_quadratic_deep._compute_sqrt(
