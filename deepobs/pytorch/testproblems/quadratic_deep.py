@@ -87,20 +87,23 @@ class quadratic_deep(UnregularizedTestproblem):
 
     def set_up(self):
         hessian = self._make_hessian()
+        self._hessian = hessian
         self.net = net_quadratic_deep(hessian)
         self.data = quadratic(self._batch_size)
         self.net.to(self._device)
         self.loss_function = torch.nn.MSELoss
         self.regularization_groups = self.get_regularization_groups()
 
-    def _make_hessian(self):
+    @staticmethod
+    def _make_hessian(eigvals_small=90, eigvals_large=10):
         rng = np.random.RandomState(42)
-        eigenvalues = np.concatenate(
-            (rng.uniform(0., 1., 90), rng.uniform(30., 60., 10)), axis=0)
+        eigenvalues = np.concatenate((rng.uniform(
+            0., 1., eigvals_small), rng.uniform(30., 60., eigvals_large)),
+                                     axis=0)
         D = np.diag(eigenvalues)
         R = random_rotation(D.shape[0])
         Hessian = np.matmul(np.transpose(R), np.matmul(D, R))
-        return torch.from_numpy(Hessian).to(self._device, torch.float32)
+        return torch.from_numpy(Hessian).to(torch.float32)
 
     def get_batch_loss_and_accuracy_func(self,
                                          reduction='mean',
