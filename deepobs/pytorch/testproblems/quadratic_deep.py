@@ -90,7 +90,7 @@ class quadratic_deep(UnregularizedTestproblem):
         self.net = net_quadratic_deep(hessian)
         self.data = quadratic(self._batch_size)
         self.net.to(self._device)
-        self.loss_function = nn.MSELoss
+        self.loss_function = torch.nn.MSELoss
         self.regularization_groups = self.get_regularization_groups()
 
     def _make_hessian(self):
@@ -116,16 +116,20 @@ class quadratic_deep(UnregularizedTestproblem):
             callable:  The function that calculates the loss/accuracy on the current batch.
         """
 
-        inputs = self._get_next_batch()[0]
+        inputs, labels = self._get_next_batch()
         inputs = inputs.to(self._device)
-        
+        labels = labels.to(self._device)
+
         def forward_func():
             # in evaluation phase is no gradient needed
             if self.phase in ["train_eval", "test", "valid"]:
                 with torch.no_grad():
-                    loss = self.loss_function(reduction=reduction)(inputs)
+                    outputs = self.net(inputs)
+                    loss = self.loss_function(reduction=reduction)(outputs,
+                                                                   labels)
             else:
-                loss = self.loss_function(reduction=reduction)(inputs)
+                outputs = self.net(inputs)
+                loss = self.loss_function(reduction=reduction)(outputs, labels)
 
             accuracy = 0.0
 
