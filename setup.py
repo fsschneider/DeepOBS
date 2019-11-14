@@ -11,6 +11,7 @@ install_requires_list = [
     "tikzplotlib",
     "seaborn",
     "bayesian-optimization",
+    "torchtext"
 ]
 
 

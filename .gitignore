@@ -41,3 +41,7 @@ wheels/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+## data directory
+data_deepobs/
+results/

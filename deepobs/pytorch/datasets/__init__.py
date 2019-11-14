@@ -7,3 +7,4 @@ from .cifar100 import cifar100
 from .fmnist import fmnist
 from .svhn import svhn
 from .quadratic import quadratic
+from .imdb import imdb

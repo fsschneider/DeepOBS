@@ -111,7 +111,10 @@ class TestProblem(abc.ABC):
         """
 
         inputs, labels = self._get_next_batch()
-        inputs = inputs.to(self._device)
+        if type(inputs) is list:
+            inputs = inputs[0].to(self._device), inputs[1].to(self._device)
+        else:
+            inputs = inputs.to(self._device)
         labels = labels.to(self._device)
 
         def forward_func():
