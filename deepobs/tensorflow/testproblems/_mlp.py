@@ -16,7 +16,8 @@ def _mlp(x, num_outputs):
             units,
             activation,
             bias_initializer=tf.initializers.constant(0.0),
-            kernel_initializer=tf.truncated_normal_initializer(stddev=3e-2))
+            kernel_initializer=tf.truncated_normal_initializer(stddev=3e-2),
+        )
 
     x = tf.reshape(x, [-1, 784])
 

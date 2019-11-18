@@ -6,7 +6,12 @@ import sys
 import unittest
 import torch
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
 
 from deepobs.pytorch import testproblems
 
@@ -29,13 +34,21 @@ class Cifar10_3c3dTest(unittest.TestCase):
             num_param.append(parameter.numel())
 
         expected_num_param = [
-                3 * 64 * 5 * 5, 64, 64 * 96 * 3 * 3, 96, 96 * 128 * 3 * 3, 128,
-                3 * 3 * 128 * 512, 512, 512 * 256, 256, 256 * 10, 10
-            ]
+            3 * 64 * 5 * 5,
+            64,
+            64 * 96 * 3 * 3,
+            96,
+            96 * 128 * 3 * 3,
+            128,
+            3 * 3 * 128 * 512,
+            512,
+            512 * 256,
+            256,
+            256 * 10,
+            10,
+        ]
 
         self.assertEqual(num_param, expected_num_param)
-
-
 
 
 if __name__ == "__main__":

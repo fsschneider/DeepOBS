@@ -18,15 +18,13 @@ def _2c2d(x, num_outputs):
             padding="same",
             activation=tf.nn.relu,
             bias_initializer=tf.initializers.constant(0.05),
-            kernel_initializer=tf.truncated_normal_initializer(stddev=0.05))
+            kernel_initializer=tf.truncated_normal_initializer(stddev=0.05),
+        )
 
     def max_pool(inputs):
         """Convenience wrapper for max pool layers."""
         return tf.layers.max_pooling2d(
-            inputs,
-            pool_size=2,
-            strides=2,
-            padding='same',
+            inputs, pool_size=2, strides=2, padding="same"
         )
 
     def dense(inputs, units, activation):
@@ -36,7 +34,8 @@ def _2c2d(x, num_outputs):
             units,
             activation,
             bias_initializer=tf.initializers.constant(0.05),
-            kernel_initializer=tf.truncated_normal_initializer(stddev=0.05))
+            kernel_initializer=tf.truncated_normal_initializer(stddev=0.05),
+        )
 
     x = conv2d(x, 32)
     x = max_pool(x)

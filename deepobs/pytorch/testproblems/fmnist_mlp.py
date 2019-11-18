@@ -7,6 +7,7 @@ from ..datasets.fmnist import fmnist
 from .testproblem import UnregularizedTestproblem
 import warnings
 
+
 class fmnist_mlp(UnregularizedTestproblem):
     """DeepOBS test problem class for a multi-layer perceptron neural network\
     on Fashion-MNIST.
@@ -32,6 +33,7 @@ class fmnist_mlp(UnregularizedTestproblem):
         loss_function: The loss function for this testproblem is torch.nn.CrossEntropyLoss()
         net: The DeepOBS subclass of torch.nn.Module that is trained for this tesproblem (net_mlp).
         """
+
     def __init__(self, batch_size, weight_decay=None):
         """Create a new multi-layer perceptron test problem instance on \
         Fashion-MNIST.
@@ -46,7 +48,7 @@ class fmnist_mlp(UnregularizedTestproblem):
         if weight_decay is not None:
             warnings.warn(
                 "Weight decay is non-zero but no weight decay is used for this model.",
-                RuntimeWarning
+                RuntimeWarning,
             )
 
     def set_up(self):

@@ -7,7 +7,12 @@ import unittest
 import torch
 import numpy as np
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
 
 from deepobs.pytorch import testproblems
 
@@ -26,6 +31,7 @@ class Quadratic_DeepTest(unittest.TestCase):
         self.quadratic_deep.set_up()
         for parameter in self.quadratic_deep.net.parameters():
             self.assertEqual(parameter.numel(), 100)
+
 
 if __name__ == "__main__":
     unittest.main()

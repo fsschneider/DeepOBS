@@ -6,19 +6,31 @@ from deepobs import config
 from torchvision import datasets
 from torchvision import transforms
 
-training_transform_not_augmented = transforms.Compose([
-                    transforms.ToTensor(),
-                    transforms.Normalize((0.49139968, 0.48215841, 0.44653091), (0.24703223, 0.24348513, 0.26158784))
-                    ])
+training_transform_not_augmented = transforms.Compose(
+    [
+        transforms.ToTensor(),
+        transforms.Normalize(
+            (0.49139968, 0.48215841, 0.44653091),
+            (0.24703223, 0.24348513, 0.26158784),
+        ),
+    ]
+)
 
-training_transform_augmented = transforms.Compose([
-                    transforms.Pad(padding=2),
-                    transforms.RandomCrop(size=(32,32)),
-                    transforms.RandomHorizontalFlip(),
-                    transforms.ColorJitter(brightness=63. / 255., saturation=[0.5,1.5], contrast=[0.2,1.8]),
-                    transforms.ToTensor(),
-                    transforms.Normalize((0.49139968, 0.48215841, 0.44653091),(0.24703223, 0.24348513, 0.26158784))
-                    ])
+training_transform_augmented = transforms.Compose(
+    [
+        transforms.Pad(padding=2),
+        transforms.RandomCrop(size=(32, 32)),
+        transforms.RandomHorizontalFlip(),
+        transforms.ColorJitter(
+            brightness=63.0 / 255.0, saturation=[0.5, 1.5], contrast=[0.2, 1.8]
+        ),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            (0.49139968, 0.48215841, 0.44653091),
+            (0.24703223, 0.24348513, 0.26158784),
+        ),
+    ]
+)
 
 
 class cifar10(dataset.DataSet):
@@ -39,10 +51,9 @@ class cifar10(dataset.DataSet):
       _make_dataloader: A helper that is shared by all three data loader methods.
   """
 
-    def __init__(self,
-                 batch_size,
-                 data_augmentation=True,
-                 train_eval_size=10000):
+    def __init__(
+        self, batch_size, data_augmentation=True, train_eval_size=10000
+    ):
         """Creates a new CIFAR-10 instance.
 
     Args:
@@ -66,12 +77,29 @@ class cifar10(dataset.DataSet):
         else:
             transform = training_transform_not_augmented
 
-        train_dataset = datasets.CIFAR10(root=config.get_data_dir(), train=True, download=True, transform=transform)
-        valid_dataset = datasets.CIFAR10(root=config.get_data_dir(), train=True, download=True, transform=training_transform_not_augmented)
-        train_loader, valid_loader = self._make_train_and_valid_dataloader_helper(train_dataset, valid_dataset)
+        train_dataset = datasets.CIFAR10(
+            root=config.get_data_dir(),
+            train=True,
+            download=True,
+            transform=transform,
+        )
+        valid_dataset = datasets.CIFAR10(
+            root=config.get_data_dir(),
+            train=True,
+            download=True,
+            transform=training_transform_not_augmented,
+        )
+        train_loader, valid_loader = self._make_train_and_valid_dataloader_helper(
+            train_dataset, valid_dataset
+        )
         return train_loader, valid_loader
 
     def _make_test_dataloader(self):
         transform = training_transform_not_augmented
-        test_dataset = datasets.CIFAR10(root=config.get_data_dir(), train=False, download=True, transform=transform)
+        test_dataset = datasets.CIFAR10(
+            root=config.get_data_dir(),
+            train=False,
+            download=True,
+            transform=transform,
+        )
         return self._make_dataloader(test_dataset, sampler=None)

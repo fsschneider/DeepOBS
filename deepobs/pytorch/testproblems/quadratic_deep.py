@@ -42,10 +42,12 @@ def random_rotation(D):
         # random coset location of SO(d-1) in SO(d)
         x = np.divide((e - v), (np.sqrt(np.transpose(e - v).dot(e - v))))
 
-        D = np.vstack([
-            np.hstack([[[1.0]], np.zeros((1, d))]),
-            np.hstack([np.zeros((d, 1)), R])
-        ])
+        D = np.vstack(
+            [
+                np.hstack([[[1.0]], np.zeros((1, d))]),
+                np.hstack([np.zeros((d, 1)), R]),
+            ]
+        )
         R = D - 2 * np.outer(x, np.transpose(x).dot(D))
     # return negative to fix determinant
     return np.negative(R)
@@ -85,23 +87,27 @@ class quadratic_deep(UnregularizedTestproblem):
         """
         super(quadratic_deep, self).__init__(batch_size, weight_decay)
 
-    def quadratic_deep_loss_function_factory(self, reduction='mean'):
+    def quadratic_deep_loss_function_factory(self, reduction="mean"):
         def quadratic_deep_loss_function(inputs):
             batched_loss = self.net(inputs)
-            if reduction == 'mean':
+            if reduction == "mean":
                 return batched_loss.mean()
-            elif reduction == 'sum':
+            elif reduction == "sum":
                 return torch.sum(batched_loss)
-            elif reduction == 'none':
+            elif reduction == "none":
                 return batched_loss
             else:
-                raise NotImplementedError('Reduction ' + reduction + ' not implemented')
+                raise NotImplementedError(
+                    "Reduction " + reduction + " not implemented"
+                )
+
         return quadratic_deep_loss_function
 
     def set_up(self):
         rng = np.random.RandomState(42)
         eigenvalues = np.concatenate(
-            (rng.uniform(0., 1., 90), rng.uniform(30., 60., 10)), axis=0)
+            (rng.uniform(0.0, 1.0, 90), rng.uniform(30.0, 60.0, 10)), axis=0
+        )
         D = np.diag(eigenvalues)
         R = random_rotation(D.shape[0])
         Hessian = np.matmul(np.transpose(R), np.matmul(D, R))
@@ -113,9 +119,9 @@ class quadratic_deep(UnregularizedTestproblem):
         self.loss_function = self.quadratic_deep_loss_function_factory
         self.regularization_groups = self.get_regularization_groups()
 
-    def get_batch_loss_and_accuracy_func(self,
-                                         reduction='mean',
-                                         add_regularization_if_available=True):
+    def get_batch_loss_and_accuracy_func(
+        self, reduction="mean", add_regularization_if_available=True
+    ):
         """Get new batch and create forward function that calculates loss and accuracy (if available)
         on that batch.
 
@@ -129,7 +135,7 @@ class quadratic_deep(UnregularizedTestproblem):
 
         inputs = self._get_next_batch()[0]
         inputs = inputs.to(self._device)
-        
+
         def forward_func():
             # in evaluation phase is no gradient needed
             if self.phase in ["train_eval", "test", "valid"]:
@@ -143,7 +149,9 @@ class quadratic_deep(UnregularizedTestproblem):
             if add_regularization_if_available:
                 regularizer_loss = self.get_regularization_loss()
             else:
-                regularizer_loss = torch.tensor(0.0, device=torch.device(self._device))
+                regularizer_loss = torch.tensor(
+                    0.0, device=torch.device(self._device)
+                )
 
             return loss + regularizer_loss, accuracy
 

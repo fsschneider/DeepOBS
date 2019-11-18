@@ -8,6 +8,7 @@ from ._quadratic import _quadratic_base
 # These are fixed properties of the test problem and should _not_ be randomized.
 rng = np.random.RandomState(42)
 
+
 def random_rotation(D):
     """Produces a rotation matrix R in SO(D) (the special orthogonal
     group SO(D), or orthogonal matrices with unit determinant, drawn uniformly
@@ -39,10 +40,12 @@ def random_rotation(D):
         # random coset location of SO(d-1) in SO(d)
         x = np.divide((e - v), (np.sqrt(np.transpose(e - v).dot(e - v))))
 
-        D = np.vstack([
-            np.hstack([[[1.0]], np.zeros((1, d))]),
-            np.hstack([np.zeros((d, 1)), R])
-        ])
+        D = np.vstack(
+            [
+                np.hstack([[[1.0]], np.zeros((1, d))]),
+                np.hstack([np.zeros((d, 1)), R]),
+            ]
+        )
         R = D - 2 * np.outer(x, np.transpose(x).dot(D))
     # return negative to fix determinant
     return np.negative(R)
@@ -90,7 +93,8 @@ class quadratic_deep(_quadratic_base):
               test problem. Defaults to ``None`` and any input here is ignored.
         """
         eigenvalues = np.concatenate(
-            (rng.uniform(0., 1., 90), rng.uniform(30., 60., 10)), axis=0)
+            (rng.uniform(0.0, 1.0, 90), rng.uniform(30.0, 60.0, 10)), axis=0
+        )
         D = np.diag(eigenvalues)
         R = random_rotation(D.shape[0])
         hessian = np.matmul(np.transpose(R), np.matmul(D, R))

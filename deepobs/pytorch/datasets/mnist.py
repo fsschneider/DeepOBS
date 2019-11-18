@@ -10,6 +10,7 @@ from torchvision import datasets
 from torchvision import transforms
 from .datasets_utils import train_eval_sampler
 
+
 class mnist(dataset.DataSet):
     """DeepOBS data set class for the `MNIST\
     <http://yann.lecun.com/exdb/mnist/>`_ data set.
@@ -25,9 +26,7 @@ class mnist(dataset.DataSet):
       _make_dataloader: A helper that is shared by all three data loader methods.
   """
 
-    def __init__(self,
-                 batch_size,
-                 train_eval_size=10000):
+    def __init__(self, batch_size, train_eval_size=10000):
         """Creates a new MNIST instance.
 
     Args:
@@ -43,12 +42,29 @@ class mnist(dataset.DataSet):
 
     def _make_train_and_valid_dataloader(self):
         transform = transforms.ToTensor()
-        train_dataset = datasets.MNIST(root=config.get_data_dir(), train=True, download=True, transform=transform)
-        valid_dataset = datasets.MNIST(root=config.get_data_dir(), train=True, download=True, transform=transform)
-        train_loader, valid_loader = self._make_train_and_valid_dataloader_helper(train_dataset, valid_dataset)
+        train_dataset = datasets.MNIST(
+            root=config.get_data_dir(),
+            train=True,
+            download=True,
+            transform=transform,
+        )
+        valid_dataset = datasets.MNIST(
+            root=config.get_data_dir(),
+            train=True,
+            download=True,
+            transform=transform,
+        )
+        train_loader, valid_loader = self._make_train_and_valid_dataloader_helper(
+            train_dataset, valid_dataset
+        )
         return train_loader, valid_loader
 
     def _make_test_dataloader(self):
         transform = transforms.ToTensor()
-        test_dataset = datasets.MNIST(root=config.get_data_dir(), train=False, download=True, transform=transform)
+        test_dataset = datasets.MNIST(
+            root=config.get_data_dir(),
+            train=False,
+            download=True,
+            transform=transform,
+        )
         return self._make_dataloader(test_dataset, sampler=None)

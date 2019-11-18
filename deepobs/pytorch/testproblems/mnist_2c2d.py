@@ -48,7 +48,7 @@ class mnist_2c2d(UnregularizedTestproblem):
         if weight_decay is not None:
             warnings.warn(
                 "Weight decay is non-zero but no weight decay is used for this model.",
-                RuntimeWarning
+                RuntimeWarning,
             )
 
     def set_up(self):

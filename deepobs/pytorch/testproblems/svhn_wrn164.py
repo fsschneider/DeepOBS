@@ -42,7 +42,9 @@ class svhn_wrn164(TestProblem):
         """Set up the Wide ResNet 16-4 test problem on SVHN."""
         self.data = svhn(self._batch_size, data_augmentation=True)
         self.loss_function = nn.CrossEntropyLoss
-        self.net = net_wrn(num_outputs=10, num_residual_blocks=2, widening_factor=4)
+        self.net = net_wrn(
+            num_outputs=10, num_residual_blocks=2, widening_factor=4
+        )
         self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
 
@@ -57,7 +59,9 @@ class svhn_wrn164(TestProblem):
 
         for parameters_name, parameters in self.net.named_parameters():
             # penalize only the non bias layer parameters
-            if ('weight' in parameters_name) and (('dense' in parameters_name) or ('conv' in parameters_name)):
+            if ("weight" in parameters_name) and (
+                ("dense" in parameters_name) or ("conv" in parameters_name)
+            ):
                 group_dict[l2].append(parameters)
             else:
                 group_dict[no].append(parameters)

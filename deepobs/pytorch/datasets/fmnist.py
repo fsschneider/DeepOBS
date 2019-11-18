@@ -22,9 +22,7 @@ class fmnist(dataset.DataSet):
         Defaults to ``10 000`` the size of the test set.
   """
 
-    def __init__(self,
-                 batch_size,
-                 train_eval_size=10000):
+    def __init__(self, batch_size, train_eval_size=10000):
         """Creates a new Fashion-MNIST instance.
 
     Args:
@@ -40,12 +38,29 @@ class fmnist(dataset.DataSet):
 
     def _make_train_and_valid_dataloader(self):
         transform = transforms.ToTensor()
-        train_dataset = datasets.FashionMNIST(root=config.get_data_dir(), train=True, download=True, transform=transform)
-        valid_dataset = datasets.FashionMNIST(root=config.get_data_dir(), train=True, download=True, transform=transform)
-        train_loader, valid_loader = self._make_train_and_valid_dataloader_helper(train_dataset, valid_dataset)
+        train_dataset = datasets.FashionMNIST(
+            root=config.get_data_dir(),
+            train=True,
+            download=True,
+            transform=transform,
+        )
+        valid_dataset = datasets.FashionMNIST(
+            root=config.get_data_dir(),
+            train=True,
+            download=True,
+            transform=transform,
+        )
+        train_loader, valid_loader = self._make_train_and_valid_dataloader_helper(
+            train_dataset, valid_dataset
+        )
         return train_loader, valid_loader
 
     def _make_test_dataloader(self):
         transform = transforms.ToTensor()
-        test_dataset = datasets.FashionMNIST(root=config.get_data_dir(), train=False, download=True, transform=transform)
+        test_dataset = datasets.FashionMNIST(
+            root=config.get_data_dir(),
+            train=False,
+            download=True,
+            transform=transform,
+        )
         return self._make_dataloader(test_dataset, sampler=None)

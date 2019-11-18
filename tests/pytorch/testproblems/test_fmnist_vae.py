@@ -6,7 +6,12 @@ import sys
 import unittest
 import torch
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
 
 from deepobs.pytorch import testproblems
 
@@ -37,13 +42,32 @@ class FMNIST_VAETest(unittest.TestCase):
             # - Bias: [dim]
 
         expected_num_param = [
-                1 * 64 * 4 * 4, 64, 64 * 64 * 4 * 4, 64, 64 * 64 * 4 * 4, 64,
-                7 * 7 * 64 * 8, 8, 7 * 7 * 64 * 8, 8, 8 * 24, 24, 24 * 49, 49,
-                1 * 64 * 4 * 4, 64, 64 * 64 * 4 * 4, 64, 64 * 64 * 4 * 4, 64,
-                14 * 14 * 64 * 28 * 28, 28 * 28
-            ]
+            1 * 64 * 4 * 4,
+            64,
+            64 * 64 * 4 * 4,
+            64,
+            64 * 64 * 4 * 4,
+            64,
+            7 * 7 * 64 * 8,
+            8,
+            7 * 7 * 64 * 8,
+            8,
+            8 * 24,
+            24,
+            24 * 49,
+            49,
+            1 * 64 * 4 * 4,
+            64,
+            64 * 64 * 4 * 4,
+            64,
+            64 * 64 * 4 * 4,
+            64,
+            14 * 14 * 64 * 28 * 28,
+            28 * 28,
+        ]
 
         self.assertEqual(num_param, expected_num_param)
+
 
 if __name__ == "__main__":
     unittest.main()

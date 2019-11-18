@@ -7,7 +7,12 @@ import unittest
 import tensorflow as tf
 import numpy as np
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
 
 from deepobs.tensorflow import testproblems
 
@@ -37,20 +42,33 @@ class FMNIST_MLPTest(unittest.TestCase):
             # - Batch norm: [input, input] (for beta and gamma)
             # - Fully connected: [input*output]
             # - Bias: [dim]
-            self.assertEqual(num_param, [
-                28 * 28 * 1000, 1000, 1000 * 500, 500, 500 * 100, 100,
-                100 * 10, 10
-            ])
+            self.assertEqual(
+                num_param,
+                [
+                    28 * 28 * 1000,
+                    1000,
+                    1000 * 500,
+                    500,
+                    500 * 100,
+                    100,
+                    100 * 10,
+                    10,
+                ],
+            )
             for init_op in [
-                    self.fmnist_mlp.train_init_op, self.fmnist_mlp.test_init_op,
-                    self.fmnist_mlp.train_eval_init_op
+                self.fmnist_mlp.train_init_op,
+                self.fmnist_mlp.test_init_op,
+                self.fmnist_mlp.train_eval_init_op,
             ]:
                 sess.run(init_op)
-                losses_, regularizer_, accuracy_ = sess.run([
-                    self.fmnist_mlp.losses, self.fmnist_mlp.regularizer,
-                    self.fmnist_mlp.accuracy
-                ])
-                self.assertEqual(losses_.shape, (self.batch_size, ))
+                losses_, regularizer_, accuracy_ = sess.run(
+                    [
+                        self.fmnist_mlp.losses,
+                        self.fmnist_mlp.regularizer,
+                        self.fmnist_mlp.accuracy,
+                    ]
+                )
+                self.assertEqual(losses_.shape, (self.batch_size,))
                 self.assertIsInstance(regularizer_, np.float32)
                 self.assertIsInstance(accuracy_, np.float32)
 

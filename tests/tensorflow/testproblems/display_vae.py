@@ -7,7 +7,12 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
 
 from deepobs.tensorflow import testproblems
 
@@ -26,14 +31,12 @@ def generate(sess, sampled_z, grid_size=5):
 
     dec = tf.get_default_graph().get_tensor_by_name("decoder/decoder_op:0")
     imgs = sess.run(dec, feed_dict={z: sampled_z})
-    imgs = [
-        np.reshape(imgs[i], [28, 28]) for i in range(grid_size * grid_size)
-    ]
+    imgs = [np.reshape(imgs[i], [28, 28]) for i in range(grid_size * grid_size)]
 
     fig = plt.figure()
     for i in range(grid_size * grid_size):
         axis = fig.add_subplot(grid_size, grid_size, i + 1)
-        axis.imshow(imgs[i], cmap='gray')
+        axis.imshow(imgs[i], cmap="gray")
         axis.axis("off")
     return fig
 
@@ -75,9 +78,10 @@ def display_images(testproblem_cls, grid_size=5, num_epochs=1):
             except tf.errors.OutOfRangeError:
                 break
         fig = generate(sess, sampled_z, grid_size=grid_size)
-        fig.suptitle(testproblem_cls.__name__ + " epoch " + str(i+1))
+        fig.suptitle(testproblem_cls.__name__ + " epoch " + str(i + 1))
         # fig.tight_layout(pad=0, w_pad=0, h_pad=0)
         fig.show()
+
 
 if __name__ == "__main__":
     display_images(testproblems.mnist_vae)

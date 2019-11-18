@@ -7,11 +7,18 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
 
 from deepobs.pytorch import datasets
 import deepobs.pytorch.config as config
-config.set_data_dir('/home/isenach/Desktop/Project/deepobs/data_deepobs')
+
+config.set_data_dir("/home/isenach/Desktop/Project/deepobs/data_deepobs")
+
 
 def denormalize_image(img):
     """Convert a normalized (float) image back to unsigned 8-bit images."""
@@ -38,11 +45,12 @@ def display_images(dataset_cls, grid_size=5, phase="train"):
         iterator = iter(dataset._train_eval_dataloader)
     elif phase == "test":
         iterator = iter(dataset._test_dataloader)
-    elif phase == 'valid':
+    elif phase == "valid":
         iterator = iter(dataset._valid_dataloader)
     else:
         raise ValueError(
-            "Choose 'phase' from ['train', 'train_eval', 'test', 'valid'].")
+            "Choose 'phase' from ['train', 'train_eval', 'test', 'valid']."
+        )
 
     x, y = next(iterator)
     x = x.numpy()
@@ -51,7 +59,7 @@ def display_images(dataset_cls, grid_size=5, phase="train"):
     fig = plt.figure()
     for i in range(grid_size * grid_size):
         axis = fig.add_subplot(grid_size, grid_size, i + 1)
-        img = np.squeeze(np.moveaxis(denormalize_image(x[i,:,:,:]), 0, -1))
+        img = np.squeeze(np.moveaxis(denormalize_image(x[i, :, :, :]), 0, -1))
         axis.imshow(img)
         # axis.set_title("Label {0:d}".format(np.argmax(y_[i])))
         axis.set_title(label_dict[y[i]])
@@ -74,31 +82,45 @@ def load_label_dict(dataset):
     """
     if dataset == "cifar10":
         with open(
-                os.path.join(config.get_data_dir(),
-                             "cifar-10-batches-py/batches.meta.txt")) as lookup_file:
+            os.path.join(
+                config.get_data_dir(), "cifar-10-batches-py/batches.meta.txt"
+            )
+        ) as lookup_file:
             label_dict = lookup_file.readlines()
     elif dataset == "cifar100":
         with open(
-                os.path.join(config.get_data_dir(),
-                             "cifar-100-python/fine_label_names.txt")) as lookup_file:
+            os.path.join(
+                config.get_data_dir(), "cifar-100-python/fine_label_names.txt"
+            )
+        ) as lookup_file:
             label_dict = lookup_file.readlines()
     elif dataset == "fmnist":
-        label_dict = dict([(0, "T-shirt"), (1, "Trouser"), (2, "Pullover"),
-                           (3, "Dress"), (4, "Coat"), (5, "Sandal"),
-                           (6, "Shirt"), (7, "Sneaker"), (8, "Bag"),
-                           (9, "Ankle boot")])
-#    elif dataset == "imagenet":
-#        label_file = os.path.join(
-#            os.path.realpath(
-#                os.path.join(os.getcwd(), os.path.dirname(__file__))),
-#            "imagenet_labels.txt")
-#        # Read from text file
-#        label_dict = {}
-#        i = 0
-#        with open(label_file) as f:
-#            for line in f:
-#                label_dict[i] = line.rstrip()
-#                i += 1
+        label_dict = dict(
+            [
+                (0, "T-shirt"),
+                (1, "Trouser"),
+                (2, "Pullover"),
+                (3, "Dress"),
+                (4, "Coat"),
+                (5, "Sandal"),
+                (6, "Shirt"),
+                (7, "Sneaker"),
+                (8, "Bag"),
+                (9, "Ankle boot"),
+            ]
+        )
+    #    elif dataset == "imagenet":
+    #        label_file = os.path.join(
+    #            os.path.realpath(
+    #                os.path.join(os.getcwd(), os.path.dirname(__file__))),
+    #            "imagenet_labels.txt")
+    #        # Read from text file
+    #        label_dict = {}
+    #        i = 0
+    #        with open(label_file) as f:
+    #            for line in f:
+    #                label_dict[i] = line.rstrip()
+    #                i += 1
     else:
         label_dict = IdentityDict()
     return label_dict
@@ -136,8 +158,8 @@ if __name__ == "__main__":
     display_images(datasets.svhn, grid_size=5, phase="test")
     display_images(datasets.svhn, grid_size=5, phase="valid")
 
-#    display_images(datasets.imagenet, grid_size=5, phase="train")
-#    display_images(datasets.imagenet, grid_size=5, phase="train_eval")
-#    display_images(datasets.imagenet, grid_size=5, phase="test")
+    #    display_images(datasets.imagenet, grid_size=5, phase="train")
+    #    display_images(datasets.imagenet, grid_size=5, phase="train_eval")
+    #    display_images(datasets.imagenet, grid_size=5, phase="test")
 
     plt.show()

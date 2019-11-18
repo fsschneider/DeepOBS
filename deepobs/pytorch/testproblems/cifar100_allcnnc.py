@@ -65,7 +65,7 @@ class cifar100_allcnnc(TestProblem):
 
         for parameters_name, parameters in self.net.named_parameters():
             # penalize only the non bias layer parameters
-            if 'bias' not in parameters_name:
+            if "bias" not in parameters_name:
                 group_dict[l2].append(parameters)
             else:
                 group_dict[no].append(parameters)

@@ -22,14 +22,17 @@ class PTRunner(Runner):
         super(PTRunner, self).__init__(optimizer_class, hyperparameter_names)
 
     @abc.abstractmethod
-    def training(self, tproblem,
-                 hyperparams,
-                 num_epochs,
-                 print_train_iter,
-                 train_log_interval,
-                 tb_log,
-                 tb_log_dir,
-                 **training_params):
+    def training(
+        self,
+        tproblem,
+        hyperparams,
+        num_epochs,
+        print_train_iter,
+        train_log_interval,
+        tb_log,
+        tb_log_dir,
+        **training_params
+    ):
         return
 
     @staticmethod
@@ -92,13 +95,13 @@ class PTRunner(Runner):
 
         """
 
-        if phase == 'TEST':
+        if phase == "TEST":
             tproblem.test_init_op()
             msg = "TEST:"
-        elif phase == 'TRAIN':
+        elif phase == "TRAIN":
             tproblem.train_eval_init_op()
             msg = "TRAIN:"
-        elif phase == 'VALID':
+        elif phase == "VALID":
             tproblem.valid_init_op()
             msg = "VALID:"
         # evaluation loop over every batch of the corresponding evaluation set
@@ -107,7 +110,9 @@ class PTRunner(Runner):
         batchCount = 0.0
         while True:
             try:
-                batch_loss, batch_accuracy = tproblem.get_batch_loss_and_accuracy()
+                batch_loss, batch_accuracy = (
+                    tproblem.get_batch_loss_and_accuracy()
+                )
                 batchCount += 1.0
                 loss += batch_loss.item()
                 accuracy += batch_accuracy
@@ -124,29 +129,35 @@ class PTRunner(Runner):
 
         return loss, accuracy
 
-    def evaluate_all(self,
-                     epoch_count,
-                     num_epochs,
-                     tproblem,
-                     train_losses,
-                     valid_losses,
-                     test_losses,
-                     train_accuracies,
-                     valid_accuracies,
-                     test_accuracies):
+    def evaluate_all(
+        self,
+        epoch_count,
+        num_epochs,
+        tproblem,
+        train_losses,
+        valid_losses,
+        test_losses,
+        train_accuracies,
+        valid_accuracies,
+        test_accuracies,
+    ):
 
         print("********************************")
-        print("Evaluating after {0:d} of {1:d} epochs...".format(epoch_count, num_epochs))
+        print(
+            "Evaluating after {0:d} of {1:d} epochs...".format(
+                epoch_count, num_epochs
+            )
+        )
 
-        loss_, acc_ = self.evaluate(tproblem, phase='TRAIN')
+        loss_, acc_ = self.evaluate(tproblem, phase="TRAIN")
         train_losses.append(loss_)
         train_accuracies.append(acc_)
 
-        loss_, acc_ = self.evaluate(tproblem, phase='VALID')
+        loss_, acc_ = self.evaluate(tproblem, phase="VALID")
         valid_losses.append(loss_)
         valid_accuracies.append(acc_)
 
-        loss_, acc_ = self.evaluate(tproblem, phase='TEST')
+        loss_, acc_ = self.evaluate(tproblem, phase="TEST")
         test_losses.append(loss_)
         test_accuracies.append(acc_)
 
@@ -159,16 +170,20 @@ class StandardRunner(PTRunner):
     """
 
     def __init__(self, optimizer_class, hyperparameter_names):
-        super(StandardRunner, self).__init__(optimizer_class, hyperparameter_names)
+        super(StandardRunner, self).__init__(
+            optimizer_class, hyperparameter_names
+        )
 
-    def training(self,
-                 tproblem,
-                 hyperparams,
-                 num_epochs,
-                 print_train_iter,
-                 train_log_interval,
-                 tb_log,
-                 tb_log_dir):
+    def training(
+        self,
+        tproblem,
+        hyperparams,
+        num_epochs,
+        print_train_iter,
+        train_log_interval,
+        tb_log,
+        tb_log_dir,
+    ):
 
         opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
 
@@ -185,23 +200,30 @@ class StandardRunner(PTRunner):
         if tb_log:
             try:
                 from torch.utils.tensorboard import SummaryWriter
+
                 summary_writer = SummaryWriter(log_dir=tb_log_dir)
             except ImportError as e:
-                warnings.warn('Not possible to use tensorboard for pytorch. Reason: ' + e.msg, RuntimeWarning)
+                warnings.warn(
+                    "Not possible to use tensorboard for pytorch. Reason: "
+                    + e.msg,
+                    RuntimeWarning,
+                )
                 tb_log = False
         global_step = 0
 
         for epoch_count in range(num_epochs + 1):
             # Evaluate at beginning of epoch.
-            self.evaluate_all(epoch_count,
-                              num_epochs,
-                              tproblem,
-                              train_losses,
-                              valid_losses,
-                              test_losses,
-                              train_accuracies,
-                              valid_accuracies,
-                              test_accuracies)
+            self.evaluate_all(
+                epoch_count,
+                num_epochs,
+                tproblem,
+                train_losses,
+                valid_losses,
+                test_losses,
+                train_accuracies,
+                valid_accuracies,
+                test_accuracies,
+            )
 
             # Break from train loop after the last round of evaluation
             if epoch_count == num_epochs:
@@ -222,9 +244,15 @@ class StandardRunner(PTRunner):
                     if batch_count % train_log_interval == 0:
                         minibatch_train_losses.append(batch_loss.item())
                         if print_train_iter:
-                            print("Epoch {0:d}, step {1:d}: loss {2:g}".format(epoch_count, batch_count, batch_loss))
+                            print(
+                                "Epoch {0:d}, step {1:d}: loss {2:g}".format(
+                                    epoch_count, batch_count, batch_loss
+                                )
+                            )
                         if tb_log:
-                            summary_writer.add_scalar('loss', batch_loss.item(), global_step)
+                            summary_writer.add_scalar(
+                                "loss", batch_loss.item(), global_step
+                            )
 
                     batch_count += 1
                     global_step += 1
@@ -242,7 +270,8 @@ class StandardRunner(PTRunner):
                     train_accuracies,
                     valid_accuracies,
                     test_accuracies,
-                    minibatch_train_losses)
+                    minibatch_train_losses,
+                )
                 break
             else:
                 continue
@@ -252,12 +281,12 @@ class StandardRunner(PTRunner):
         # Put results into output dictionary.
         output = {
             "train_losses": train_losses,
-            'valid_losses': valid_losses,
+            "valid_losses": valid_losses,
             "test_losses": test_losses,
             "minibatch_train_losses": minibatch_train_losses,
             "train_accuracies": train_accuracies,
-            'valid_accuracies': valid_accuracies,
-            "test_accuracies": test_accuracies
+            "valid_accuracies": valid_accuracies,
+            "test_accuracies": test_accuracies,
         }
 
         return output
@@ -270,11 +299,13 @@ class LearningRateScheduleRunner(PTRunner):
 
     def __init__(self, optimizer_class, hyperparameter_names):
 
-        super(LearningRateScheduleRunner, self).__init__(optimizer_class, hyperparameter_names)
+        super(LearningRateScheduleRunner, self).__init__(
+            optimizer_class, hyperparameter_names
+        )
 
     def _add_training_params_to_argparse(self, parser, args, training_params):
         try:
-            args['lr_sched_epochs'] = training_params['lr_sched_epochs']
+            args["lr_sched_epochs"] = training_params["lr_sched_epochs"]
         except KeyError:
             parser.add_argument(
                 "--lr_sched_epochs",
@@ -286,35 +317,38 @@ class LearningRateScheduleRunner(PTRunner):
           via '--lr_sched_factors'. Example: '--lr 0.3 --lr_sched_epochs 50 100
           --lr_sched_factors 0.1 0.01' will start with a learning rate of 0.3,
           then decrease to 0.1*0.3=0.03 after training for 50 epochs, and
-          decrease to 0.01*0.3=0.003' after training for 100 epochs.""")
+          decrease to 0.01*0.3=0.003' after training for 100 epochs.""",
+            )
 
         try:
-            args['lr_sched_factors'] = training_params['lr_sched_factors']
+            args["lr_sched_factors"] = training_params["lr_sched_factors"]
         except KeyError:
             parser.add_argument(
                 "--lr_sched_factors",
                 nargs="+",
                 type=float,
-                help=
-                """One or more factors (floats) by which to change the learning
+                help="""One or more factors (floats) by which to change the learning
           rate. The base learning rate has to be passed via '--learing_rate' and
           the epochs at which to change the learning rate have to be passed via
           '--lr_sched_factors'. Example: '--lr 0.3 --lr_sched_epochs 50 100
           --lr_sched_factors 0.1 0.01' will start with a learning rate of 0.3,
           then decrease to 0.1*0.3=0.03 after training for 50 epochs, and
-          decrease to 0.01*0.3=0.003' after training for 100 epochs.""")
+          decrease to 0.01*0.3=0.003' after training for 100 epochs.""",
+            )
 
-    def training(self,
-                 tproblem,
-                 hyperparams,
-                 num_epochs,
-                 print_train_iter,
-                 train_log_interval,
-                 tb_log,
-                 tb_log_dir,
-                 # the following are the training_params
-                 lr_sched_epochs=None,
-                 lr_sched_factors=None):
+    def training(
+        self,
+        tproblem,
+        hyperparams,
+        num_epochs,
+        print_train_iter,
+        train_log_interval,
+        tb_log,
+        tb_log_dir,
+        # the following are the training_params
+        lr_sched_epochs=None,
+        lr_sched_factors=None,
+    ):
         """Performs the training and stores the metrices.
 
         Args:
@@ -342,8 +376,11 @@ class LearningRateScheduleRunner(PTRunner):
 
         opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
         if lr_sched_epochs is not None:
-            lr_schedule = runner_utils.make_lr_schedule(optimizer=opt, lr_sched_epochs=lr_sched_epochs,
-                                                        lr_sched_factors=lr_sched_factors)
+            lr_schedule = runner_utils.make_lr_schedule(
+                optimizer=opt,
+                lr_sched_epochs=lr_sched_epochs,
+                lr_sched_factors=lr_sched_factors,
+            )
 
         # Lists to log train/test loss and accuracy.
         train_losses = []
@@ -357,15 +394,17 @@ class LearningRateScheduleRunner(PTRunner):
 
         for epoch_count in range(num_epochs + 1):
             # Evaluate at beginning of epoch.
-            self.evaluate_all(epoch_count,
-                              num_epochs,
-                              tproblem,
-                              train_losses,
-                              valid_losses,
-                              test_losses,
-                              train_accuracies,
-                              valid_accuracies,
-                              test_accuracies)
+            self.evaluate_all(
+                epoch_count,
+                num_epochs,
+                tproblem,
+                train_losses,
+                valid_losses,
+                test_losses,
+                train_accuracies,
+                valid_accuracies,
+                test_accuracies,
+            )
 
             # Break from train loop after the last round of evaluation
             if epoch_count == num_epochs:
@@ -377,7 +416,11 @@ class LearningRateScheduleRunner(PTRunner):
                 lr_schedule.step(epoch_count)
 
                 if epoch_count in lr_sched_epochs:
-                    print("Setting learning rate to {0}".format(lr_schedule.get_lr()))
+                    print(
+                        "Setting learning rate to {0}".format(
+                            lr_schedule.get_lr()
+                        )
+                    )
 
             # set to training mode
             tproblem.train_init_op()
@@ -393,7 +436,11 @@ class LearningRateScheduleRunner(PTRunner):
                     if batch_count % train_log_interval == 0:
                         minibatch_train_losses.append(batch_loss.item())
                         if print_train_iter:
-                            print("Epoch {0:d}, step {1:d}: loss {2:g}".format(epoch_count, batch_count, batch_loss))
+                            print(
+                                "Epoch {0:d}, step {1:d}: loss {2:g}".format(
+                                    epoch_count, batch_count, batch_loss
+                                )
+                            )
                     batch_count += 1
 
                 except StopIteration:
@@ -401,14 +448,16 @@ class LearningRateScheduleRunner(PTRunner):
 
             # break from training if it goes wrong
             if not np.isfinite(batch_loss.item()):
-                self._abort_routine(epoch_count,
-                                    num_epochs,
-                                    train_losses,
-                                    valid_losses,
-                                    test_losses,
-                                    train_accuracies,
-                                    valid_accuracies,
-                                    test_accuracies)
+                self._abort_routine(
+                    epoch_count,
+                    num_epochs,
+                    train_losses,
+                    valid_losses,
+                    test_losses,
+                    train_accuracies,
+                    valid_accuracies,
+                    test_accuracies,
+                )
                 break
             else:
                 continue
@@ -420,8 +469,8 @@ class LearningRateScheduleRunner(PTRunner):
             "test_losses": test_losses,
             "minibatch_train_losses": minibatch_train_losses,
             "train_accuracies": train_accuracies,
-            'valid_accuracies': valid_accuracies,
-            "test_accuracies": test_accuracies
+            "valid_accuracies": valid_accuracies,
+            "test_accuracies": test_accuracies,
         }
 
         return output

@@ -7,7 +7,12 @@ import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
 
 from deepobs.pytorch import datasets
 import deepobs.pytorch.config as config
@@ -31,8 +36,7 @@ def display_text(dataset_cls, grid_size=5, phase="train"):
     elif phase == "test":
         iterator = iter(dataset._test_dataloader)
     else:
-        raise ValueError(
-            "Choose 'phase' from ['train', 'train_eval', 'test'].")
+        raise ValueError("Choose 'phase' from ['train', 'train_eval', 'test'].")
 
     x_, y_ = next(iterator)
     x_next, y_next = next(iterator)  # Next batch, will be plotted in red
@@ -40,16 +44,25 @@ def display_text(dataset_cls, grid_size=5, phase="train"):
     fig = plt.figure()
     for i in range(grid_size * grid_size):
         axis = fig.add_subplot(grid_size, grid_size, i + 1)
-        input_txt = ''.join([label_dict[char] for char in np.squeeze(x_[i])])
-        output_txt = ''.join([label_dict[char] for char in np.squeeze(y_[i])])
+        input_txt = "".join([label_dict[char] for char in np.squeeze(x_[i])])
+        output_txt = "".join([label_dict[char] for char in np.squeeze(y_[i])])
         # Next Batch, to check if text continues
-        input_next_txt = ''.join(
-            [label_dict[char] for char in np.squeeze(x_next[i])])
-        output_next_txt = ''.join(
-            [label_dict[char] for char in np.squeeze(y_next[i])])
-        txt = "*INPUT* \n" + input_txt + "\n \n *OUTPUT* \n" + output_txt + \
-                "\n \n \n *INPUT NEXT BATCH* \n" + input_next_txt + \
-                "\n \n *OUTPUT NEXT BATCH* \n" + output_next_txt
+        input_next_txt = "".join(
+            [label_dict[char] for char in np.squeeze(x_next[i])]
+        )
+        output_next_txt = "".join(
+            [label_dict[char] for char in np.squeeze(y_next[i])]
+        )
+        txt = (
+            "*INPUT* \n"
+            + input_txt
+            + "\n \n *OUTPUT* \n"
+            + output_txt
+            + "\n \n \n *INPUT NEXT BATCH* \n"
+            + input_next_txt
+            + "\n \n *OUTPUT NEXT BATCH* \n"
+            + output_next_txt
+        )
         axis.text(0, 0, txt, fontsize=10)
         axis.axis("off")
     fig.tight_layout(pad=0, w_pad=0, h_pad=0)
@@ -84,8 +97,8 @@ class IdentityDict(dict):
 
 
 if __name__ == "__main__":
-#    display_text(datasets.tolstoi, grid_size=2, phase="train")
+    #    display_text(datasets.tolstoi, grid_size=2, phase="train")
     display_text(datasets.tolstoi, grid_size=2, phase="train_eval")
-#    display_text(datasets.tolstoi, grid_size=2, phase="test")
+    #    display_text(datasets.tolstoi, grid_size=2, phase="test")
 
     plt.show()

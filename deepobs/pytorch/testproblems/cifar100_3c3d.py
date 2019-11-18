@@ -37,6 +37,7 @@ class cifar100_3c3d(TestProblem):
   Methods:
       get_regularization_loss: Returns the current regularization loss of the network state.
   """
+
     def __init__(self, batch_size, weight_decay=0.002):
         super(cifar100_3c3d, self).__init__(batch_size, weight_decay)
 
@@ -59,7 +60,7 @@ class cifar100_3c3d(TestProblem):
 
         for parameters_name, parameters in self.net.named_parameters():
             # penalize only the non bias layer parameters
-            if 'bias' not in parameters_name:
+            if "bias" not in parameters_name:
                 group_dict[l2].append(parameters)
             else:
                 group_dict[no].append(parameters)

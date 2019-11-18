@@ -46,22 +46,23 @@ class tolstoi(dataset.DataSet):
         # can be produced, given batch size and sequence lengh
         arr = np.load(filepath)
         num_batches = int(
-            np.floor(
-                (np.size(arr) - 1) / (self._batch_size * self._seq_length)))
+            np.floor((np.size(arr) - 1) / (self._batch_size * self._seq_length))
+        )
         if num_batches == 0:
             raise ValueError(
                 "This dataset is to small to use with this batch size "
-                "and sequence length.")
+                "and sequence length."
+            )
 
         # Create input and output, where output is the text shifted by one
         # character
-        x = arr[:num_batches * self._batch_size * self._seq_length]
-        y = arr[1:num_batches * self._batch_size * self._seq_length + 1]
+        x = arr[: num_batches * self._batch_size * self._seq_length]
+        y = arr[1 : num_batches * self._batch_size * self._seq_length + 1]
 
-#        x_sequences = x.reshape((self._batch_size  * num_batches, -1))
-#        y_sequences = y.reshape((self._batch_size  * num_batches, -1))
-#        dataset = dat.TensorDataset(torch.from_numpy(x_sequences), torch.from_numpy(y_sequences))
-#        loader = dat.DataLoader(dataset=dataset, batch_size=self._batch_size, shuffle=False, sampler = sampler)
+        #        x_sequences = x.reshape((self._batch_size  * num_batches, -1))
+        #        y_sequences = y.reshape((self._batch_size  * num_batches, -1))
+        #        dataset = dat.TensorDataset(torch.from_numpy(x_sequences), torch.from_numpy(y_sequences))
+        #        loader = dat.DataLoader(dataset=dataset, batch_size=self._batch_size, shuffle=False, sampler = sampler)
 
         # Split into batches and put into arrays X, Y, such that X[i,:] is the
         # i-th batch
@@ -80,7 +81,9 @@ class tolstoi(dataset.DataSet):
         return self._make_dataloader(filepath)
 
     def _make_train_eval_dataloader(self):
-        indices = np.arange(self._train_eval_size // (self._batch_size*self._seq_length))
+        indices = np.arange(
+            self._train_eval_size // (self._batch_size * self._seq_length)
+        )
         train_eval_set = self._train_dataloader[indices]
         return dat.TensorDataset(train_eval_set[0], train_eval_set[1])
 

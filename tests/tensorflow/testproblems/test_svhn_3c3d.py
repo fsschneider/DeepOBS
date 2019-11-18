@@ -7,7 +7,12 @@ import unittest
 import tensorflow as tf
 import numpy as np
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
 
 from deepobs.tensorflow import testproblems
 
@@ -37,21 +42,37 @@ class SVHN_3c3dTest(unittest.TestCase):
             # - Batch norm: [input, input] (for beta and gamma)
             # - Fully connected: [input*output]
             # - Bias: [dim]
-            self.assertEqual(num_param, [
-                3 * 64 * 5 * 5, 64, 64 * 96 * 3 * 3, 96, 96 * 128 * 3 * 3, 128,
-                3 * 3 * 128 * 512, 512, 512 * 256, 256, 256 * 10, 10
-            ])
+            self.assertEqual(
+                num_param,
+                [
+                    3 * 64 * 5 * 5,
+                    64,
+                    64 * 96 * 3 * 3,
+                    96,
+                    96 * 128 * 3 * 3,
+                    128,
+                    3 * 3 * 128 * 512,
+                    512,
+                    512 * 256,
+                    256,
+                    256 * 10,
+                    10,
+                ],
+            )
             for init_op in [
-                    self.svhn_3c3d.train_init_op,
-                    self.svhn_3c3d.test_init_op,
-                    self.svhn_3c3d.train_eval_init_op
+                self.svhn_3c3d.train_init_op,
+                self.svhn_3c3d.test_init_op,
+                self.svhn_3c3d.train_eval_init_op,
             ]:
                 sess.run(init_op)
-                losses_, regularizer_, accuracy_ = sess.run([
-                    self.svhn_3c3d.losses, self.svhn_3c3d.regularizer,
-                    self.svhn_3c3d.accuracy
-                ])
-                self.assertEqual(losses_.shape, (self.batch_size, ))
+                losses_, regularizer_, accuracy_ = sess.run(
+                    [
+                        self.svhn_3c3d.losses,
+                        self.svhn_3c3d.regularizer,
+                        self.svhn_3c3d.accuracy,
+                    ]
+                )
+                self.assertEqual(losses_.shape, (self.batch_size,))
                 self.assertIsInstance(regularizer_, np.float32)
                 self.assertIsInstance(accuracy_, np.float32)
 

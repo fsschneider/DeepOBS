@@ -7,9 +7,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
 
 from deepobs.pytorch import testproblems
+
 
 def generate(testprob, sampled_z, grid_size=5):
     """Function to generate images using the decoder.
@@ -23,11 +29,11 @@ def generate(testprob, sampled_z, grid_size=5):
     """
 
     # batch the sampled_zs according to grid size and make it compatible with testproblem
-    batched_z = np.zeros((grid_size*grid_size,8))
+    batched_z = np.zeros((grid_size * grid_size, 8))
     for i in range(len(sampled_z)):
-        batched_z[i,:] = sampled_z[i]
+        batched_z[i, :] = sampled_z[i]
     batched_z = torch.from_numpy(batched_z)
-    batched_z = batched_z.to('cuda', dtype = torch.float32)
+    batched_z = batched_z.to("cuda", dtype=torch.float32)
 
     imgs = testprob.net.decode(batched_z)
     imgs = np.squeeze(imgs.cpu().detach().numpy())
@@ -35,7 +41,7 @@ def generate(testprob, sampled_z, grid_size=5):
     fig = plt.figure()
     for i in range(grid_size * grid_size):
         axis = fig.add_subplot(grid_size, grid_size, i + 1)
-        axis.imshow(imgs[i], cmap='gray')
+        axis.imshow(imgs[i], cmap="gray")
         axis.axis("off")
     return fig
 
@@ -65,7 +71,7 @@ def display_images(testproblem_cls, grid_size=5, num_epochs=4):
     fig.show()
     # Train Loop
 
-    opt = torch.optim.Adam(testprob.net.parameters(), lr = 0.0005)
+    opt = torch.optim.Adam(testprob.net.parameters(), lr=0.0005)
     for i in range(num_epochs):
         while True:
             try:
@@ -74,7 +80,7 @@ def display_images(testproblem_cls, grid_size=5, num_epochs=4):
 
                 # if the testproblem has a regularization, add the regularization loss.
                 # TODO the regularization loss is added to every batch loss! correct?
-                if hasattr(testprob, 'get_regularization_loss'):
+                if hasattr(testprob, "get_regularization_loss"):
                     regularizer_loss = testprob.get_regularization_loss()
                     batch_loss += regularizer_loss
                 batch_loss.backward()
@@ -84,12 +90,13 @@ def display_images(testproblem_cls, grid_size=5, num_epochs=4):
 
         fig = generate(testprob, sampled_z, grid_size=grid_size)
 
-        fig.suptitle(testproblem_cls.__name__ + " epoch " + str(i+1))
+        fig.suptitle(testproblem_cls.__name__ + " epoch " + str(i + 1))
         # fig.tight_layout(pad=0, w_pad=0, h_pad=0)
         fig.show()
 
+
 if __name__ == "__main__":
-#    display_images(testproblems.mnist_vae)
+    #    display_images(testproblems.mnist_vae)
 
     display_images(testproblems.fmnist_vae)
 

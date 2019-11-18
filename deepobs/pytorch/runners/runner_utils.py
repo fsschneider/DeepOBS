@@ -4,7 +4,8 @@
 from torch.optim import lr_scheduler
 import numpy as np
 
-def make_lr_schedule(optimizer, lr_sched_epochs = None, lr_sched_factors = None):
+
+def make_lr_schedule(optimizer, lr_sched_epochs=None, lr_sched_factors=None):
     """Creates a learning rate schedule in the form of a torch.optim.lr_scheduler.LambdaLR instance.
 
   After ``lr_sched_epochs[i]`` epochs of training, the learning rate will be set
@@ -31,6 +32,7 @@ def make_lr_schedule(optimizer, lr_sched_epochs = None, lr_sched_factors = None)
     if (lr_sched_factors is None) or (lr_sched_epochs is None):
         determine_lr = lambda epoch: 1
     else:
+
         def determine_lr(epoch):
             if epoch < lr_sched_epochs[0]:
                 return 1

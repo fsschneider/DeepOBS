@@ -7,7 +7,12 @@ import unittest
 import tensorflow as tf
 import numpy as np
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
 
 from deepobs.tensorflow import testproblems
 
@@ -37,22 +42,32 @@ class Tolstoi_Char_RNNTest(unittest.TestCase):
             # - Batch norm: [input, input] (for beta and gamma)
             # - Fully connected: [input*output]
             # - Bias: [dim]
-            self.assertEqual(num_param, [
-                83 * 128, 4 * (128 * 128 + 128 * 128), 4 * 128,
-                4 * (128 * 128 + 128 * 128), 4 * 128, 83 * 128, 83
-            ])
+            self.assertEqual(
+                num_param,
+                [
+                    83 * 128,
+                    4 * (128 * 128 + 128 * 128),
+                    4 * 128,
+                    4 * (128 * 128 + 128 * 128),
+                    4 * 128,
+                    83 * 128,
+                    83,
+                ],
+            )
             for init_op in [
-                    self.tolstoi_char_rnn.train_init_op,
-                    self.tolstoi_char_rnn.test_init_op,
-                    self.tolstoi_char_rnn.train_eval_init_op
+                self.tolstoi_char_rnn.train_init_op,
+                self.tolstoi_char_rnn.test_init_op,
+                self.tolstoi_char_rnn.train_eval_init_op,
             ]:
                 sess.run(init_op)
-                losses_, regularizer_, accuracy_ = sess.run([
-                    self.tolstoi_char_rnn.losses,
-                    self.tolstoi_char_rnn.regularizer,
-                    self.tolstoi_char_rnn.accuracy
-                ])
-                self.assertEqual(losses_.shape, (self.batch_size, ))
+                losses_, regularizer_, accuracy_ = sess.run(
+                    [
+                        self.tolstoi_char_rnn.losses,
+                        self.tolstoi_char_rnn.regularizer,
+                        self.tolstoi_char_rnn.accuracy,
+                    ]
+                )
+                self.assertEqual(losses_.shape, (self.batch_size,))
                 self.assertIsInstance(regularizer_, np.float32)
                 self.assertIsInstance(accuracy_, np.float32)
 
