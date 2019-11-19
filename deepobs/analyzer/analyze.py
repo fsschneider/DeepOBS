@@ -421,6 +421,7 @@ def plot_hyperparameter_sensitivity(
     plot_std=True,
     reference_path=None,
     show=True,
+    ax=None,
 ):
     """Plots the hyperparameter sensitivtiy of the optimizer.
 
@@ -433,11 +434,15 @@ def plot_hyperparameter_sensitivity(
         plot_std (bool): Whether to plot markers for individual seed runs or not. If `False`, only the mean is plotted.
         reference_path (str): Path to the reference optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are taken as reference).
         show (bool): Whether to show the plot or not.
+        ax (matplotlib.axis): Axis to draw onto. Defaults to none, which creates a new one.
 
     Returns:
         tuple: The figure and axes of the plot.
         """
-    fig, ax = plt.subplots()
+    if ax is None:
+        fig, ax = plt.subplots()
+    else:
+        fig = plt.gcf()
     pathes = _preprocess_path(path)
     for optimizer_path in pathes:
         metric = _determine_available_metric(optimizer_path, metric)
