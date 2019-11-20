@@ -5,7 +5,7 @@ SMALL_TEST_SET = ["quadratic_deep", "mnist_vae", "fmnist_2c2d", "cifar10_3c3d"]
 LARGE_TEST_SET = [
     "fmnist_vae",
     "cifar100_allcnnc",
-    "svhn_wrn_164",
+    "svhn_wrn164",
     "tolstoi_char_rnn",
 ]
 DATA_SET_NAMING = {
