@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 """Module implementing the abstract Runner."""
-import os
-import json
-from .abstract_runner_utils import float2str
-from .abstract_runner_utils import _add_hp_to_argparse
-import time
 import abc
 import argparse
+import glob
+import json
+import os
+import time
 import warnings
 from copy import deepcopy
+
 from deepobs import config as global_config
-import glob
+
+from .abstract_runner_utils import _add_hp_to_argparse, float2str
 
 
 class Runner(abc.ABC):

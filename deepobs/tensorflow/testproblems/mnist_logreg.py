@@ -3,8 +3,8 @@
 
 import tensorflow as tf
 
-from ._logreg import _logreg
 from ..datasets.mnist import mnist
+from ._logreg import _logreg
 from .testproblem import TestProblem
 
 

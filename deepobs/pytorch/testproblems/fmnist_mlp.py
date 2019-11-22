@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 """A vanilla MLP architecture for Fashion-MNIST."""
 
+import warnings
+
 from torch import nn
-from .testproblems_modules import net_mlp
+
 from ..datasets.fmnist import fmnist
 from .testproblem import UnregularizedTestproblem
-import warnings
+from .testproblems_modules import net_mlp
 
 
 class fmnist_mlp(UnregularizedTestproblem):

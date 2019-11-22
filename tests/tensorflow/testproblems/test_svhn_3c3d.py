@@ -4,8 +4,11 @@
 import os
 import sys
 import unittest
-import tensorflow as tf
+
 import numpy as np
+import tensorflow as tf
+
+from deepobs.tensorflow import testproblems
 
 sys.path.insert(
     0,
@@ -14,7 +17,6 @@ sys.path.insert(
     ),
 )
 
-from deepobs.tensorflow import testproblems
 
 
 class SVHN_3c3dTest(unittest.TestCase):

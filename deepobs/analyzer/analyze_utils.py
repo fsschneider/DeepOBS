@@ -1,5 +1,6 @@
-import numpy as np
 import os
+
+import numpy as np
 
 
 def _preprocess_path(path):
@@ -42,4 +43,3 @@ def _rescale_ax(ax):
     else:
         ax.set_ylim([1.0, 2.0])
     return ax
-

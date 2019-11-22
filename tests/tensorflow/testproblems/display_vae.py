@@ -3,9 +3,12 @@
 
 import os
 import sys
+
+import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-import matplotlib.pyplot as plt
+
+from deepobs.tensorflow import testproblems
 
 sys.path.insert(
     0,
@@ -14,7 +17,6 @@ sys.path.insert(
     ),
 )
 
-from deepobs.tensorflow import testproblems
 
 
 def generate(sess, sampled_z, grid_size=5):

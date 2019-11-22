@@ -2,11 +2,13 @@
 """Tolstoi DeepOBS dataset."""
 
 import os
+
 import numpy as np
-from torch.utils import data as dat
-from . import dataset
-from .. import config
 import torch
+from torch.utils import data as dat
+
+from .. import config
+from . import dataset
 
 
 class tolstoi(dataset.DataSet):

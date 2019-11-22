@@ -4,7 +4,10 @@
 import os
 import sys
 import unittest
+
 import tensorflow as tf
+
+from deepobs.tensorflow import datasets
 
 sys.path.insert(
     0,
@@ -13,7 +16,6 @@ sys.path.insert(
     ),
 )
 
-from deepobs.tensorflow import datasets
 
 
 class QuadraticTest(unittest.TestCase):
@@ -78,5 +80,3 @@ class QuadraticTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
-

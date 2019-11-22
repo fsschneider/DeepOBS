@@ -2,9 +2,10 @@
 """A VAE architecture for MNIST."""
 
 import torch
-from .testproblems_modules import net_vae
+
 from ..datasets.mnist import mnist
 from .testproblem import UnregularizedTestproblem
+from .testproblems_modules import net_vae
 from .testproblems_utils import vae_loss_function_factory
 
 

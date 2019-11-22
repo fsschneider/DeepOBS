@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
+import os
+
 import numpy as np
 from scipy.stats.distributions import uniform
-from ..analyzer.shared_utils import (
-    create_setting_analyzer_ranking,
-    _clear_json,
-    _append_json,
-    _determine_available_metric,
-)
-import os
+
+from ..analyzer.shared_utils import (_append_json, _clear_json,
+                                     _determine_available_metric,
+                                     create_setting_analyzer_ranking)
 
 
 def rerun_setting(

@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 """A VAE architecture for Fashion MNIST."""
 
+import warnings
+
 import torch
-from .testproblems_modules import net_vae
+
 from ..datasets.fmnist import fmnist
 from .testproblem import UnregularizedTestproblem
+from .testproblems_modules import net_vae
 from .testproblems_utils import vae_loss_function_factory
-import warnings
 
 
 class fmnist_vae(UnregularizedTestproblem):

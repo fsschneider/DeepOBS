@@ -381,4 +381,3 @@ class SettingAnalyzer:
                     metric, self.aggregate["testproblem"]
                 )
             )
-

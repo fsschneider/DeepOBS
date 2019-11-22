@@ -3,8 +3,8 @@
 
 import tensorflow as tf
 
-from ._vae import _vae
 from ..datasets.mnist import mnist
+from ._vae import _vae
 from .testproblem import TestProblem
 
 

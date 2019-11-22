@@ -3,8 +3,8 @@
 
 import tensorflow as tf
 
-from ._vgg import _vgg
 from ..datasets.cifar100 import cifar100
+from ._vgg import _vgg
 from .testproblem import TestProblem
 
 

@@ -2,8 +2,9 @@
 """A Variational Autoencoder architecture for Fashion-MNIST."""
 
 import tensorflow as tf
-from ._vae import _vae
+
 from ..datasets.fmnist import fmnist
+from ._vae import _vae
 from .testproblem import TestProblem
 
 

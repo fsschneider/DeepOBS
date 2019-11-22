@@ -1,6 +1,7 @@
 """Example run script using StandardRunner."""
 
 import tensorflow as tf
+
 from deepobs import tensorflow as tfobs
 
 optimizer_class = tf.train.MomentumOptimizer

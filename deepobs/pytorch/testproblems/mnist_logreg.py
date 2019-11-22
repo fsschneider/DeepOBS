@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 """A vanilla MLP architecture for MNIST."""
 
+import warnings
+
 from torch import nn
-from .testproblems_modules import net_mnist_logreg
+
 from ..datasets.mnist import mnist
 from .testproblem import UnregularizedTestproblem
-import warnings
+from .testproblems_modules import net_mnist_logreg
 
 
 class mnist_logreg(UnregularizedTestproblem):

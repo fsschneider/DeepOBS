@@ -3,8 +3,8 @@
 
 import tensorflow as tf
 
-from ._wrn import _wrn
 from ..datasets.cifar100 import cifar100
+from ._wrn import _wrn
 from .testproblem import TestProblem
 
 

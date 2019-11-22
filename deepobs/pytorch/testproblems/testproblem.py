@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """Base class for DeepOBS test problems."""
-import torch
 import abc
+
+import torch
+
 from .. import config
 
 

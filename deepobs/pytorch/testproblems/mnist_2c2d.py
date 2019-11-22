@@ -2,10 +2,12 @@
 """A vanilla CNN architecture for MNIST."""
 
 import warnings
+
 from torch import nn
-from .testproblems_modules import net_mnist_2c2d
+
 from ..datasets.mnist import mnist
 from .testproblem import UnregularizedTestproblem
+from .testproblems_modules import net_mnist_2c2d
 
 
 class mnist_2c2d(UnregularizedTestproblem):

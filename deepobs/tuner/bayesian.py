@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-from .tuner import Tuner
-from bayes_opt import UtilityFunction
-import bayes_opt
-from .bayesian_utils import (
-    _save_bo_optimizer_object,
-    _init_summary_directory,
-    _update_bo_tuning_summary,
-)
 import os
+
+import bayes_opt
+from bayes_opt import UtilityFunction
+
+from .bayesian_utils import (_init_summary_directory,
+                             _save_bo_optimizer_object,
+                             _update_bo_tuning_summary)
+from .tuner import Tuner
 from .tuner_utils import rerun_setting
 
 

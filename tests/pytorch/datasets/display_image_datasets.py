@@ -3,9 +3,13 @@
 
 import os
 import sys
+
+import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-import matplotlib.pyplot as plt
+
+import deepobs.pytorch.config as config
+from deepobs.pytorch import datasets
 
 sys.path.insert(
     0,
@@ -14,8 +18,6 @@ sys.path.insert(
     ),
 )
 
-from deepobs.pytorch import datasets
-import deepobs.pytorch.config as config
 
 config.set_data_dir("/home/isenach/Desktop/Project/deepobs/data_deepobs")
 

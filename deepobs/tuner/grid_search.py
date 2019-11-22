@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from .tuner import ParallelizedTuner
 from itertools import product
+
+from .tuner import ParallelizedTuner
 
 
 class GridSearch(ParallelizedTuner):

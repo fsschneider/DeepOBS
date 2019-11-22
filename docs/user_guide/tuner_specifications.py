@@ -1,9 +1,10 @@
-from deepobs.tuner import GridSearch, RandomSearch, GP
-from torch.optim import SGD
 import numpy as np
+from scipy.stats.distributions import binom, uniform
+from torch.optim import SGD
+
 from deepobs.pytorch.runners import StandardRunner
+from deepobs.tuner import GP, GridSearch, RandomSearch
 from deepobs.tuner.tuner_utils import log_uniform
-from scipy.stats.distributions import uniform, binom
 
 # define optimizer
 optimizer_class = SGD
@@ -73,4 +74,3 @@ tuner = GP(
     ressources=36,
     transformations=transformations,
 )
-

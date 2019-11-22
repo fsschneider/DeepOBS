@@ -1,8 +1,9 @@
 import torch
 from torch import nn
-from .testproblems_modules import net_wrn
+
 from ..datasets.svhn import svhn
 from .testproblem import TestProblem
+from .testproblems_modules import net_wrn
 
 
 class svhn_wrn164(TestProblem):

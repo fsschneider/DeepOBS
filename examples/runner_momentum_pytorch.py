@@ -1,6 +1,7 @@
 """Example run script using StandardRunner."""
 
 from torch.optim import SGD
+
 from deepobs import pytorch as pt
 
 optimizer_class = SGD

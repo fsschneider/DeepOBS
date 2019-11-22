@@ -3,8 +3,8 @@
 
 import tensorflow as tf
 
-from ._3c3d import _3c3d
 from ..datasets.cifar100 import cifar100
+from ._3c3d import _3c3d
 from .testproblem import TestProblem
 
 

@@ -3,8 +3,8 @@
 
 import tensorflow as tf
 
-from ._vgg import _vgg
 from ..datasets.imagenet import imagenet
+from ._vgg import _vgg
 from .testproblem import TestProblem
 
 

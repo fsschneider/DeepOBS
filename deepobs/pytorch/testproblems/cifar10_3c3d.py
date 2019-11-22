@@ -2,9 +2,10 @@
 """A vanilla CNN architecture for CIFAR-10."""
 
 from torch import nn
-from .testproblems_modules import net_cifar10_3c3d
+
 from ..datasets.cifar10 import cifar10
 from .testproblem import TestProblem
+from .testproblems_modules import net_cifar10_3c3d
 
 
 class cifar10_3c3d(TestProblem):

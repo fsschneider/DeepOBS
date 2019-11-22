@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """SVHN DeepOBS dataset."""
 
-from . import dataset
-from deepobs import config
 from torch.utils import data as dat
-from torchvision import datasets
-from torchvision import transforms
+from torchvision import datasets, transforms
+
+from deepobs import config
+
+from . import dataset
 from .datasets_utils import train_eval_sampler
 
 training_transform_augmented = transforms.Compose(

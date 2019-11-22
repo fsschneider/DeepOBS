@@ -1,6 +1,7 @@
-from deepobs.analyzer.analyze import plot_results_table, estimate_runtime
-from deepobs.pytorch.runners import StandardRunner
 from torch.optim import Adam
+
+from deepobs.analyzer.analyze import estimate_runtime, plot_results_table
+from deepobs.pytorch.runners import StandardRunner
 
 # plot the overview table which contains the speed measure for iterations
 plot_results_table(

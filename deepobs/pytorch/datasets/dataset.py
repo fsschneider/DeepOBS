@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 import abc
-from .. import config
+from random import shuffle
+
 from torch.utils import data as dat
 from torch.utils.data.sampler import SubsetRandomSampler
+
+from .. import config
 from .datasets_utils import train_eval_sampler
-from random import shuffle
 
 """Base class for DeepOBS datasets."""
 

@@ -50,4 +50,3 @@ def set_default_device(device):
         """
     global DEFAULT_DEVICE
     DEFAULT_DEVICE = device
-

@@ -1,8 +1,9 @@
-from deepobs.tuner import GridSearch
-from torch.optim import SGD
 import numpy as np
-from deepobs.pytorch.runners import StandardRunner
+from torch.optim import SGD
+
 from deepobs.config import get_small_test_set
+from deepobs.pytorch.runners import StandardRunner
+from deepobs.tuner import GridSearch
 
 # define optimizer
 optimizer_class = SGD
@@ -22,4 +23,3 @@ small_testset = get_small_test_set()
 tuner.tune_on_testset(
     small_testset, rerun_best_setting=True
 )  # kwargs are parsed to the tune() method
-

@@ -3,9 +3,11 @@
 
 import os
 import sys
+
 import torch
-from deepobs.pytorch import datasets
+
 import deepobs.pytorch.config as config
+from deepobs.pytorch import datasets
 
 sys.path.insert(
     0,
@@ -111,5 +113,3 @@ if __name__ == "__main__":
     # _check_data_set(datasets.fmnist)
     # _check_data_set(datasets.mnist)
     _check_data_set(datasets.svhn)
-    # _check_non_labeled_dataset(datasets.quadratic)
-

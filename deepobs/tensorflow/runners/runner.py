@@ -1,16 +1,19 @@
 """Module implementing StandardRunner."""
 
 from __future__ import print_function
-import numpy as np
-import importlib
-import tensorflow as tf
+
 import abc
-from .. import config
-from .. import testproblems
-from . import runner_utils
+import importlib
 from copy import deepcopy
+
+import numpy as np
+import tensorflow as tf
+
 from deepobs import config as global_config
 from deepobs.abstract_runner.abstract_runner import Runner
+
+from .. import config, testproblems
+from . import runner_utils
 
 
 class TFRunner(Runner):

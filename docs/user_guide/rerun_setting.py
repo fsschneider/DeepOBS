@@ -1,7 +1,8 @@
-from deepobs.tuner import GridSearch
-from torch.optim import SGD
 import numpy as np
+from torch.optim import SGD
+
 from deepobs.pytorch.runners import StandardRunner
+from deepobs.tuner import GridSearch
 
 # define optimizer
 optimizer_class = SGD
@@ -18,4 +19,3 @@ tuner = GridSearch(
 
 # tune on quadratic test problem and automatically rerun the best instance with 10 different seeds.
 tuner.tune("quadratic_deep", rerun_best_setting=True)
-

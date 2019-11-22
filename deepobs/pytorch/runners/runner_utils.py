@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Utility functions for running optimizers."""
 
-from torch.optim import lr_scheduler
 import numpy as np
+from torch.optim import lr_scheduler
 
 
 def make_lr_schedule(optimizer, lr_sched_epochs=None, lr_sched_factors=None):

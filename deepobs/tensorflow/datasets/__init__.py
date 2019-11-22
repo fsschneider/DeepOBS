@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from .dataset import DataSet
 from .cifar10 import cifar10
 from .cifar100 import cifar100
+from .dataset import DataSet
 from .fmnist import fmnist
 from .imagenet import imagenet
 from .mnist import mnist

@@ -2,11 +2,11 @@
 """A simple N-Dimensional Noisy Quadratic Problem with Deep Learning eigenvalues."""
 
 import numpy as np
-from .testproblem import UnregularizedTestproblem
 import torch
-from .testproblems_modules import net_quadratic_deep
-from ..datasets.quadratic import quadratic
 
+from ..datasets.quadratic import quadratic
+from .testproblem import UnregularizedTestproblem
+from .testproblems_modules import net_quadratic_deep
 
 rng = np.random.RandomState(42)
 

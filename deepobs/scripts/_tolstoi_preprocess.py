@@ -10,10 +10,11 @@ The text file is assumed to be called input.txt and to reside in a folder given
 by the --data_dir argument."""
 
 import codecs
-import os
 import collections
-import six
+import os
+
 import numpy as np
+import six
 
 
 def preprocess(file_path="", encoding="utf-8", test_size=0.2):

@@ -2,9 +2,12 @@
 """CIFAR-10 DeepOBS dataset."""
 
 import os
+
 import tensorflow as tf
-from . import dataset
+
 from deepobs import config
+
+from . import dataset
 
 
 class cifar10(dataset.DataSet):

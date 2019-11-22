@@ -4,8 +4,11 @@
 import os
 import sys
 import unittest
-import torch
+
 import numpy as np
+import torch
+
+from deepobs.pytorch import testproblems
 
 sys.path.insert(
     0,
@@ -14,7 +17,6 @@ sys.path.insert(
     ),
 )
 
-from deepobs.pytorch import testproblems
 
 
 class Quadratic_DeepTest(unittest.TestCase):

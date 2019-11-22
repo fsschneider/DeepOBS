@@ -3,8 +3,8 @@
 
 import tensorflow as tf
 
-from ._mlp import _mlp
 from ..datasets.mnist import mnist
+from ._mlp import _mlp
 from .testproblem import TestProblem
 
 

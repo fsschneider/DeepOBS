@@ -1,8 +1,9 @@
-from deepobs.tuner import GP
-from torch.optim import SGD
 from sklearn.gaussian_process.kernels import Matern
+from torch.optim import SGD
+
 from deepobs import config
 from deepobs.pytorch.runners import StandardRunner
+from deepobs.tuner import GP
 
 optimizer_class = SGD
 hyperparams = {

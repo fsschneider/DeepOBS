@@ -4,7 +4,10 @@
 import os
 import sys
 import unittest
+
 import tensorflow as tf
+
+from deepobs.tensorflow import datasets
 
 sys.path.insert(
     0,
@@ -13,7 +16,6 @@ sys.path.insert(
     ),
 )
 
-from deepobs.tensorflow import datasets
 
 
 class Two_dTest(unittest.TestCase):

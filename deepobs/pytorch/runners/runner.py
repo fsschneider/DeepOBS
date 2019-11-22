@@ -1,18 +1,21 @@
 """Module implementing StandardRunner."""
 
 from __future__ import print_function
-import torch
-import importlib
+
 import abc
-from deepobs import config as global_config
-from .. import config
-from .. import testproblems
-from . import runner_utils
-from deepobs.abstract_runner.abstract_runner import Runner
-import numpy as np
+import importlib
 import warnings
-from random import seed
 from copy import deepcopy
+from random import seed
+
+import numpy as np
+import torch
+
+from deepobs import config as global_config
+from deepobs.abstract_runner.abstract_runner import Runner
+
+from .. import config, testproblems
+from . import runner_utils
 
 
 class PTRunner(Runner):

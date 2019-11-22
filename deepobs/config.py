@@ -137,4 +137,3 @@ def get_testproblem_default_setting(testproblem):
             + testproblem
             + ". Please set num_epochs and batch_size in the run."
         )
-

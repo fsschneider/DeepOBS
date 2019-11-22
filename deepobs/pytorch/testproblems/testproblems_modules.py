@@ -4,13 +4,10 @@
 import torch
 from torch import nn
 from torch.nn import functional as F
-from .testproblems_utils import tfconv2d
-from .testproblems_utils import tfmaxpool2d
-from .testproblems_utils import flatten
-from .testproblems_utils import tfconv2d_transpose
-from .testproblems_utils import mean_allcnnc
-from .testproblems_utils import residual_block
-from .testproblems_utils import _truncated_normal_init
+
+from .testproblems_utils import (_truncated_normal_init, flatten, mean_allcnnc,
+                                 residual_block, tfconv2d, tfconv2d_transpose,
+                                 tfmaxpool2d)
 
 
 class net_mnist_logreg(nn.Sequential):
@@ -809,4 +806,3 @@ class net_mlp(nn.Sequential):
                 module.weight.data = _truncated_normal_init(
                     module.weight.data, mean=0, stddev=3e-2
                 )
-

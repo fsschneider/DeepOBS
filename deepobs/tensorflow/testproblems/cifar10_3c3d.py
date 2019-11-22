@@ -2,8 +2,9 @@
 """A vanilla CNN architecture for CIFAR-10."""
 
 import tensorflow as tf
-from ._3c3d import _3c3d
+
 from ..datasets.cifar10 import cifar10
+from ._3c3d import _3c3d
 from .testproblem import TestProblem
 
 

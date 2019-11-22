@@ -3,9 +3,12 @@
 
 import os
 import sys
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
 import torch
+
+from deepobs.pytorch import testproblems
 
 sys.path.insert(
     0,
@@ -14,7 +17,6 @@ sys.path.insert(
     ),
 )
 
-from deepobs.pytorch import testproblems
 
 
 def generate(testprob, sampled_z, grid_size=5):

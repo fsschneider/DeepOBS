@@ -2,9 +2,10 @@
 """The all CNN-C architecture for CIFAR-100."""
 
 from torch import nn
-from .testproblems_modules import net_cifar100_allcnnc
+
 from ..datasets.cifar100 import cifar100
 from .testproblem import TestProblem
+from .testproblems_modules import net_cifar100_allcnnc
 
 
 class cifar100_allcnnc(TestProblem):

@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 """A vanilla CNN architecture for Fashion MNIST."""
 
+import warnings
+
 from torch import nn
-from .testproblems_modules import net_mnist_2c2d
+
 from ..datasets.fmnist import fmnist
 from .testproblem import UnregularizedTestproblem
-import warnings
+from .testproblems_modules import net_mnist_2c2d
 
 
 class fmnist_2c2d(UnregularizedTestproblem):

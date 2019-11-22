@@ -2,6 +2,7 @@
 """A simple N-Dimensional Noisy Quadratic Problem with Deep Learning eigenvalues."""
 
 import numpy as np
+
 from ._quadratic import _quadratic_base
 
 # Random generator with a fixed seed to randomly draw eigenvalues and rotation.

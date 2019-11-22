@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import torch
-from scipy.stats import truncnorm as tn
 from math import ceil
-from torch import nn
+
+import torch
 from numpy.random import RandomState
+from scipy.stats import truncnorm as tn
+from torch import nn
 
 
 def vae_loss_function_factory(reduction="mean"):

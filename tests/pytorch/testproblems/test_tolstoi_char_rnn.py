@@ -4,7 +4,10 @@
 import os
 import sys
 import unittest
+
 import torch
+
+from deepobs.pytorch import testproblems
 
 sys.path.insert(
     0,
@@ -13,7 +16,6 @@ sys.path.insert(
     ),
 )
 
-from deepobs.pytorch import testproblems
 
 
 class Tolstoi_Char_RNNTest(unittest.TestCase):

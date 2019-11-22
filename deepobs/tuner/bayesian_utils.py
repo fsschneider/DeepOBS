@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-import pickle
-import numpy as np
-import os
 import json
-import matplotlib.pyplot as plt
-from ..analyzer.shared_utils import _append_json, _clear_json
+import os
+import pickle
 from itertools import product
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from ..analyzer.shared_utils import _append_json, _clear_json
 
 
 def _reshape_posterior_and_domain_for_plotting(

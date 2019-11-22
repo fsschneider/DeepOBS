@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """CIFAR-10 DeepOBS dataset."""
 
-from . import dataset
+from torchvision import datasets, transforms
+
 from deepobs import config
-from torchvision import datasets
-from torchvision import transforms
+
+from . import dataset
 
 training_transform_not_augmented = transforms.Compose(
     [

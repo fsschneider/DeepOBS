@@ -6,19 +6,16 @@ from collections import Counter
 
 import numpy as np
 import pandas as pd
-
-from matplotlib import pyplot as plt
 import seaborn as sns
+from matplotlib import pyplot as plt
 
 from ..tuner.tuner_utils import generate_tuning_summary
 from .analyze_utils import _preprocess_path, _rescale_ax
-from .shared_utils import (
-    _check_output_structure,
-    _check_setting_folder_is_not_empty,
-    _determine_available_metric,
-    _get_optimizer_name_and_testproblem_from_path,
-    create_setting_analyzer_ranking,
-)
+from .shared_utils import (_check_output_structure,
+                           _check_setting_folder_is_not_empty,
+                           _determine_available_metric,
+                           _get_optimizer_name_and_testproblem_from_path,
+                           create_setting_analyzer_ranking)
 
 sns.set()
 sns.set_style(

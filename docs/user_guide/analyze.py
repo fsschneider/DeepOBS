@@ -1,7 +1,5 @@
-from deepobs.analyzer.analyze import (
-    plot_optimizer_performance,
-    plot_hyperparameter_sensitivity,
-)
+from deepobs.analyzer.analyze import (plot_hyperparameter_sensitivity,
+                                      plot_optimizer_performance)
 
 # plot your optimizer against baselines
 plot_optimizer_performance(

@@ -3,8 +3,8 @@
 
 import tensorflow as tf
 
-from ._2c2d import _2c2d
 from ..datasets.mnist import mnist
+from ._2c2d import _2c2d
 from .testproblem import TestProblem
 
 

@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 import abc
-from numpy.random import seed as np_seed
 import os
-from .tuner_utils import rerun_setting
+
+from numpy.random import seed as np_seed
+
 from deepobs.analyzer.shared_utils import _dump_json
+
+from .tuner_utils import rerun_setting
 
 
 class Tuner(abc.ABC):

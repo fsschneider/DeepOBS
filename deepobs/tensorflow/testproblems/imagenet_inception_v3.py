@@ -3,8 +3,8 @@
 
 import tensorflow as tf
 
-from ._inception_v3 import _inception_v3
 from ..datasets.imagenet import imagenet
+from ._inception_v3 import _inception_v3
 from .testproblem import TestProblem
 
 

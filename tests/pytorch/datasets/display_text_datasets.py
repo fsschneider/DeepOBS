@@ -2,10 +2,14 @@
 """Script to show text from DeepOBS text datasets."""
 
 import os
-import sys
 import pickle
-import numpy as np
+import sys
+
 import matplotlib.pyplot as plt
+import numpy as np
+
+import deepobs.pytorch.config as config
+from deepobs.pytorch import datasets
 
 sys.path.insert(
     0,
@@ -14,8 +18,6 @@ sys.path.insert(
     ),
 )
 
-from deepobs.pytorch import datasets
-import deepobs.pytorch.config as config
 
 
 def display_text(dataset_cls, grid_size=5, phase="train"):
