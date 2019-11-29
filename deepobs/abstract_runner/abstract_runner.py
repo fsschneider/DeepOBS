@@ -681,9 +681,9 @@ class Runner(abc.ABC):
         )
 
         # Add training parameters to the name.
-        run_folder_name = self._add_training_params_to_output_dir_name(
-            training_params, run_folder_name
-        )
+        # run_folder_name = self._add_training_params_to_output_dir_name(
+        #     training_params, run_folder_name
+        # )
 
         file_name = self._filename_no_date(random_seed)
         file_name += time.strftime("%Y-%m-%d-%H-%M-%S")
