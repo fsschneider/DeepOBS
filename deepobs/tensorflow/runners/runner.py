@@ -290,7 +290,11 @@ class StandardRunner(TFRunner):
         with tf.control_dependencies(
             tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         ):
-            step = opt.minimize(loss, global_step=global_step)
+            # Try to pass with global step, otherwise don't pass it
+            try:
+                step = opt.minimize(loss, global_step=global_step)
+            except TypeError:
+                step = opt.minimize(loss)
 
         # Lists to track train/test loss and accuracy.
         train_losses = []
@@ -352,12 +356,8 @@ class StandardRunner(TFRunner):
                         minibatch_train_losses.append(loss_.astype(float))
 
                         if tb_log:
-                            current_step = sess.run(global_step)
                             self.write_per_iter_summary(
-                                sess,
-                                per_iter_summaries,
-                                summary_writer,
-                                current_step,
+                                sess, per_iter_summaries, summary_writer, s
                             )
 
                         minibatch_train_losses.append(loss_.astype(float))
@@ -507,7 +507,11 @@ class LearningRateScheduleRunner(TFRunner):
         with tf.control_dependencies(
             tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         ):
-            step = opt.minimize(loss, global_step=global_step)
+            # Try to pass with global step, otherwise don't pass it
+            try:
+                step = opt.minimize(loss, global_step=global_step)
+            except TypeError:
+                step = opt.minimize(loss)
 
         # Lists to track train/test loss and accuracy.
         train_losses = []
@@ -572,12 +576,8 @@ class LearningRateScheduleRunner(TFRunner):
                         minibatch_train_losses.append(loss_.astype(float))
 
                         if tb_log:
-                            current_step = sess.run(global_step)
                             self.write_per_iter_summary(
-                                sess,
-                                per_iter_summaries,
-                                summary_writer,
-                                current_step,
+                                sess, per_iter_summaries, summary_writer, s
                             )
 
                         minibatch_train_losses.append(loss_.astype(float))
