@@ -12,6 +12,4 @@ hyperparams = {
 }
 
 runner = pt.runners.StandardRunner(optimizer_class, hyperparams)
-runner.run(
-    testproblem="quadratic_deep", hyperparams={"lr": 1e-2}, num_epochs=10
-)
+runner.run()

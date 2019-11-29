@@ -12,8 +12,4 @@ hyperparams = {
 }
 
 runner = tfobs.runners.StandardRunner(optimizer_class, hyperparams)
-runner.run(
-    testproblem="quadratic_deep",
-    hyperparams={"learning_rate": 1e-2},
-    num_epochs=10,
-)
+runner.run()
