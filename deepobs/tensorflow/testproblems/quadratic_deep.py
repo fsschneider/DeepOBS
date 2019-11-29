@@ -68,7 +68,7 @@ class quadratic_deep(_quadratic_base):
 
     Args:
       batch_size (int): Batch size to use.
-      weight_decay (float): No weight decay (L2-regularization) is used in this
+      l2_reg (float): No L2-Regularization (weight decay) is used in this
           test problem. Defaults to ``None`` and any input here is ignored.
 
     Attributes:
@@ -85,12 +85,12 @@ class quadratic_deep(_quadratic_base):
           Will always be ``0.0`` since no regularizer is used.
     """
 
-    def __init__(self, batch_size, weight_decay=None):
+    def __init__(self, batch_size, l2_reg=None):
         """Create a new quadratic deep test problem instance.
 
         Args:
           batch_size (int): Batch size to use.
-          weight_decay (float): No weight decay (L2-regularization) is used in this
+          l2_reg (float): No L2-Regularization (weight decay) is used in this
               test problem. Defaults to ``None`` and any input here is ignored.
         """
         eigenvalues = np.concatenate(
@@ -99,4 +99,4 @@ class quadratic_deep(_quadratic_base):
         D = np.diag(eigenvalues)
         R = random_rotation(D.shape[0])
         hessian = np.matmul(np.transpose(R), np.matmul(D, R))
-        super(quadratic_deep, self).__init__(batch_size, weight_decay, hessian)
+        super(quadratic_deep, self).__init__(batch_size, l2_reg, hessian)

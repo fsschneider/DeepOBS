@@ -30,7 +30,7 @@ class mnist_vae(TestProblem):
 
   Args:
       batch_size (type): Batch size to use.
-      weight_decay (type): No weight decay (L2-regularization) is used in this
+      l2_reg (type): No L2-Regularization (weight decay) is used in this
           test problem. Defaults to ``None`` and any input here is ignored.
 
   Attributes:
@@ -47,19 +47,19 @@ class mnist_vae(TestProblem):
         Will always be ``0.0`` since no regularizer is used.
   """
 
-    def __init__(self, batch_size, weight_decay=None):
+    def __init__(self, batch_size, l2_reg=None):
         """Create a new VAE test problem instance on MNIST.
 
         Args:
             batch_size (type): Batch size to use.
-            weight_decay (type): No weight decay (L2-regularization) is used in this
+            l2_reg (type): No L2-Regularization (weight decay) is used in this
                 test problem. Defaults to ``None`` and any input here is ignored.
         """
-        super(mnist_vae, self).__init__(batch_size, weight_decay)
+        super(mnist_vae, self).__init__(batch_size, l2_reg)
 
-        if weight_decay is not None:
+        if l2_reg is not None:
             print(
-                "WARNING: Weight decay is non-zero but no weight decay is used",
+                "WARNING: L2-Regularization is non-zero but no L2-regularization is used",
                 "for this model.",
             )
 

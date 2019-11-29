@@ -70,7 +70,7 @@ class Runner(abc.ABC):
         random_seed=None,
         data_dir=None,
         output_dir=None,
-        weight_decay=None,
+        l2_reg=None,
         no_logs=None,
         train_log_interval=None,
         print_train_iter=None,
@@ -92,7 +92,7 @@ class Runner(abc.ABC):
             random_seed (int): The torch random seed.
             data_dir (str): The path where the data is stored.
             output_dir (str): Path of the folder where the results are written to.
-            weight_decay (float): Regularization factor for the testproblem.
+            l2_reg (float): Regularization factor for the testproblem.
             no_logs (bool): Whether to write the output or not.
             train_log_interval (int): Mini-batch interval for logging.
             print_train_iter (bool): Whether to print the training progress at each train_log_interval.
@@ -121,7 +121,7 @@ class Runner(abc.ABC):
             random_seed=random_seed,
             data_dir=data_dir,
             output_dir=output_dir,
-            weight_decay=weight_decay,
+            l2_reg=l2_reg,
             no_logs=no_logs,
             train_log_interval=train_log_interval,
             print_train_iter=print_train_iter,
@@ -141,7 +141,7 @@ class Runner(abc.ABC):
                 random_seed,
                 data_dir,
                 output_dir,
-                weight_decay,
+                l2_reg,
                 no_logs,
                 train_log_interval,
                 print_train_iter,
@@ -163,7 +163,7 @@ class Runner(abc.ABC):
         random_seed=None,
         data_dir=None,
         output_dir=None,
-        weight_decay=None,
+        l2_reg=None,
         no_logs=None,
         train_log_interval=None,
         print_train_iter=None,
@@ -190,7 +190,7 @@ class Runner(abc.ABC):
             testproblem,
             batch_size,
             num_epochs,
-            weight_decay,
+            l2_reg,
             random_seed,
             output_dir,
             hyperparams,
@@ -208,7 +208,7 @@ class Runner(abc.ABC):
                 tb_log_dir = self._run_directory
 
         tproblem = self.create_testproblem(
-            testproblem, batch_size, weight_decay, random_seed
+            testproblem, batch_size, l2_reg, random_seed
         )
 
         output = self.training(
@@ -228,7 +228,7 @@ class Runner(abc.ABC):
             batch_size,
             num_epochs,
             random_seed,
-            weight_decay,
+            l2_reg,
             hyperparams_before_training,
             **training_params_before_training
         )
@@ -247,7 +247,7 @@ class Runner(abc.ABC):
         random_seed=None,
         data_dir=None,
         output_dir=None,
-        weight_decay=None,
+        l2_reg=None,
         no_logs=None,
         train_log_interval=None,
         print_train_iter=None,
@@ -273,7 +273,7 @@ class Runner(abc.ABC):
             random_seed,
             data_dir,
             output_dir,
-            weight_decay,
+            l2_reg,
             no_logs,
             train_log_interval,
             print_train_iter,
@@ -292,7 +292,7 @@ class Runner(abc.ABC):
         random_seed=None,
         data_dir=None,
         output_dir=None,
-        weight_decay=None,
+        l2_reg=None,
         no_logs=None,
         train_log_interval=None,
         print_train_iter=None,
@@ -312,7 +312,7 @@ class Runner(abc.ABC):
             testproblem,
             batch_size,
             num_epochs,
-            weight_decay,
+            l2_reg,
             random_seed,
             output_dir,
             hyperparams,
@@ -480,7 +480,7 @@ class Runner(abc.ABC):
         random_seed,
         data_dir,
         output_dir,
-        weight_decay,
+        l2_reg,
         no_logs,
         train_log_interval,
         print_train_iter,
@@ -498,7 +498,7 @@ class Runner(abc.ABC):
                 random_seed (int): The torch random seed.
                 data_dir (str): The path where the data is stored.
                 output_dir (str): Path of the folder where the results are written to.
-                weight_decay (float): Regularization factor for the testproblem.
+                l2_reg (float): Regularization factor for the testproblem.
                 no_logs (bool): Whether to write the output or not.
                 train_log_interval (int): Mini-batch interval for logging.
                 print_train_iter (bool): Whether to print the training progress at each train_log_interval.
@@ -519,9 +519,9 @@ class Runner(abc.ABC):
         else:
             args["testproblem"] = testproblem
 
-        if weight_decay is None:
+        if l2_reg is None:
             parser.add_argument(
-                "--weight_decay",
+                "--l2_reg",
                 "--wd",
                 type=float,
                 help="""Factor
@@ -530,7 +530,7 @@ class Runner(abc.ABC):
           value will be ignored in such a case.""",
             )
         else:
-            args["weight_decay"] = weight_decay
+            args["l2_reg"] = l2_reg
 
         if batch_size is None:
             parser.add_argument(
@@ -657,7 +657,7 @@ class Runner(abc.ABC):
         testproblem,
         batch_size,
         num_epochs,
-        weight_decay,
+        l2_reg,
         random_seed,
         output_dir,
         optimizer_hyperparams,
@@ -670,9 +670,9 @@ class Runner(abc.ABC):
             + "__batch_size__"
             + str(batch_size)
         )
-        if weight_decay is not None:
-            run_folder_name += "__weight_decay__{0:s}".format(
-                float2str(weight_decay)
+        if l2_reg is not None:
+            run_folder_name += "__l2_reg__{0:s}".format(
+                float2str(l2_reg)
             )
 
         # Add all hyperparameters to the name.
@@ -705,7 +705,7 @@ class Runner(abc.ABC):
         batch_size,
         num_epochs,
         random_seed,
-        weight_decay,
+        l2_reg,
         hyperparams,
         **training_params
     ):
@@ -727,7 +727,7 @@ class Runner(abc.ABC):
             "batch_size": batch_size,
             "num_epochs": num_epochs,
             "random_seed": random_seed,
-            "weight_decay": weight_decay,
+            "l2_reg": l2_reg,
             "optimizer_name": self._optimizer_name,
             "optimizer_hyperparams": hyperparams,
             "training_params": training_params,

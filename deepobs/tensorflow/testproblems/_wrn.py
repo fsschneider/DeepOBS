@@ -14,7 +14,7 @@ def _wrn(
     num_residual_units,
     widening_factor,
     num_outputs,
-    weight_decay,
+    l2_reg,
     bn_momentum=0.9,
 ):
     def conv2d(inputs, filters, kernel_size, strides=1):
@@ -27,7 +27,7 @@ def _wrn(
             padding="same",
             use_bias=False,
             kernel_initializer=tf.initializers.glorot_uniform(),
-            kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
+            kernel_regularizer=tf.contrib.layers.l2_regularizer(l2_reg),
         )
 
     def batch_normalization(inputs):
@@ -113,7 +113,7 @@ def _wrn(
             num_outputs,
             kernel_initializer=tf.initializers.glorot_uniform(),
             bias_initializer=tf.initializers.constant(0.0),
-            kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
+            kernel_regularizer=tf.contrib.layers.l2_regularizer(l2_reg),
         )
 
     return linear_outputs

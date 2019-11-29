@@ -33,7 +33,7 @@ class imagenet_inception_v3(TestProblem):
 
   Args:
     batch_size (int): Batch size to use.
-    weight_decay (float): Weight decay factor. Weight decay (L2-regularization)
+    l2_reg (float): L2-regularization factor. L2-Regularization (weight decay)
         is used on the weights but not the biases.
         Defaults to ``5e-4``.
 
@@ -51,16 +51,16 @@ class imagenet_inception_v3(TestProblem):
     accuracy: A scalar tf.Tensor containing the mini-batch mean accuracy.
   """
 
-    def __init__(self, batch_size, weight_decay=5e-4):
+    def __init__(self, batch_size, l2_reg=5e-4):
         """Create a new Inception v3 test problem instance on ImageNet.
 
         Args:
           batch_size (int): Batch size to use.
-          weight_decay (float): Weight decay factor. Weight decay (L2-regularization)
+          l2_reg (float): L2-regularization factor. L2-Regularization (weight decay)
               is used on the weights but not the biases.
               Defaults to ``5e-4``.
         """
-        super(imagenet_inception_v3, self).__init__(batch_size, weight_decay)
+        super(imagenet_inception_v3, self).__init__(batch_size, l2_reg)
 
     def set_up(self):
         """Set up the Inception v3 test problem on ImageNet."""
@@ -73,7 +73,7 @@ class imagenet_inception_v3(TestProblem):
         x, y = self.dataset.batch
 
         linear_outputs, aux_linear_outputs = _inception_v3(
-            x, training, weight_decay=self._weight_decay
+            x, training, l2_reg=self._l2_reg
         )
 
         # Compute two components of losses

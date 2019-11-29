@@ -3,7 +3,7 @@
 import tensorflow as tf
 
 
-def _inception_v3(x, training, weight_decay):
+def _inception_v3(x, training, l2_reg):
     def conv2d_BN(inputs, filters, kernel_size, strides, padding, training):
         """Creates a convolutional layer, followed by a batch normalization layer
         and a ReLU activation.
@@ -35,7 +35,7 @@ def _inception_v3(x, training, weight_decay):
             padding,
             activation=None,
             use_bias=False,
-            kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
+            kernel_regularizer=tf.contrib.layers.l2_regularizer(l2_reg),
         )
         x = tf.layers.batch_normalization(x, momentum=0.9997, training=training)
         x = tf.nn.relu(x)

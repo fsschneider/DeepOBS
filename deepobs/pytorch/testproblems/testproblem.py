@@ -12,14 +12,14 @@ class TestProblem(abc.ABC):
 
   Args:
     batch_size (int): Batch size to use.
-    weight_decay (float): Weight decay (L2-regularization) factor to use. If
+    l2_reg (float): L2-Regularization (weight decay) factor to use. If
         not specified, the test problems revert to their respective defaults.
         Note: Some test problems do not use regularization and this value will
         be ignored in such a case.
 
   Attributes:
     _batch_size: Batch_size for the data of this test problem.
-    _weight_decay: The regularization factor for this test problem
+    _l2_reg: The regularization factor for this test problem
     data: The dataset used by the test problem (datasets.DataSet instance).
     loss_function: The loss function for this test problem.
     net: The torch module (the neural network) that is trained.
@@ -36,18 +36,18 @@ class TestProblem(abc.ABC):
     set_up: Sets all public attributes.
   """
 
-    def __init__(self, batch_size, weight_decay=None):
+    def __init__(self, batch_size, l2_reg=None):
         """Creates a new test problem instance.
 
     Args:
       batch_size (int): Batch size to use.
-      weight_decay (float): Weight decay (L2-regularization) factor to use. If
+      l2_reg (float): L2-Regularization (weight decay) factor to use. If
           not specified, the test problems revert to their respective defaults.
           Note: Some test problems do not use regularization and this value will
           be ignored in such a case.
     """
         self._batch_size = batch_size
-        self._weight_decay = weight_decay
+        self._l2_reg = l2_reg
         self._device = torch.device(config.get_default_device())
 
         # Public attributes by which to interact with test problems. These have to
@@ -208,8 +208,8 @@ class TestProblem(abc.ABC):
 
 
 class UnregularizedTestproblem(TestProblem):
-    def __init__(self, batch_size, weight_decay=None):
-        super(UnregularizedTestproblem, self).__init__(batch_size, weight_decay)
+    def __init__(self, batch_size, l2_reg=None):
+        super(UnregularizedTestproblem, self).__init__(batch_size, l2_reg)
 
     def get_regularization_groups(self):
         """Creates regularization groups for the parameters.

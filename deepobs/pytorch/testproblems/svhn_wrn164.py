@@ -11,7 +11,7 @@ class svhn_wrn164(TestProblem):
     for SVHN.
 
   Details about the architecture can be found in the `original paper`_.
-  A weight decay is used on the weights (but not the biases)
+  L2-Regularization is used on the weights (but not the biases)
   which defaults to ``5e-4``.
 
   Training settings recommenden in the `original paper`_:
@@ -23,21 +23,21 @@ class svhn_wrn164(TestProblem):
 
   Args:
     batch_size (int): Batch size to use.
-    weight_decay (float): Weight decay factor. Weight decay (L2-regularization)
+    l2_reg (float): L2-regularization factor. L2-Regularization (weight decay)
         is used on the weights but not the biases.
         Defaults to ``5e-4``.
   """
 
-    def __init__(self, batch_size, weight_decay=0.0005):
+    def __init__(self, batch_size, l2_reg=0.0005):
         """Create a new WRN 16-4 test problem instance on SVHN.
 
         Args:
           batch_size (int): Batch size to use.
-          weight_decay (float): Weight decay factor. Weight decay (L2-regularization)
+          l2_reg (float): L2-regularization factor. L2-Regularization (weight decay)
               is used on the weights but not the biases.
               Defaults to ``5e-4``.
         """
-        super(svhn_wrn164, self).__init__(batch_size, weight_decay)
+        super(svhn_wrn164, self).__init__(batch_size, l2_reg)
 
     def set_up(self):
         """Set up the Wide ResNet 16-4 test problem on SVHN."""
@@ -55,7 +55,7 @@ class svhn_wrn164(TestProblem):
         Returns:
             dict: A dictionary where the key is the regularization factor and the value is a list of parameters.
         """
-        no, l2 = 0.0, self._weight_decay
+        no, l2 = 0.0, self._l2_reg
         group_dict = {no: [], l2: []}
 
         for parameters_name, parameters in self.net.named_parameters():

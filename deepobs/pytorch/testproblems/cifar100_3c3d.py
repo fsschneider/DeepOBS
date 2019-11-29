@@ -27,7 +27,7 @@ class cifar100_3c3d(TestProblem):
 
   Args:
       batch_size (int): Batch size to use.
-      weight_decay (float): Weight decay factor. Weight decay (L2-regularization)
+      l2_reg (float): L2-regularization factor. L2-Regularization (weight decay)
           is used on the weights but not the biases. Defaults to ``0.002``.
 
   Attributes:
@@ -39,8 +39,8 @@ class cifar100_3c3d(TestProblem):
       get_regularization_loss: Returns the current regularization loss of the network state.
   """
 
-    def __init__(self, batch_size, weight_decay=0.002):
-        super(cifar100_3c3d, self).__init__(batch_size, weight_decay)
+    def __init__(self, batch_size, l2_reg=0.002):
+        super(cifar100_3c3d, self).__init__(batch_size, l2_reg)
 
     def set_up(self):
         """Set up the vanilla CNN test problem on Cifar-100."""
@@ -56,7 +56,7 @@ class cifar100_3c3d(TestProblem):
         Returns:
             dict: A dictionary where the key is the regularization factor and the value is a list of parameters.
         """
-        no, l2 = 0.0, self._weight_decay
+        no, l2 = 0.0, self._l2_reg
         group_dict = {no: [], l2: []}
 
         for parameters_name, parameters in self.net.named_parameters():

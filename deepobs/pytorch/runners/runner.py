@@ -39,13 +39,13 @@ class PTRunner(Runner):
         return
 
     @staticmethod
-    def create_testproblem(testproblem, batch_size, weight_decay, random_seed):
+    def create_testproblem(testproblem, batch_size, l2_reg, random_seed):
         """Sets up the deepobs.pytorch.testproblems.testproblem instance.
 
         Args:
             testproblem (str): The name of the testproblem.
             batch_size (int): Batch size that is used for training
-            weight_decay (float): Regularization factor
+            l2_reg (float): Regularization factor
             random_seed (int): The random seed of the framework
 
         Returns:
@@ -62,7 +62,7 @@ class PTRunner(Runner):
         np.random.seed(random_seed)
         torch.manual_seed(random_seed)
 
-        # Find testproblem by name and instantiate with batch size and weight decay.
+        # Find testproblem by name and instantiate with batch size and L2-regularization.
         try:
             testproblem_mod = importlib.import_module(testproblem)
             testproblem_cls = getattr(testproblem_mod, testproblem)
@@ -70,9 +70,9 @@ class PTRunner(Runner):
         except:
             testproblem_cls = getattr(testproblems, testproblem)
 
-        # if the user specified a weight decay, use that one
-        if weight_decay is not None:
-            tproblem = testproblem_cls(batch_size, weight_decay)
+        # if the user specified L2-regularization, use that one
+        if l2_reg is not None:
+            tproblem = testproblem_cls(batch_size, l2_reg)
         # else use the default of the testproblem
         else:
             tproblem = testproblem_cls(batch_size)

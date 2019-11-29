@@ -26,7 +26,7 @@ class svhn_3c3d(TestProblem):
 
   Args:
       batch_size (int): Batch size to use.
-      weight_decay (float): Weight decay factor. Weight decay (L2-regularization)
+      l2_reg (float): L2-regularization factor. L2-Regularization (weight decay)
           is used on the weights but not the biases. Defaults to ``0.002``.
 
   Attributes:
@@ -43,15 +43,15 @@ class svhn_3c3d(TestProblem):
     accuracy: A scalar tf.Tensor containing the mini-batch mean accuracy.
   """
 
-    def __init__(self, batch_size, weight_decay=0.002):
+    def __init__(self, batch_size, l2_reg=0.002):
         """Create a new 3c3d test problem instance on SVHN.
 
         Args:
             batch_size (int): Batch size to use.
-            weight_decay (float): Weight decay factor. Weight decay (L2-regularization)
+            l2_reg (float): L2-regularization factor. L2-Regularization (weight decay)
                 is used on the weights but not the biases. Defaults to ``0.002``.
         """
-        super(svhn_3c3d, self).__init__(batch_size, weight_decay)
+        super(svhn_3c3d, self).__init__(batch_size, l2_reg)
 
     def set_up(self):
         """Set up the vanilla CNN test problem on SVHN."""
@@ -63,7 +63,7 @@ class svhn_3c3d(TestProblem):
 
         x, y = self.dataset.batch
         linear_outputs = _3c3d(
-            x, num_outputs=10, weight_decay=self._weight_decay
+            x, num_outputs=10, l2_reg=self._l2_reg
         )
 
         self.losses = tf.nn.softmax_cross_entropy_with_logits_v2(

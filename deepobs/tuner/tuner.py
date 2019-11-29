@@ -45,12 +45,10 @@ class Tuner(abc.ABC):
         Args:
             testset (list): A list of testproblems.
         """
-        if any(
-            s in kwargs for s in ["num_epochs", "batch_size", "weight_decay"]
-        ):
+        if any(s in kwargs for s in ["num_epochs", "batch_size", "l2_reg"]):
             raise RuntimeError(
                 "Cannot execute tuning on a whole testset if num_epochs, "
-                "weight_decay or batch_size is set. "
+                "l2_reg or batch_size is set. "
                 "A testset tuning is ment to tune on default testproblems."
             )
         for testproblem in testset:
@@ -216,12 +214,10 @@ class ParallelizedTuner(Tuner):
         Args:
             testset (list): A list of the testproblem strings.
             """
-        if any(
-            s in kwargs for s in ["num_epochs", "batch_size", "weight_decay"]
-        ):
+        if any(s in kwargs for s in ["num_epochs", "batch_size", "l2_reg"]):
             raise RuntimeError(
                 "Cannot execute tuning on a whole testset if num_epochs, "
-                "weight_decay or batch_size is set. "
+                "l2_reg or batch_size is set. "
                 "A testset tuning is ment to tune on default testproblems."
             )
         for testproblem in testset:

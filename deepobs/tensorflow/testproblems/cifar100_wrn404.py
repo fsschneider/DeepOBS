@@ -13,7 +13,7 @@ class cifar100_wrn404(TestProblem):
     for CIFAR-100.
 
   Details about the architecture can be found in the `original paper`_.
-  A weight decay is used on the weights (but not the biases)
+  L2-Regularization is used on the weights (but not the biases)
   which defaults to ``5e-4``.
 
   Training settings recommenden in the `original paper`_:
@@ -25,7 +25,7 @@ class cifar100_wrn404(TestProblem):
 
   Args:
     batch_size (int): Batch size to use.
-    weight_decay (float): Weight decay factor. Weight decay (L2-regularization)
+    l2_reg (float): L2-regularization factor. L2-Regularization (weight decay)
         is used on the weights but not the biases.
         Defaults to ``5e-4``.
 
@@ -43,16 +43,16 @@ class cifar100_wrn404(TestProblem):
     accuracy: A scalar tf.Tensor containing the mini-batch mean accuracy.
   """
 
-    def __init__(self, batch_size, weight_decay=0.0005):
+    def __init__(self, batch_size, l2_reg=0.0005):
         """Create a new WRN 40-4 test problem instance on Cifar-100.
 
         Args:
           batch_size (int): Batch size to use.
-          weight_decay (float): Weight decay factor. Weight decay (L2-regularization)
+          l2_reg (float): L2-regularization factor. L2-Regularization (weight decay)
               is used on the weights but not the biases.
               Defaults to ``5e-4``.
         """
-        super(cifar100_wrn404, self).__init__(batch_size, weight_decay)
+        super(cifar100_wrn404, self).__init__(batch_size, l2_reg)
 
     def set_up(self):
         """Set up the Wide ResNet 40-4 test problem on Cifar-100."""
@@ -70,7 +70,7 @@ class cifar100_wrn404(TestProblem):
             num_residual_units=6,
             widening_factor=4,
             num_outputs=100,
-            weight_decay=self._weight_decay,
+            l2_reg=self._l2_reg,
         )
 
         self.losses = tf.nn.softmax_cross_entropy_with_logits_v2(

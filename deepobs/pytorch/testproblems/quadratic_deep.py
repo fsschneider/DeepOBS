@@ -69,7 +69,7 @@ class quadratic_deep(UnregularizedTestproblem):
 
     Args:
       batch_size (int): Batch size to use.
-      weight_decay (float): No weight decay (L2-regularization) is used in this
+      l2_reg (float): No L2-Regularization (weight decay) is used in this
           test problem. Defaults to ``None`` and any input here is ignored.
     Attributes:
         data: The DeepOBS data set class for the quadratic problem.
@@ -77,15 +77,15 @@ class quadratic_deep(UnregularizedTestproblem):
         net: The DeepOBS subclass of torch.nn.Module that is trained for this tesproblem (net_quadratic_deep).
           """
 
-    def __init__(self, batch_size, weight_decay=None):
+    def __init__(self, batch_size, l2_reg=None):
         """Create a new quadratic deep test problem instance.
 
         Args:
           batch_size (int): Batch size to use.
-          weight_decay (float): No weight decay (L2-regularization) is used in this
+          l2_reg (float): No L2-Regularization (weight decay) is used in this
               test problem. Defaults to ``None`` and any input here is ignored.
         """
-        super(quadratic_deep, self).__init__(batch_size, weight_decay)
+        super(quadratic_deep, self).__init__(batch_size, l2_reg)
 
     def quadratic_deep_loss_function_factory(self, reduction="mean"):
         def quadratic_deep_loss_function(inputs):
