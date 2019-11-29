@@ -312,7 +312,9 @@ class StandardRunner(TFRunner):
             summary_writer = None
 
         # Start tensorflow session and initialize variables.
-        sess = tf.Session()
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        sess = tf.Session(config=config)
         sess.run(tf.global_variables_initializer())
 
         # Start of training loop.
@@ -527,7 +529,9 @@ class LearningRateScheduleRunner(TFRunner):
             summary_writer = None
 
         # Start tensorflow session and initialize variables.
-        sess = tf.Session()
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        sess = tf.Session(config=config)
         sess.run(tf.global_variables_initializer())
 
         # Start of training loop.
