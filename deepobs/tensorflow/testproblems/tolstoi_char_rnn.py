@@ -171,7 +171,7 @@ class tolstoi_char_rnn(TestProblem):
                 ),
             ]
         )
-        self.train_eval_init_op = tf.group(
+        self.valid_init_op = tf.group(
             [
                 self.dataset.valid_init_op,
                 self._get_state_update_op(
