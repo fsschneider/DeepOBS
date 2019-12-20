@@ -6,17 +6,11 @@ from .cifar100_allcnnc import cifar100_allcnnc
 from .fmnist_2c2d import fmnist_2c2d
 from .fmnist_mlp import fmnist_mlp
 from .fmnist_vae import fmnist_vae
+from .imdb_lstm import imdb_lstm
 from .mnist_2c2d import mnist_2c2d
 from .mnist_logreg import mnist_logreg
 from .mnist_mlp import mnist_mlp
 from .mnist_vae import mnist_vae
 from .quadratic_deep import quadratic_deep
 from .svhn_wrn164 import svhn_wrn164
-<<<<<<< HEAD
 from .testproblem import TestProblem
-=======
-
-from .mnist_logreg import mnist_logreg
-
-from .imdb_lstm import imdb_lstm
->>>>>>> 4a29f36a1344e26a1a3fd3ffad71d4e88e5433dc

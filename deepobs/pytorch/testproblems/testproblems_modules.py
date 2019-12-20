@@ -804,11 +804,9 @@ class net_mlp(nn.Sequential):
         for module in self.modules():
             if isinstance(module, nn.Linear):
                 nn.init.constant_(module.bias, 0.0)
-<<<<<<< HEAD
                 module.weight.data = _truncated_normal_init(
                     module.weight.data, mean=0, stddev=3e-2
                 )
-=======
                 module.weight.data = _truncated_normal_init(module.weight.data, mean = 0, stddev=3e-2)
 
 
@@ -870,4 +868,3 @@ class net_imdb_lstm(nn.Module):
         output = self.output_layer(output)
 
         return output
->>>>>>> 4a29f36a1344e26a1a3fd3ffad71d4e88e5433dc
