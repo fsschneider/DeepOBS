@@ -12,4 +12,11 @@ from .mnist_mlp import mnist_mlp
 from .mnist_vae import mnist_vae
 from .quadratic_deep import quadratic_deep
 from .svhn_wrn164 import svhn_wrn164
+<<<<<<< HEAD
 from .testproblem import TestProblem
+=======
+
+from .mnist_logreg import mnist_logreg
+
+from .imdb_lstm import imdb_lstm
+>>>>>>> 4a29f36a1344e26a1a3fd3ffad71d4e88e5433dc

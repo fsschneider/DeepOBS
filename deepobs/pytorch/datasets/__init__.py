@@ -6,4 +6,8 @@ from .dataset import DataSet
 from .fmnist import fmnist
 from .mnist import mnist
 from .quadratic import quadratic
+<<<<<<< HEAD
 from .svhn import svhn
+=======
+from .imdb import imdb
+>>>>>>> 4a29f36a1344e26a1a3fd3ffad71d4e88e5433dc
