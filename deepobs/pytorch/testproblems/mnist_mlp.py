@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 """A vanilla MLP architecture for MNIST."""
 
+import warnings
+
 from torch import nn
-from .testproblems_modules import net_mlp
+
 from ..datasets.mnist import mnist
 from .testproblem import UnregularizedTestproblem
-import warnings
+from .testproblems_modules import net_mlp
+
 
 class mnist_mlp(UnregularizedTestproblem):
     """DeepOBS test problem class for a multi-layer perceptron neural network\
@@ -24,7 +27,7 @@ class mnist_mlp(UnregularizedTestproblem):
 
   Args:
     batch_size (int): Batch size to use.
-    weight_decay (float): No weight decay (L2-regularization) is used in this
+    l2_reg (float): No L2-Regularization (weight decay) is used in this
         test problem. Defaults to ``None`` and any input here is ignored.
 
       Attributes:
@@ -32,21 +35,22 @@ class mnist_mlp(UnregularizedTestproblem):
         loss_function: The loss function for this testproblem is torch.nn.CrossEntropyLoss()
         net: The DeepOBS subclass of torch.nn.Module that is trained for this tesproblem (net_mlp).
         """
-    def __init__(self, batch_size, weight_decay=None):
+
+    def __init__(self, batch_size, l2_reg=None):
         """Create a new multi-layer perceptron test problem instance on \
         Fashion-MNIST.
 
         Args:
           batch_size (int): Batch size to use.
-          weight_decay (float): No weight decay (L2-regularization) is used in this
+          l2_reg (float): No L2-Regularization (weight decay) is used in this
               test problem. Defaults to ``None`` and any input here is ignored.
         """
-        super(mnist_mlp, self).__init__(batch_size, weight_decay)
+        super(mnist_mlp, self).__init__(batch_size, l2_reg)
 
-        if weight_decay is not None:
+        if l2_reg is not None:
             warnings.warn(
-                "Weight decay is non-zero but no weight decay is used for this model.",
-                RuntimeWarning
+                "L2-Regularization is non-zero but no L2-regularization is used for this model.",
+                RuntimeWarning,
             )
 
     def set_up(self):

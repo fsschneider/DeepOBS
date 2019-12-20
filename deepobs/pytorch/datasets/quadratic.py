@@ -2,9 +2,10 @@
 """Quadratic DeepOBS dataset."""
 
 import numpy as np
-from . import dataset
-from torch.utils import data as dat
 import torch
+from torch.utils import data as dat
+
+from . import dataset
 
 
 class quadratic(dataset.DataSet):

@@ -4,12 +4,19 @@
 import os
 import sys
 import unittest
-import torch
-import numpy as np
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+import numpy as np
+import torch
 
 from deepobs.pytorch import testproblems
+
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
+
 
 
 class MNIST_VAETest(unittest.TestCase):
@@ -30,13 +37,32 @@ class MNIST_VAETest(unittest.TestCase):
             num_param.append(parameter.numel())
 
         expected_num_param = [
-                1 * 64 * 4 * 4, 64, 64 * 64 * 4 * 4, 64, 64 * 64 * 4 * 4, 64,
-                7 * 7 * 64 * 8, 8, 7 * 7 * 64 * 8, 8, 8 * 24, 24, 24 * 49, 49,
-                1 * 64 * 4 * 4, 64, 64 * 64 * 4 * 4, 64, 64 * 64 * 4 * 4, 64,
-                14 * 14 * 64 * 28 * 28, 28 * 28
+            1 * 64 * 4 * 4,
+            64,
+            64 * 64 * 4 * 4,
+            64,
+            64 * 64 * 4 * 4,
+            64,
+            7 * 7 * 64 * 8,
+            8,
+            7 * 7 * 64 * 8,
+            8,
+            8 * 24,
+            24,
+            24 * 49,
+            49,
+            1 * 64 * 4 * 4,
+            64,
+            64 * 64 * 4 * 4,
+            64,
+            64 * 64 * 4 * 4,
+            64,
+            14 * 14 * 64 * 28 * 28,
+            28 * 28,
         ]
 
         self.assertEqual(num_param, expected_num_param)
+
 
 if __name__ == "__main__":
     unittest.main()

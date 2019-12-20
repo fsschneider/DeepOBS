@@ -4,11 +4,18 @@
 import os
 import sys
 import unittest
+
 import torch
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
 from deepobs.pytorch import testproblems
+
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
+
 
 
 class FMNIST_MLPTest(unittest.TestCase):
@@ -37,11 +44,18 @@ class FMNIST_MLPTest(unittest.TestCase):
             # - Bias: [dim]
 
         expected_num_param = [
-                28 * 28 * 1000, 1000, 1000 * 500, 500, 500 * 100, 100,
-                100 * 10, 10
-            ]
+            28 * 28 * 1000,
+            1000,
+            1000 * 500,
+            500,
+            500 * 100,
+            100,
+            100 * 10,
+            10,
+        ]
 
         self.assertEqual(num_param, expected_num_param)
+
 
 if __name__ == "__main__":
     unittest.main()

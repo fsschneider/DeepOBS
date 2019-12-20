@@ -3,6 +3,7 @@
 
 import numpy as np
 import tensorflow as tf
+
 from . import dataset
 
 
@@ -128,4 +129,3 @@ class quadratic(dataset.DataSet):
         X_test = np.float32(X_test)
 
         return self._make_dataset(X_test, shuffle=False)
-

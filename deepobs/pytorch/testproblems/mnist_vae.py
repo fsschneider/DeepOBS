@@ -2,9 +2,10 @@
 """A VAE architecture for MNIST."""
 
 import torch
-from .testproblems_modules import net_vae
+
 from ..datasets.mnist import mnist
 from .testproblem import UnregularizedTestproblem
+from .testproblems_modules import net_vae
 from .testproblems_utils import vae_loss_function_factory
 
 
@@ -31,7 +32,7 @@ class mnist_vae(UnregularizedTestproblem):
 
   Args:
     batch_size (int): Batch size to use.
-    weight_decay (float): No weight decay (L2-regularization) is used in this
+    l2_reg (float): No L2-Regularization (weight decay) is used in this
         test problem. Defaults to ``None`` and any input here is ignored.
 
   Attributes:
@@ -40,20 +41,20 @@ class mnist_vae(UnregularizedTestproblem):
     net: The DeepOBS subclass of torch.nn.Module that is trained for this tesproblem (net_vae).
   """
 
-    def __init__(self, batch_size, weight_decay=None):
+    def __init__(self, batch_size, l2_reg=None):
         """Create a new VAE test problem instance on MNIST.
 
         Args:
           batch_size (int): Batch size to use.
-          weight_decay (float): No weight decay (L2-regularization) is used in this
+          l2_reg (float): No L2-Regularization (weight decay) is used in this
               test problem. Defaults to ``None`` and any input here is ignored.
         """
-        super(mnist_vae, self).__init__(batch_size, weight_decay)
+        super(mnist_vae, self).__init__(batch_size, l2_reg)
 
-        if weight_decay is not None:
+        if l2_reg is not None:
             print(
-                "WARNING: Weight decay is non-zero but no weight decay is used",
-                "for this model."
+                "WARNING: L2-Regularization is non-zero but no L2-regularization is used",
+                "for this model.",
             )
 
         self.loss_function = vae_loss_function_factory
@@ -61,13 +62,13 @@ class mnist_vae(UnregularizedTestproblem):
     def set_up(self):
         """Sets up the vanilla CNN test problem on MNIST."""
         self.data = mnist(self._batch_size)
-        self.net = net_vae(n_latent = 8)
+        self.net = net_vae(n_latent=8)
         self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
 
-    def get_batch_loss_and_accuracy_func(self,
-                                    reduction='mean',
-                                    add_regularization_if_available=True):
+    def get_batch_loss_and_accuracy_func(
+        self, reduction="mean", add_regularization_if_available=True
+    ):
         """Get new batch and create forward function that calculates loss and accuracy (if available)
         on that batch.
 
@@ -87,17 +88,23 @@ class mnist_vae(UnregularizedTestproblem):
             if self.phase in ["train_eval", "test", "valid"]:
                 with torch.no_grad():
                     outputs, means, std_devs = self.net(inputs)
-                    loss = self.loss_function(reduction=reduction)(outputs, inputs, means, std_devs)
+                    loss = self.loss_function(reduction=reduction)(
+                        outputs, inputs, means, std_devs
+                    )
             else:
                 outputs, means, std_devs = self.net(inputs)
-                loss = self.loss_function(reduction=reduction)(outputs, inputs, means, std_devs)
+                loss = self.loss_function(reduction=reduction)(
+                    outputs, inputs, means, std_devs
+                )
 
             accuracy = 0
 
             if add_regularization_if_available:
                 regularizer_loss = self.get_regularization_loss()
             else:
-                regularizer_loss = torch.tensor(0.0, device=torch.device(self._device))
+                regularizer_loss = torch.tensor(
+                    0.0, device=torch.device(self._device)
+                )
 
             return loss + regularizer_loss, accuracy
 

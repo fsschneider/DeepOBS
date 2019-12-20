@@ -4,12 +4,19 @@
 import os
 import sys
 import unittest
-import tensorflow as tf
-import numpy as np
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+import numpy as np
+import tensorflow as tf
 
 from deepobs.tensorflow import testproblems
+
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
+
 
 
 class Imagenet_VGG16Test(unittest.TestCase):
@@ -37,27 +44,57 @@ class Imagenet_VGG16Test(unittest.TestCase):
             # - Batch norm: [input, input] (for beta and gamma)
             # - Fully connected: [input*output]
             # - Bias: [dim]
-            self.assertEqual(num_param, [
-                3 * 64 * 3 * 3, 64, 64 * 64 * 3 * 3, 64, 64 * 128 * 3 * 3, 128,
-                128 * 128 * 3 * 3, 128, 128 * 256 * 3 * 3, 256,
-                256 * 256 * 3 * 3, 256, 256 * 256 * 3 * 3, 256,
-                256 * 512 * 3 * 3, 512, 512 * 512 * 3 * 3, 512,
-                512 * 512 * 3 * 3, 512, 512 * 512 * 3 * 3, 512,
-                512 * 512 * 3 * 3, 512, 512 * 512 * 3 * 3, 512,
-                512 * 7 * 7 * 4096, 4096, 4096 * 4096, 4096, 4096 * 1001, 1001
-            ])
+            self.assertEqual(
+                num_param,
+                [
+                    3 * 64 * 3 * 3,
+                    64,
+                    64 * 64 * 3 * 3,
+                    64,
+                    64 * 128 * 3 * 3,
+                    128,
+                    128 * 128 * 3 * 3,
+                    128,
+                    128 * 256 * 3 * 3,
+                    256,
+                    256 * 256 * 3 * 3,
+                    256,
+                    256 * 256 * 3 * 3,
+                    256,
+                    256 * 512 * 3 * 3,
+                    512,
+                    512 * 512 * 3 * 3,
+                    512,
+                    512 * 512 * 3 * 3,
+                    512,
+                    512 * 512 * 3 * 3,
+                    512,
+                    512 * 512 * 3 * 3,
+                    512,
+                    512 * 512 * 3 * 3,
+                    512,
+                    512 * 7 * 7 * 4096,
+                    4096,
+                    4096 * 4096,
+                    4096,
+                    4096 * 1001,
+                    1001,
+                ],
+            )
             for init_op in [
-                    self.imagenet_vgg16.train_init_op,
-                    self.imagenet_vgg16.test_init_op,
-                    self.imagenet_vgg16.train_eval_init_op
+                self.imagenet_vgg16.train_init_op,
+                self.imagenet_vgg16.test_init_op,
+                self.imagenet_vgg16.train_eval_init_op,
             ]:
                 sess.run(init_op)
-                losses_, regularizer_, accuracy_ = sess.run([
-                    self.imagenet_vgg16.losses,
-                    self.imagenet_vgg16.regularizer,
-                    self.imagenet_vgg16.accuracy
-                ])
-                self.assertEqual(losses_.shape, (self.batch_size, ))
+                losses_, regularizer_, accuracy_ = sess.run(
+                    [
+                        self.imagenet_vgg16.losses,
+                        self.imagenet_vgg16.regularizer,
+                        self.imagenet_vgg16.accuracy,
+                    ]
+                )
+                self.assertEqual(losses_.shape, (self.batch_size,))
                 self.assertIsInstance(regularizer_, np.float32)
                 self.assertIsInstance(accuracy_, np.float32)
 

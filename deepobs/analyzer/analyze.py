@@ -6,19 +6,16 @@ from collections import Counter
 
 import numpy as np
 import pandas as pd
-
-from matplotlib import pyplot as plt
 import seaborn as sns
+from matplotlib import pyplot as plt
 
 from ..tuner.tuner_utils import generate_tuning_summary
 from .analyze_utils import _preprocess_path, _rescale_ax
-from .shared_utils import (
-    _check_output_structure,
-    _check_setting_folder_is_not_empty,
-    _determine_available_metric,
-    _get_optimizer_name_and_testproblem_from_path,
-    create_setting_analyzer_ranking,
-)
+from .shared_utils import (_check_output_structure,
+                           _check_setting_folder_is_not_empty,
+                           _determine_available_metric,
+                           _get_optimizer_name_and_testproblem_from_path,
+                           create_setting_analyzer_ranking)
 
 sns.set()
 sns.set_style(
@@ -421,6 +418,7 @@ def plot_hyperparameter_sensitivity(
     plot_std=True,
     reference_path=None,
     show=True,
+    ax=None,
 ):
     """Plots the hyperparameter sensitivtiy of the optimizer.
 
@@ -433,11 +431,15 @@ def plot_hyperparameter_sensitivity(
         plot_std (bool): Whether to plot markers for individual seed runs or not. If `False`, only the mean is plotted.
         reference_path (str): Path to the reference optimizer or to a whole testproblem (in this case all optimizers in the testproblem folder are taken as reference).
         show (bool): Whether to show the plot or not.
+        ax (matplotlib.axis): Axis to draw onto. Defaults to none, which creates a new one.
 
     Returns:
         tuple: The figure and axes of the plot.
         """
-    fig, ax = plt.subplots()
+    if ax is None:
+        fig, ax = plt.subplots()
+    else:
+        fig = plt.gcf()
     pathes = _preprocess_path(path)
     for optimizer_path in pathes:
         metric = _determine_available_metric(optimizer_path, metric)

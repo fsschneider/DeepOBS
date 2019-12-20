@@ -8,7 +8,7 @@ Created on Thu Dec 20 10:07:47 2018
 import tensorflow as tf
 
 
-def _vgg(x, training, variant, num_outputs, weight_decay):
+def _vgg(x, training, variant, num_outputs, l2_reg):
     def conv2d(inputs, filters, kernel_size=3, strides=(1, 1)):
         """Convenience wrapper for conv layers."""
         return tf.layers.conv2d(
@@ -20,15 +20,14 @@ def _vgg(x, training, variant, num_outputs, weight_decay):
             activation=tf.nn.relu,
             bias_initializer=tf.initializers.constant(0.0),
             kernel_initializer=tf.keras.initializers.glorot_normal(),
-            kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay))
+            kernel_regularizer=tf.contrib.layers.l2_regularizer(l2_reg),
+        )
+
     def max_pool(inputs):
         """Convenience wrapper for max pool layers."""
         return tf.layers.max_pooling2d(
-            inputs,
-            pool_size=[2, 2],
-            strides=[2, 2],
-            padding='same',
-            )
+            inputs, pool_size=[2, 2], strides=[2, 2], padding="same"
+        )
 
     # for now padd to 224x224 image size for VGG
     x = tf.image.resize_images(x, size=[224, 224])

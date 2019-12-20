@@ -2,11 +2,15 @@
 """Script to show text from DeepOBS text datasets."""
 
 import os
-import sys
 import pickle
+import sys
+
+import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-import matplotlib.pyplot as plt
+
+import deepobs.config as config
+from deepobs.tensorflow import datasets
 
 sys.path.insert(
     0,
@@ -15,8 +19,6 @@ sys.path.insert(
     ),
 )
 
-from deepobs.tensorflow import datasets
-import deepobs.config as config
 
 
 def display_text(dataset_cls, grid_size=5, phase="train"):

@@ -5,6 +5,7 @@ http://ufldl.stanford.edu/housenumbers/) to a CIFAR-style binary format.
 """
 
 import os
+
 import scipy.io
 
 

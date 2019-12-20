@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from .testproblem import TestProblem
 from .cifar10_3c3d import cifar10_3c3d
 from .cifar10_vgg16 import cifar10_vgg16
 from .cifar10_vgg19 import cifar10_vgg19
@@ -23,6 +22,7 @@ from .mnist_vae import mnist_vae
 from .quadratic_deep import quadratic_deep
 from .svhn_3c3d import svhn_3c3d
 from .svhn_wrn164 import svhn_wrn164
+from .testproblem import TestProblem
 from .tolstoi_char_rnn import tolstoi_char_rnn
 from .two_d_beale import two_d_beale
 from .two_d_branin import two_d_branin

@@ -8,7 +8,7 @@ Created on Thu Dec 20 10:07:47 2018
 import tensorflow as tf
 
 
-def _3c3d(x, num_outputs, weight_decay):
+def _3c3d(x, num_outputs, l2_reg):
     def conv2d(inputs, filters, kernel_size=3, padding="same"):
         """Convenience wrapper for conv layers."""
         return tf.layers.conv2d(
@@ -20,15 +20,13 @@ def _3c3d(x, num_outputs, weight_decay):
             activation=tf.nn.relu,
             bias_initializer=tf.initializers.constant(0.0),
             kernel_initializer=tf.keras.initializers.glorot_normal(),
-            kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay))
+            kernel_regularizer=tf.contrib.layers.l2_regularizer(l2_reg),
+        )
 
     def max_pool(inputs):
         """Convenience wrapper for max pool layers."""
         return tf.layers.max_pooling2d(
-            inputs,
-            pool_size=3,
-            strides=2,
-            padding='same',
+            inputs, pool_size=3, strides=2, padding="same"
         )
 
     def dense(inputs, units, activation):
@@ -39,7 +37,8 @@ def _3c3d(x, num_outputs, weight_decay):
             activation,
             kernel_initializer=tf.initializers.glorot_uniform(),
             bias_initializer=tf.initializers.constant(0.0),
-            kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay))
+            kernel_regularizer=tf.contrib.layers.l2_regularizer(l2_reg),
+        )
 
     x = conv2d(x, 64, 5, "valid")
     x = max_pool(x)

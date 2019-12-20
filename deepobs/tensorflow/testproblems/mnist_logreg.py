@@ -3,8 +3,8 @@
 
 import tensorflow as tf
 
-from ._logreg import _logreg
 from ..datasets.mnist import mnist
+from ._logreg import _logreg
 from .testproblem import TestProblem
 
 
@@ -15,7 +15,7 @@ class mnist_logreg(TestProblem):
 
   Args:
     batch_size (int): Batch size to use.
-    weight_decay (float): No weight decay (L2-regularization) is used in this
+    l2_reg (float): No L2-Regularization (weight decay) is used in this
         test problem. Defaults to ``None`` and any input here is ignored.
 
   Attributes:
@@ -33,19 +33,19 @@ class mnist_logreg(TestProblem):
     accuracy: A scalar tf.Tensor containing the mini-batch mean accuracy.
   """
 
-    def __init__(self, batch_size, weight_decay=None):
+    def __init__(self, batch_size, l2_reg=None):
         """Create a new logistic regression test problem instance on MNIST.
 
         Args:
           batch_size (int): Batch size to use.
-          weight_decay (float): No weight decay (L2-regularization) is used in this
+          l2_reg (float): No L2-Regularization (weight decay) is used in this
               test problem. Defaults to ``None`` and any input here is ignored.
         """
-        super(mnist_logreg, self).__init__(batch_size, weight_decay)
+        super(mnist_logreg, self).__init__(batch_size, l2_reg)
 
-        if weight_decay is not None:
+        if l2_reg is not None:
             print(
-                "WARNING: Weight decay is non-zero but no weight decay is used",
+                "WARNING: L2-Regularization is non-zero but no L2-regularization is used",
                 "for this model.",
             )
 

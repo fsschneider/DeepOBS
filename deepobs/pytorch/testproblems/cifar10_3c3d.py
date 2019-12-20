@@ -2,9 +2,10 @@
 """A vanilla CNN architecture for CIFAR-10."""
 
 from torch import nn
-from .testproblems_modules import net_cifar10_3c3d
+
 from ..datasets.cifar10 import cifar10
 from .testproblem import TestProblem
+from .testproblems_modules import net_cifar10_3c3d
 
 
 class cifar10_3c3d(TestProblem):
@@ -28,7 +29,7 @@ class cifar10_3c3d(TestProblem):
 
   Args:
       batch_size (int): Batch size to use.
-      weight_decay (float): Weight decay factor. Weight decay (L2-regularization)
+      l2_reg (float): L2-regularization factor. L2-Regularization (weight decay)
           is used on the weights but not the biases. Defaults to ``0.002``.
 
   Attributes:
@@ -40,16 +41,16 @@ class cifar10_3c3d(TestProblem):
       get_regularization_loss: Returns the current regularization loss of the network state.
   """
 
-    def __init__(self, batch_size, weight_decay=0.002):
+    def __init__(self, batch_size, l2_reg=0.002):
         """Create a new 3c3d test problem instance on Cifar-10.
 
         Args:
             batch_size (int): Batch size to use.
-            weight_decay (float): Weight decay factor. Weight decay (L2-regularization)
+            l2_reg (float): L2-regularization factor. L2-Regularization (weight decay)
                 is used on the weights but not the biases. Defaults to ``0.002``.
         """
 
-        super(cifar10_3c3d, self).__init__(batch_size, weight_decay)
+        super(cifar10_3c3d, self).__init__(batch_size, l2_reg)
 
     def set_up(self):
         """Set up the vanilla CNN test problem on Cifar-10."""
@@ -65,12 +66,12 @@ class cifar10_3c3d(TestProblem):
         Returns:
             dict: A dictionary where the key is the regularization factor and the value is a list of parameters.
         """
-        no, l2 = 0.0, self._weight_decay
+        no, l2 = 0.0, self._l2_reg
         group_dict = {no: [], l2: []}
 
         for parameters_name, parameters in self.net.named_parameters():
             # penalize only the non bias layer parameters
-            if 'bias' not in parameters_name:
+            if "bias" not in parameters_name:
                 group_dict[l2].append(parameters)
             else:
                 group_dict[no].append(parameters)

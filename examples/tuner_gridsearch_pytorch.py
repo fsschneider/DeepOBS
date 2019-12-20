@@ -1,7 +1,8 @@
-from deepobs.tuner import GridSearch
-from torch.optim import SGD
 import numpy as np
+from torch.optim import SGD
+
 from deepobs.pytorch.runners import StandardRunner
+from deepobs.tuner import GridSearch
 
 optimizer_class = SGD
 hyperparams = {
@@ -37,4 +38,3 @@ tuner.generate_commands_script(
     output_dir="./grid_search",
     generation_dir="./grid_search_commands",
 )
-

@@ -16,7 +16,7 @@ class cifar100_allcnnc(TestProblem):
   The paper does not comment on initialization; here we use Xavier for conv
   filters and constant 0.1 for biases.
 
-  A weight decay is used on the weights (but not the biases)
+  L2-Regularization is used on the weights (but not the biases)
   which defaults to ``5e-4``.
 
   .. _original paper: https://arxiv.org/abs/1412.6806
@@ -28,7 +28,7 @@ class cifar100_allcnnc(TestProblem):
 
   Args:
     batch_size (int): Batch size to use.
-    weight_decay (float): Weight decay factor. Weight decay (L2-regularization)
+    l2_reg (float): L2-regularization factor. L2-Regularization (weight decay)
         is used on the weights but not the biases.
         Defaults to ``5e-4``.
 
@@ -46,16 +46,16 @@ class cifar100_allcnnc(TestProblem):
     accuracy: A scalar tf.Tensor containing the mini-batch mean accuracy.
   """
 
-    def __init__(self, batch_size, weight_decay=0.0005):
+    def __init__(self, batch_size, l2_reg=0.0005):
         """Create a new All CNN C test problem instance on Cifar-100.
 
         Args:
           batch_size (int): Batch size to use.
-          weight_decay (float): Weight decay factor. Weight decay (L2-regularization)
+          l2_reg (float): L2-regularization factor. L2-Regularization (weight decay)
               is used on the weights but not the biases.
               Defaults to ``5e-4``.
         """
-        super(cifar100_allcnnc, self).__init__(batch_size, weight_decay)
+        super(cifar100_allcnnc, self).__init__(batch_size, l2_reg)
 
     def set_up(self):
         """Set up the All CNN C test problem on Cifar-100."""
@@ -79,7 +79,7 @@ class cifar100_allcnnc(TestProblem):
                 bias_initializer=tf.initializers.constant(0.1),
                 kernel_initializer=tf.keras.initializers.glorot_normal(),
                 kernel_regularizer=tf.contrib.layers.l2_regularizer(
-                    self._weight_decay
+                    self._l2_reg
                 ),
             )
 

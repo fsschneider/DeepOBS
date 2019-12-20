@@ -16,7 +16,8 @@ def _logreg(x, num_outputs):
             units,
             activation=None,
             bias_initializer=tf.initializers.constant(0.0),
-            kernel_initializer=tf.initializers.constant(0.0))
+            kernel_initializer=tf.initializers.constant(0.0),
+        )
 
     x = tf.reshape(x, [-1, 784])
 

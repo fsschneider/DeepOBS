@@ -3,12 +3,15 @@
 
 from __future__ import print_function
 
-import os
 import gzip
+import os
+
 import numpy as np
 import tensorflow as tf
-from . import dataset
+
 from deepobs import config
+
+from . import dataset
 
 
 class mnist(dataset.DataSet):

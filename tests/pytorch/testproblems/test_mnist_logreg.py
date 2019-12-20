@@ -4,11 +4,18 @@
 import os
 import sys
 import unittest
+
 import torch
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
 from deepobs.pytorch import testproblems
+
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
+
 
 
 class MNIST_LOGREGTest(unittest.TestCase):
@@ -36,11 +43,10 @@ class MNIST_LOGREGTest(unittest.TestCase):
             # - Fully connected: [input*output]
             # - Bias: [dim]
 
-        expected_num_param = [
-            784 * 10, 10
-            ]
+        expected_num_param = [784 * 10, 10]
 
         self.assertEqual(num_param, expected_num_param)
+
 
 if __name__ == "__main__":
     unittest.main()

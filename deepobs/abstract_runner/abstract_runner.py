@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 """Module implementing the abstract Runner."""
-import os
-import json
-from .abstract_runner_utils import float2str
-from .abstract_runner_utils import _add_hp_to_argparse
-import time
 import abc
 import argparse
+import glob
+import json
+import os
+import time
 import warnings
 from copy import deepcopy
+
 from deepobs import config as global_config
-import glob
+
+from .abstract_runner_utils import _add_hp_to_argparse, float2str
 
 
 class Runner(abc.ABC):
@@ -23,6 +24,8 @@ class Runner(abc.ABC):
     _optimizer_name: The name of the optimizer class
     _hyperparameter_names: A nested dictionary that lists all hyperparameters of the optimizer,
     their type and their default values
+    _run_directory: Path of the current run
+    _file_name: Filename used for the results
 
     Methods:
     run: An abstract method that is overwritten by the tensorflow and pytorch
@@ -31,6 +34,7 @@ class Runner(abc.ABC):
     create_output_directory: Creates the output folder of the run.
     write_output: Writes the output of the run to the output directory.
     """
+
     def __init__(self, optimizer_class, hyperparameter_names):
         """ Creates a new Runner instance
 
@@ -54,22 +58,27 @@ class Runner(abc.ABC):
         self._optimizer_name = optimizer_class.__name__
         self._hyperparameter_names = hyperparameter_names
 
-    def run(self,
-            testproblem=None,
-            hyperparams=None,
-            batch_size=None,
-            num_epochs=None,
-            random_seed=None,
-            data_dir=None,
-            output_dir=None,
-            weight_decay=None,
-            no_logs=None,
-            train_log_interval=None,
-            print_train_iter=None,
-            tb_log=None,
-            tb_log_dir=None,
-            skip_if_exists=False,
-            **training_params):
+        self._run_directory = None
+        self._file_name = None
+
+    def run(
+        self,
+        testproblem=None,
+        hyperparams=None,
+        batch_size=None,
+        num_epochs=None,
+        random_seed=None,
+        data_dir=None,
+        output_dir=None,
+        l2_reg=None,
+        no_logs=None,
+        train_log_interval=None,
+        print_train_iter=None,
+        tb_log=None,
+        tb_log_dir=None,
+        skip_if_exists=False,
+        **training_params
+    ):
         """Runs a testproblem with the optimizer_class. Has the following tasks:
             1. setup testproblem
             2. run the training (must be implemented by subclass)
@@ -83,7 +92,7 @@ class Runner(abc.ABC):
             random_seed (int): The torch random seed.
             data_dir (str): The path where the data is stored.
             output_dir (str): Path of the folder where the results are written to.
-            weight_decay (float): Regularization factor for the testproblem.
+            l2_reg (float): Regularization factor for the testproblem.
             no_logs (bool): Whether to write the output or not.
             train_log_interval (int): Mini-batch interval for logging.
             print_train_iter (bool): Whether to print the training progress at each train_log_interval.
@@ -112,13 +121,14 @@ class Runner(abc.ABC):
             random_seed=random_seed,
             data_dir=data_dir,
             output_dir=output_dir,
-            weight_decay=weight_decay,
+            l2_reg=l2_reg,
             no_logs=no_logs,
             train_log_interval=train_log_interval,
             print_train_iter=print_train_iter,
             tb_log=tb_log,
             tb_log_dir=tb_log_dir,
-            **training_params)
+            **training_params
+        )
 
         require_run = not (exists and skip_if_exists)
 
@@ -131,7 +141,7 @@ class Runner(abc.ABC):
                 random_seed,
                 data_dir,
                 output_dir,
-                weight_decay,
+                l2_reg,
                 no_logs,
                 train_log_interval,
                 print_train_iter,
@@ -144,79 +154,107 @@ class Runner(abc.ABC):
         else:
             print("Found output file(s): {}\nSkipping run.".format(matches))
 
-    def _run(self,
-             testproblem=None,
-             hyperparams=None,
-             batch_size=None,
-             num_epochs=None,
-             random_seed=None,
-             data_dir=None,
-             output_dir=None,
-             weight_decay=None,
-             no_logs=None,
-             train_log_interval=None,
-             print_train_iter=None,
-             tb_log=None,
-             tb_log_dir=None,
-             **training_params):
+    def _run(
+        self,
+        testproblem=None,
+        hyperparams=None,
+        batch_size=None,
+        num_epochs=None,
+        random_seed=None,
+        data_dir=None,
+        output_dir=None,
+        l2_reg=None,
+        no_logs=None,
+        train_log_interval=None,
+        print_train_iter=None,
+        tb_log=None,
+        tb_log_dir=None,
+        **training_params
+    ):
 
         # Creates a backup copy of the initial parameters. Users might change the dicts during training.
         hyperparams_before_training = deepcopy(hyperparams)
         training_params_before_training = deepcopy(training_params)
 
         batch_size = self._use_default_batch_size_if_missing(
-            testproblem, batch_size)
+            testproblem, batch_size
+        )
         num_epochs = self._use_default_num_epochs_if_missing(
-            testproblem, num_epochs)
+            testproblem, num_epochs
+        )
 
         if data_dir is not None:
             global_config.set_data_dir(data_dir)
 
-        run_directory, file_name = self.generate_output_directory_name(
-            testproblem, batch_size, num_epochs, weight_decay, random_seed,
-            output_dir, hyperparams, **training_params)
+        self._run_directory, self._file_name = self.generate_output_directory_name(
+            testproblem,
+            batch_size,
+            num_epochs,
+            l2_reg,
+            random_seed,
+            output_dir,
+            hyperparams,
+            **training_params
+        )
 
         if tb_log:
-            if tb_log_dir == 'none':
+            if tb_log_dir == "none":
                 print(
-                    'Tensorboard logging: No tb_log_dir specified, using settings folder {0:s} as default.'
-                    .format(run_directory))
-                os.makedirs(run_directory, exist_ok=True)
-                tb_log_dir = run_directory
+                    "Tensorboard logging: No tb_log_dir specified, using settings folder {0:s} as default.".format(
+                        self._run_directory
+                    )
+                )
+                os.makedirs(self._run_directory, exist_ok=True)
+                tb_log_dir = self._run_directory
 
-        tproblem = self.create_testproblem(testproblem, batch_size,
-                                           weight_decay, random_seed)
+        tproblem = self.create_testproblem(
+            testproblem, batch_size, l2_reg, random_seed
+        )
 
-        output = self.training(tproblem, hyperparams, num_epochs,
-                               print_train_iter, train_log_interval, tb_log,
-                               tb_log_dir, **training_params)
+        output = self.training(
+            tproblem,
+            hyperparams,
+            num_epochs,
+            print_train_iter,
+            train_log_interval,
+            tb_log,
+            tb_log_dir,
+            **training_params
+        )
 
-        output = self._post_process_output(output, testproblem, batch_size,
-                                           num_epochs, random_seed,
-                                           weight_decay,
-                                           hyperparams_before_training,
-                                           **training_params_before_training)
+        output = self._post_process_output(
+            output,
+            testproblem,
+            batch_size,
+            num_epochs,
+            random_seed,
+            l2_reg,
+            hyperparams_before_training,
+            **training_params_before_training
+        )
         if not no_logs:
-            os.makedirs(run_directory, exist_ok=True)
-            self.write_output(output, run_directory, file_name)
+            os.makedirs(self._run_directory, exist_ok=True)
+            self.write_output(output)
 
         return output
 
-    def run_exists(self,
-                   testproblem=None,
-                   hyperparams=None,
-                   batch_size=None,
-                   num_epochs=None,
-                   random_seed=None,
-                   data_dir=None,
-                   output_dir=None,
-                   weight_decay=None,
-                   no_logs=None,
-                   train_log_interval=None,
-                   print_train_iter=None,
-                   tb_log=None,
-                   tb_log_dir=None,
-                   **training_params):
+    def run_exists(
+        self,
+        testproblem=None,
+        hyperparams=None,
+        batch_size=None,
+        num_epochs=None,
+        random_seed=None,
+        data_dir=None,
+        output_dir=None,
+        l2_reg=None,
+        no_logs=None,
+        train_log_interval=None,
+        print_train_iter=None,
+        tb_log=None,
+        tb_log_dir=None,
+        **training_params
+    ):
         """Return whether output file for this run already exists.
 
         Args:
@@ -235,7 +273,7 @@ class Runner(abc.ABC):
             random_seed,
             data_dir,
             output_dir,
-            weight_decay,
+            l2_reg,
             no_logs,
             train_log_interval,
             print_train_iter,
@@ -245,30 +283,41 @@ class Runner(abc.ABC):
         )
         return self._run_exists(**args)
 
-    def _run_exists(self,
-                    testproblem=None,
-                    hyperparams=None,
-                    batch_size=None,
-                    num_epochs=None,
-                    random_seed=None,
-                    data_dir=None,
-                    output_dir=None,
-                    weight_decay=None,
-                    no_logs=None,
-                    train_log_interval=None,
-                    print_train_iter=None,
-                    tb_log=None,
-                    tb_log_dir=None,
-                    **training_params):
+    def _run_exists(
+        self,
+        testproblem=None,
+        hyperparams=None,
+        batch_size=None,
+        num_epochs=None,
+        random_seed=None,
+        data_dir=None,
+        output_dir=None,
+        l2_reg=None,
+        no_logs=None,
+        train_log_interval=None,
+        print_train_iter=None,
+        tb_log=None,
+        tb_log_dir=None,
+        **training_params
+    ):
 
         batch_size = self._use_default_batch_size_if_missing(
-            testproblem, batch_size)
+            testproblem, batch_size
+        )
         num_epochs = self._use_default_num_epochs_if_missing(
-            testproblem, num_epochs)
+            testproblem, num_epochs
+        )
 
         run_directory, _ = self.generate_output_directory_name(
-            testproblem, batch_size, num_epochs, weight_decay, random_seed,
-            output_dir, hyperparams, **training_params)
+            testproblem,
+            batch_size,
+            num_epochs,
+            l2_reg,
+            random_seed,
+            output_dir,
+            hyperparams,
+            **training_params
+        )
         file_regex = "{}*.json".format(self._filename_no_date(random_seed))
         pattern = os.path.join(run_directory, file_regex)
         matches = glob.glob(pattern)
@@ -277,15 +326,15 @@ class Runner(abc.ABC):
         return exists, matches
 
     def _use_default_batch_size_if_missing(self, testproblem, batch_size):
-        fall_back_to_default = (batch_size is None)
+        fall_back_to_default = batch_size is None
         if fall_back_to_default:
-            batch_size = self._use_default(testproblem, 'batch_size')
+            batch_size = self._use_default(testproblem, "batch_size")
         return batch_size
 
     def _use_default_num_epochs_if_missing(self, testproblem, num_epochs):
-        fall_back_to_default = (num_epochs is None)
+        fall_back_to_default = num_epochs is None
         if fall_back_to_default:
-            num_epochs = self._use_default(testproblem, 'num_epochs')
+            num_epochs = self._use_default(testproblem, "num_epochs")
         return num_epochs
 
     @staticmethod
@@ -293,8 +342,17 @@ class Runner(abc.ABC):
         return global_config.get_testproblem_default_setting(testproblem)[key]
 
     @abc.abstractmethod
-    def training(self, tproblem, hyperparams, num_epochs, print_train_iter,
-                 train_log_interval, tb_log, tb_log_dir, **training_params):
+    def training(
+        self,
+        tproblem,
+        hyperparams,
+        num_epochs,
+        print_train_iter,
+        train_log_interval,
+        tb_log,
+        tb_log_dir,
+        **training_params
+    ):
         """Performs the training and stores the metrices.
 
             Args:
@@ -352,22 +410,23 @@ class Runner(abc.ABC):
 
         """
         if hyperparams is None:  # if no hyperparams dict is passed to run()
-            for hp_name, hp_specification in self._hyperparameter_names.items(
-            ):
-                _add_hp_to_argparse(parser, self._optimizer_name,
-                                    hp_specification, hp_name)
+            for hp_name, hp_specification in self._hyperparameter_names.items():
+                _add_hp_to_argparse(
+                    parser, self._optimizer_name, hp_specification, hp_name
+                )
 
         else:  # if there is one, fill the missing params from command line
-            for hp_name, hp_specification in self._hyperparameter_names.items(
-            ):
+            for hp_name, hp_specification in self._hyperparameter_names.items():
                 if hp_name in hyperparams:
                     args[hp_name] = hyperparams[hp_name]
                 else:
-                    _add_hp_to_argparse(parser, self._optimizer_name,
-                                        hp_specification, hp_name)
+                    _add_hp_to_argparse(
+                        parser, self._optimizer_name, hp_specification, hp_name
+                    )
 
-    def _add_training_params_to_output_dir_name(self, training_params,
-                                                run_folder_name):
+    def _add_training_params_to_output_dir_name(
+        self, training_params, run_folder_name
+    ):
         """Overwrite this method to specify how your
         runner should format additional training_parameters in the run folder name.
 
@@ -382,12 +441,15 @@ class Runner(abc.ABC):
             if tp_value is not None:
                 run_folder_name += "__{0:s}".format(tp_name)
                 run_folder_name += "__{0:s}".format(
-                    float2str(tp_value) if isinstance(tp_value, float
-                                                      ) else str(tp_value))
+                    float2str(tp_value)
+                    if isinstance(tp_value, float)
+                    else str(tp_value)
+                )
         return run_folder_name
 
-    def _add_hyperparams_to_output_dir_name(self, optimizer_hyperparams,
-                                            run_folder_name):
+    def _add_hyperparams_to_output_dir_name(
+        self, optimizer_hyperparams, run_folder_name
+    ):
         """Overwrite this method to specify how your
         runner should format optimizer hyper_parameters in the run folder name.
 
@@ -403,14 +465,29 @@ class Runner(abc.ABC):
         for hp_name, hp_value in sorted(optimizer_hyperparams.items()):
             run_folder_name += "__{0:s}".format(hp_name)
             run_folder_name += "__{0:s}".format(
-                float2str(hp_value) if isinstance(hp_value, float
-                                                  ) else str(hp_value))
+                float2str(hp_value)
+                if isinstance(hp_value, float)
+                else str(hp_value)
+            )
         return run_folder_name
 
-    def parse_args(self, testproblem, hyperparams, batch_size, num_epochs,
-                   random_seed, data_dir, output_dir, weight_decay, no_logs,
-                   train_log_interval, print_train_iter, tb_log, tb_log_dir,
-                   training_params):
+    def parse_args(
+        self,
+        testproblem,
+        hyperparams,
+        batch_size,
+        num_epochs,
+        random_seed,
+        data_dir,
+        output_dir,
+        l2_reg,
+        no_logs,
+        train_log_interval,
+        print_train_iter,
+        tb_log,
+        tb_log_dir,
+        training_params,
+    ):
         """Constructs an argparse.ArgumentParser and parses the arguments from command line.
 
         Args:
@@ -421,7 +498,7 @@ class Runner(abc.ABC):
                 random_seed (int): The torch random seed.
                 data_dir (str): The path where the data is stored.
                 output_dir (str): Path of the folder where the results are written to.
-                weight_decay (float): Regularization factor for the testproblem.
+                l2_reg (float): Regularization factor for the testproblem.
                 no_logs (bool): Whether to write the output or not.
                 train_log_interval (int): Mini-batch interval for logging.
                 print_train_iter (bool): Whether to print the training progress at each train_log_interval.
@@ -434,39 +511,46 @@ class Runner(abc.ABC):
             """
         args = {}
         parser = argparse.ArgumentParser(
-            description='Arguments for running optimizer script.')
+            description="Arguments for running optimizer script."
+        )
 
         if testproblem is None:
-            parser.add_argument('testproblem')
+            parser.add_argument("testproblem")
         else:
-            args['testproblem'] = testproblem
+            args["testproblem"] = testproblem
 
-        if weight_decay is None:
-            parser.add_argument("--weight_decay",
-                                "--wd",
-                                type=float,
-                                help="""Factor
+        if l2_reg is None:
+            parser.add_argument(
+                "--l2_reg",
+                "--wd",
+                type=float,
+                help="""Factor
           used for the weight_deacy. If not given, the default weight decay for
           this model is used. Note that not all models use weight decay and this
-          value will be ignored in such a case.""")
+          value will be ignored in such a case.""",
+            )
         else:
-            args['weight_decay'] = weight_decay
+            args["l2_reg"] = l2_reg
 
         if batch_size is None:
-            parser.add_argument("--batch_size",
-                                "--bs",
-                                type=int,
-                                help="The batch size (positive integer).")
+            parser.add_argument(
+                "--batch_size",
+                "--bs",
+                type=int,
+                help="The batch size (positive integer).",
+            )
         else:
-            args['batch_size'] = batch_size
+            args["batch_size"] = batch_size
 
         if num_epochs is None:
-            parser.add_argument("-N",
-                                "--num_epochs",
-                                type=int,
-                                help="Total number of training epochs.")
+            parser.add_argument(
+                "-N",
+                "--num_epochs",
+                type=int,
+                help="Total number of training epochs.",
+            )
         else:
-            args['num_epochs'] = num_epochs
+            args["num_epochs"] = num_epochs
 
         if random_seed is None:
             parser.add_argument(
@@ -474,16 +558,19 @@ class Runner(abc.ABC):
                 "--random_seed",
                 type=int,
                 default=42,
-                help="An integer to set as tensorflow's random seed.")
+                help="An integer to set as tensorflow's random seed.",
+            )
         else:
-            args['random_seed'] = random_seed
+            args["random_seed"] = random_seed
 
         if data_dir is None:
-            parser.add_argument("--data_dir",
-                                help="""Path to the base data dir. If
-      not specified, DeepOBS uses its default.""")
+            parser.add_argument(
+                "--data_dir",
+                help="""Path to the base data dir. If
+      not specified, DeepOBS uses its default.""",
+            )
         else:
-            args['data_dir'] = data_dir
+            args["data_dir"] = data_dir
 
         if output_dir is None:
             parser.add_argument(
@@ -492,9 +579,10 @@ class Runner(abc.ABC):
                 default="./results",
                 help="""Path to the base directory in which output files will be
           stored. Results will automatically be sorted into subdirectories of
-          the form 'testproblem/optimizer'.""")
+          the form 'testproblem/optimizer'.""",
+            )
         else:
-            args['output_dir'] = output_dir
+            args["output_dir"] = output_dir
 
         if no_logs is None:
             parser.add_argument(
@@ -502,18 +590,20 @@ class Runner(abc.ABC):
                 action="store_const",
                 const=True,
                 default=False,
-                help="""Add this flag to not save any json logging files.""")
+                help="""Add this flag to not save any json logging files.""",
+            )
         else:
-            args['no_logs'] = no_logs
+            args["no_logs"] = no_logs
 
         if train_log_interval is None:
             parser.add_argument(
                 "--train_log_interval",
                 type=int,
                 default=10,
-                help="""Interval of steps at which to log training loss.""")
+                help="""Interval of steps at which to log training loss.""",
+            )
         else:
-            args['train_log_interval'] = train_log_interval
+            args["train_log_interval"] = train_log_interval
 
         if print_train_iter is None:
             parser.add_argument(
@@ -521,11 +611,10 @@ class Runner(abc.ABC):
                 action="store_const",
                 const=True,
                 default=False,
-                help=
-                """Add this flag to print the mini-batch-loss at the train_log_interval."""
+                help="""Add this flag to print the mini-batch-loss at the train_log_interval.""",
             )
         else:
-            args['print_train_iter'] = print_train_iter
+            args["print_train_iter"] = print_train_iter
 
         if tb_log is None:
             parser.add_argument(
@@ -533,20 +622,20 @@ class Runner(abc.ABC):
                 action="store_const",
                 const=True,
                 default=False,
-                help="""Add this flag to save tensorboard logging files.""")
+                help="""Add this flag to save tensorboard logging files.""",
+            )
         else:
-            args['tb_log'] = tb_log
+            args["tb_log"] = tb_log
 
         if tb_log_dir is None:
             parser.add_argument(
                 "--tb_log_dir",
                 type=str,
                 default="none",
-                help=
-                """Path to the directory where the tensorboard logs are saved."""
+                help="""Path to the directory where the tensorboard logs are saved.""",
             )
         else:
-            args['tb_log_dir'] = tb_log_dir
+            args["tb_log_dir"] = tb_log_dir
 
         # add hyperparams and training params
         self._add_hyperparams_to_argparse(parser, args, hyperparams)
@@ -556,37 +645,52 @@ class Runner(abc.ABC):
         args.update(cmdline_args)
 
         # put all optimizer hyperparams in one subdict
-        args['hyperparams'] = {}
+        args["hyperparams"] = {}
         for hp in self._hyperparameter_names:
-            args['hyperparams'][hp] = args[hp]
+            args["hyperparams"][hp] = args[hp]
             del args[hp]
 
         return args
 
-    def generate_output_directory_name(self, testproblem, batch_size,
-                                       num_epochs, weight_decay, random_seed,
-                                       output_dir, optimizer_hyperparams,
-                                       **training_params):
+    def generate_output_directory_name(
+        self,
+        testproblem,
+        batch_size,
+        num_epochs,
+        l2_reg,
+        random_seed,
+        output_dir,
+        optimizer_hyperparams,
+        **training_params
+    ):
         # add everything mandatory to the name
-        run_folder_name = "num_epochs__" + str(
-            num_epochs) + "__batch_size__" + str(batch_size)
-        if weight_decay is not None:
-            run_folder_name += "__weight_decay__{0:s}".format(
-                float2str(weight_decay))
+        run_folder_name = (
+            "num_epochs__"
+            + str(num_epochs)
+            + "__batch_size__"
+            + str(batch_size)
+        )
+        if l2_reg is not None:
+            run_folder_name += "__l2_reg__{0:s}".format(
+                float2str(l2_reg)
+            )
 
         # Add all hyperparameters to the name.
         run_folder_name = self._add_hyperparams_to_output_dir_name(
-            optimizer_hyperparams, run_folder_name)
+            optimizer_hyperparams, run_folder_name
+        )
 
         # Add training parameters to the name.
-        run_folder_name = self._add_training_params_to_output_dir_name(
-            training_params, run_folder_name)
+        # run_folder_name = self._add_training_params_to_output_dir_name(
+        #     training_params, run_folder_name
+        # )
 
         file_name = self._filename_no_date(random_seed)
         file_name += time.strftime("%Y-%m-%d-%H-%M-%S")
 
-        run_directory = os.path.join(output_dir, testproblem,
-                                     self._optimizer_name, run_folder_name)
+        run_directory = os.path.join(
+            output_dir, testproblem, self._optimizer_name, run_folder_name
+        )
 
         return run_directory, file_name
 
@@ -594,38 +698,45 @@ class Runner(abc.ABC):
     def _filename_no_date(random_seed):
         return "random_seed__{0:d}__".format(random_seed)
 
-    def _post_process_output(self, output, testproblem, batch_size, num_epochs,
-                             random_seed, weight_decay, hyperparams,
-                             **training_params):
+    def _post_process_output(
+        self,
+        output,
+        testproblem,
+        batch_size,
+        num_epochs,
+        random_seed,
+        l2_reg,
+        hyperparams,
+        **training_params
+    ):
         """Ensures that for both frameworks the structure of the output is the same"""
 
         # remove test accuracy if it is not available
-        if 'test_accuracies' in output:
-            if all(output['test_accuracies']) == 0:
-                del output['test_accuracies']
-                del output['train_accuracies']
+        if "test_accuracies" in output:
+            if all(output["test_accuracies"]) == 0:
+                del output["test_accuracies"]
+                del output["train_accuracies"]
                 try:
-                    del output['valid_accuracies']
+                    del output["valid_accuracies"]
                 except KeyError:
                     pass
 
         # merge meta data to output dict
         output = {
-            'testproblem': testproblem,
-            'batch_size': batch_size,
-            'num_epochs': num_epochs,
-            'random_seed': random_seed,
-            'weight_decay': weight_decay,
-            'optimizer_name': self._optimizer_name,
-            'optimizer_hyperparams': hyperparams,
-            'training_params': training_params,
-            **output
+            "testproblem": testproblem,
+            "batch_size": batch_size,
+            "num_epochs": num_epochs,
+            "random_seed": random_seed,
+            "l2_reg": l2_reg,
+            "optimizer_name": self._optimizer_name,
+            "optimizer_hyperparams": hyperparams,
+            "training_params": training_params,
+            **output,
         }
 
         return output
 
-    @staticmethod
-    def write_output(output, run_folder_name, file_name):
+    def write_output(self, output):
         """Writes the JSON output.
 
         Args:
@@ -633,20 +744,31 @@ class Runner(abc.ABC):
             run_folder_name (str): The name of the output folder.
             file_name (str): The file name where the output is written to.
         """
-        with open(os.path.join(run_folder_name, file_name + ".json"),
-                  "w") as f:
+        with open(
+            os.path.join(self._run_directory, self._file_name + ".json"), "w"
+        ) as f:
             json.dump(output, f, indent=4)
 
     @staticmethod
-    def _abort_routine(epoch_count, num_epochs, train_losses, valid_losses,
-                       test_losses, train_accuracies, valid_accuracies,
-                       test_accuracies, minibatch_train_losses):
+    def _abort_routine(
+        epoch_count,
+        num_epochs,
+        train_losses,
+        valid_losses,
+        test_losses,
+        train_accuracies,
+        valid_accuracies,
+        test_accuracies,
+        minibatch_train_losses,
+    ):
         """A routine that is executed if a training run is aborted (loss is NaN or Inf)."""
 
         warnings.warn(
-            'Breaking from run after epoch ' + str(epoch_count) +
-            'due to wrongly calibrated optimization (Loss is Nan or Inf). The metrices for the remaining epochs will be filled with the initial performance values.',
-            RuntimeWarning)
+            "Breaking from run after epoch "
+            + str(epoch_count)
+            + "due to wrongly calibrated optimization (Loss is Nan or Inf). The metrices for the remaining epochs will be filled with the initial performance values.",
+            RuntimeWarning,
+        )
 
         # fill the rest of the metrices with initial observations
         for i in range(epoch_count, num_epochs):

@@ -4,12 +4,19 @@
 import os
 import sys
 import unittest
-import tensorflow as tf
-import numpy as np
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+import numpy as np
+import tensorflow as tf
 
 from deepobs.tensorflow import testproblems
+
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
+
 
 
 class MNIST_LogRegTest(unittest.TestCase):
@@ -37,19 +44,21 @@ class MNIST_LogRegTest(unittest.TestCase):
             # - Batch norm: [input, input] (for beta and gamma)
             # - Fully connected: [input*output]
             # - Bias: [dim]
-            self.assertEqual(num_param, [
-                784*10, 10
-            ])
+            self.assertEqual(num_param, [784 * 10, 10])
             for init_op in [
-                    self.mnist_logreg.train_init_op, self.mnist_logreg.test_init_op,
-                    self.mnist_logreg.train_eval_init_op
+                self.mnist_logreg.train_init_op,
+                self.mnist_logreg.test_init_op,
+                self.mnist_logreg.train_eval_init_op,
             ]:
                 sess.run(init_op)
-                losses_, regularizer_, accuracy_ = sess.run([
-                    self.mnist_logreg.losses, self.mnist_logreg.regularizer,
-                    self.mnist_logreg.accuracy
-                ])
-                self.assertEqual(losses_.shape, (self.batch_size, ))
+                losses_, regularizer_, accuracy_ = sess.run(
+                    [
+                        self.mnist_logreg.losses,
+                        self.mnist_logreg.regularizer,
+                        self.mnist_logreg.accuracy,
+                    ]
+                )
+                self.assertEqual(losses_.shape, (self.batch_size,))
                 self.assertIsInstance(regularizer_, np.float32)
                 self.assertIsInstance(accuracy_, np.float32)
 

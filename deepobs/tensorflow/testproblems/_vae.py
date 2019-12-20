@@ -17,21 +17,21 @@ def _vae(x, training, n_latent=8):
             kernel_size,
             strides,
             padding="same",
-            activation=activation)
+            activation=activation,
+        )
 
-    def conv2d_transpose(inputs,
-                         filters,
-                         kernel_size,
-                         strides,
-                         activation=tf.nn.relu):
+    def conv2d_transpose(
+        inputs, filters, kernel_size, strides, activation=tf.nn.relu
+    ):
         """Convenience wrapper for conv layers."""
         return tf.layers.conv2d_transpose(
             inputs,
             filters,
             kernel_size,
             strides,
-            padding='same',
-            activation=activation)
+            padding="same",
+            activation=activation,
+        )
 
     def lrelu(x, alpha=0.3):
         """Leaky ReLU activation function.
@@ -127,6 +127,5 @@ def _vae(x, training, n_latent=8):
 
     sampled_z, mean, std_dev = encoder(x, training, n_latent=n_latent)
     img = decoder(sampled_z, training)
-
 
     return img, mean, std_dev

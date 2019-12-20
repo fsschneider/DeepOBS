@@ -1,27 +1,35 @@
 # -*- coding: utf-8 -*-
-from .tuner import ParallelizedTuner
 from itertools import product
+
+from .tuner import ParallelizedTuner
 
 
 class GridSearch(ParallelizedTuner):
     """
     A basic Grid Search tuner.
     """
-    def __init__(self, optimizer_class, hyperparam_names, grid, ressources, runner):
+
+    def __init__(
+        self, optimizer_class, hyperparam_names, grid, ressources, runner
+    ):
         """
         Args:
             grid (dict): Holds the discrete values for each hyperparameter as lists.
         """
-        super(GridSearch, self).__init__(optimizer_class, hyperparam_names, ressources, runner)
+        super(GridSearch, self).__init__(
+            optimizer_class, hyperparam_names, ressources, runner
+        )
         self.__check_if_grid_is_valid(grid, ressources)
         self._grid = grid
-        self._search_name = 'grid_search'
+        self._search_name = "grid_search"
 
     @staticmethod
     def __check_if_grid_is_valid(grid, ressources):
         grid_size = len(list(product(*[values for values in grid.values()])))
         if grid_size > ressources:
-            raise RuntimeError('Grid is too large for the available number of iterations.')
+            raise RuntimeError(
+                "Grid is too large for the available number of iterations."
+            )
 
     def _sample(self):
         all_values = []

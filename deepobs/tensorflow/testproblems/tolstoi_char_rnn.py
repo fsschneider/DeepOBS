@@ -29,7 +29,7 @@ class tolstoi_char_rnn(TestProblem):
 
   Args:
     batch_size (int): Batch size to use.
-    weight_decay (float): No weight decay (L2-regularization) is used in this
+    l2_reg (float): No L2-regularization (weight decay) is used in this
         test problem. Defaults to ``None`` and any input here is ignored.
 
   Attributes:
@@ -46,19 +46,19 @@ class tolstoi_char_rnn(TestProblem):
     accuracy: A scalar tf.Tensor containing the mini-batch mean accuracy.
   """
 
-    def __init__(self, batch_size, weight_decay=None):
+    def __init__(self, batch_size, l2_reg=None):
         """Create a new Char RNN test problem instance on Tolstoi.
 
         Args:
           batch_size (int): Batch size to use.
-          weight_decay (float): No weight decay (L2-regularization) is used in this
+          l2_reg (float): No L2-regularization (weight decay) is used in this
               test problem. Defaults to ``None`` and any input here is ignored.
         """
-        super(tolstoi_char_rnn, self).__init__(batch_size, weight_decay)
+        super(tolstoi_char_rnn, self).__init__(batch_size, l2_reg)
 
-        if weight_decay is not None:
+        if l2_reg is not None:
             print(
-                "WARNING: Weight decay is non-zero but no weight decay is used",
+                "WARNING: L2-Regularization is non-zero but no L2-regularization is used",
                 "for this model.",
             )
 
@@ -171,7 +171,7 @@ class tolstoi_char_rnn(TestProblem):
                 ),
             ]
         )
-        self.train_eval_init_op = tf.group(
+        self.valid_init_op = tf.group(
             [
                 self.dataset.valid_init_op,
                 self._get_state_update_op(
