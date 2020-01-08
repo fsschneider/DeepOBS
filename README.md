@@ -221,9 +221,9 @@ Here is a list of all authors on relevant research papers that Kaolin borrows co
 
 If you use DeepOBS in your work, we would appreciate a reference to our ICLR paper:
 
-[Frank Schneider, Lukas Balles, Philipp Hennig<br/>
-**DeepOBS: A Deep Learning Optimizer Benchmark Suite**<br/>
-*ICLR 2019*](https://openreview.net/forum?id=rJg6ssC5Y7)
+> [Frank Schneider, Lukas Balles, Philipp Hennig<br/>
+> **DeepOBS: A Deep Learning Optimizer Benchmark Suite**<br/>
+> *ICLR 2019*](https://openreview.net/forum?id=rJg6ssC5Y7)
 
 BibTeX entry:
 
