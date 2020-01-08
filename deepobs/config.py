@@ -116,6 +116,7 @@ DEFAULT_TEST_PROBLEMS_SETTINGS = {
     "mnist_mlp": {"batch_size": 128, "num_epochs": 100},
     "fmnist_mlp": {"batch_size": 128, "num_epochs": 100},
     "mnist_logreg": {"batch_size": 128, "num_epochs": 50},
+    "fmnist_logreg": {"batch_size": 128, "num_epochs": 50},
 }
 
 
