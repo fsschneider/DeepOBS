@@ -19,9 +19,12 @@ def readme():
         return f.read()
 
 
+version_dict = {}
+exec(open("deepobs/version.py").read(), version_dict)
+
 setuptools.setup(
     name="deepobs",
-    version=exec(open("deepobs/version.py").read()),
+    version=version_dict["__version__"],
     description="Deep Learning Optimizer Benchmark Suite",
     long_description=readme(),
     long_description_content_type="text/markdown",
