@@ -176,6 +176,42 @@ Many people have contributed to **DeepOBS** and were essential during its develo
     <td align="center"><a href="https://www.idiap.ch/en">Idiap Research Institute</a>, <a href="https://www.epfl.ch/en/">EPFL, Switzerland</a></td>
     <td align="center"><a href="https://www.idiap.ch/en">Idiap Research Institute</a>, <a href="https://www.epfl.ch/en/">EPFL, Switzerland</a></td>
   </tr>
+  <tr>
+    <th>
+    <th>
+    <th>
+    <th>
+    <th>
+    <th>
+    <th>
+  </tr>
+  <tr>
+    <th><a href="https://github.com/SirRob1997"><img alt="Robin Schmidt" src="https://avatars0.githubusercontent.com/u/20804972?s=400&v=4" class="contrib" style="border-radius: 50%;"></a>
+    <th>
+    <th>
+    <th>
+    <th>
+    <th>
+    <th>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/SirRob1997">Robin Schmidt</a></td>
+    <td align="center"></td>
+    <td align="center"></td>
+    <td align="center"></td>
+    <td align="center"></td>
+    <td align="center"></td>
+    <td align="center"></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://uni-tuebingen.de/en/faculties/faculty-of-science/departments/computer-science/lehrstuehle/methods-of-machine-learning/start/">University of Tübingen</a></td>
+    <td align="center"></td>
+    <td align="center"></td>
+    <td align="center"></td>
+    <td align="center"></td>
+    <td align="center"></td>
+    <td align="center"></td>
+  </tr>
 </table>
 
 <!-- Add List with images of contributors (Frank, Lukas,Philipp, Aaron, Felix, Florian Mai, etc.) in chronological order. Also add list of "borrowed sources" (where we got the test problems from):
