@@ -7,6 +7,7 @@ LARGE_TEST_SET = [
     "cifar100_allcnnc",
     "svhn_wrn164",
     "tolstoi_char_rnn",
+    "imdb_lstm"
 ]
 DATA_SET_NAMING = {
     "two": "2D",
@@ -18,6 +19,7 @@ DATA_SET_NAMING = {
     "svhn": "SVHN",
     "imagenet": "ImageNet",
     "tolstoi": "Tolstoi",
+    "imdb": "IMDb"
 }
 TP_NAMING = {
     "d_beale": "Beale",
@@ -36,6 +38,7 @@ TP_NAMING = {
     "wrn404": "Wide ResNet 40-4",
     "inception_v3": "Inception-v3",
     "char_rnn": "Char RNN",
+    "imdb_lstm": "IMDb LSTM"
 }
 DATA_DIR = "data_deepobs"
 
@@ -116,6 +119,7 @@ DEFAULT_TEST_PROBLEMS_SETTINGS = {
     "mnist_mlp": {"batch_size": 128, "num_epochs": 100},
     "fmnist_mlp": {"batch_size": 128, "num_epochs": 100},
     "mnist_logreg": {"batch_size": 128, "num_epochs": 50},
+    'imdb_lstm': {"batch_size": 128, "num_epochs": 150}
 }
 
 

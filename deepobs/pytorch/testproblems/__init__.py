@@ -6,6 +6,7 @@ from .cifar100_allcnnc import cifar100_allcnnc
 from .fmnist_2c2d import fmnist_2c2d
 from .fmnist_mlp import fmnist_mlp
 from .fmnist_vae import fmnist_vae
+from .imdb_lstm import imdb_lstm
 from .mnist_2c2d import mnist_2c2d
 from .mnist_logreg import mnist_logreg
 from .mnist_mlp import mnist_mlp

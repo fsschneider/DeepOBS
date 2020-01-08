@@ -7,3 +7,4 @@ from .fmnist import fmnist
 from .mnist import mnist
 from .quadratic import quadratic
 from .svhn import svhn
+from .imdb import imdb
