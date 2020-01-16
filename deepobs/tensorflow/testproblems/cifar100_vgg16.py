@@ -41,7 +41,7 @@ class cifar100_vgg16(TestProblem):
     accuracy: A scalar tf.Tensor containing the mini-batch mean accuracy.
   """
 
-    def __init__(self, batch_size, l2_reg=5e-4):
+    def __init__(self, batch_size, l2_reg=0.0005):
         """Create a new VGG 16 test problem instance on Cifar-100.
 
         Args:
