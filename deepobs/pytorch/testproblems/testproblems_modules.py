@@ -19,7 +19,7 @@ class net_mnist_logreg(nn.Sequential):
             "dense", nn.Linear(in_features=784, out_features=num_outputs)
         )
 
-        # init
+        # initfrom .cifar100_vgg19 import cifar100_vgg19
         nn.init.constant_(self.dense.bias, 0.0)
         nn.init.constant_(self.dense.weight, 0.0)
 
