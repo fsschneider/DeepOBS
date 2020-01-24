@@ -309,7 +309,7 @@ def tfconv2d_transpose(
 def mean_allcnnc():
     """The all convolution layer implementation of torch.mean()."""
     # TODO implement pre forward hook to adapt to arbitary image size for other data sets than cifar100
-    return nn.Sequential(nn.AvgPool2d(kernel_size=(6, 6)), flatten())
+    return nn.Sequential(nn.AvgPool2d(kernel_size=(6, 6)), nn.Flatten())
 
 
 class residual_block(nn.Module):
