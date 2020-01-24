@@ -50,7 +50,7 @@ def vae_loss_function_factory(reduction="mean"):
 def _determine_inverse_padding_from_tf_same(
     input_dimensions, kernel_dimensions, stride_dimensions
 ):
-    """Implements tf's padding 'same' for inverse processses such as transpose convolution
+    """Implements tf's padding 'same' for inverse processes such as transpose convolution
     Args:
         input_dimensions (int or tuple): dimension of the input image
         kernel_dimensions (int or tuple): dimensions of the convolution kernel
