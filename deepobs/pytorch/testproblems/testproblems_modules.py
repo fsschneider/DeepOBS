@@ -5,16 +5,21 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from .testproblems_utils import (_truncated_normal_init, flatten, mean_allcnnc,
-                                 residual_block, tfconv2d, tfconv2d_transpose,
-                                 tfmaxpool2d)
+from .testproblems_utils import (
+    _truncated_normal_init,
+    mean_allcnnc,
+    residual_block,
+    tfconv2d,
+    tfconv2d_transpose,
+    tfmaxpool2d,
+)
 
 
 class net_mnist_logreg(nn.Sequential):
     def __init__(self, num_outputs):
         super(net_mnist_logreg, self).__init__()
 
-        self.add_module("flatten", flatten())
+        self.add_module("flatten", nn.Flatten())
         self.add_module(
             "dense", nn.Linear(in_features=784, out_features=num_outputs)
         )
@@ -70,7 +75,7 @@ class net_cifar10_3c3d(nn.Sequential):
             tfmaxpool2d(kernel_size=3, stride=2, tf_padding_type="same"),
         )
 
-        self.add_module("flatten", flatten())
+        self.add_module("flatten", nn.Flatten())
 
         self.add_module(
             "dense1", nn.Linear(in_features=3 * 3 * 128, out_features=512)
@@ -139,7 +144,7 @@ class net_mnist_2c2d(nn.Sequential):
             tfmaxpool2d(kernel_size=2, stride=2, tf_padding_type="same"),
         )
 
-        self.add_module("flatten", flatten())
+        self.add_module("flatten", nn.Flatten())
 
         self.add_module(
             "dense1", nn.Linear(in_features=7 * 7 * 64, out_features=1024)
@@ -513,7 +518,7 @@ class net_vgg(nn.Sequential):
             tfmaxpool2d(kernel_size=2, stride=2, tf_padding_type="same"),
         )
 
-        self.add_module("flatten", flatten())
+        self.add_module("flatten", nn.Flatten())
 
         self.add_module(
             "dense1", nn.Linear(in_features=7 * 7 * 512, out_features=4096)
@@ -701,7 +706,7 @@ class net_wrn(nn.Sequential):
         self.add_module("avg_pool", nn.AvgPool2d(8))
 
         # reshape and dense layer
-        self.add_module("flatten", flatten())
+        self.add_module("flatten", nn.Flatten())
         self.add_module(
             "dense",
             nn.Linear(in_features=self._filters[3], out_features=num_outputs),
@@ -791,7 +796,7 @@ class net_mlp(nn.Sequential):
     def __init__(self, num_outputs):
         super(net_mlp, self).__init__()
 
-        self.add_module("flatten", flatten())
+        self.add_module("flatten", nn.Flatten())
         self.add_module("dense1", nn.Linear(784, 1000))
         self.add_module("relu1", nn.ReLU())
         self.add_module("dense2", nn.Linear(1000, 500))

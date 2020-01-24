@@ -306,17 +306,6 @@ def tfconv2d_transpose(
     return nn.Sequential(*modules)
 
 
-class flatten(nn.Module):
-    """A layer that simply flattens the input."""
-
-    def __init__(self):
-        super(flatten, self).__init__()
-
-    def forward(self, x):
-        shape = torch.prod(torch.tensor(x.shape[1:])).item()
-        return x.view(-1, shape)
-
-
 def mean_allcnnc():
     """The all convolution layer implementation of torch.mean()."""
     # TODO implement pre forward hook to adapt to arbitary image size for other data sets than cifar100
