@@ -14,7 +14,7 @@ class cifar100_3c3d(TestProblem):
 
   The network consists of
 
-    - thre conv layers with ReLUs, each followed by max-pooling
+    - three conv layers with ReLUs, each followed by max-pooling
     - two fully-connected layers with ``512`` and ``256`` units and ReLU activation
     - 100-unit output layer with softmax
     - cross-entropy loss
