@@ -31,7 +31,7 @@ class net_mnist_logreg(nn.Sequential):
 
 class net_cifar10_3c3d(nn.Sequential):
     """  Basic conv net for cifar10/100. The network consists of
-    - thre conv layers with ReLUs, each followed by max-pooling
+    - three conv layers with ReLUs, each followed by max-pooling
     - two fully-connected layers with ``512`` and ``256`` units and ReLU activation
     - output layer with softmax
   The weight matrices are initialized using Xavier initialization and the biases

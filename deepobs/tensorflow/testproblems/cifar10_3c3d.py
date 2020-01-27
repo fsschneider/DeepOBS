@@ -14,7 +14,7 @@ class cifar10_3c3d(TestProblem):
 
   The network consists of
 
-    - thre conv layers with ReLUs, each followed by max-pooling
+    - three conv layers with ReLUs, each followed by max-pooling
     - two fully-connected layers with ``512`` and ``256`` units and ReLU activation
     - 10-unit output layer with softmax
     - cross-entropy loss
@@ -65,9 +65,7 @@ class cifar10_3c3d(TestProblem):
         self.test_init_op = self.dataset.test_init_op
 
         x, y = self.dataset.batch
-        linear_outputs = _3c3d(
-            x, num_outputs=10, l2_reg=self._l2_reg
-        )
+        linear_outputs = _3c3d(x, num_outputs=10, l2_reg=self._l2_reg)
 
         self.losses = tf.nn.softmax_cross_entropy_with_logits_v2(
             labels=y, logits=linear_outputs
