@@ -3,8 +3,8 @@
 
 import tensorflow as tf
 
-from ._3c3d import _3c3d
 from ..datasets.cifar100 import cifar100
+from ._3c3d import _3c3d
 from .testproblem import TestProblem
 
 
@@ -14,7 +14,7 @@ class cifar100_3c3d(TestProblem):
 
   The network consists of
 
-    - thre conv layers with ReLUs, each followed by max-pooling
+    - three conv layers with ReLUs, each followed by max-pooling
     - two fully-connected layers with ``512`` and ``256`` units and ReLU activation
     - 100-unit output layer with softmax
     - cross-entropy loss
@@ -62,12 +62,12 @@ class cifar100_3c3d(TestProblem):
 
         x, y = self.dataset.batch
         linear_outputs = _3c3d(
-            x,
-            num_outputs=100,
-            weight_decay=self._weight_decay)
+            x, num_outputs=100, weight_decay=self._weight_decay
+        )
 
         self.losses = tf.nn.softmax_cross_entropy_with_logits_v2(
-            labels=y, logits=linear_outputs)
+            labels=y, logits=linear_outputs
+        )
 
         y_pred = tf.argmax(linear_outputs, 1)
         y_correct = tf.argmax(y, 1)
