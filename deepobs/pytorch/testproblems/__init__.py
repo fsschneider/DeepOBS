@@ -4,6 +4,7 @@ from .cifar10_3c3d import cifar10_3c3d
 from .cifar100_3c3d import cifar100_3c3d
 from .cifar100_allcnnc import cifar100_allcnnc
 from .cifar100_wrn164 import cifar100_wrn164
+from .cifar100_wrn404 import cifar100_wrn404
 from .fmnist_2c2d import fmnist_2c2d
 from .fmnist_logreg import fmnist_logreg
 from .fmnist_mlp import fmnist_mlp
