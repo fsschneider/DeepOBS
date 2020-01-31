@@ -7,12 +7,7 @@ class RandomSearch(ParallelizedTuner):
     """
 
     def __init__(
-        self,
-        optimizer_class,
-        hyperparam_names,
-        distributions,
-        ressources,
-        runner,
+        self, optimizer_class, hyperparam_names, distributions, ressources, runner,
     ):
         """
         Args:

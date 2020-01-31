@@ -12,12 +12,8 @@ import deepobs.config as config
 from deepobs.tensorflow import datasets
 
 sys.path.insert(
-    0,
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ),
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 )
-
 
 
 def denormalize_image(img):
@@ -88,9 +84,7 @@ def load_label_dict(dataset):
             label_dict = lookup_file.readlines()
     elif dataset == "cifar100":
         with open(
-            os.path.join(
-                config.get_data_dir(), "cifar-100/fine_label_names.txt"
-            )
+            os.path.join(config.get_data_dir(), "cifar-100/fine_label_names.txt")
         ) as lookup_file:
             label_dict = lookup_file.readlines()
     elif dataset == "fmnist":
@@ -110,9 +104,7 @@ def load_label_dict(dataset):
         )
     elif dataset == "imagenet":
         label_file = os.path.join(
-            os.path.realpath(
-                os.path.join(os.getcwd(), os.path.dirname(__file__))
-            ),
+            os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__))),
             "imagenet_labels.txt",
         )
         # Read from text file

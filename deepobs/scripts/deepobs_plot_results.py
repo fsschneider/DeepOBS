@@ -89,13 +89,9 @@ def main(
     if args.get_best_run or args.full:
         deepobs.analyzer.analyze.get_best_run(folder_parser)
     if args.plot_lr_sensitivity or args.full:
-        deepobs.analyzer.analyze.plot_lr_sensitivity(
-            folder_parser, baseline_parser
-        )
+        deepobs.analyzer.analyze.plot_lr_sensitivity(folder_parser, baseline_parser)
     if args.plot_performance or args.full:
-        deepobs.analyzer.analyze.plot_performance(
-            folder_parser, baseline_parser
-        )
+        deepobs.analyzer.analyze.plot_performance(folder_parser, baseline_parser)
     if args.plot_table or args.full:
         deepobs.analyzer.analyze.plot_table(folder_parser, baseline_parser)
 

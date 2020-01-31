@@ -11,12 +11,8 @@ import tensorflow as tf
 from deepobs.tensorflow import testproblems
 
 sys.path.insert(
-    0,
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ),
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 )
-
 
 
 class FMNIST_MLPTest(unittest.TestCase):
@@ -35,8 +31,7 @@ class FMNIST_MLPTest(unittest.TestCase):
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
             num_param = [
-                np.prod(v.get_shape().as_list())
-                for v in tf.trainable_variables()
+                np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()
             ]
             # Check if number of parameters per "layer" is equal to what we expect
             # We will write them in the following form:
@@ -46,16 +41,7 @@ class FMNIST_MLPTest(unittest.TestCase):
             # - Bias: [dim]
             self.assertEqual(
                 num_param,
-                [
-                    28 * 28 * 1000,
-                    1000,
-                    1000 * 500,
-                    500,
-                    500 * 100,
-                    100,
-                    100 * 10,
-                    10,
-                ],
+                [28 * 28 * 1000, 1000, 1000 * 500, 500, 500 * 100, 100, 100 * 10, 10,],
             )
             for init_op in [
                 self.fmnist_mlp.train_init_op,

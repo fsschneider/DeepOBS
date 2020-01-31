@@ -35,9 +35,11 @@ class DataSet(object):
       batch_size (int): The mini-batch size to use.
     """
         self._batch_size = batch_size
-        self._train_dataset, self._train_eval_dataset, self._valid_dataset = (
-            self._make_train_datasets()
-        )
+        (
+            self._train_dataset,
+            self._train_eval_dataset,
+            self._valid_dataset,
+        ) = self._make_train_datasets()
         self._test_dataset = self._make_test_dataset()
 
         # Reinitializable iterator given types and shapes of the outputs

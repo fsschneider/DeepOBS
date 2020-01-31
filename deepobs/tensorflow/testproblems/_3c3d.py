@@ -25,9 +25,7 @@ def _3c3d(x, num_outputs, l2_reg):
 
     def max_pool(inputs):
         """Convenience wrapper for max pool layers."""
-        return tf.layers.max_pooling2d(
-            inputs, pool_size=3, strides=2, padding="same"
-        )
+        return tf.layers.max_pooling2d(inputs, pool_size=3, strides=2, padding="same")
 
     def dense(inputs, units, activation):
         """Convenience wrapper for max pool layers."""

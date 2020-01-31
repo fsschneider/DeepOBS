@@ -4,9 +4,12 @@ import os
 import numpy as np
 from scipy.stats.distributions import uniform
 
-from ..analyzer.shared_utils import (_append_json, _clear_json,
-                                     _determine_available_metric,
-                                     create_setting_analyzer_ranking)
+from ..analyzer.shared_utils import (
+    _append_json,
+    _clear_json,
+    _determine_available_metric,
+    create_setting_analyzer_ranking,
+)
 
 
 def rerun_setting(
@@ -54,13 +57,11 @@ def rerun_setting(
             num_epochs=num_epochs,
             batch_size=batch_size,
             output_dir=results_path,
-            **training_params
+            **training_params,
         )
 
 
-def write_tuning_summary(
-    optimizer_path, mode="final", metric="valid_accuracies"
-):
+def write_tuning_summary(optimizer_path, mode="final", metric="valid_accuracies"):
     """Writes the tuning summary to a json file in the ``optimizer_path``.
     Args:
         optimizer_path (str): Path to the optimizer folder.
@@ -75,9 +76,7 @@ def write_tuning_summary(
         _append_json(optimizer_path, "tuning_log.json", line)
 
 
-def generate_tuning_summary(
-    optimizer_path, mode="final", metric="valid_accuracies"
-):
+def generate_tuning_summary(optimizer_path, mode="final", metric="valid_accuracies"):
     """Generates a list of dictionaries that holds an overview of the current tuning process.
     Should not be used for Bayesian tuning methods, since the order of evaluation is ignored in this summary. For
     Bayesian tuning methods use the tuning summary logging of the respective class.

@@ -77,14 +77,10 @@ class two_d_branin(TestProblem):
 
         # Set model weights
         u = tf.get_variable(
-            "weight",
-            shape=(),
-            initializer=tf.constant_initializer(starting_point[0]),
+            "weight", shape=(), initializer=tf.constant_initializer(starting_point[0]),
         )
         v = tf.get_variable(
-            "bias",
-            shape=(),
-            initializer=tf.constant_initializer(starting_point[1]),
+            "bias", shape=(), initializer=tf.constant_initializer(starting_point[1]),
         )
 
         # Define some constants.

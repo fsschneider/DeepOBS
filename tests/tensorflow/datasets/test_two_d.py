@@ -10,12 +10,8 @@ import tensorflow as tf
 from deepobs.tensorflow import datasets
 
 sys.path.insert(
-    0,
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ),
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 )
-
 
 
 class Two_dTest(unittest.TestCase):

@@ -16,22 +16,14 @@ def vae_loss_function_factory(reduction="mean"):
         outputs_flat = outputs.view(-1, 28 * 28)
         targets_flat = targets.view(-1, 28 * 28)
         if reduction == "mean":
-            image_loss = torch.mean(
-                (outputs_flat - targets_flat).pow(2).sum(dim=1)
-            )
+            image_loss = torch.mean((outputs_flat - targets_flat).pow(2).sum(dim=1))
             latent_loss = -0.5 * torch.mean(
-                (1 + 2 * std_dev - mean.pow(2) - torch.exp(2 * std_dev)).sum(
-                    dim=1
-                )
+                (1 + 2 * std_dev - mean.pow(2) - torch.exp(2 * std_dev)).sum(dim=1)
             )
         elif reduction == "sum":
-            image_loss = torch.sum(
-                (outputs_flat - targets_flat).pow(2).sum(dim=1)
-            )
+            image_loss = torch.sum((outputs_flat - targets_flat).pow(2).sum(dim=1))
             latent_loss = -0.5 * torch.sum(
-                (1 + 2 * std_dev - mean.pow(2) - torch.exp(2 * std_dev)).sum(
-                    dim=1
-                )
+                (1 + 2 * std_dev - mean.pow(2) - torch.exp(2 * std_dev)).sum(dim=1)
             )
         elif reduction == "none":
             image_loss = (outputs_flat - targets_flat).pow(2).sum(dim=1)
@@ -39,9 +31,7 @@ def vae_loss_function_factory(reduction="mean"):
                 1 + 2 * std_dev - mean.pow(2) - torch.exp(2 * std_dev)
             ).sum(dim=1)
         else:
-            raise NotImplementedError(
-                "Reduction " + reduction + " not implemented."
-            )
+            raise NotImplementedError("Reduction " + reduction + " not implemented.")
         return image_loss + latent_loss
 
     return vae_loss_function
@@ -82,9 +72,7 @@ def _determine_inverse_padding_from_tf_same(
     pad_along_height = max(
         (in_height - 1) * stride_height + kernel_height - out_height, 0
     )
-    pad_along_width = max(
-        (in_width - 1) * stride_width + kernel_width - out_width, 0
-    )
+    pad_along_width = max((in_width - 1) * stride_width + kernel_width - out_width, 0)
 
     # determine padding 4-tuple (can be asymmetric)
     pad_top = pad_along_height // 2
@@ -130,9 +118,7 @@ def _determine_padding_from_tf_same(
     pad_along_height = max(
         (out_height - 1) * stride_height + kernel_height - in_height, 0
     )
-    pad_along_width = max(
-        (out_width - 1) * stride_width + kernel_width - in_width, 0
-    )
+    pad_along_width = max((out_width - 1) * stride_width + kernel_width - in_width, 0)
 
     # determine padding 4-tuple (can be asymmetric)
     pad_top = pad_along_height // 2
@@ -162,12 +148,7 @@ def _truncated_normal_init(tensor, mean=0, stddev=1):
     np_state = RandomState(np_seed)
     # truncates 2 std from mean, since rescaling: a = ((mean-2std)-mean)/std = -2
     samples = tn.rvs(
-        a=-2,
-        b=2,
-        loc=mean,
-        scale=stddev,
-        size=total_size,
-        random_state=np_state,
+        a=-2, b=2, loc=mean, scale=stddev, size=total_size, random_state=np_state,
     )
     samples = samples.reshape(tuple(tensor.size()))
     init_tensor = torch.from_numpy(samples).type_as(tensor)

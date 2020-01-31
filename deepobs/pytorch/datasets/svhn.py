@@ -18,8 +18,7 @@ training_transform_augmented = transforms.Compose(
         ),
         transforms.ToTensor(),
         transforms.Normalize(
-            (0.4376821, 0.4437697, 0.47280442),
-            (0.19803012, 0.20101562, 0.19703614),
+            (0.4376821, 0.4437697, 0.47280442), (0.19803012, 0.20101562, 0.19703614),
         ),
     ]
 )
@@ -28,8 +27,7 @@ training_transform_not_augmented = transforms.Compose(
     [
         transforms.ToTensor(),
         transforms.Normalize(
-            (0.4376821, 0.4437697, 0.47280442),
-            (0.19803012, 0.20101562, 0.19703614),
+            (0.4376821, 0.4437697, 0.47280442), (0.19803012, 0.20101562, 0.19703614),
         ),
     ]
 )
@@ -50,9 +48,7 @@ class svhn(dataset.DataSet):
         Defaults to ``26 000`` the size of the test set.
   """
 
-    def __init__(
-        self, batch_size, data_augmentation=True, train_eval_size=26032
-    ):
+    def __init__(self, batch_size, data_augmentation=True, train_eval_size=26032):
 
         self._name = "svhn"
         self._data_augmentation = data_augmentation

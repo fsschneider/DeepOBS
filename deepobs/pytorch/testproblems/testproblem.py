@@ -124,9 +124,7 @@ class TestProblem(abc.ABC):
             if self.phase in ["train_eval", "test", "valid"]:
                 with torch.no_grad():
                     outputs = self.net(inputs)
-                    loss = self.loss_function(reduction=reduction)(
-                        outputs, labels
-                    )
+                    loss = self.loss_function(reduction=reduction)(outputs, labels)
             else:
                 outputs = self.net(inputs)
                 loss = self.loss_function(reduction=reduction)(outputs, labels)
@@ -140,9 +138,7 @@ class TestProblem(abc.ABC):
             if add_regularization_if_available:
                 regularizer_loss = self.get_regularization_loss()
             else:
-                regularizer_loss = torch.tensor(
-                    0.0, device=torch.device(self._device)
-                )
+                regularizer_loss = torch.tensor(0.0, device=torch.device(self._device))
 
             return loss + regularizer_loss, accuracy
 
@@ -178,10 +174,7 @@ class TestProblem(abc.ABC):
         """
         # iterate through all layers
         layer_norms = []
-        for (
-            regularization,
-            parameter_group,
-        ) in self.regularization_groups.items():
+        for (regularization, parameter_group,) in self.regularization_groups.items():
             if regularization > 0.0:
                 # L2 regularization
                 for parameters in parameter_group:

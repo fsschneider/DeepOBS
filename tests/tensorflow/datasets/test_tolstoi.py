@@ -11,12 +11,8 @@ import tensorflow as tf
 from deepobs.tensorflow import datasets
 
 sys.path.insert(
-    0,
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ),
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 )
-
 
 
 class TolstoiTest(unittest.TestCase):
@@ -43,12 +39,8 @@ class TolstoiTest(unittest.TestCase):
             ]:
                 sess.run(init_op)
                 x_, y_ = sess.run(self.tolstoi.batch)
-                self.assertEqual(
-                    x_.shape, (self.batch_size, self.tolstoi._seq_length)
-                )
-                self.assertEqual(
-                    y_.shape, (self.batch_size, self.tolstoi._seq_length)
-                )
+                self.assertEqual(x_.shape, (self.batch_size, self.tolstoi._seq_length))
+                self.assertEqual(y_.shape, (self.batch_size, self.tolstoi._seq_length))
                 #  check if y is x shifted by one
                 x_next, _ = sess.run(self.tolstoi.batch)
                 x_shift = np.roll(x_, -1, axis=1)

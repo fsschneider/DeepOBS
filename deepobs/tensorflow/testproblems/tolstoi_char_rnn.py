@@ -135,9 +135,7 @@ class tolstoi_char_rnn(TestProblem):
         # print logits.get_shape()
 
         # Reshape logits to batch_size x seq_length x vocab size
-        reshaped_logits = tf.reshape(
-            logits, [self._batch_size, seq_length, vocab_size]
-        )
+        reshaped_logits = tf.reshape(logits, [self._batch_size, seq_length, vocab_size])
         # print "Shape of reshaped logits", reshaped_logits.get_shape()
 
         # Create vector of losses
@@ -158,33 +156,25 @@ class tolstoi_char_rnn(TestProblem):
         self.train_init_op = tf.group(
             [
                 self.dataset.train_init_op,
-                self._get_state_update_op(
-                    self.state_variables, self.zero_states
-                ),
+                self._get_state_update_op(self.state_variables, self.zero_states),
             ]
         )
         self.train_eval_init_op = tf.group(
             [
                 self.dataset.train_eval_init_op,
-                self._get_state_update_op(
-                    self.state_variables, self.zero_states
-                ),
+                self._get_state_update_op(self.state_variables, self.zero_states),
             ]
         )
         self.valid_init_op = tf.group(
             [
                 self.dataset.valid_init_op,
-                self._get_state_update_op(
-                    self.state_variables, self.zero_states
-                ),
+                self._get_state_update_op(self.state_variables, self.zero_states),
             ]
         )
         self.test_init_op = tf.group(
             [
                 self.dataset.test_init_op,
-                self._get_state_update_op(
-                    self.state_variables, self.zero_states
-                ),
+                self._get_state_update_op(self.state_variables, self.zero_states),
             ]
         )
 

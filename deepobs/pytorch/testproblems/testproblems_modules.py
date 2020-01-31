@@ -20,9 +20,7 @@ class net_mnist_logreg(nn.Sequential):
         super(net_mnist_logreg, self).__init__()
 
         self.add_module("flatten", nn.Flatten())
-        self.add_module(
-            "dense", nn.Linear(in_features=784, out_features=num_outputs)
-        )
+        self.add_module("dense", nn.Linear(in_features=784, out_features=num_outputs))
 
         # initfrom .cifar100_vgg19 import cifar100_vgg19
         nn.init.constant_(self.dense.bias, 0.0)
@@ -47,8 +45,7 @@ class net_cifar10_3c3d(nn.Sequential):
         )
         self.add_module("relu1", nn.ReLU())
         self.add_module(
-            "maxpool1",
-            tfmaxpool2d(kernel_size=3, stride=2, tf_padding_type="same"),
+            "maxpool1", tfmaxpool2d(kernel_size=3, stride=2, tf_padding_type="same"),
         )
 
         self.add_module(
@@ -56,36 +53,27 @@ class net_cifar10_3c3d(nn.Sequential):
         )
         self.add_module("relu2", nn.ReLU())
         self.add_module(
-            "maxpool2",
-            tfmaxpool2d(kernel_size=3, stride=2, tf_padding_type="same"),
+            "maxpool2", tfmaxpool2d(kernel_size=3, stride=2, tf_padding_type="same"),
         )
 
         self.add_module(
             "conv3",
             tfconv2d(
-                in_channels=96,
-                out_channels=128,
-                kernel_size=3,
-                tf_padding_type="same",
+                in_channels=96, out_channels=128, kernel_size=3, tf_padding_type="same",
             ),
         )
         self.add_module("relu3", nn.ReLU())
         self.add_module(
-            "maxpool3",
-            tfmaxpool2d(kernel_size=3, stride=2, tf_padding_type="same"),
+            "maxpool3", tfmaxpool2d(kernel_size=3, stride=2, tf_padding_type="same"),
         )
 
         self.add_module("flatten", nn.Flatten())
 
-        self.add_module(
-            "dense1", nn.Linear(in_features=3 * 3 * 128, out_features=512)
-        )
+        self.add_module("dense1", nn.Linear(in_features=3 * 3 * 128, out_features=512))
         self.add_module("relu4", nn.ReLU())
         self.add_module("dense2", nn.Linear(in_features=512, out_features=256))
         self.add_module("relu5", nn.ReLU())
-        self.add_module(
-            "dense3", nn.Linear(in_features=256, out_features=num_outputs)
-        )
+        self.add_module("dense3", nn.Linear(in_features=256, out_features=num_outputs))
 
         # init the layers
         for module in self.modules():
@@ -117,43 +105,31 @@ class net_mnist_2c2d(nn.Sequential):
         self.add_module(
             "conv1",
             tfconv2d(
-                in_channels=1,
-                out_channels=32,
-                kernel_size=5,
-                tf_padding_type="same",
+                in_channels=1, out_channels=32, kernel_size=5, tf_padding_type="same",
             ),
         )
         self.add_module("relu1", nn.ReLU())
         self.add_module(
-            "max_pool1",
-            tfmaxpool2d(kernel_size=2, stride=2, tf_padding_type="same"),
+            "max_pool1", tfmaxpool2d(kernel_size=2, stride=2, tf_padding_type="same"),
         )
 
         self.add_module(
             "conv2",
             tfconv2d(
-                in_channels=32,
-                out_channels=64,
-                kernel_size=5,
-                tf_padding_type="same",
+                in_channels=32, out_channels=64, kernel_size=5, tf_padding_type="same",
             ),
         )
         self.add_module("relu2", nn.ReLU())
         self.add_module(
-            "max_pool2",
-            tfmaxpool2d(kernel_size=2, stride=2, tf_padding_type="same"),
+            "max_pool2", tfmaxpool2d(kernel_size=2, stride=2, tf_padding_type="same"),
         )
 
         self.add_module("flatten", nn.Flatten())
 
-        self.add_module(
-            "dense1", nn.Linear(in_features=7 * 7 * 64, out_features=1024)
-        )
+        self.add_module("dense1", nn.Linear(in_features=7 * 7 * 64, out_features=1024))
         self.add_module("relu3", nn.ReLU())
 
-        self.add_module(
-            "dense2", nn.Linear(in_features=1024, out_features=num_outputs)
-        )
+        self.add_module("dense2", nn.Linear(in_features=1024, out_features=num_outputs))
 
         # init the layers
         for module in self.modules():
@@ -221,12 +197,8 @@ class net_vae(nn.Module):
         )
         self.dropout3 = nn.Dropout(p=0.2)
 
-        self.dense1 = nn.Linear(
-            in_features=7 * 7 * 64, out_features=self.n_latent
-        )
-        self.dense2 = nn.Linear(
-            in_features=7 * 7 * 64, out_features=self.n_latent
-        )
+        self.dense1 = nn.Linear(in_features=7 * 7 * 64, out_features=self.n_latent)
+        self.dense2 = nn.Linear(in_features=7 * 7 * 64, out_features=self.n_latent)
 
         # decoding layers
         self.dense3 = nn.Linear(in_features=8, out_features=24)
@@ -333,35 +305,25 @@ class net_vgg(nn.Sequential):
         self.add_module(
             "conv11",
             tfconv2d(
-                in_channels=3,
-                out_channels=64,
-                kernel_size=3,
-                tf_padding_type="same",
+                in_channels=3, out_channels=64, kernel_size=3, tf_padding_type="same",
             ),
         )
         self.add_module("relu11", nn.ReLU())
         self.add_module(
             "conv12",
             tfconv2d(
-                in_channels=64,
-                out_channels=64,
-                kernel_size=3,
-                tf_padding_type="same",
+                in_channels=64, out_channels=64, kernel_size=3, tf_padding_type="same",
             ),
         )
         self.add_module("relu12", nn.ReLU())
         self.add_module(
-            "max_pool1",
-            tfmaxpool2d(kernel_size=2, stride=2, tf_padding_type="same"),
+            "max_pool1", tfmaxpool2d(kernel_size=2, stride=2, tf_padding_type="same"),
         )
 
         self.add_module(
             "conv21",
             tfconv2d(
-                in_channels=64,
-                out_channels=128,
-                kernel_size=3,
-                tf_padding_type="same",
+                in_channels=64, out_channels=128, kernel_size=3, tf_padding_type="same",
             ),
         )
         self.add_module("relu21", nn.ReLU())
@@ -376,8 +338,7 @@ class net_vgg(nn.Sequential):
         )
         self.add_module("relu22", nn.ReLU())
         self.add_module(
-            "max_pool2",
-            tfmaxpool2d(kernel_size=2, stride=2, tf_padding_type="same"),
+            "max_pool2", tfmaxpool2d(kernel_size=2, stride=2, tf_padding_type="same"),
         )
 
         self.add_module(
@@ -422,8 +383,7 @@ class net_vgg(nn.Sequential):
             )
             self.add_module("relu34", nn.ReLU())
         self.add_module(
-            "max_pool3",
-            tfmaxpool2d(kernel_size=2, stride=2, tf_padding_type="same"),
+            "max_pool3", tfmaxpool2d(kernel_size=2, stride=2, tf_padding_type="same"),
         )
 
         self.add_module(
@@ -468,8 +428,7 @@ class net_vgg(nn.Sequential):
             )
             self.add_module("relu44", nn.ReLU())
         self.add_module(
-            "max_pool4",
-            tfmaxpool2d(kernel_size=2, stride=2, tf_padding_type="same"),
+            "max_pool4", tfmaxpool2d(kernel_size=2, stride=2, tf_padding_type="same"),
         )
 
         self.add_module(
@@ -514,27 +473,20 @@ class net_vgg(nn.Sequential):
             )
             self.add_module("relu54", nn.ReLU())
         self.add_module(
-            "max_pool5",
-            tfmaxpool2d(kernel_size=2, stride=2, tf_padding_type="same"),
+            "max_pool5", tfmaxpool2d(kernel_size=2, stride=2, tf_padding_type="same"),
         )
 
         self.add_module("flatten", nn.Flatten())
 
-        self.add_module(
-            "dense1", nn.Linear(in_features=7 * 7 * 512, out_features=4096)
-        )
+        self.add_module("dense1", nn.Linear(in_features=7 * 7 * 512, out_features=4096))
         self.add_module("relu1", nn.ReLU())
         self.add_module("dropout1", nn.Dropout(p=0.5))
 
-        self.add_module(
-            "dense2", nn.Linear(in_features=4096, out_features=4096)
-        )
+        self.add_module("dense2", nn.Linear(in_features=4096, out_features=4096))
         self.add_module("relu2", nn.ReLU())
         self.add_module("dropout2", nn.Dropout(p=0.5))
 
-        self.add_module(
-            "dense3", nn.Linear(in_features=4096, out_features=num_outputs)
-        )
+        self.add_module("dense3", nn.Linear(in_features=4096, out_features=num_outputs))
 
         # init the layers
         for module in self.modules():
@@ -556,20 +508,14 @@ class net_cifar100_allcnnc(nn.Sequential):
         self.add_module(
             "conv1",
             tfconv2d(
-                in_channels=3,
-                out_channels=96,
-                kernel_size=3,
-                tf_padding_type="same",
+                in_channels=3, out_channels=96, kernel_size=3, tf_padding_type="same",
             ),
         )
         self.add_module("relu1", nn.ReLU())
         self.add_module(
             "conv2",
             tfconv2d(
-                in_channels=96,
-                out_channels=96,
-                kernel_size=3,
-                tf_padding_type="same",
+                in_channels=96, out_channels=96, kernel_size=3, tf_padding_type="same",
             ),
         )
         self.add_module("relu2", nn.ReLU())
@@ -590,10 +536,7 @@ class net_cifar100_allcnnc(nn.Sequential):
         self.add_module(
             "conv4",
             tfconv2d(
-                in_channels=96,
-                out_channels=192,
-                kernel_size=3,
-                tf_padding_type="same",
+                in_channels=96, out_channels=192, kernel_size=3, tf_padding_type="same",
             ),
         )
         self.add_module("relu4", nn.ReLU())
@@ -662,9 +605,7 @@ class net_wrn(nn.Sequential):
         super(net_wrn, self).__init__()
 
         # initial conv
-        self.add_module(
-            "conv1", tfconv2d(3, 16, 3, bias=False, tf_padding_type="same")
-        )
+        self.add_module("conv1", tfconv2d(3, 16, 3, bias=False, tf_padding_type="same"))
 
         self._filters = [
             16,
@@ -690,26 +631,21 @@ class net_wrn(nn.Sequential):
             # loop over further residual blocks of this group
             for residual_block_number in range(1, num_residual_blocks):
                 self.add_module(
-                    "res_unit"
-                    + str(group_number)
-                    + str(residual_block_number + 1),
+                    "res_unit" + str(group_number) + str(residual_block_number + 1),
                     residual_block(
                         in_channels=self._filters[group_number],
                         out_channels=self._filters[group_number],
                     ),
                 )
         # last layer
-        self.add_module(
-            "bn", nn.BatchNorm2d(self._filters[3], momentum=bn_momentum)
-        )
+        self.add_module("bn", nn.BatchNorm2d(self._filters[3], momentum=bn_momentum))
         self.add_module("relu", nn.ReLU())
         self.add_module("avg_pool", nn.AvgPool2d(8))
 
         # reshape and dense layer
         self.add_module("flatten", nn.Flatten())
         self.add_module(
-            "dense",
-            nn.Linear(in_features=self._filters[3], out_features=num_outputs),
+            "dense", nn.Linear(in_features=self._filters[3], out_features=num_outputs),
         )
 
         # initialisation

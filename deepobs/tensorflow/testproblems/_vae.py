@@ -20,9 +20,7 @@ def _vae(x, training, n_latent=8):
             activation=activation,
         )
 
-    def conv2d_transpose(
-        inputs, filters, kernel_size, strides, activation=tf.nn.relu
-    ):
+    def conv2d_transpose(inputs, filters, kernel_size, strides, activation=tf.nn.relu):
         """Convenience wrapper for conv layers."""
         return tf.layers.conv2d_transpose(
             inputs,

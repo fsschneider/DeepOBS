@@ -102,9 +102,7 @@ class fmnist_vae(UnregularizedTestproblem):
             if add_regularization_if_available:
                 regularizer_loss = self.get_regularization_loss()
             else:
-                regularizer_loss = torch.tensor(
-                    0.0, device=torch.device(self._device)
-                )
+                regularizer_loss = torch.tensor(0.0, device=torch.device(self._device))
 
             return loss + regularizer_loss, accuracy
 

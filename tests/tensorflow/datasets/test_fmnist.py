@@ -11,12 +11,8 @@ import tensorflow as tf
 from deepobs.tensorflow import datasets
 
 sys.path.insert(
-    0,
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ),
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 )
-
 
 
 class FMNISTTest(unittest.TestCase):
@@ -78,9 +74,7 @@ class FMNISTTest(unittest.TestCase):
                                     self.image_channels,
                                 ),
                             )
-                            self.assertEqual(
-                                y_.shape, (self.batch_size, self.classes)
-                            )
+                            self.assertEqual(y_.shape, (self.batch_size, self.classes))
                             self.assertTrue(
                                 np.allclose(
                                     np.sum(y_, axis=1), np.ones(self.batch_size)

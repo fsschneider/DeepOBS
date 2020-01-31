@@ -41,16 +41,10 @@ class fmnist(dataset.DataSet):
     def _make_train_and_valid_dataloader(self):
         transform = transforms.ToTensor()
         train_dataset = datasets.FashionMNIST(
-            root=config.get_data_dir(),
-            train=True,
-            download=True,
-            transform=transform,
+            root=config.get_data_dir(), train=True, download=True, transform=transform,
         )
         valid_dataset = datasets.FashionMNIST(
-            root=config.get_data_dir(),
-            train=True,
-            download=True,
-            transform=transform,
+            root=config.get_data_dir(), train=True, download=True, transform=transform,
         )
         train_loader, valid_loader = self._make_train_and_valid_dataloader_helper(
             train_dataset, valid_dataset
@@ -60,9 +54,6 @@ class fmnist(dataset.DataSet):
     def _make_test_dataloader(self):
         transform = transforms.ToTensor()
         test_dataset = datasets.FashionMNIST(
-            root=config.get_data_dir(),
-            train=False,
-            download=True,
-            transform=transform,
+            root=config.get_data_dir(), train=False, download=True, transform=transform,
         )
         return self._make_dataloader(test_dataset, sampler=None)

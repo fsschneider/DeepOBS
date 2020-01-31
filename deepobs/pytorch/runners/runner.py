@@ -113,9 +113,7 @@ class PTRunner(Runner):
         batchCount = 0.0
         while True:
             try:
-                batch_loss, batch_accuracy = (
-                    tproblem.get_batch_loss_and_accuracy()
-                )
+                batch_loss, batch_accuracy = tproblem.get_batch_loss_and_accuracy()
                 batchCount += 1.0
                 loss += batch_loss.item()
                 accuracy += batch_accuracy
@@ -147,9 +145,7 @@ class PTRunner(Runner):
 
         print("********************************")
         print(
-            "Evaluating after {0:d} of {1:d} epochs...".format(
-                epoch_count, num_epochs
-            )
+            "Evaluating after {0:d} of {1:d} epochs...".format(epoch_count, num_epochs)
         )
 
         loss_, acc_ = self.evaluate(tproblem, phase="TRAIN")
@@ -173,9 +169,7 @@ class StandardRunner(PTRunner):
     """
 
     def __init__(self, optimizer_class, hyperparameter_names):
-        super(StandardRunner, self).__init__(
-            optimizer_class, hyperparameter_names
-        )
+        super(StandardRunner, self).__init__(optimizer_class, hyperparameter_names)
 
     def training(
         self,
@@ -207,8 +201,7 @@ class StandardRunner(PTRunner):
                 summary_writer = SummaryWriter(log_dir=tb_log_dir)
             except ImportError as e:
                 warnings.warn(
-                    "Not possible to use tensorboard for pytorch. Reason: "
-                    + e.msg,
+                    "Not possible to use tensorboard for pytorch. Reason: " + e.msg,
                     RuntimeWarning,
                 )
                 tb_log = False
@@ -419,11 +412,7 @@ class LearningRateScheduleRunner(PTRunner):
                 lr_schedule.step(epoch_count)
 
                 if epoch_count in lr_sched_epochs:
-                    print(
-                        "Setting learning rate to {0}".format(
-                            lr_schedule.get_lr()
-                        )
-                    )
+                    print("Setting learning rate to {0}".format(lr_schedule.get_lr()))
 
             # set to training mode
             tproblem.train_init_op()

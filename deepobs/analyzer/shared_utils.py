@@ -12,11 +12,7 @@ def _check_setting_folder_is_not_empty(setting_path):
     try:
         assert len(runs) > 0
     except AssertionError:
-        print(
-            "Found a setting folder with no runs inside: {0:s}".format(
-                setting_path
-            )
-        )
+        print("Found a setting folder with no runs inside: {0:s}".format(setting_path))
 
 
 def _check_output_structure(path, file_name):
@@ -45,9 +41,7 @@ def _check_output_structure(path, file_name):
         )
     except AssertionError as e:
         print(
-            "Found corrupted output file: {0:s} in path: {1:s}".format(
-                file_name, path
-            )
+            "Found corrupted output file: {0:s} in path: {1:s}".format(file_name, path)
         )
 
 
@@ -130,8 +124,7 @@ def _read_all_settings_folders(optimizer_path):
         [
             f
             for f in os.listdir(optimizer_path)
-            if os.path.isdir(os.path.join(optimizer_path, f))
-            and "num_epochs" in f
+            if os.path.isdir(os.path.join(optimizer_path, f)) and "num_epochs" in f
         ]
     )
 
@@ -149,9 +142,7 @@ def _check_if_metric_is_available(optimizer_path, metric):
         return False
 
 
-def _determine_available_metric(
-    optimizer_path, metric, default_metric="valid_losses"
-):
+def _determine_available_metric(optimizer_path, metric, default_metric="valid_losses"):
     """Checks if the metric ``metric`` is availabe for the runs in ``optimizer_path``.
     If not, it returns the fallback metric ``default_metric``."""
     optimizer_name, testproblem_name = _get_optimizer_name_and_testproblem_from_path(
@@ -256,12 +247,11 @@ def create_setting_analyzer_ranking(
         )
     elif mode == "most":
         # if all have the same amount of runs, i.e. no 'most' avalaible, fall back to 'final'
-        if all(
-            x.n_runs == setting_analyzers[0].n_runs for x in setting_analyzers
-        ):
-            optimizer_name, testproblem_name = _get_optimizer_name_and_testproblem_from_path(
-                optimizer_path
-            )
+        if all(x.n_runs == setting_analyzers[0].n_runs for x in setting_analyzers):
+            (
+                optimizer_name,
+                testproblem_name,
+            ) = _get_optimizer_name_and_testproblem_from_path(optimizer_path)
             warnings.warn(
                 "All settings for {0:s} on test problem {1:s} have the same number of seeds runs. Mode 'most' does not make sense and we use the fallback mode 'final'".format(
                     optimizer_path, testproblem_name
@@ -269,8 +259,7 @@ def create_setting_analyzer_ranking(
                 RuntimeWarning,
             )
             setting_analyzers_ordered = sorted(
-                setting_analyzers,
-                key=lambda idx: sgn * idx.get_final_value(metric),
+                setting_analyzers, key=lambda idx: sgn * idx.get_final_value(metric),
             )
         else:
             setting_analyzers_ordered = sorted(
@@ -304,9 +293,7 @@ class SettingAnalyzer:
 
     def __get_number_of_runs(self):
         """Calculates the total number of seed runs."""
-        return len(
-            [run for run in os.listdir(self.path) if run.endswith(".json")]
-        )
+        return len([run for run in os.listdir(self.path) if run.endswith(".json")])
 
     def get_final_value(self, metric):
         """Get the final (mean) value of the metric."""
@@ -342,9 +329,7 @@ class SettingAnalyzer:
 
         runs = [run for run in os.listdir(self.path) if run.endswith(".json")]
         metric = (
-            "test_accuracies"
-            if "test_accuracies" in self.aggregate
-            else "test_losses"
+            "test_accuracies" if "test_accuracies" in self.aggregate else "test_losses"
         )
         perf_values = []
 

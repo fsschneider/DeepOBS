@@ -10,12 +10,8 @@ import torch
 from deepobs.pytorch import testproblems
 
 sys.path.insert(
-    0,
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ),
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 )
-
 
 
 class SVHN_WRN164Test(unittest.TestCase):

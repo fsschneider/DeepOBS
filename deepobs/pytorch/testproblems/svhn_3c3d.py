@@ -5,6 +5,7 @@ from ..datasets.svhn import svhn
 from .testproblem import TestProblem
 from .testproblems_modules import net_cifar10_3c3d
 
+
 class svhn_3c3d(TestProblem):
     """DeepOBS test problem class for a three convolutional and three dense \
     layered neural network on SVHN.
@@ -50,7 +51,6 @@ class svhn_3c3d(TestProblem):
         self.net = net_cifar10_3c3d(num_outputs=10)
         self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
-
 
     def get_regularization_groups(self):
         """Creates regularization groups for the parameters.

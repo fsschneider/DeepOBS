@@ -95,9 +95,7 @@ class quadratic(dataset.DataSet):
         # Draw data from a random generator with a fixed seed to always get the
         # same data.
         rng = np.random.RandomState(42)
-        X_train = rng.normal(
-            0.0, self._noise_level, (self._train_size, self._dim)
-        )
+        X_train = rng.normal(0.0, self._noise_level, (self._train_size, self._dim))
         X_train = np.float32(X_train)
         train_data = self._make_dataset(X_train, shuffle=True)
 
@@ -106,9 +104,7 @@ class quadratic(dataset.DataSet):
         # Draw data from a random generator with a fixed seed to always get the
         # same data.
         rng = np.random.RandomState(44)
-        X_valid = rng.normal(
-            0.0, self._noise_level, (self._train_size, self._dim)
-        )
+        X_valid = rng.normal(0.0, self._noise_level, (self._train_size, self._dim))
         X_valid = np.float32(X_valid)
         valid_data = self._make_dataset(X_valid, shuffle=False)
 
@@ -123,9 +119,7 @@ class quadratic(dataset.DataSet):
         # Draw data from a random generator with a fixed seed to always get the
         # same data.
         rng = np.random.RandomState(43)
-        X_test = rng.normal(
-            0.0, self._noise_level, (self._train_size, self._dim)
-        )
+        X_test = rng.normal(0.0, self._noise_level, (self._train_size, self._dim))
         X_test = np.float32(X_test)
 
         return self._make_dataset(X_test, shuffle=False)
