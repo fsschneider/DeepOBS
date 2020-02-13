@@ -6,6 +6,7 @@ from ..datasets.cifar100 import cifar100
 from .testproblem import TestProblem
 from .testproblems_modules import net_vgg
 
+
 class cifar100_vgg19(TestProblem):
     """DeepOBS test problem class for the VGG 19 network on Cifar-100.
 
@@ -29,9 +30,7 @@ class cifar100_vgg19(TestProblem):
     data: The DeepOBS data set class for Cifar-100.
     loss_function: The loss function for this testproblem is torch.nn.CrossEntropyLoss()
     net: The DeepOBS subclass of torch.nn.Module that is trained for this tesproblem (net_vgg).
-
   """
-
 
     def __init__(self, batch_size, l2_reg=0.0005):
         """Create a new VGG 19 test problem instance on Cifar-100.
@@ -47,8 +46,8 @@ class cifar100_vgg19(TestProblem):
     def set_up(self):
         """Set up the VGG 19 test problem on Cifar-100."""
         self.data = cifar100(self._batch_size)
-        self.loss_function = nn.CrossEntropyLoss
-        self.net = net_vgg(num_outputs=100,variant=19)
+        self.net = net_vgg(num_outputs=100, variant=19)
+        self.net = net_vgg(num_outputs=100, variant=19)
         self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
 

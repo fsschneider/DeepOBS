@@ -6,6 +6,7 @@ from ..datasets.cifar10 import cifar10
 from .testproblem import TestProblem
 from .testproblems_modules import net_vgg
 
+
 class cifar10_vgg16(TestProblem):
     """DeepOBS test problem class for the VGG 16 network on Cifar-10.
 
@@ -30,7 +31,6 @@ class cifar10_vgg16(TestProblem):
     data: The DeepOBS data set class for Cifar-10.
     loss_function: The loss function for this testproblem is torch.nn.CrossEntropyLoss()
     net: The DeepOBS subclass of torch.nn.Module that is trained for this tesproblem (net_vgg).
-
   """
 
     def __init__(self, batch_size, l2_reg=0.0005):
@@ -43,7 +43,6 @@ class cifar10_vgg16(TestProblem):
               Defaults to ``5e-4``.
         """
         super(cifar10_vgg16, self).__init__(batch_size, l2_reg)
-
 
     def set_up(self):
         """Set up the VGG 16 test problem on Cifar-10."""
@@ -69,4 +68,3 @@ class cifar10_vgg16(TestProblem):
             else:
                 group_dict[no].append(parameters)
         return group_dict
-

@@ -28,7 +28,7 @@ class cifar100_wrn404(TestProblem):
         Defaults to ``5e-4``.
   """
 
-    def __init__(self, batch_size, l2_reg= 0.0005):
+    def __init__(self, batch_size, l2_reg=0.0005):
         """Create a new WRN 40-4 test problem instance on Cifar-100
 
         Args:
@@ -61,9 +61,9 @@ class cifar100_wrn404(TestProblem):
         for parameters_name, parameters in self.net.named_parameters():
             # penalize only the non bias layer parameters
             if ("weight" in parameters_name) and (
-                    ("dense" in parameters_name) or ("conv" in parameters_name)
+                ("dense" in parameters_name) or ("conv" in parameters_name)
             ):
                 group_dict[l2].append(parameters)
             else:
                 group_dict[no].append(parameters)
-        return group_dict
+
