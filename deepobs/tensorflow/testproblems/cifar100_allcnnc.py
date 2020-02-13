@@ -65,9 +65,7 @@ class cifar100_allcnnc(TestProblem):
         self.valid_init_op = self.dataset.valid_init_op
         self.test_init_op = self.dataset.test_init_op
 
-        def conv2d(
-            inputs, filters, kernel_size=3, strides=(1, 1), padding="same"
-        ):
+        def conv2d(inputs, filters, kernel_size=3, strides=(1, 1), padding="same"):
             """Convenience wrapper for conv layers."""
             return tf.layers.conv2d(
                 inputs,
@@ -78,9 +76,7 @@ class cifar100_allcnnc(TestProblem):
                 activation=tf.nn.relu,
                 bias_initializer=tf.initializers.constant(0.1),
                 kernel_initializer=tf.keras.initializers.glorot_normal(),
-                kernel_regularizer=tf.contrib.layers.l2_regularizer(
-                    self._l2_reg
-                ),
+                kernel_regularizer=tf.contrib.layers.l2_regularizer(self._l2_reg),
             )
 
         training = tf.equal(self.dataset.phase, "train")

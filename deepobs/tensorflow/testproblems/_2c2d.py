@@ -23,9 +23,7 @@ def _2c2d(x, num_outputs):
 
     def max_pool(inputs):
         """Convenience wrapper for max pool layers."""
-        return tf.layers.max_pooling2d(
-            inputs, pool_size=2, strides=2, padding="same"
-        )
+        return tf.layers.max_pooling2d(inputs, pool_size=2, strides=2, padding="same")
 
     def dense(inputs, units, activation):
         """Convenience wrapper for max pool layers."""

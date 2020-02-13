@@ -20,11 +20,7 @@ grid = {
 
 # Make sure to set the amount of ressources to the grid size. For grid search, this is just a sanity check.
 tuner = GridSearch(
-    optimizer_class,
-    hyperparams,
-    grid,
-    runner=StandardRunner,
-    ressources=6 * 3 * 2,
+    optimizer_class, hyperparams, grid, runner=StandardRunner, ressources=6 * 3 * 2,
 )
 
 # Tune (i.e. evaluate every grid point) and rerun the best setting with 10 different seeds.

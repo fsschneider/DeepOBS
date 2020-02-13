@@ -46,9 +46,10 @@ class DataSet(abc.ABC):
         else:
             self._pin_memory = False
         self._num_workers = config.get_num_workers()
-        self._train_dataloader, self._valid_dataloader = (
-            self._make_train_and_valid_dataloader()
-        )
+        (
+            self._train_dataloader,
+            self._valid_dataloader,
+        ) = self._make_train_and_valid_dataloader()
         self._train_eval_dataloader = self._make_train_eval_dataloader()
         self._test_dataloader = self._make_test_dataloader()
 
@@ -76,19 +77,13 @@ class DataSet(abc.ABC):
         valid_sampler = SubsetRandomSampler(valid_indices)
         return train_sampler, valid_sampler
 
-    def _make_train_and_valid_dataloader_helper(
-        self, train_dataset, valid_dataset
-    ):
+    def _make_train_and_valid_dataloader_helper(self, train_dataset, valid_dataset):
         train_sampler, valid_sampler = self._make_train_eval_split_sampler(
             train_dataset
         )
         # since random sampling, shuffle is useless
-        train_loader = self._make_dataloader(
-            train_dataset, sampler=train_sampler
-        )
-        valid_loader = self._make_dataloader(
-            valid_dataset, sampler=valid_sampler
-        )
+        train_loader = self._make_dataloader(train_dataset, sampler=train_sampler)
+        valid_loader = self._make_dataloader(valid_dataset, sampler=valid_sampler)
         return train_loader, valid_loader
 
     def _make_train_eval_dataloader(self):
@@ -99,9 +94,7 @@ class DataSet(abc.ABC):
         """
         size = len(self._train_dataloader.dataset)
         sampler = train_eval_sampler(size, self._train_eval_size)
-        return self._make_dataloader(
-            self._train_dataloader.dataset, sampler=sampler
-        )
+        return self._make_dataloader(self._train_dataloader.dataset, sampler=sampler)
 
     @abc.abstractmethod
     def _make_train_and_valid_dataloader(self):

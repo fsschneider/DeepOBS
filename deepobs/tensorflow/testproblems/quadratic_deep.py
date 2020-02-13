@@ -42,10 +42,7 @@ def random_rotation(D):
         x = np.divide((e - v), (np.sqrt(np.transpose(e - v).dot(e - v))))
 
         D = np.vstack(
-            [
-                np.hstack([[[1.0]], np.zeros((1, d))]),
-                np.hstack([np.zeros((d, 1)), R]),
-            ]
+            [np.hstack([[[1.0]], np.zeros((1, d))]), np.hstack([np.zeros((d, 1)), R]),]
         )
         R = D - 2 * np.outer(x, np.transpose(x).dot(D))
     # return negative to fix determinant

@@ -18,8 +18,7 @@ training_transform_augmented = transforms.Compose(
         ),
         transforms.ToTensor(),
         transforms.Normalize(
-            (0.50707516, 0.48654887, 0.44091784),
-            (0.26733429, 0.25643846, 0.27615047),
+            (0.50707516, 0.48654887, 0.44091784), (0.26733429, 0.25643846, 0.27615047),
         ),
     ]
 )
@@ -28,8 +27,7 @@ training_transform_not_augmented = transforms.Compose(
     [
         transforms.ToTensor(),
         transforms.Normalize(
-            (0.50707516, 0.48654887, 0.44091784),
-            (0.26733429, 0.25643846, 0.27615047),
+            (0.50707516, 0.48654887, 0.44091784), (0.26733429, 0.25643846, 0.27615047),
         ),
     ]
 )
@@ -53,9 +51,7 @@ class cifar100(dataset.DataSet):
       _make_dataloader: A helper that is shared by all three data loader methods.
   """
 
-    def __init__(
-        self, batch_size, data_augmentation=True, train_eval_size=10000
-    ):
+    def __init__(self, batch_size, data_augmentation=True, train_eval_size=10000):
         """Creates a new CIFAR-100 instance.
 
     Args:
@@ -80,10 +76,7 @@ class cifar100(dataset.DataSet):
             transform = training_transform_not_augmented
 
         train_dataset = datasets.CIFAR100(
-            root=config.get_data_dir(),
-            train=True,
-            download=True,
-            transform=transform,
+            root=config.get_data_dir(), train=True, download=True, transform=transform,
         )
         valid_dataset = datasets.CIFAR100(
             root=config.get_data_dir(),
@@ -99,9 +92,6 @@ class cifar100(dataset.DataSet):
     def _make_test_dataloader(self):
         transform = training_transform_not_augmented
         test_dataset = datasets.CIFAR100(
-            root=config.get_data_dir(),
-            train=False,
-            download=True,
-            transform=transform,
+            root=config.get_data_dir(), train=False, download=True, transform=transform,
         )
         return self._make_dataloader(test_dataset, sampler=None)

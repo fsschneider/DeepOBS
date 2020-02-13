@@ -75,14 +75,10 @@ class two_d_rosenbrock(TestProblem):
 
         # Set model weights
         u = tf.get_variable(
-            "weight",
-            shape=(),
-            initializer=tf.constant_initializer(starting_point[0]),
+            "weight", shape=(), initializer=tf.constant_initializer(starting_point[0]),
         )
         v = tf.get_variable(
-            "bias",
-            shape=(),
-            initializer=tf.constant_initializer(starting_point[1]),
+            "bias", shape=(), initializer=tf.constant_initializer(starting_point[1]),
         )
 
         self.losses = (1 - u) ** 2 + 100 * (v - u ** 2) ** 2 + u * x + v * y

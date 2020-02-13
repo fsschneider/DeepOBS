@@ -33,11 +33,7 @@ def _wrn(
     def batch_normalization(inputs):
         """Convenience wrapper for batch norm."""
         return tf.layers.batch_normalization(
-            inputs,
-            axis=-1,
-            momentum=bn_momentum,
-            epsilon=1e-5,
-            training=training,
+            inputs, axis=-1, momentum=bn_momentum, epsilon=1e-5, training=training,
         )
 
     # Number of filter channels and stride for the blocks

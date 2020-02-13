@@ -42,9 +42,7 @@ class cifar10(dataset.DataSet):
         by testproblems to adapt their behavior to this phase.
   """
 
-    def __init__(
-        self, batch_size, data_augmentation=True, train_eval_size=10000
-    ):
+    def __init__(self, batch_size, data_augmentation=True, train_eval_size=10000):
         """Creates a new CIFAR-10 instance.
 
     Args:
@@ -87,12 +85,8 @@ class cifar10(dataset.DataSet):
         def parse_func(raw_record):
             """Function parsing data from raw binary records."""
             # Decode raw_record.
-            record = tf.reshape(
-                tf.decode_raw(raw_record, tf.uint8), [record_bytes]
-            )
-            label = tf.cast(
-                tf.slice(record, [label_offset], [label_bytes]), tf.int32
-            )
+            record = tf.reshape(tf.decode_raw(raw_record, tf.uint8), [record_bytes])
+            label = tf.cast(tf.slice(record, [label_offset], [label_bytes]), tf.int32)
             depth_major = tf.reshape(
                 tf.slice(record, [label_bytes], [image_bytes]),
                 [depth, image_size, image_size],
@@ -106,9 +100,7 @@ class cifar10(dataset.DataSet):
                 )
                 image = tf.random_crop(image, [32, 32, 3])
                 image = tf.image.random_flip_left_right(image)
-                image = tf.image.random_brightness(
-                    image, max_delta=63.0 / 255.0
-                )
+                image = tf.image.random_brightness(image, max_delta=63.0 / 255.0)
                 image = tf.image.random_saturation(image, lower=0.5, upper=1.5)
                 image = tf.image.random_contrast(image, lower=0.2, upper=1.8)
             else:
@@ -121,8 +113,7 @@ class cifar10(dataset.DataSet):
         with tf.name_scope(self._name):
             with tf.device("/cpu:0"):
                 data = data.map(
-                    parse_func,
-                    num_parallel_calls=(8 if data_augmentation else 4),
+                    parse_func, num_parallel_calls=(8 if data_augmentation else 4),
                 )
                 if shuffle:
                     data = data.shuffle(buffer_size=20000)
@@ -169,9 +160,7 @@ class cifar10(dataset.DataSet):
       A tf.data.Dataset instance with batches of training eval data.
       A tf.data.Dataset instance with batches of validation data.
     """
-        pattern = os.path.join(
-            config.get_data_dir(), "cifar-10", "data_batch_*.bin"
-        )
+        pattern = os.path.join(config.get_data_dir(), "cifar-10", "data_batch_*.bin")
 
         data = self._load_dataset(pattern)
         valid_data = data.take(self._train_eval_size)
@@ -180,9 +169,7 @@ class cifar10(dataset.DataSet):
         train_data = self._make_dataset(
             train_data, data_augmentation=self._data_augmentation, shuffle=True
         )
-        train_eval_data = train_data.take(
-            self._train_eval_size // self._batch_size
-        )
+        train_eval_data = train_data.take(self._train_eval_size // self._batch_size)
 
         valid_data = self._make_dataset(
             valid_data, data_augmentation=False, shuffle=False
@@ -196,12 +183,8 @@ class cifar10(dataset.DataSet):
     Returns:
       A tf.data.Dataset instance with batches of test data.
     """
-        pattern = os.path.join(
-            config.get_data_dir(), "cifar-10", "test_batch.bin"
-        )
+        pattern = os.path.join(config.get_data_dir(), "cifar-10", "test_batch.bin")
 
         test_data = self._load_dataset(pattern)
 
-        return self._make_dataset(
-            test_data, data_augmentation=False, shuffle=False
-        )
+        return self._make_dataset(test_data, data_augmentation=False, shuffle=False)

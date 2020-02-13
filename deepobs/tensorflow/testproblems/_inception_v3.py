@@ -62,30 +62,22 @@ def _inception_v3(x, training, l2_reg):
         elif variant == "b":
             num_filters = 64
         else:
-            raise ValueError(
-                "requested variant of the inception block not known"
-            )
+            raise ValueError("requested variant of the inception block not known")
         # Build block
         with tf.variable_scope(name):
             with tf.variable_scope("branch0"):
                 branch0_1x1 = conv2d_BN(inputs, 64, 1, (1, 1), "SAME", training)
             with tf.variable_scope("branch1"):
-                branch1_pool = tf.layers.average_pooling2d(
-                    inputs, 3, (1, 1), "SAME"
-                )
+                branch1_pool = tf.layers.average_pooling2d(inputs, 3, (1, 1), "SAME")
                 branch1_1x1 = conv2d_BN(
                     branch1_pool, num_filters, 1, (1, 1), "SAME", training
                 )
             with tf.variable_scope("branch2"):
                 branch2_1x1 = conv2d_BN(inputs, 48, 1, (1, 1), "SAME", training)
-                branch2_5x5 = conv2d_BN(
-                    branch2_1x1, 64, 5, (1, 1), "SAME", training
-                )
+                branch2_5x5 = conv2d_BN(branch2_1x1, 64, 5, (1, 1), "SAME", training)
             with tf.variable_scope("branch3"):
                 branch3_1x1 = conv2d_BN(inputs, 64, 1, (1, 1), "SAME", training)
-                branch3_3x3_0 = conv2d_BN(
-                    branch3_1x1, 96, 3, (1, 1), "SAME", training
-                )
+                branch3_3x3_0 = conv2d_BN(branch3_1x1, 96, 3, (1, 1), "SAME", training)
                 branch3_3x3_1 = conv2d_BN(
                     branch3_3x3_0, 96, 3, (1, 1), "SAME", training
                 )
@@ -110,18 +102,12 @@ def _inception_v3(x, training, l2_reg):
         # Build block
         with tf.variable_scope(name):
             with tf.variable_scope("branch0"):
-                branch0_pool = tf.layers.max_pooling2d(
-                    inputs, 3, (2, 2), "VALID"
-                )
+                branch0_pool = tf.layers.max_pooling2d(inputs, 3, (2, 2), "VALID")
             with tf.variable_scope("branch1"):
-                branch1_3x3 = conv2d_BN(
-                    inputs, 384, 3, (2, 2), "VALID", training
-                )
+                branch1_3x3 = conv2d_BN(inputs, 384, 3, (2, 2), "VALID", training)
             with tf.variable_scope("branch2"):
                 branch2_1x1 = conv2d_BN(inputs, 64, 1, (1, 1), "SAME", training)
-                branch2_3x3_0 = conv2d_BN(
-                    branch2_1x1, 96, 3, (1, 1), "SAME", training
-                )
+                branch2_3x3_0 = conv2d_BN(branch2_1x1, 96, 3, (1, 1), "SAME", training)
                 branch2_3x3_1 = conv2d_BN(
                     branch2_3x3_0, 96, 3, (2, 2), "VALID", training
                 )
@@ -151,22 +137,14 @@ def _inception_v3(x, training, l2_reg):
         elif variant == "c":
             num_filters = 192
         else:
-            raise ValueError(
-                "requested variant of the inception block not known"
-            )
+            raise ValueError("requested variant of the inception block not known")
         # Build block
         with tf.variable_scope(name):
             with tf.variable_scope("branch0"):
-                branch0_1x1 = conv2d_BN(
-                    inputs, 192, 1, (1, 1), "SAME", training
-                )
+                branch0_1x1 = conv2d_BN(inputs, 192, 1, (1, 1), "SAME", training)
             with tf.variable_scope("branch1"):
-                branch1_pool = tf.layers.average_pooling2d(
-                    inputs, 3, (1, 1), "SAME"
-                )
-                branch1_1x1 = conv2d_BN(
-                    branch1_pool, 192, 1, (1, 1), "SAME", training
-                )
+                branch1_pool = tf.layers.average_pooling2d(inputs, 3, (1, 1), "SAME")
+                branch1_1x1 = conv2d_BN(branch1_pool, 192, 1, (1, 1), "SAME", training)
             with tf.variable_scope("branch2"):
                 branch2_1x1 = conv2d_BN(
                     inputs, num_filters, 1, (1, 1), "SAME", training
@@ -214,29 +192,19 @@ def _inception_v3(x, training, l2_reg):
         # Build block
         with tf.variable_scope(name):
             with tf.variable_scope("branch0"):
-                branch0_pool = tf.layers.max_pooling2d(
-                    inputs, 3, (2, 2), "VALID"
-                )
+                branch0_pool = tf.layers.max_pooling2d(inputs, 3, (2, 2), "VALID")
             with tf.variable_scope("branch1"):
-                branch1_1x1 = conv2d_BN(
-                    inputs, 192, 1, (1, 1), "SAME", training
-                )
+                branch1_1x1 = conv2d_BN(inputs, 192, 1, (1, 1), "SAME", training)
                 branch1_1x7 = conv2d_BN(
                     branch1_1x1, 192, [1, 7], (1, 1), "SAME", training
                 )
                 branch1_7x1 = conv2d_BN(
                     branch1_1x7, 192, [7, 1], (1, 1), "SAME", training
                 )
-                branch1_3x3 = conv2d_BN(
-                    branch1_7x1, 192, 3, (2, 2), "VALID", training
-                )
+                branch1_3x3 = conv2d_BN(branch1_7x1, 192, 3, (2, 2), "VALID", training)
             with tf.variable_scope("branch2"):
-                branch2_1x1 = conv2d_BN(
-                    inputs, 192, 1, (1, 1), "SAME", training
-                )
-                branch2_3x3 = conv2d_BN(
-                    branch2_1x1, 320, 3, (2, 2), "VALID", training
-                )
+                branch2_1x1 = conv2d_BN(inputs, 192, 1, (1, 1), "SAME", training)
+                branch2_3x3 = conv2d_BN(branch2_1x1, 320, 3, (2, 2), "VALID", training)
             output = tf.concat([branch0_pool, branch1_3x3, branch2_3x3], 3)
         return output
 
@@ -256,13 +224,9 @@ def _inception_v3(x, training, l2_reg):
         # Build block
         with tf.variable_scope(name):
             with tf.variable_scope("branch0"):
-                branch0_1x1 = conv2d_BN(
-                    inputs, 320, 1, (1, 1), "SAME", training
-                )
+                branch0_1x1 = conv2d_BN(inputs, 320, 1, (1, 1), "SAME", training)
             with tf.variable_scope("branch1"):
-                branch1_1x1 = conv2d_BN(
-                    inputs, 384, 1, (1, 1), "SAME", training
-                )
+                branch1_1x1 = conv2d_BN(inputs, 384, 1, (1, 1), "SAME", training)
                 branch1_1x3 = conv2d_BN(
                     branch1_1x1, 384, [1, 3], (1, 1), "SAME", training
                 )
@@ -271,12 +235,8 @@ def _inception_v3(x, training, l2_reg):
                 )
                 branch1_concat = tf.concat([branch1_1x3, branch1_3x1], 3)
             with tf.variable_scope("branch2"):
-                branch2_1x1 = conv2d_BN(
-                    inputs, 448, 1, (1, 1), "SAME", training
-                )
-                branch2_3x3 = conv2d_BN(
-                    branch2_1x1, 384, 3, (1, 1), "SAME", training
-                )
+                branch2_1x1 = conv2d_BN(inputs, 448, 1, (1, 1), "SAME", training)
+                branch2_3x3 = conv2d_BN(branch2_1x1, 384, 3, (1, 1), "SAME", training)
                 branch2_1x3 = conv2d_BN(
                     branch2_3x3, 384, [1, 3], (1, 1), "SAME", training
                 )
@@ -285,12 +245,8 @@ def _inception_v3(x, training, l2_reg):
                 )
                 branch2_concat = tf.concat([branch2_1x3, branch2_3x1], 3)
             with tf.variable_scope("branch3"):
-                branch3_pool = tf.layers.average_pooling2d(
-                    inputs, 3, (1, 1), "SAME"
-                )
-                branch3_1x1 = conv2d_BN(
-                    branch3_pool, 192, 1, (1, 1), "SAME", training
-                )
+                branch3_pool = tf.layers.average_pooling2d(inputs, 3, (1, 1), "SAME")
+                branch3_1x1 = conv2d_BN(branch3_pool, 192, 1, (1, 1), "SAME", training)
             output = tf.concat(
                 [branch0_1x1, branch1_concat, branch2_concat, branch3_1x1], 3
             )

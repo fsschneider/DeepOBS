@@ -22,11 +22,7 @@ distributions = {
 
 # Allow 36 random evaluations.
 tuner = RandomSearch(
-    optimizer_class,
-    hyperparams,
-    distributions,
-    runner=StandardRunner,
-    ressources=36,
+    optimizer_class, hyperparams, distributions, runner=StandardRunner, ressources=36,
 )
 
 # Tune (i.e. evaluate 36 different random samples) and rerun the best setting with 10 different seeds.

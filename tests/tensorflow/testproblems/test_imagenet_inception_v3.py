@@ -11,12 +11,8 @@ import tensorflow as tf
 from deepobs.tensorflow import testproblems
 
 sys.path.insert(
-    0,
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ),
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 )
-
 
 
 class Imagenet_Inception_v3Test(unittest.TestCase):
@@ -25,9 +21,7 @@ class Imagenet_Inception_v3Test(unittest.TestCase):
     def setUp(self):
         """Sets up ImageNet dataset for the tests."""
         self.batch_size = 1
-        self.imagenet_inception_v3 = testproblems.imagenet_inception_v3(
-            self.batch_size
-        )
+        self.imagenet_inception_v3 = testproblems.imagenet_inception_v3(self.batch_size)
 
     def test_init_ops(self):
         """Tests all three initialization operations."""
@@ -37,8 +31,7 @@ class Imagenet_Inception_v3Test(unittest.TestCase):
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
             num_param = [
-                np.prod(v.get_shape().as_list())
-                for v in tf.trainable_variables()
+                np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()
             ]
             # Check if number of parameters per "layer" is equal to what we expect
             # We will write them in the following form:

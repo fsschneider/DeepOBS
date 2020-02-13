@@ -4,9 +4,11 @@ import os
 import bayes_opt
 from bayes_opt import UtilityFunction
 
-from .bayesian_utils import (_init_summary_directory,
-                             _save_bo_optimizer_object,
-                             _update_bo_tuning_summary)
+from .bayesian_utils import (
+    _init_summary_directory,
+    _save_bo_optimizer_object,
+    _update_bo_tuning_summary,
+)
 from .tuner import Tuner
 from .tuner_utils import rerun_setting
 
@@ -34,9 +36,7 @@ class GP(Tuner):
             the transformed hyperparameter.
             runner: The DeepOBS runner which is used for each evaluation.
         """
-        super(GP, self).__init__(
-            optimizer_class, hyperparam_names, ressources, runner
-        )
+        super(GP, self).__init__(optimizer_class, hyperparam_names, ressources, runner)
         self._bounds = bounds
         self._transformations = transformations
 
@@ -187,9 +187,7 @@ class GP(Tuner):
                 )
 
         if rerun_best_setting:
-            optimizer_path = os.path.join(
-                output_dir, testproblem, self._optimizer_name
-            )
+            optimizer_path = os.path.join(output_dir, testproblem, self._optimizer_name)
             rerun_setting(
                 self._runner,
                 self._optimizer_class,

@@ -1,0 +1,6 @@
+argparse
+numpy
+pandas
+matplotlib
+matplotlib2tikz
+seaborn

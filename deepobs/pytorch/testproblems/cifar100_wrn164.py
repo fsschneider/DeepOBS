@@ -28,7 +28,7 @@ class cifar100_wrn164(TestProblem):
         Defaults to ``5e-4``.
   """
 
-    def __init__(self, batch_size, l2_reg= 0.0005):
+    def __init__(self, batch_size, l2_reg=0.0005):
         """Create a new WRN 16-4 test problem instance on Cifar-100
 
         Args:
@@ -43,9 +43,7 @@ class cifar100_wrn164(TestProblem):
         """Set up the Wide ResNet 16-4 test problem on Cifar-100."""
         self.data = cifar100(self._batch_size)
         self.loss_function = nn.CrossEntropyLoss
-        self.net = net_wrn(
-            num_outputs=100, num_residual_blocks=2, widening_factor=4
-        )
+        self.net = net_wrn(num_outputs=100, num_residual_blocks=2, widening_factor=4)
         self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
 
@@ -61,7 +59,7 @@ class cifar100_wrn164(TestProblem):
         for parameters_name, parameters in self.net.named_parameters():
             # penalize only the non bias layer parameters
             if ("weight" in parameters_name) and (
-                    ("dense" in parameters_name) or ("conv" in parameters_name)
+                ("dense" in parameters_name) or ("conv" in parameters_name)
             ):
                 group_dict[l2].append(parameters)
             else:

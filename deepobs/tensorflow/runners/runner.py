@@ -49,13 +49,7 @@ class TFRunner(Runner):
 
     @staticmethod
     def write_per_epoch_summary(
-        sess,
-        loss_,
-        acc_,
-        current_step,
-        per_epoch_summaries,
-        summary_writer,
-        phase,
+        sess, loss_, acc_, current_step, per_epoch_summaries, summary_writer, phase,
     ):
         """Writes the tensorboard epoch summary"""
         if phase == "TEST":
@@ -78,9 +72,7 @@ class TFRunner(Runner):
         return
 
     @staticmethod
-    def write_per_iter_summary(
-        sess, per_iter_summaries, summary_writer, current_step
-    ):
+    def write_per_iter_summary(sess, per_iter_summaries, summary_writer, current_step):
         """Writes the tensorboard iteration summary"""
         per_iter_summary_ = sess.run(per_iter_summaries)
         summary_writer.add_summary(per_iter_summary_, current_step)
@@ -256,9 +248,7 @@ class TFRunner(Runner):
 class StandardRunner(TFRunner):
     def __init__(self, optimizer_class, hyperparameter_names):
 
-        super(StandardRunner, self).__init__(
-            optimizer_class, hyperparameter_names
-        )
+        super(StandardRunner, self).__init__(optimizer_class, hyperparameter_names)
 
     def training(
         self,
@@ -287,9 +277,7 @@ class StandardRunner(TFRunner):
         # Call optimizer's minimize on loss to update all variables in the
         # TRAINABLE_VARIABLES collection (with a dependency on performing all ops
         # in the collection UPDATE_OPS collection for batch norm, etc).
-        with tf.control_dependencies(
-            tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-        ):
+        with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
             # Try to pass with global step, otherwise don't pass it
             try:
                 step = opt.minimize(loss, global_step=global_step)
@@ -504,9 +492,7 @@ class LearningRateScheduleRunner(TFRunner):
         # Call optimizer's minimize on loss to update all variables in the
         # TRAINABLE_VARIABLES collection (with a dependency on performing all ops
         # in the collection UPDATE_OPS collection for batch norm, etc).
-        with tf.control_dependencies(
-            tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-        ):
+        with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
             # Try to pass with global step, otherwise don't pass it
             try:
                 step = opt.minimize(loss, global_step=global_step)

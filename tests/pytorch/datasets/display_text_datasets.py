@@ -12,12 +12,8 @@ import deepobs.pytorch.config as config
 from deepobs.pytorch import datasets
 
 sys.path.insert(
-    0,
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ),
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 )
-
 
 
 def display_text(dataset_cls, grid_size=5, phase="train"):
@@ -49,12 +45,8 @@ def display_text(dataset_cls, grid_size=5, phase="train"):
         input_txt = "".join([label_dict[char] for char in np.squeeze(x_[i])])
         output_txt = "".join([label_dict[char] for char in np.squeeze(y_[i])])
         # Next Batch, to check if text continues
-        input_next_txt = "".join(
-            [label_dict[char] for char in np.squeeze(x_next[i])]
-        )
-        output_next_txt = "".join(
-            [label_dict[char] for char in np.squeeze(y_next[i])]
-        )
+        input_next_txt = "".join([label_dict[char] for char in np.squeeze(x_next[i])])
+        output_next_txt = "".join([label_dict[char] for char in np.squeeze(y_next[i])])
         txt = (
             "*INPUT* \n"
             + input_txt

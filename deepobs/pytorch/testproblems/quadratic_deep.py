@@ -43,10 +43,7 @@ def random_rotation(D):
         x = np.divide((e - v), (np.sqrt(np.transpose(e - v).dot(e - v))))
 
         D = np.vstack(
-            [
-                np.hstack([[[1.0]], np.zeros((1, d))]),
-                np.hstack([np.zeros((d, 1)), R]),
-            ]
+            [np.hstack([[[1.0]], np.zeros((1, d))]), np.hstack([np.zeros((d, 1)), R]),]
         )
         R = D - 2 * np.outer(x, np.transpose(x).dot(D))
     # return negative to fix determinant
@@ -97,9 +94,7 @@ class quadratic_deep(UnregularizedTestproblem):
             elif reduction == "none":
                 return batched_loss
             else:
-                raise NotImplementedError(
-                    "Reduction " + reduction + " not implemented"
-                )
+                raise NotImplementedError("Reduction " + reduction + " not implemented")
 
         return quadratic_deep_loss_function
 
@@ -149,9 +144,7 @@ class quadratic_deep(UnregularizedTestproblem):
             if add_regularization_if_available:
                 regularizer_loss = self.get_regularization_loss()
             else:
-                regularizer_loss = torch.tensor(
-                    0.0, device=torch.device(self._device)
-                )
+                regularizer_loss = torch.tensor(0.0, device=torch.device(self._device))
 
             return loss + regularizer_loss, accuracy
 

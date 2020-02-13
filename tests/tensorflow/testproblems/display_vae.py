@@ -11,12 +11,8 @@ import tensorflow as tf
 from deepobs.tensorflow import testproblems
 
 sys.path.insert(
-    0,
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ),
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 )
-
 
 
 def generate(sess, sampled_z, grid_size=5):
@@ -54,9 +50,7 @@ def display_images(testproblem_cls, grid_size=5, num_epochs=1):
 
     tf.set_random_seed(42)
     np.random.seed(42)
-    sampled_z = [
-        np.random.normal(0, 1, 8) for _ in range(grid_size * grid_size)
-    ]
+    sampled_z = [np.random.normal(0, 1, 8) for _ in range(grid_size * grid_size)]
 
     testprob = testproblem_cls(batch_size=grid_size * grid_size)
     testprob.set_up()

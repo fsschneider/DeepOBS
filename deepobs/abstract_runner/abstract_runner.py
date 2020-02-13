@@ -127,7 +127,7 @@ class Runner(abc.ABC):
             print_train_iter=print_train_iter,
             tb_log=tb_log,
             tb_log_dir=tb_log_dir,
-            **training_params
+            **training_params,
         )
 
         require_run = not (exists and skip_if_exists)
@@ -176,12 +176,8 @@ class Runner(abc.ABC):
         hyperparams_before_training = deepcopy(hyperparams)
         training_params_before_training = deepcopy(training_params)
 
-        batch_size = self._use_default_batch_size_if_missing(
-            testproblem, batch_size
-        )
-        num_epochs = self._use_default_num_epochs_if_missing(
-            testproblem, num_epochs
-        )
+        batch_size = self._use_default_batch_size_if_missing(testproblem, batch_size)
+        num_epochs = self._use_default_num_epochs_if_missing(testproblem, num_epochs)
 
         if data_dir is not None:
             global_config.set_data_dir(data_dir)
@@ -194,7 +190,7 @@ class Runner(abc.ABC):
             random_seed,
             output_dir,
             hyperparams,
-            **training_params
+            **training_params,
         )
 
         if tb_log:
@@ -207,9 +203,7 @@ class Runner(abc.ABC):
                 os.makedirs(self._run_directory, exist_ok=True)
                 tb_log_dir = self._run_directory
 
-        tproblem = self.create_testproblem(
-            testproblem, batch_size, l2_reg, random_seed
-        )
+        tproblem = self.create_testproblem(testproblem, batch_size, l2_reg, random_seed)
 
         output = self.training(
             tproblem,
@@ -219,7 +213,7 @@ class Runner(abc.ABC):
             train_log_interval,
             tb_log,
             tb_log_dir,
-            **training_params
+            **training_params,
         )
 
         output = self._post_process_output(
@@ -230,7 +224,7 @@ class Runner(abc.ABC):
             random_seed,
             l2_reg,
             hyperparams_before_training,
-            **training_params_before_training
+            **training_params_before_training,
         )
         if not no_logs:
             os.makedirs(self._run_directory, exist_ok=True)
@@ -301,12 +295,8 @@ class Runner(abc.ABC):
         **training_params
     ):
 
-        batch_size = self._use_default_batch_size_if_missing(
-            testproblem, batch_size
-        )
-        num_epochs = self._use_default_num_epochs_if_missing(
-            testproblem, num_epochs
-        )
+        batch_size = self._use_default_batch_size_if_missing(testproblem, batch_size)
+        num_epochs = self._use_default_num_epochs_if_missing(testproblem, num_epochs)
 
         run_directory, _ = self.generate_output_directory_name(
             testproblem,
@@ -316,7 +306,7 @@ class Runner(abc.ABC):
             random_seed,
             output_dir,
             hyperparams,
-            **training_params
+            **training_params,
         )
         file_regex = "{}*.json".format(self._filename_no_date(random_seed))
         pattern = os.path.join(run_directory, file_regex)
@@ -424,9 +414,7 @@ class Runner(abc.ABC):
                         parser, self._optimizer_name, hp_specification, hp_name
                     )
 
-    def _add_training_params_to_output_dir_name(
-        self, training_params, run_folder_name
-    ):
+    def _add_training_params_to_output_dir_name(self, training_params, run_folder_name):
         """Overwrite this method to specify how your
         runner should format additional training_parameters in the run folder name.
 
@@ -465,9 +453,7 @@ class Runner(abc.ABC):
         for hp_name, hp_value in sorted(optimizer_hyperparams.items()):
             run_folder_name += "__{0:s}".format(hp_name)
             run_folder_name += "__{0:s}".format(
-                float2str(hp_value)
-                if isinstance(hp_value, float)
-                else str(hp_value)
+                float2str(hp_value) if isinstance(hp_value, float) else str(hp_value)
             )
         return run_folder_name
 
@@ -544,10 +530,7 @@ class Runner(abc.ABC):
 
         if num_epochs is None:
             parser.add_argument(
-                "-N",
-                "--num_epochs",
-                type=int,
-                help="Total number of training epochs.",
+                "-N", "--num_epochs", type=int, help="Total number of training epochs.",
             )
         else:
             args["num_epochs"] = num_epochs
@@ -665,15 +648,10 @@ class Runner(abc.ABC):
     ):
         # add everything mandatory to the name
         run_folder_name = (
-            "num_epochs__"
-            + str(num_epochs)
-            + "__batch_size__"
-            + str(batch_size)
+            "num_epochs__" + str(num_epochs) + "__batch_size__" + str(batch_size)
         )
         if l2_reg is not None:
-            run_folder_name += "__l2_reg__{0:s}".format(
-                float2str(l2_reg)
-            )
+            run_folder_name += "__l2_reg__{0:s}".format(float2str(l2_reg))
 
         # Add all hyperparameters to the name.
         run_folder_name = self._add_hyperparams_to_output_dir_name(

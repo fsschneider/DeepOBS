@@ -11,8 +11,7 @@ training_transform_not_augmented = transforms.Compose(
     [
         transforms.ToTensor(),
         transforms.Normalize(
-            (0.49139968, 0.48215841, 0.44653091),
-            (0.24703223, 0.24348513, 0.26158784),
+            (0.49139968, 0.48215841, 0.44653091), (0.24703223, 0.24348513, 0.26158784),
         ),
     ]
 )
@@ -27,8 +26,7 @@ training_transform_augmented = transforms.Compose(
         ),
         transforms.ToTensor(),
         transforms.Normalize(
-            (0.49139968, 0.48215841, 0.44653091),
-            (0.24703223, 0.24348513, 0.26158784),
+            (0.49139968, 0.48215841, 0.44653091), (0.24703223, 0.24348513, 0.26158784),
         ),
     ]
 )
@@ -52,9 +50,7 @@ class cifar10(dataset.DataSet):
       _make_dataloader: A helper that is shared by all three data loader methods.
   """
 
-    def __init__(
-        self, batch_size, data_augmentation=True, train_eval_size=10000
-    ):
+    def __init__(self, batch_size, data_augmentation=True, train_eval_size=10000):
         """Creates a new CIFAR-10 instance.
 
     Args:
@@ -79,10 +75,7 @@ class cifar10(dataset.DataSet):
             transform = training_transform_not_augmented
 
         train_dataset = datasets.CIFAR10(
-            root=config.get_data_dir(),
-            train=True,
-            download=True,
-            transform=transform,
+            root=config.get_data_dir(), train=True, download=True, transform=transform,
         )
         valid_dataset = datasets.CIFAR10(
             root=config.get_data_dir(),
@@ -98,9 +91,6 @@ class cifar10(dataset.DataSet):
     def _make_test_dataloader(self):
         transform = training_transform_not_augmented
         test_dataset = datasets.CIFAR10(
-            root=config.get_data_dir(),
-            train=False,
-            download=True,
-            transform=transform,
+            root=config.get_data_dir(), train=False, download=True, transform=transform,
         )
         return self._make_dataloader(test_dataset, sampler=None)

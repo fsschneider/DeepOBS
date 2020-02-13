@@ -136,13 +136,11 @@ class ParallelizedTuner(Tuner):
                 hyperparams=sample,
                 random_seed=random_seed,
                 output_dir=output_dir,
-                **kwargs
+                **kwargs,
             )
 
         if rerun_best_setting:
-            optimizer_path = os.path.join(
-                output_dir, testproblem, self._optimizer_name
-            )
+            optimizer_path = os.path.join(output_dir, testproblem, self._optimizer_name)
             rerun_setting(
                 self._runner,
                 self._optimizer_class,
@@ -188,9 +186,7 @@ class ParallelizedTuner(Tuner):
         self._set_seed(random_seed)
         params = self._sample()
         for sample in params:
-            sample_string = self._generate_hyperparams_format_for_command_line(
-                sample
-            )
+            sample_string = self._generate_hyperparams_format_for_command_line(sample)
             file.write(
                 "python3 "
                 + run_script

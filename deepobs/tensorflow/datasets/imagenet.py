@@ -46,9 +46,7 @@ class imagenet(dataset.DataSet):
         by testproblems to adapt their behavior to this phase.
   """
 
-    def __init__(
-        self, batch_size, data_augmentation=True, train_eval_size=50000
-    ):
+    def __init__(self, batch_size, data_augmentation=True, train_eval_size=50000):
         """Creates a new ImageNet instance.
 
     Args:
@@ -100,13 +98,9 @@ class imagenet(dataset.DataSet):
             data set through it
             """
             # Parse example proto, decode image and resize while preserving aspect
-            image_buffer, label, _ = self._parse_example_proto(
-                example_serialized
-            )
+            image_buffer, label, _ = self._parse_example_proto(example_serialized)
             image = self._decode_jpeg(image_buffer)
-            image = self._aspect_preserving_resize(
-                image, target_smaller_side=256
-            )
+            image = self._aspect_preserving_resize(image, target_smaller_side=256)
 
             # Crop to 224x224, either randomly or centered according to arguments
             if random_crop:
@@ -190,9 +184,7 @@ class imagenet(dataset.DataSet):
             distort_color=False,
             shuffle=True,
         )
-        train_eval_data = train_data.take(
-            self._train_eval_size // self._batch_size
-        )
+        train_eval_data = train_data.take(self._train_eval_size // self._batch_size)
 
         valid_data = self._make_dataset(
             valid_data,
@@ -211,9 +203,7 @@ class imagenet(dataset.DataSet):
     Returns:
       A tf.data.Dataset instance with batches of test data.
     """
-        pattern = os.path.join(
-            config.get_data_dir(), "imagenet", "validation-*"
-        )
+        pattern = os.path.join(config.get_data_dir(), "imagenet", "validation-*")
 
         test_data = self._load_dataset(pattern)
 
@@ -253,9 +243,7 @@ class imagenet(dataset.DataSet):
         """
         # Dense features in Example proto.
         feature_map = {
-            "image/encoded": tf.FixedLenFeature(
-                [], dtype=tf.string, default_value=""
-            ),
+            "image/encoded": tf.FixedLenFeature([], dtype=tf.string, default_value=""),
             "image/class/label": tf.FixedLenFeature(
                 [1], dtype=tf.int64, default_value=-1
             ),
@@ -327,9 +315,7 @@ class imagenet(dataset.DataSet):
         Returns:
           tf.Tensor: The color-distorted image.
         """
-        with tf.name_scope(
-            values=[image], name=scope, default_name="distort_color"
-        ):
+        with tf.name_scope(values=[image], name=scope, default_name="distort_color"):
             image = tf.image.random_brightness(image, max_delta=32.0 / 255.0)
             image = tf.image.random_saturation(image, lower=0.5, upper=1.5)
             image = tf.image.random_hue(image, max_delta=0.2)

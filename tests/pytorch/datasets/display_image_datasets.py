@@ -12,10 +12,7 @@ import deepobs.pytorch.config as config
 from deepobs.pytorch import datasets
 
 sys.path.insert(
-    0,
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ),
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 )
 
 
@@ -84,16 +81,12 @@ def load_label_dict(dataset):
     """
     if dataset == "cifar10":
         with open(
-            os.path.join(
-                config.get_data_dir(), "cifar-10-batches-py/batches.meta.txt"
-            )
+            os.path.join(config.get_data_dir(), "cifar-10-batches-py/batches.meta.txt")
         ) as lookup_file:
             label_dict = lookup_file.readlines()
     elif dataset == "cifar100":
         with open(
-            os.path.join(
-                config.get_data_dir(), "cifar-100-python/fine_label_names.txt"
-            )
+            os.path.join(config.get_data_dir(), "cifar-100-python/fine_label_names.txt")
         ) as lookup_file:
             label_dict = lookup_file.readlines()
     elif dataset == "fmnist":

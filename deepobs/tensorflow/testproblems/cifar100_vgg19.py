@@ -63,11 +63,7 @@ class cifar100_vgg19(TestProblem):
         training = tf.equal(self.dataset.phase, "train")
         x, y = self.dataset.batch
         linear_outputs = _vgg(
-            x,
-            training,
-            variant=19,
-            num_outputs=100,
-            l2_reg=self._l2_reg,
+            x, training, variant=19, num_outputs=100, l2_reg=self._l2_reg,
         )
 
         self.losses = tf.nn.softmax_cross_entropy_with_logits_v2(

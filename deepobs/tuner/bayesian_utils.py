@@ -10,9 +10,7 @@ import numpy as np
 from ..analyzer.shared_utils import _append_json, _clear_json
 
 
-def _reshape_posterior_and_domain_for_plotting(
-    mean, std, domain, acq, resolution
-):
+def _reshape_posterior_and_domain_for_plotting(mean, std, domain, acq, resolution):
     num_features = domain.shape[-1]
     new_shape = tuple(np.repeat(resolution, num_features))
     mean = mean.reshape(new_shape)
@@ -36,9 +34,7 @@ def plot_2d_bo_posterior(optimizer_path, step, resolution, show=True):
         tuple: Figure and axes of the plot.
     """
 
-    op = _load_bo_optimizer_object(
-        os.path.join(optimizer_path, "obj"), str(step)
-    )
+    op = _load_bo_optimizer_object(os.path.join(optimizer_path, "obj"), str(step))
     acq_func = _load_bo_optimizer_object(
         os.path.join(optimizer_path, "obj"), "acq_func"
     )
@@ -65,9 +61,7 @@ def plot_2d_bo_posterior(optimizer_path, step, resolution, show=True):
     return fig, ax
 
 
-def plot_1d_bo_posterior(
-    optimizer_path, step, resolution, xscale="linear", show=True
-):
+def plot_1d_bo_posterior(optimizer_path, step, resolution, xscale="linear", show=True):
     """Plots the one dimensional GP posterior of the Bayesian tuning process. The tuning process must have been done
     for only one hyperparameter (i.e. one dimensional).
     Args:
@@ -79,9 +73,7 @@ def plot_1d_bo_posterior(
     Returns:
         tuple: The figure and axes of the plot.
     """
-    op = _load_bo_optimizer_object(
-        os.path.join(optimizer_path, "obj"), str(step)
-    )
+    op = _load_bo_optimizer_object(os.path.join(optimizer_path, "obj"), str(step))
     acq_func = _load_bo_optimizer_object(
         os.path.join(optimizer_path, "obj"), "acq_func"
     )
@@ -135,10 +127,7 @@ def _init_summary_directory(log_path, file=None):
         if file is not None:  # clean just one file
             _clear_json(log_path, file)
         else:  # clean whole directory
-            [
-                os.remove(os.path.join(log_path, file))
-                for file in os.listdir(log_path)
-            ]
+            [os.remove(os.path.join(log_path, file)) for file in os.listdir(log_path)]
 
 
 def _save_bo_optimizer_object(path, file_name, op):
@@ -160,9 +149,7 @@ def _update_bo_tuning_summary(gp, next_point, target, log_path):
         grid[0, c] = value
         c += 1
 
-    predicted_target_mean, predicted_target_std = gp.predict(
-        grid, return_std=True
-    )
+    predicted_target_mean, predicted_target_std = gp.predict(grid, return_std=True)
 
     summary_dict = {}
     summary_dict["predicted_target"] = predicted_target_mean[0]
