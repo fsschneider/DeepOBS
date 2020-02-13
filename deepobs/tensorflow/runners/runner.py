@@ -282,7 +282,7 @@ class StandardRunner(TFRunner):
         hyperparams_ = deepcopy(hyperparams)
         hyperparams_.pop("learning_rate")
 
-        opt = self._optimizer_class(learning_rate_var, **hyperparams_)
+        opt = self._optimizer_class(learning_rate=learning_rate_var, **hyperparams_)
 
         # Call optimizer's minimize on loss to update all variables in the
         # TRAINABLE_VARIABLES collection (with a dependency on performing all ops
@@ -496,7 +496,7 @@ class LearningRateScheduleRunner(TFRunner):
         hyperparams_ = deepcopy(hyperparams)
         hyperparams_.pop("learning_rate")
 
-        opt = self._optimizer_class(learning_rate_var, **hyperparams_)
+        opt = self._optimizer_class(learning_rate=learning_rate_var, **hyperparams_)
         lr_schedule = runner_utils.make_lr_schedule(
             learning_rate, lr_sched_epochs, lr_sched_factors
         )
