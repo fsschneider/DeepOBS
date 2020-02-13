@@ -34,6 +34,8 @@ sns.set_style(
         "ytick.color": ".5",
     },
 )
+colors = ["#feae34","#193c3e","#733e39","#3e2731","#a22633","#e43b44","#f77622","#63c74d","#265c42","#124e89","#0099db","#5a6988","#68386c","#b55088","#f6757a","#181425","#75580f"]
+sns.set_palette(colors)
 
 
 def check_output(results_path):

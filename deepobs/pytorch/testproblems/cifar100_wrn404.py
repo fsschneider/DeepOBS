@@ -6,8 +6,8 @@ from .testproblem import TestProblem
 from .testproblems_modules import net_wrn
 
 
-class cifar100_wrn164(TestProblem):
-    """DeepOBS test problem class for the Wide Residual Network 16-4 architecture\
+class cifar100_wrn404(TestProblem):
+    """DeepOBS test problem class for the Wide Residual Network 40-4 architecture\
     for Cifar-100.
 
   Details about the architecture can be found in the `original paper`_.
@@ -28,8 +28,8 @@ class cifar100_wrn164(TestProblem):
         Defaults to ``5e-4``.
   """
 
-    def __init__(self, batch_size, l2_reg=0.0005):
-        """Create a new WRN 16-4 test problem instance on Cifar-100
+    def __init__(self, batch_size, l2_reg= 0.0005):
+        """Create a new WRN 40-4 test problem instance on Cifar-100
 
         Args:
           batch_size (int): Batch size to use.
@@ -37,13 +37,15 @@ class cifar100_wrn164(TestProblem):
               is used on the weights but not the biases.
               Defaults to ``5e-4``.
         """
-        super(cifar100_wrn164, self).__init__(batch_size, l2_reg)
+        super(cifar100_wrn404, self).__init__(batch_size, l2_reg)
 
     def set_up(self):
         """Set up the Wide ResNet 16-4 test problem on Cifar-100."""
         self.data = cifar100(self._batch_size)
         self.loss_function = nn.CrossEntropyLoss
-        self.net = net_wrn(num_outputs=100, num_residual_blocks=2, widening_factor=4)
+        self.net = net_wrn(
+            num_outputs=100, num_residual_blocks=6, widening_factor=4
+        )
         self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
 
@@ -59,7 +61,7 @@ class cifar100_wrn164(TestProblem):
         for parameters_name, parameters in self.net.named_parameters():
             # penalize only the non bias layer parameters
             if ("weight" in parameters_name) and (
-                ("dense" in parameters_name) or ("conv" in parameters_name)
+                    ("dense" in parameters_name) or ("conv" in parameters_name)
             ):
                 group_dict[l2].append(parameters)
             else:

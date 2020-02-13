@@ -14,7 +14,7 @@ class svhn_wrn164(TestProblem):
   L2-Regularization is used on the weights (but not the biases)
   which defaults to ``5e-4``.
 
-  Training settings recommenden in the `original paper`_:
+  Training settings recommended in the `original paper`_:
   ``batch size = 128``, ``num_epochs = 160`` using the Momentum optimizer
   with :math:`\\mu = 0.9` and an initial learning rate of ``0.01`` with a decrease by
   ``0.1`` after ``80`` and ``120`` epochs.

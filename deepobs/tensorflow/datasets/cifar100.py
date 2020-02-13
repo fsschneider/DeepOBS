@@ -61,7 +61,7 @@ class cifar100(dataset.DataSet):
         super(cifar100, self).__init__(batch_size)
 
     def _make_dataset(self, data, data_augmentation=False, shuffle=True):
-        """Creates a CIFAR-100 data set (helper used by ``.make_*_datset`` below).
+        """Creates a CIFAR-100 data set (helper used by ``.make_*_dataset`` below).
 
     Args:
         data (tf.data.Dataset): A tf.data.Dataset with CIFAR-100 (train or test)
@@ -122,7 +122,7 @@ class cifar100(dataset.DataSet):
                 return data
 
     def _load_dataset(self, binaries_fname_pattern):
-        """Creates a CIFAR-100 data set (helper used by ``.make_*_datset`` below).
+        """Creates a CIFAR-100 data set (helper used by ``.make_*_dataset`` below).
 
     Args:
         binaries_fname_pattern (str): Pattern of the ``.bin`` files from which

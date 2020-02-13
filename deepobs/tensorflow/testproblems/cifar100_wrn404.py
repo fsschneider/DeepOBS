@@ -16,7 +16,7 @@ class cifar100_wrn404(TestProblem):
   L2-Regularization is used on the weights (but not the biases)
   which defaults to ``5e-4``.
 
-  Training settings recommenden in the `original paper`_:
+  Training settings recommended in the `original paper`_:
   ``batch size = 128``, ``num_epochs = 200`` using the Momentum optimizer
   with :math:`\\mu = 0.9` and an initial learning rate of ``0.1`` with a decrease by
   ``0.2`` after ``60``, ``120`` and ``160`` epochs.
