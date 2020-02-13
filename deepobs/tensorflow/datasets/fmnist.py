@@ -58,7 +58,7 @@ class fmnist(dataset.DataSet):
         super(fmnist, self).__init__(batch_size)
 
     def _make_dataset(self, data, shuffle=True):
-        """Creates a Fashion-MNIST data set (helper used by ``.make_*_datset`` below).
+        """Creates a Fashion-MNIST data set (helper used by ``.make_*_dataset`` below).
 
     Args:
         data (tf.data.Dataset): A tf.data.Dataset with Fashion-MNIST (train or test)
@@ -79,7 +79,7 @@ class fmnist(dataset.DataSet):
                 return data
 
     def _load_dataset(self, images_file, labels_file):
-        """Creates a Fashion-MNIST data set (helper used by ``.make_*_datset`` below).
+        """Creates a Fashion-MNIST data set (helper used by ``.make_*_dataset`` below).
 
     Args:
         images_file (str): Path to the images in compressed ``.gz`` files.
