@@ -86,7 +86,7 @@ class GP(Tuner):
 
         for iteration in range(1, n_init_samples + 1):
             random_sample = op.space.random_sample()
-            params = dict(zip(sorted(self._hyperparam_names), random_sample))
+            params = dict(sorted(zip(self._bounds, random_sample)))
             target = cost_function(**params)
             if tuning_summary:
                 _update_bo_tuning_summary(op._gp, params, target, log_path)
