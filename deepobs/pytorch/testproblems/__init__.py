@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from .cifar10_3c3d import cifar10_3c3d
+from .cifar10_vgg16 import cifar10_vgg16
+from .cifar10_vgg19 import cifar10_vgg19
 from .cifar100_3c3d import cifar100_3c3d
 from .cifar100_allcnnc import cifar100_allcnnc
+from .cifar100_vgg16 import cifar100_vgg16
+from .cifar100_vgg19 import cifar100_vgg19
 from .cifar100_wrn164 import cifar100_wrn164
 from .cifar100_wrn404 import cifar100_wrn404
 from .fmnist_2c2d import fmnist_2c2d
