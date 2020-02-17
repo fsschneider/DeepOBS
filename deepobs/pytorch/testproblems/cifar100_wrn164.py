@@ -1,11 +1,11 @@
 from torch import nn
 
 from ..datasets.cifar100 import cifar100
-from .testproblem import Testproblem
+from .testproblem import TestProblem
 from .testproblems_modules import net_wrn
 
 
-class cifar100_wrn164(Testproblem):
+class cifar100_wrn164(TestProblem):
     """DeepOBS test problem class for the Wide Residual Network 16-4 architecture\
     for Cifar-100.
 
