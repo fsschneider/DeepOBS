@@ -203,7 +203,6 @@ class TestProblem(abc.ABC):
 class WeightRegularizedTestproblem(TestProblem):
     """Test problem with l2 regularization on weights, none on bias."""
 
-    @abc.abstractmethod
     def get_regularization_groups(self):
         """Creates regularization groups for the parameters.
 
