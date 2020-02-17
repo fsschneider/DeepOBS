@@ -1,12 +1,11 @@
-import torch
 from torch import nn
 
 from ..datasets.cifar100 import cifar100
-from .testproblem import TestProblem
+from .testproblem import Testproblem
 from .testproblems_modules import net_wrn
 
 
-class cifar100_wrn164(TestProblem):
+class cifar100_wrn164(Testproblem):
     """DeepOBS test problem class for the Wide Residual Network 16-4 architecture\
     for Cifar-100.
 
@@ -47,6 +46,7 @@ class cifar100_wrn164(TestProblem):
         self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
 
+    # TODO: Refactor, use WeightRegularizedTestproblem
     def get_regularization_groups(self):
         """Creates regularization groups for the parameters.
 

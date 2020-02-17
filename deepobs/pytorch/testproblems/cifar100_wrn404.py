@@ -1,4 +1,3 @@
-import torch
 from torch import nn
 
 from ..datasets.cifar100 import cifar100
@@ -43,12 +42,11 @@ class cifar100_wrn404(TestProblem):
         """Set up the Wide ResNet 16-4 test problem on Cifar-100."""
         self.data = cifar100(self._batch_size)
         self.loss_function = nn.CrossEntropyLoss
-        self.net = net_wrn(
-            num_outputs=100, num_residual_blocks=6, widening_factor=4
-        )
+        self.net = net_wrn(num_outputs=100, num_residual_blocks=6, widening_factor=4)
         self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
 
+    # TODO: Refactor, use WeightRegularizedTestproblem
     def get_regularization_groups(self):
         """Creates regularization groups for the parameters.
 
@@ -66,4 +64,3 @@ class cifar100_wrn404(TestProblem):
                 group_dict[l2].append(parameters)
             else:
                 group_dict[no].append(parameters)
-
