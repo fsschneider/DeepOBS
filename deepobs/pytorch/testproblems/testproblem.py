@@ -200,6 +200,56 @@ class TestProblem(abc.ABC):
         pass
 
 
+class WeightRegularizedTestproblem(TestProblem):
+    """Test problem with l2 regularization on weights, none on bias."""
+
+    @abc.abstractmethod
+    def get_regularization_groups(self):
+        """Creates regularization groups for the parameters.
+
+        Returns:
+            dict: A dictionary where the key is the regularization factor and the value is a list of parameters.
+        """
+        return self._make_groups_regularize_only_weights(self.net, self._l2_reg)
+
+    @staticmethod
+    def _make_groups_regularize_only_weights(net, l2_reg):
+        """Create regularization groups with l2 regularization for the weights.
+
+        Args:
+            net (nn.Module) :
+                Network to be regularized
+            l2_reg (float) :
+                l2 regularization strength
+        Returns:
+            dict:
+                Keys correspond to l2 regularization strengths, values contain
+                a list parameters that that are regularized accordingly.
+        """
+        no_reg = 0.0
+        group_dict = {no_reg: [], l2_reg: []}
+
+        def is_bias(name):
+            return "bias" in name
+
+        def is_weight(name):
+            return "weight" in name
+
+        def reg_strength(name):
+            if is_bias(name):
+                return no_reg
+            elif is_weight(name):
+                return l2_reg
+            else:
+                raise ValueError(name + "cannot be classified as weight or bias")
+
+        for param_name, param in net.named_parameters():
+            append_key = reg_strength(param_name)
+            group_dict[append_key].append(param)
+
+        return group_dict
+
+
 class UnregularizedTestproblem(TestProblem):
     def __init__(self, batch_size, l2_reg=None):
         super(UnregularizedTestproblem, self).__init__(batch_size, l2_reg)
