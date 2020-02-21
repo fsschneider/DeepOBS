@@ -4,11 +4,11 @@
 from torch import nn
 
 from ..datasets.cifar10 import cifar10
-from .testproblem import TestProblem
+from .testproblem import WeightRegularizedTestproblem
 from .testproblems_modules import net_cifar10_3c3d
 
 
-class cifar10_3c3d(TestProblem):
+class cifar10_3c3d(WeightRegularizedTestproblem):
     """DeepOBS test problem class for a three convolutional and three dense \
     layered neural network on Cifar-10.
 
@@ -59,20 +59,3 @@ class cifar10_3c3d(TestProblem):
         self.net = net_cifar10_3c3d(num_outputs=10)
         self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
-
-    def get_regularization_groups(self):
-        """Creates regularization groups for the parameters.
-
-        Returns:
-            dict: A dictionary where the key is the regularization factor and the value is a list of parameters.
-        """
-        no, l2 = 0.0, self._l2_reg
-        group_dict = {no: [], l2: []}
-
-        for parameters_name, parameters in self.net.named_parameters():
-            # penalize only the non bias layer parameters
-            if "bias" not in parameters_name:
-                group_dict[l2].append(parameters)
-            else:
-                group_dict[no].append(parameters)
-        return group_dict
