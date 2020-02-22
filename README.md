@@ -60,11 +60,11 @@ compatibility in the future.
 
 If you want to create a local and modifiable version of DeepOBS, you can do this directly from this repo via
 
-	pip install -e git+https://github.com/fsschneider/DeepOBS.git#egg=DeepOBS
+	pip install -e 'git+https://github.com/fsschneider/DeepOBS.git#egg=DeepOBS'
 
 for the stable version, or 
 
-	pip install -e git+https://github.com/fsschneider/DeepOBS.git@develop#egg=DeepOBS
+	pip install -e 'git+https://github.com/fsschneider/DeepOBS.git@develop#egg=DeepOBS'
 
 for the latest development version.
 
