@@ -3,8 +3,8 @@
 
 import tensorflow as tf
 
-from ._3c3d import _3c3d
 from ..datasets.cifar100 import cifar100
+from ._3c3d import _3c3d
 from .testproblem import TestProblem
 
 
@@ -14,7 +14,7 @@ class cifar100_3c3d(TestProblem):
 
   The network consists of
 
-    - thre conv layers with ReLUs, each followed by max-pooling
+    - three conv layers with ReLUs, each followed by max-pooling
     - two fully-connected layers with ``512`` and ``256`` units and ReLU activation
     - 100-unit output layer with softmax
     - cross-entropy loss
@@ -26,7 +26,7 @@ class cifar100_3c3d(TestProblem):
 
   Args:
       batch_size (int): Batch size to use.
-      weight_decay (float): Weight decay factor. Weight decay (L2-regularization)
+      l2_reg (float): L2-regularization factor. L2-Regularization (weight decay)
           is used on the weights but not the biases. Defaults to ``0.002``.
 
   Attributes:
@@ -43,15 +43,15 @@ class cifar100_3c3d(TestProblem):
     accuracy: A scalar tf.Tensor containing the mini-batch mean accuracy.
   """
 
-    def __init__(self, batch_size, weight_decay=0.002):
+    def __init__(self, batch_size, l2_reg=0.002):
         """Create a new 3c3d test problem instance on Cifar-100.
 
         Args:
             batch_size (int): Batch size to use.
-            weight_decay (float): Weight decay factor. Weight decay (L2-regularization)
+            l2_reg (float): L2-regularization factor. L2-Regularization (weight decay)
                 is used on the weights but not the biases. Defaults to ``0.002``.
         """
-        super(cifar100_3c3d, self).__init__(batch_size, weight_decay)
+        super(cifar100_3c3d, self).__init__(batch_size, l2_reg)
 
     def set_up(self):
         """Set up the vanilla CNN test problem on Cifar-100."""
@@ -62,9 +62,7 @@ class cifar100_3c3d(TestProblem):
         self.test_init_op = self.dataset.test_init_op
 
         x, y = self.dataset.batch
-        linear_outputs = _3c3d(
-            x, num_outputs=100, weight_decay=self._weight_decay
-        )
+        linear_outputs = _3c3d(x, num_outputs=100, l2_reg=self._l2_reg)
 
         self.losses = tf.nn.softmax_cross_entropy_with_logits_v2(
             labels=y, logits=linear_outputs

@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 """A VAE architecture for Fashion MNIST."""
 
+import warnings
+
 import torch
-from .testproblems_modules import net_vae
+
 from ..datasets.fmnist import fmnist
 from .testproblem import UnregularizedTestproblem
+from .testproblems_modules import net_vae
 from .testproblems_utils import vae_loss_function_factory
-import warnings
 
 
 class fmnist_vae(UnregularizedTestproblem):
@@ -32,7 +34,7 @@ class fmnist_vae(UnregularizedTestproblem):
 
   Args:
     batch_size (int): Batch size to use.
-    weight_decay (float): No weight decay (L2-regularization) is used in this
+    l2_reg (float): No L2-Regularization (weight decay) is used in this
         test problem. Defaults to ``None`` and any input here is ignored.
 
   Attributes:
@@ -41,34 +43,34 @@ class fmnist_vae(UnregularizedTestproblem):
     net: The DeepOBS subclass of torch.nn.Module that is trained for this tesproblem (net_vae).
   """
 
-    def __init__(self, batch_size, weight_decay=None):
+    def __init__(self, batch_size, l2_reg=None):
         """Create a new VAE test problem instance on Fashion-MNIST.
 
         Args:
           batch_size (int): Batch size to use.
-          weight_decay (float): No weight decay (L2-regularization) is used in this
+          l2_reg (float): No L2-Regularization (weight decay) is used in this
               test problem. Defaults to ``None`` and any input here is ignored.
         """
 
-        super(fmnist_vae, self).__init__(batch_size, weight_decay)
+        super(fmnist_vae, self).__init__(batch_size, l2_reg)
 
-        if weight_decay is not None:
+        if l2_reg is not None:
             warnings.warn(
-                "Weight decay is non-zero but no weight decay is used for this model.",
-                RuntimeWarning
+                "L2-Regularization is non-zero but no L2-regularization is used for this model.",
+                RuntimeWarning,
             )
 
         self.loss_function = vae_loss_function_factory
 
     def set_up(self):
         self.data = fmnist(self._batch_size)
-        self.net = net_vae(n_latent = 8)
+        self.net = net_vae(n_latent=8)
         self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
 
-    def get_batch_loss_and_accuracy_func(self,
-                                         reduction='mean',
-                                         add_regularization_if_available=True):
+    def get_batch_loss_and_accuracy_func(
+        self, reduction="mean", add_regularization_if_available=True
+    ):
         """Gets a new batch and calculates the loss and accuracy (if available)
         on that batch. This is a default implementation for image classification.
         Testproblems with different calculation routines (e.g. RNNs) overwrite this method accordingly.
@@ -87,10 +89,14 @@ class fmnist_vae(UnregularizedTestproblem):
             if self.phase in ["train_eval", "test", "valid"]:
                 with torch.no_grad():
                     outputs, means, std_devs = self.net(inputs)
-                    loss = self.loss_function(reduction=reduction)(outputs, inputs, means, std_devs)
+                    loss = self.loss_function(reduction=reduction)(
+                        outputs, inputs, means, std_devs
+                    )
             else:
                 outputs, means, std_devs = self.net(inputs)
-                loss = self.loss_function(reduction=reduction)(outputs, inputs, means, std_devs)
+                loss = self.loss_function(reduction=reduction)(
+                    outputs, inputs, means, std_devs
+                )
 
             accuracy = 0
             if add_regularization_if_available:

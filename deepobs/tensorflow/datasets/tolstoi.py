@@ -2,10 +2,13 @@
 """Tolstoi DeepOBS dataset."""
 
 import os
+
 import numpy as np
 import tensorflow as tf
-from . import dataset
+
 from deepobs import config
+
+from . import dataset
 
 
 class tolstoi(dataset.DataSet):
@@ -128,6 +131,4 @@ class tolstoi(dataset.DataSet):
         filepath = os.path.join(config.get_data_dir(), "tolstoi", "test.npy")
 
         data = np.load(filepath)
-
         return self._make_dataset(data)
-

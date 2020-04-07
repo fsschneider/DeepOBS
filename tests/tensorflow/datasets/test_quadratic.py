@@ -4,16 +4,14 @@
 import os
 import sys
 import unittest
+
 import tensorflow as tf
 
-sys.path.insert(
-    0,
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ),
-)
-
 from deepobs.tensorflow import datasets
+
+sys.path.insert(
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+)
 
 
 class QuadraticTest(unittest.TestCase):
@@ -40,9 +38,7 @@ class QuadraticTest(unittest.TestCase):
             ]:
                 sess.run(init_op)
                 x_ = sess.run(self.quadratic.batch)
-                self.assertEqual(
-                    x_.shape, (self.batch_size, self.quadratic._dim)
-                )
+                self.assertEqual(x_.shape, (self.batch_size, self.quadratic._dim))
 
     def test_data_set_sizes(self):
         """Tests the sizes of the individual data sets."""
@@ -79,4 +75,3 @@ class QuadraticTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

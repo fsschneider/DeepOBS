@@ -1,16 +1,19 @@
 """Module implementing StandardRunner."""
 
 from __future__ import print_function
-import numpy as np
-import importlib
-import tensorflow as tf
+
 import abc
-from .. import config
-from .. import testproblems
-from . import runner_utils
+import importlib
 from copy import deepcopy
+
+import numpy as np
+import tensorflow as tf
+
 from deepobs import config as global_config
 from deepobs.abstract_runner.abstract_runner import Runner
+
+from .. import config, testproblems
+from . import runner_utils
 
 
 class TFRunner(Runner):
@@ -46,13 +49,7 @@ class TFRunner(Runner):
 
     @staticmethod
     def write_per_epoch_summary(
-        sess,
-        loss_,
-        acc_,
-        current_step,
-        per_epoch_summaries,
-        summary_writer,
-        phase,
+        sess, loss_, acc_, current_step, per_epoch_summaries, summary_writer, phase,
     ):
         """Writes the tensorboard epoch summary"""
         if phase == "TEST":
@@ -75,35 +72,33 @@ class TFRunner(Runner):
         return
 
     @staticmethod
-    def write_per_iter_summary(
-        sess, per_iter_summaries, summary_writer, current_step
-    ):
+    def write_per_iter_summary(sess, per_iter_summaries, summary_writer, current_step):
         """Writes the tensorboard iteration summary"""
         per_iter_summary_ = sess.run(per_iter_summaries)
         summary_writer.add_summary(per_iter_summary_, current_step)
 
     @staticmethod
-    def create_testproblem(testproblem, batch_size, weight_decay, random_seed):
+    def create_testproblem(testproblem, batch_size, l2_reg, random_seed):
         """Sets up the deepobs.tensorflow.testproblems.testproblem instance.
 
         Args:
             testproblem (str): The name of the testproblem.
             batch_size (int): Batch size that is used for training
-            weight_decay (float): Regularization factor
+            l2_reg (float): Regularization factor
             random_seed (int): The random seed of the framework
 
         Returns:
             deepobs.tensorflow.testproblems.testproblem: An instance of deepobs.pytorch.testproblems.testproblem
         """
-        # Find testproblem by name and instantiate with batch size and weight decay.
+        # Find testproblem by name and instantiate with batch size and L2-regularization.
         try:
             testproblem_mod = importlib.import_module(testproblem)
             testproblem_cls = getattr(testproblem_mod, testproblem)
             print("Loading local testproblem.")
         except:
             testproblem_cls = getattr(testproblems, testproblem)
-        if weight_decay is not None:
-            tproblem = testproblem_cls(batch_size, weight_decay)
+        if l2_reg is not None:
+            tproblem = testproblem_cls(batch_size, l2_reg)
         else:
             tproblem = testproblem_cls(batch_size)
 
@@ -253,9 +248,7 @@ class TFRunner(Runner):
 class StandardRunner(TFRunner):
     def __init__(self, optimizer_class, hyperparameter_names):
 
-        super(StandardRunner, self).__init__(
-            optimizer_class, hyperparameter_names
-        )
+        super(StandardRunner, self).__init__(optimizer_class, hyperparameter_names)
 
     def training(
         self,
@@ -279,15 +272,17 @@ class StandardRunner(TFRunner):
         hyperparams_ = deepcopy(hyperparams)
         hyperparams_.pop("learning_rate")
 
-        opt = self._optimizer_class(learning_rate_var, **hyperparams_)
+        opt = self._optimizer_class(learning_rate=learning_rate_var, **hyperparams_)
 
         # Call optimizer's minimize on loss to update all variables in the
         # TRAINABLE_VARIABLES collection (with a dependency on performing all ops
         # in the collection UPDATE_OPS collection for batch norm, etc).
-        with tf.control_dependencies(
-            tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-        ):
-            step = opt.minimize(loss, global_step=global_step)
+        with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
+            # Try to pass with global step, otherwise don't pass it
+            try:
+                step = opt.minimize(loss, global_step=global_step)
+            except TypeError:
+                step = opt.minimize(loss)
 
         # Lists to track train/test loss and accuracy.
         train_losses = []
@@ -309,7 +304,9 @@ class StandardRunner(TFRunner):
             summary_writer = None
 
         # Start tensorflow session and initialize variables.
-        sess = tf.Session()
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        sess = tf.Session(config=config)
         sess.run(tf.global_variables_initializer())
 
         # Start of training loop.
@@ -347,12 +344,8 @@ class StandardRunner(TFRunner):
                         minibatch_train_losses.append(loss_.astype(float))
 
                         if tb_log:
-                            current_step = sess.run(global_step)
                             self.write_per_iter_summary(
-                                sess,
-                                per_iter_summaries,
-                                summary_writer,
-                                current_step,
+                                sess, per_iter_summaries, summary_writer, s
                             )
 
                         minibatch_train_losses.append(loss_.astype(float))
@@ -491,7 +484,7 @@ class LearningRateScheduleRunner(TFRunner):
         hyperparams_ = deepcopy(hyperparams)
         hyperparams_.pop("learning_rate")
 
-        opt = self._optimizer_class(learning_rate_var, **hyperparams_)
+        opt = self._optimizer_class(learning_rate=learning_rate_var, **hyperparams_)
         lr_schedule = runner_utils.make_lr_schedule(
             learning_rate, lr_sched_epochs, lr_sched_factors
         )
@@ -499,10 +492,12 @@ class LearningRateScheduleRunner(TFRunner):
         # Call optimizer's minimize on loss to update all variables in the
         # TRAINABLE_VARIABLES collection (with a dependency on performing all ops
         # in the collection UPDATE_OPS collection for batch norm, etc).
-        with tf.control_dependencies(
-            tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-        ):
-            step = opt.minimize(loss, global_step=global_step)
+        with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
+            # Try to pass with global step, otherwise don't pass it
+            try:
+                step = opt.minimize(loss, global_step=global_step)
+            except TypeError:
+                step = opt.minimize(loss)
 
         # Lists to track train/test loss and accuracy.
         train_losses = []
@@ -524,7 +519,9 @@ class LearningRateScheduleRunner(TFRunner):
             summary_writer = None
 
         # Start tensorflow session and initialize variables.
-        sess = tf.Session()
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        sess = tf.Session(config=config)
         sess.run(tf.global_variables_initializer())
 
         # Start of training loop.
@@ -565,12 +562,8 @@ class LearningRateScheduleRunner(TFRunner):
                         minibatch_train_losses.append(loss_.astype(float))
 
                         if tb_log:
-                            current_step = sess.run(global_step)
                             self.write_per_iter_summary(
-                                sess,
-                                per_iter_summaries,
-                                summary_writer,
-                                current_step,
+                                sess, per_iter_summaries, summary_writer, s
                             )
 
                         minibatch_train_losses.append(loss_.astype(float))

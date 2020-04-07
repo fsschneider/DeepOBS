@@ -2,11 +2,11 @@
 """A simple N-Dimensional Noisy Quadratic Problem with Deep Learning eigenvalues."""
 
 import numpy as np
-from .testproblem import UnregularizedTestproblem
 import torch
-from .testproblems_modules import net_quadratic_deep
-from ..datasets.quadratic import quadratic
 
+from ..datasets.quadratic import quadratic
+from .testproblem import UnregularizedTestproblem
+from .testproblems_modules import net_quadratic_deep
 
 rng = np.random.RandomState(42)
 
@@ -42,10 +42,9 @@ def random_rotation(D):
         # random coset location of SO(d-1) in SO(d)
         x = np.divide((e - v), (np.sqrt(np.transpose(e - v).dot(e - v))))
 
-        D = np.vstack([
-            np.hstack([[[1.0]], np.zeros((1, d))]),
-            np.hstack([np.zeros((d, 1)), R])
-        ])
+        D = np.vstack(
+            [np.hstack([[[1.0]], np.zeros((1, d))]), np.hstack([np.zeros((d, 1)), R]),]
+        )
         R = D - 2 * np.outer(x, np.transpose(x).dot(D))
     # return negative to fix determinant
     return np.negative(R)
@@ -67,7 +66,7 @@ class quadratic_deep(UnregularizedTestproblem):
 
     Args:
       batch_size (int): Batch size to use.
-      weight_decay (float): No weight decay (L2-regularization) is used in this
+      l2_reg (float): No L2-Regularization (weight decay) is used in this
           test problem. Defaults to ``None`` and any input here is ignored.
     Attributes:
         data: The DeepOBS data set class for the quadratic problem.
@@ -75,15 +74,15 @@ class quadratic_deep(UnregularizedTestproblem):
         net: The DeepOBS subclass of torch.nn.Module that is trained for this tesproblem (net_quadratic_deep).
           """
 
-    def __init__(self, batch_size, weight_decay=None):
+    def __init__(self, batch_size, l2_reg=None):
         """Create a new quadratic deep test problem instance.
 
         Args:
           batch_size (int): Batch size to use.
-          weight_decay (float): No weight decay (L2-regularization) is used in this
+          l2_reg (float): No L2-Regularization (weight decay) is used in this
               test problem. Defaults to ``None`` and any input here is ignored.
         """
-        super(quadratic_deep, self).__init__(batch_size, weight_decay)
+        super(quadratic_deep, self).__init__(batch_size, l2_reg)
 
     def set_up(self):
         hessian = self._make_hessian()
@@ -105,9 +104,9 @@ class quadratic_deep(UnregularizedTestproblem):
         Hessian = np.matmul(np.transpose(R), np.matmul(D, R))
         return torch.from_numpy(Hessian).to(torch.float32)
 
-    def get_batch_loss_and_accuracy_func(self,
-                                         reduction='mean',
-                                         add_regularization_if_available=True):
+    def get_batch_loss_and_accuracy_func(
+        self, reduction="mean", add_regularization_if_available=True
+    ):
         """Get new batch and create forward function that calculates loss and accuracy (if available)
         on that batch.
 

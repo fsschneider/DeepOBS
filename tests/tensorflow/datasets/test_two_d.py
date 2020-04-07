@@ -4,16 +4,14 @@
 import os
 import sys
 import unittest
+
 import tensorflow as tf
 
-sys.path.insert(
-    0,
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ),
-)
-
 from deepobs.tensorflow import datasets
+
+sys.path.insert(
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+)
 
 
 class Two_dTest(unittest.TestCase):

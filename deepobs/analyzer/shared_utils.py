@@ -254,8 +254,7 @@ def create_setting_analyzer_ranking(optimizer_path,
                 RuntimeWarning,
             )
             setting_analyzers_ordered = sorted(
-                setting_analyzers,
-                key=lambda idx: sgn * idx.get_final_value(metric),
+                setting_analyzers, key=lambda idx: sgn * idx.get_final_value(metric),
             )
         else:
             setting_analyzers_ordered = sorted(setting_analyzers,

@@ -23,7 +23,7 @@ class _quadratic_base(TestProblem):
 
     Args:
         batch_size (int): Batch size to use.
-        weight_decay (float): No weight decay (L2-regularization) is used in this
+        l2_reg (float): No L2-Regularization (weight decay) is used in this
             test problem. Defaults to ``None`` and any input here is ignored.
         hessian (np.array): Hessian of the quadratic problem.
             Defaults to the ``100`` dimensional identity.
@@ -42,21 +42,21 @@ class _quadratic_base(TestProblem):
           Will always be ``0.0`` since no regularizer is used.
     """
 
-    def __init__(self, batch_size, weight_decay=None, hessian=np.eye(100)):
+    def __init__(self, batch_size, l2_reg=None, hessian=np.eye(100)):
         """Create a new quadratic test problem instance.
 
         Args:
             batch_size (int): Batch size to use.
-            weight_decay (float): No weight decay (L2-regularization) is used in this
+            l2_reg (float): No L2-Regularization (weight decay) is used in this
                 test problem. Defaults to ``None`` and any input here is ignored.
             hessian (np.array): Hessian of the quadratic problem.
                 Defaults to the ``100`` dimensional identity.
         """
-        super(_quadratic_base, self).__init__(batch_size, weight_decay)
+        super(_quadratic_base, self).__init__(batch_size, l2_reg)
         self._hessian = hessian
-        if weight_decay is not None:
+        if l2_reg is not None:
             print(
-                "WARNING: Weight decay is non-zero but no weight decay is used",
+                "WARNING: L2-Regularization is non-zero but no L2-regularization is used",
                 "for this model.",
             )
 

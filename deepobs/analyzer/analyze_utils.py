@@ -1,5 +1,6 @@
-import numpy as np
 import os
+
+import numpy as np
 
 
 def _preprocess_path(path):
@@ -11,11 +12,17 @@ def _preprocess_path(path):
         A list of all optimizers.
         """
     path = os.path.abspath(path)
-    pathes = sorted([_path for _path in os.listdir(path) if os.path.isdir(os.path.join(path, _path))])
+    pathes = sorted(
+        [
+            _path
+            for _path in os.listdir(path)
+            if os.path.isdir(os.path.join(path, _path))
+        ]
+    )
 
-    if 'num_epochs' in pathes[0]:    # path was a path to an optimizer
+    if "num_epochs" in pathes[0]:  # path was a path to an optimizer
         return path.split()
-    else:    # path was a testproblem path
+    else:  # path was a testproblem path
         return sorted([os.path.join(path, _path) for _path in pathes])
 
 
@@ -36,4 +43,3 @@ def _rescale_ax(ax):
     else:
         ax.set_ylim([1.0, 2.0])
     return ax
-

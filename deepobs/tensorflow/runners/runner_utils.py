@@ -38,14 +38,16 @@ def make_lr_schedule(lr_base, lr_sched_epochs, lr_sched_factors):
 
     # Make sure learning rate schedule has been properly specified
     if lr_sched_epochs is None or lr_sched_factors is None:
-        raise TypeError(
-            """Specifiy *both* lr_sched_epochs and lr_sched_factors.""")
-    if ((not isinstance(lr_sched_epochs, list))
-            or (not isinstance(lr_sched_factors, list))
-            or (len(lr_sched_epochs) != len(lr_sched_factors))):
+        raise TypeError("""Specifiy *both* lr_sched_epochs and lr_sched_factors.""")
+    if (
+        (not isinstance(lr_sched_epochs, list))
+        or (not isinstance(lr_sched_factors, list))
+        or (len(lr_sched_epochs) != len(lr_sched_factors))
+    ):
         raise ValueError(
             """lr_sched_epochs and lr_sched_factors must be lists of
-                     the same length.""")
+                     the same length."""
+        )
 
     # Create schedule as dictionary epoch->factor; add value for epoch 0.
     sched = {n: f * lr_base for n, f in zip(lr_sched_epochs, lr_sched_factors)}

@@ -3,9 +3,10 @@
 
 import torch
 from torch import nn
-from .testproblems_modules import net_cifar10_3c3d
+
 from ..datasets.cifar100 import cifar100
 from .testproblem import TestProblem
+from .testproblems_modules import net_cifar10_3c3d
 
 
 class cifar100_3c3d(TestProblem):
@@ -14,7 +15,7 @@ class cifar100_3c3d(TestProblem):
 
   The network consists of
 
-    - thre conv layers with ReLUs, each followed by max-pooling
+    - three conv layers with ReLUs, each followed by max-pooling
     - two fully-connected layers with ``512`` and ``256`` units and ReLU activation
     - 100-unit output layer with softmax
     - cross-entropy loss
@@ -26,7 +27,7 @@ class cifar100_3c3d(TestProblem):
 
   Args:
       batch_size (int): Batch size to use.
-      weight_decay (float): Weight decay factor. Weight decay (L2-regularization)
+      l2_reg (float): L2-regularization factor. L2-Regularization (weight decay)
           is used on the weights but not the biases. Defaults to ``0.002``.
 
   Attributes:
@@ -37,8 +38,9 @@ class cifar100_3c3d(TestProblem):
   Methods:
       get_regularization_loss: Returns the current regularization loss of the network state.
   """
-    def __init__(self, batch_size, weight_decay=0.002):
-        super(cifar100_3c3d, self).__init__(batch_size, weight_decay)
+
+    def __init__(self, batch_size, l2_reg=0.002):
+        super(cifar100_3c3d, self).__init__(batch_size, l2_reg)
 
     def set_up(self):
         """Set up the vanilla CNN test problem on Cifar-100."""
@@ -54,12 +56,12 @@ class cifar100_3c3d(TestProblem):
         Returns:
             dict: A dictionary where the key is the regularization factor and the value is a list of parameters.
         """
-        no, l2 = 0.0, self._weight_decay
+        no, l2 = 0.0, self._l2_reg
         group_dict = {no: [], l2: []}
 
         for parameters_name, parameters in self.net.named_parameters():
             # penalize only the non bias layer parameters
-            if 'bias' not in parameters_name:
+            if "bias" not in parameters_name:
                 group_dict[l2].append(parameters)
             else:
                 group_dict[no].append(parameters)

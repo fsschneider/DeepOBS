@@ -1,7 +1,8 @@
-from deepobs.tuner import GridSearch
-from torch.optim import SGD
 import numpy as np
+from torch.optim import SGD
+
 from deepobs.pytorch.runners import StandardRunner
+from deepobs.tuner import GridSearch
 
 optimizer_class = SGD
 hyperparams = {
@@ -19,11 +20,7 @@ grid = {
 
 # Make sure to set the amount of ressources to the grid size. For grid search, this is just a sanity check.
 tuner = GridSearch(
-    optimizer_class,
-    hyperparams,
-    grid,
-    runner=StandardRunner,
-    ressources=6 * 3 * 2,
+    optimizer_class, hyperparams, grid, runner=StandardRunner, ressources=6 * 3 * 2,
 )
 
 # Tune (i.e. evaluate every grid point) and rerun the best setting with 10 different seeds.
@@ -37,4 +34,3 @@ tuner.generate_commands_script(
     output_dir="./grid_search",
     generation_dir="./grid_search_commands",
 )
-

@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 import abc
-from numpy.random import seed as np_seed
 import os
-from .tuner_utils import rerun_setting
+
+from numpy.random import seed as np_seed
+
 from deepobs.analyzer.shared_utils import _dump_json
+
+from .tuner_utils import rerun_setting
 
 
 class Tuner(abc.ABC):
@@ -11,11 +14,7 @@ class Tuner(abc.ABC):
     The base class for all tuning methods in DeepOBS.
     """
 
-    def __init__(self,
-                 optimizer_class,
-                 hyperparam_names,
-                 ressources,
-                 runner):
+    def __init__(self, optimizer_class, hyperparam_names, ressources, runner):
         """
         Args:
             optimizer_class (framework optimizer class): The optimizer class of the optimizer that is run on \
@@ -46,15 +45,25 @@ class Tuner(abc.ABC):
         Args:
             testset (list): A list of testproblems.
         """
-        if any(s in kwargs for s in ['num_epochs', 'batch_size', 'weight_decay']):
-            raise RuntimeError('Cannot execute tuning on a whole testset if num_epochs, '
-                               'weight_decay or batch_size is set. '
-                               'A testset tuning is ment to tune on default testproblems.')
+        if any(s in kwargs for s in ["num_epochs", "batch_size", "l2_reg"]):
+            raise RuntimeError(
+                "Cannot execute tuning on a whole testset if num_epochs, "
+                "l2_reg or batch_size is set. "
+                "A testset tuning is ment to tune on default testproblems."
+            )
         for testproblem in testset:
             self.tune(testproblem, *args, **kwargs)
 
     @abc.abstractmethod
-    def tune(self, testproblem, *args, output_dir='./results', random_seed=42, rerun_best_setting = True, **kwargs):
+    def tune(
+        self,
+        testproblem,
+        *args,
+        output_dir="./results",
+        random_seed=42,
+        rerun_best_setting=True,
+        **kwargs
+    ):
         """Tunes hyperparaneter of the optimizer_class on a testproblem.
         Args:
             testproblem (str): Testproblem for which to generate commands.
@@ -69,15 +78,11 @@ class ParallelizedTuner(Tuner):
     """
     The base class for all tuning methods which are uninformed and parallelizable, like Grid Search and Random Search.
     """
-    def __init__(self,
-                 optimizer_class,
-                 hyperparam_names,
-                 ressources,
-                 runner):
-        super(ParallelizedTuner, self).__init__(optimizer_class,
-                                                hyperparam_names,
-                                                ressources,
-                                                runner)
+
+    def __init__(self, optimizer_class, hyperparam_names, ressources, runner):
+        super(ParallelizedTuner, self).__init__(
+            optimizer_class, hyperparam_names, ressources, runner
+        )
 
     @abc.abstractmethod
     def _sample(self):
@@ -86,28 +91,35 @@ class ParallelizedTuner(Tuner):
     def _generate_hyperparams_format_for_command_line(self, hyperparams):
         """Overwrite this method to specify how hyperparams should be represented in the command line string.
         This is basically the inversion of your runner specific method ``_add_hyperparams_to_argparse``"""
-        string = ''
+        string = ""
         for key, value in hyperparams.items():
-            if self._hyperparam_names[key]['type'] == bool:
-                string += ' --' + key
+            if self._hyperparam_names[key]["type"] == bool:
+                string += " --" + key
             else:
-                string += ' --' + key + ' ' + str(value)
+                string += " --" + key + " " + str(value)
         return string
 
     def _generate_kwargs_format_for_command_line(self, **kwargs):
         """Overwrite this method to specify how additional training params should be represented in the command line string.
         This is basically the inversion of your runner specific method ``_add_training_params_to_argparse``"""
-        string = ''
+        string = ""
         for key, value in kwargs.items():
-            if key == 'lr_sched_factors' or key == 'lr_sched_epochs':
-                string += ' --' + key
+            if key == "lr_sched_factors" or key == "lr_sched_epochs":
+                string += " --" + key
                 for v in value:
-                    string += ' ' + str(v)
+                    string += " " + str(v)
             else:
-                string += ' --' + key + ' ' + str(value)
+                string += " --" + key + " " + str(value)
         return string
 
-    def tune(self, testproblem, output_dir='./results', random_seed=42, rerun_best_setting = False, **kwargs):
+    def tune(
+        self,
+        testproblem,
+        output_dir="./results",
+        random_seed=42,
+        rerun_best_setting=False,
+        **kwargs
+    ):
         """Tunes the optimizer on the test problem.
         Args:
             testproblem (str): The test problem to tune the optimizer on.
@@ -119,14 +131,32 @@ class ParallelizedTuner(Tuner):
         params = self._sample()
         for sample in params:
             runner = self._runner(self._optimizer_class, self._hyperparam_names)
-            runner.run(testproblem, hyperparams=sample, random_seed=random_seed, output_dir=output_dir, **kwargs)
+            runner.run(
+                testproblem,
+                hyperparams=sample,
+                random_seed=random_seed,
+                output_dir=output_dir,
+                **kwargs,
+            )
 
         if rerun_best_setting:
             optimizer_path = os.path.join(output_dir, testproblem, self._optimizer_name)
-            rerun_setting(self._runner, self._optimizer_class, self._hyperparam_names, optimizer_path)
+            rerun_setting(
+                self._runner,
+                self._optimizer_class,
+                self._hyperparam_names,
+                optimizer_path,
+            )
 
-    def generate_commands_script(self, testproblem, run_script, output_dir='./results', random_seed=42,
-                                 generation_dir = './command_scripts', **kwargs):
+    def generate_commands_script(
+        self,
+        testproblem,
+        run_script,
+        output_dir="./results",
+        random_seed=42,
+        generation_dir="./command_scripts",
+        **kwargs
+    ):
         """
         Args:
             testproblem (str): Testproblem for which to generate commands.
@@ -141,15 +171,37 @@ class ParallelizedTuner(Tuner):
         """
 
         os.makedirs(generation_dir, exist_ok=True)
-        file_path = os.path.join(generation_dir, 'jobs_' + self._optimizer_name + '_' + self._search_name + '_' + testproblem + '.txt')
-        file = open(file_path, 'w')
+        file_path = os.path.join(
+            generation_dir,
+            "jobs_"
+            + self._optimizer_name
+            + "_"
+            + self._search_name
+            + "_"
+            + testproblem
+            + ".txt",
+        )
+        file = open(file_path, "w")
         kwargs_string = self._generate_kwargs_format_for_command_line(**kwargs)
         self._set_seed(random_seed)
         params = self._sample()
         for sample in params:
             sample_string = self._generate_hyperparams_format_for_command_line(sample)
-            file.write('python3 ' + run_script + ' ' + testproblem + ' ' + sample_string + ' --random_seed ' + str(
-                random_seed) + ' --output_dir ' + output_dir + ' ' + kwargs_string + '\n')
+            file.write(
+                "python3 "
+                + run_script
+                + " "
+                + testproblem
+                + " "
+                + sample_string
+                + " --random_seed "
+                + str(random_seed)
+                + " --output_dir "
+                + output_dir
+                + " "
+                + kwargs_string
+                + "\n"
+            )
         file.close()
         return file_path
 
@@ -158,9 +210,11 @@ class ParallelizedTuner(Tuner):
         Args:
             testset (list): A list of the testproblem strings.
             """
-        if any(s in kwargs for s in ['num_epochs', 'batch_size', 'weight_decay']):
-            raise RuntimeError('Cannot execute tuning on a whole testset if num_epochs, '
-                               'weight_decay or batch_size is set. '
-                               'A testset tuning is ment to tune on default testproblems.')
+        if any(s in kwargs for s in ["num_epochs", "batch_size", "l2_reg"]):
+            raise RuntimeError(
+                "Cannot execute tuning on a whole testset if num_epochs, "
+                "l2_reg or batch_size is set. "
+                "A testset tuning is ment to tune on default testproblems."
+            )
         for testproblem in testset:
             self.generate_commands_script(testproblem, *args, **kwargs)

@@ -4,11 +4,14 @@
 import os
 import sys
 import unittest
+
 import torch
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
 from deepobs.pytorch import testproblems
+
+sys.path.insert(
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+)
 
 
 class Cifar100_AllCNNCTest(unittest.TestCase):
@@ -29,11 +32,25 @@ class Cifar100_AllCNNCTest(unittest.TestCase):
             num_param.append(parameter.numel())
 
         expected_num_param = [
-                3 * 96 * 3 * 3, 96, 96 * 96 * 3 * 3, 96, 96 * 96 * 3 * 3, 96,
-                96 * 192 * 3 * 3, 192, 192 * 192 * 3 * 3, 192,
-                192 * 192 * 3 * 3, 192, 192 * 192 * 3 * 3, 192,
-                192 * 192 * 1 * 1, 192, 192 * 100 * 1 * 1, 100
-            ]
+            3 * 96 * 3 * 3,
+            96,
+            96 * 96 * 3 * 3,
+            96,
+            96 * 96 * 3 * 3,
+            96,
+            96 * 192 * 3 * 3,
+            192,
+            192 * 192 * 3 * 3,
+            192,
+            192 * 192 * 3 * 3,
+            192,
+            192 * 192 * 3 * 3,
+            192,
+            192 * 192 * 1 * 1,
+            192,
+            192 * 100 * 1 * 1,
+            100,
+        ]
 
         self.assertEqual(num_param, expected_num_param)
 

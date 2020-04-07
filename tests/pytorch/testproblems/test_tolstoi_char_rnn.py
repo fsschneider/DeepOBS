@@ -4,11 +4,14 @@
 import os
 import sys
 import unittest
+
 import torch
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
 from deepobs.pytorch import testproblems
+
+sys.path.insert(
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+)
 
 
 class Tolstoi_Char_RNNTest(unittest.TestCase):
@@ -34,9 +37,18 @@ class Tolstoi_Char_RNNTest(unittest.TestCase):
         # bias input-hidden: 4*input_size
         # weight input-hidden: [4*input, hidden]
         expected_num_param = [
-                83 * 128, 4 * 128 * 128, 4 * 128 * 128, 4 * 128, 4* 128,
-                4 * 128 * 128, 4 * 128 * 128, 4 * 128, 4 * 128, 83 * 128, 83
-            ]
+            83 * 128,
+            4 * 128 * 128,
+            4 * 128 * 128,
+            4 * 128,
+            4 * 128,
+            4 * 128 * 128,
+            4 * 128 * 128,
+            4 * 128,
+            4 * 128,
+            83 * 128,
+            83,
+        ]
 
         self.assertEqual(num_param, expected_num_param)
 

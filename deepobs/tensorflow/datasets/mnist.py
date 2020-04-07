@@ -3,12 +3,15 @@
 
 from __future__ import print_function
 
-import os
 import gzip
+import os
+
 import numpy as np
 import tensorflow as tf
-from . import dataset
+
 from deepobs import config
+
+from . import dataset
 
 
 class mnist(dataset.DataSet):
@@ -116,9 +119,7 @@ class mnist(dataset.DataSet):
         train_data = data.skip(self._train_eval_size)
 
         train_data = self._make_dataset(train_data, shuffle=True)
-        train_eval_data = train_data.take(
-            self._train_eval_size // self._batch_size
-        )
+        train_eval_data = train_data.take(self._train_eval_size // self._batch_size)
 
         valid_data = self._make_dataset(valid_data, shuffle=False)
 
@@ -131,12 +132,8 @@ class mnist(dataset.DataSet):
       A tf.data.Dataset instance with batches of test data.
     """
         data_dir = config.get_data_dir()
-        test_images_file = os.path.join(
-            data_dir, "mnist", "t10k-images-idx3-ubyte.gz"
-        )
-        test_labels_file = os.path.join(
-            data_dir, "mnist", "t10k-labels-idx1-ubyte.gz"
-        )
+        test_images_file = os.path.join(data_dir, "mnist", "t10k-images-idx3-ubyte.gz")
+        test_labels_file = os.path.join(data_dir, "mnist", "t10k-labels-idx1-ubyte.gz")
 
         test_data = self._load_dataset(test_images_file, test_labels_file)
 

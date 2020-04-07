@@ -4,11 +4,14 @@
 import os
 import sys
 import unittest
+
 import torch
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
 from deepobs.pytorch import testproblems
+
+sys.path.insert(
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+)
 
 
 class SVHN_WRN164Test(unittest.TestCase):
@@ -29,18 +32,53 @@ class SVHN_WRN164Test(unittest.TestCase):
             num_param.append(parameter.numel())
 
         expected_num_param = [
-                3 * 16 * 3 * 3, 16, 16, 16 * 64 * 1 * 1, 16 * 64 * 3 * 3, 64,
-                64, 64 * 64 * 3 * 3, 64, 64, 64 * 64 * 3 * 3, 64, 64,
-                64 * 64 * 3 * 3, 64, 64, 64 * 128 * 1 * 1, 64 * 128 * 3 * 3,
-                128, 128, 128 * 128 * 3 * 3, 128, 128, 128 * 128 * 3 * 3, 128,
-                128, 128 * 128 * 3 * 3, 128, 128, 128 * 256 * 1 * 1,
-                128 * 256 * 3 * 3, 256, 256, 256 * 256 * 3 * 3, 256, 256,
-                256 * 256 * 3 * 3, 256, 256, 256 * 256 * 3 * 3, 256, 256,
-                256 * 10, 10
-            ]
+            3 * 16 * 3 * 3,
+            16,
+            16,
+            16 * 64 * 1 * 1,
+            16 * 64 * 3 * 3,
+            64,
+            64,
+            64 * 64 * 3 * 3,
+            64,
+            64,
+            64 * 64 * 3 * 3,
+            64,
+            64,
+            64 * 64 * 3 * 3,
+            64,
+            64,
+            64 * 128 * 1 * 1,
+            64 * 128 * 3 * 3,
+            128,
+            128,
+            128 * 128 * 3 * 3,
+            128,
+            128,
+            128 * 128 * 3 * 3,
+            128,
+            128,
+            128 * 128 * 3 * 3,
+            128,
+            128,
+            128 * 256 * 1 * 1,
+            128 * 256 * 3 * 3,
+            256,
+            256,
+            256 * 256 * 3 * 3,
+            256,
+            256,
+            256 * 256 * 3 * 3,
+            256,
+            256,
+            256 * 256 * 3 * 3,
+            256,
+            256,
+            256 * 10,
+            10,
+        ]
 
         self.assertEqual(num_param, expected_num_param)
-
 
 
 if __name__ == "__main__":

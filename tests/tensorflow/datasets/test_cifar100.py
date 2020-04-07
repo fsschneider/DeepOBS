@@ -4,17 +4,15 @@
 import os
 import sys
 import unittest
-import tensorflow as tf
-import numpy as np
 
-sys.path.insert(
-    0,
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ),
-)
+import numpy as np
+import tensorflow as tf
 
 from deepobs.tensorflow import datasets
+
+sys.path.insert(
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+)
 
 
 class Cifar100Test(unittest.TestCase):

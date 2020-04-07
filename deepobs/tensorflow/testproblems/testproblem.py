@@ -7,7 +7,7 @@ class TestProblem(object):
 
   Args:
     batch_size (int): Batch size to use.
-    weight_decay (float): Weight decay (L2-regularization) factor to use. If
+    l2_reg (float): L2-Regularization (weight decay) factor to use. If
         not specified, the test problems revert to their respective defaults.
         Note: Some test problems do not use regularization and this value will
         be ignored in such a case.
@@ -27,18 +27,18 @@ class TestProblem(object):
     accuracy: A scalar tf.Tensor containing the mini-batch mean accuracy.
   """
 
-    def __init__(self, batch_size, weight_decay=None):
+    def __init__(self, batch_size, l2_reg=None):
         """Creates a new test problem instance.
 
     Args:
       batch_size (int): Batch size to use.
-      weight_decay (float): Weight decay (L2-regularization) factor to use. If
+      l2_reg (float): L2-Regularization (weight decay) factor to use. If
           not specified, the test problems revert to their respective defaults.
           Note: Some test problems do not use regularization and this value will
           be ignored in such a case.
     """
         self._batch_size = batch_size
-        self._weight_decay = weight_decay
+        self._l2_reg = l2_reg
 
         # Public attributes by which to interact with test problems. These have to
         # be created by the set_up function of sub-classes.

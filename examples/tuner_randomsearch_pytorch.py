@@ -1,9 +1,10 @@
-from deepobs.tuner import RandomSearch
+from scipy.stats.distributions import binom, uniform
 from torch.optim import SGD
-from deepobs.tuner.tuner_utils import log_uniform
-from scipy.stats.distributions import uniform, binom
+
 from deepobs import config
 from deepobs.pytorch.runners import StandardRunner
+from deepobs.tuner import RandomSearch
+from deepobs.tuner.tuner_utils import log_uniform
 
 optimizer_class = SGD
 hyperparams = {
@@ -21,11 +22,7 @@ distributions = {
 
 # Allow 36 random evaluations.
 tuner = RandomSearch(
-    optimizer_class,
-    hyperparams,
-    distributions,
-    runner=StandardRunner,
-    ressources=36,
+    optimizer_class, hyperparams, distributions, runner=StandardRunner, ressources=36,
 )
 
 # Tune (i.e. evaluate 36 different random samples) and rerun the best setting with 10 different seeds.
@@ -44,4 +41,3 @@ tuner.generate_commands_script(
     output_dir="./random_search",
     generation_dir="./random_search_commands",
 )
-

@@ -24,7 +24,7 @@ class two_d_rosenbrock(TestProblem):
 
     Args:
       batch_size (int): Batch size to use.
-      weight_decay (float): No weight decay (L2-regularization) is used in this
+      l2_reg (float): No L2-regularization (weight decay) is used in this
           test problem. Defaults to ``None`` and any input here is ignored.
 
     Attributes:
@@ -41,19 +41,19 @@ class two_d_rosenbrock(TestProblem):
           Will always be ``0.0`` since no regularizer is used.
     """
 
-    def __init__(self, batch_size, weight_decay=None):
+    def __init__(self, batch_size, l2_reg=None):
         """Create a new 2D Rosenbrock Test Problem instance.
 
         Args:
           batch_size (int): Batch size to use.
-          weight_decay (float): No weight decay (L2-regularization) is used in this
+          l2_reg (float): No L2-regularization (weight decay) is used in this
               test problem. Defaults to ``None`` and any input here is ignored.
         """
-        super(two_d_rosenbrock, self).__init__(batch_size, weight_decay)
+        super(two_d_rosenbrock, self).__init__(batch_size, l2_reg)
 
-        if weight_decay is not None:
+        if l2_reg is not None:
             print(
-                "WARNING: Weight decay is non-zero but no weight decay is used",
+                "WARNING: L2-Regularization is non-zero but no L2-Regularization is used",
                 "for this model.",
             )
 
@@ -75,14 +75,10 @@ class two_d_rosenbrock(TestProblem):
 
         # Set model weights
         u = tf.get_variable(
-            "weight",
-            shape=(),
-            initializer=tf.constant_initializer(starting_point[0]),
+            "weight", shape=(), initializer=tf.constant_initializer(starting_point[0]),
         )
         v = tf.get_variable(
-            "bias",
-            shape=(),
-            initializer=tf.constant_initializer(starting_point[1]),
+            "bias", shape=(), initializer=tf.constant_initializer(starting_point[1]),
         )
 
         self.losses = (1 - u) ** 2 + 100 * (v - u ** 2) ** 2 + u * x + v * y
