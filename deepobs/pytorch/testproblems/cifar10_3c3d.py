@@ -2,7 +2,6 @@
 """A vanilla CNN architecture for CIFAR-10."""
 
 from torch import nn
-
 from ..datasets.cifar10 import cifar10
 from .testproblem import TestProblem
 from .testproblems_modules import net_cifar10_3c3d
@@ -14,7 +13,7 @@ class cifar10_3c3d(TestProblem):
 
   The network consists of
 
-    - thre conv layers with ReLUs, each followed by max-pooling
+    - three conv layers with ReLUs, each followed by max-pooling
     - two fully-connected layers with ``512`` and ``256`` units and ReLU activation
     - 10-unit output layer with softmax
     - cross-entropy loss

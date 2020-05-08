@@ -11,6 +11,22 @@ from deepobs import config
 from . import dataset
 from .datasets_utils import train_eval_sampler
 
+image_size = 64
+
+transform_images_resize = transforms.Compose(
+    [transforms.Resize(image_size),
+     transforms.ToTensor(),
+     # image to numbers with three color pixel channels to convert to  their color brightness 0-255, then scaled down to range 0-1
+     transforms.Normalize((0.5,), (0.5,)),
+    ]
+)
+
+transform_images_no_resize = transforms.Compose(
+    [transforms.ToTensor(),
+     # image to numbers with three color pixel channels to convert to  their color brightness 0-255, then scaled down to range 0-1
+     transforms.Normalize((0.5,), (0.5,)),
+    ]
+)
 
 class fmnist(dataset.DataSet):
     """DeepOBS data set class for the `Fashion-MNIST (FMNIST)\
@@ -24,7 +40,7 @@ class fmnist(dataset.DataSet):
         Defaults to ``10 000`` the size of the test set.
   """
 
-    def __init__(self, batch_size, train_eval_size=10000):
+    def __init__(self, batch_size, resize_images=True, train_eval_size=1):
         """Creates a new Fashion-MNIST instance.
 
     Args:
@@ -35,11 +51,16 @@ class fmnist(dataset.DataSet):
           Defaults to ``10 000`` the size of the test set.
     """
         self._name = "fmnist"
+        self._resize_images = resize_images
         self._train_eval_size = train_eval_size
         super(fmnist, self).__init__(batch_size)
 
     def _make_train_and_valid_dataloader(self):
-        transform = transforms.ToTensor()
+        if self._resize_images:
+            transform = transform_images_resize
+        else:
+            transform = transform_images_no_resize
+
         train_dataset = datasets.FashionMNIST(
             root=config.get_data_dir(),
             train=True,
