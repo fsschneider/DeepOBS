@@ -16,16 +16,13 @@ image_size = 64
 transform_images_resize = transforms.Compose(
     [transforms.Resize(image_size),
      transforms.ToTensor(),
-     # image to numbers with three color pixel channels to convert to  their color brightness 0-255, then scaled down to range 0-1
      transforms.Normalize((0.5,), (0.5,)),
     ]
 )
 
 transform_images_no_resize = transforms.Compose(
-    [transforms.ToTensor(),
-     # image to numbers with three color pixel channels to convert to  their color brightness 0-255, then scaled down to range 0-1
-     transforms.Normalize((0.5,), (0.5,)),
-    ]
+    [transforms.ToTensor()
+     ]
 )
 
 class fmnist(dataset.DataSet):
@@ -40,7 +37,7 @@ class fmnist(dataset.DataSet):
         Defaults to ``10 000`` the size of the test set.
   """
 
-    def __init__(self, batch_size, resize_images=True, train_eval_size=1):
+    def __init__(self, batch_size, resize_images=False, train_eval_size=10000):
         """Creates a new Fashion-MNIST instance.
 
     Args:
