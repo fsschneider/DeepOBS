@@ -6,7 +6,7 @@ from .testproblems_modules import net_wrn
 
 
 class cifar100_wrn404(TestProblem):
-    """DeepOBS test problem class for the Wide Residual Network 40-4 architecture\
+    """DeepOBS test problem class for the Wide Residual Network 40-4 architecture
     for Cifar-100.
 
   Details about the architecture can be found in the `original paper`_.
@@ -42,7 +42,9 @@ class cifar100_wrn404(TestProblem):
         """Set up the Wide ResNet 16-4 test problem on Cifar-100."""
         self.data = cifar100(self._batch_size)
         self.loss_function = nn.CrossEntropyLoss
-        self.net = net_wrn(num_outputs=100, num_residual_blocks=6, widening_factor=4)
+        self.net = net_wrn(
+            num_outputs=100, num_residual_blocks=6, widening_factor=4
+        )
         self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
 
@@ -64,3 +66,4 @@ class cifar100_wrn404(TestProblem):
                 group_dict[l2].append(parameters)
             else:
                 group_dict[no].append(parameters)
+        return group_dict

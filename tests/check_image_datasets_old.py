@@ -11,10 +11,6 @@ import tensorflow as tf
 import deepobs.config as config
 from deepobs.tensorflow import datasets
 
-sys.path.insert(
-    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-)
-
 
 def denormalize_image(img):
     """Convert a normalized (float) image back to unsigned 8-bit images."""
@@ -26,7 +22,6 @@ def denormalize_image(img):
 
 def display_images(dataset_cls, grid_size=5, phase="train"):
     """Display images from a DeepOBS data set.
-
   Args:
     dataset_cls: The DeepOBS dataset class to display images from. Is assumed to
         yield a tuple (x, y) of images and one-hot label vectors.
@@ -69,13 +64,10 @@ def display_images(dataset_cls, grid_size=5, phase="train"):
 def load_label_dict(dataset):
     """Get dict that translates from label number to humanly-readable class
     (e.g. from 1 -> automobile on cifar 10)
-
     Args:
         dataset (str): Name of the dataset.
-
     Returns:
         dict: Dictionary that translates from class number to class label.
-
     """
     if dataset == "cifar10":
         with open(
@@ -84,7 +76,9 @@ def load_label_dict(dataset):
             label_dict = lookup_file.readlines()
     elif dataset == "cifar100":
         with open(
-            os.path.join(config.get_data_dir(), "cifar-100/fine_label_names.txt")
+            os.path.join(
+                config.get_data_dir(), "cifar-100/fine_label_names.txt"
+            )
         ) as lookup_file:
             label_dict = lookup_file.readlines()
     elif dataset == "fmnist":
@@ -104,7 +98,9 @@ def load_label_dict(dataset):
         )
     elif dataset == "imagenet":
         label_file = os.path.join(
-            os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__))),
+            os.path.realpath(
+                os.path.join(os.getcwd(), os.path.dirname(__file__))
+            ),
             "imagenet_labels.txt",
         )
         # Read from text file
