@@ -7,3 +7,5 @@ from .fmnist import fmnist
 from .mnist import mnist
 from .quadratic import quadratic
 from .svhn import svhn
+from .celeba import celeba
+from .afhq import afhq

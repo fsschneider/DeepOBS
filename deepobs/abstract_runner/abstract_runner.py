@@ -48,10 +48,10 @@ class Runner(abc.ABC):
         Example
         -------
         >>> optimizer_class = tf.train.MomentumOptimizer
-        >>> hyperparms = {'lr': {'type': float},
+        >>> hyperparams = {'lr': {'type': float},
         >>>    'momentum': {'type': float, 'default': 0.99},
         >>>    'uses_nesterov': {'type': bool, 'default': False}}
-        >>> runner = StandardRunner(optimizer_class, hyperparms)
+        >>> runner = StandardRunner(optimizer_class, hyperparams)
 
         """
         self._optimizer_class = optimizer_class
@@ -211,16 +211,24 @@ class Runner(abc.ABC):
             testproblem, batch_size, l2_reg, random_seed
         )
 
-        output = self.training(
-            tproblem,
-            hyperparams,
-            num_epochs,
-            print_train_iter,
-            train_log_interval,
-            tb_log,
-            tb_log_dir,
-            **training_params
-        )
+        if "_dcgan" in str(testproblem):
+            output = self.training_dcgan(
+                tproblem,
+                hyperparams,
+                num_epochs,
+                **training_params
+            )
+        else:
+            output = self.training(
+                tproblem,
+                hyperparams,
+                num_epochs,
+                print_train_iter,
+                train_log_interval,
+                tb_log,
+                tb_log_dir,
+                **training_params
+            )
 
         output = self._post_process_output(
             output,
@@ -373,6 +381,33 @@ class Runner(abc.ABC):
                      'test_accuracies': [...], \
                      'valid_accuracies': [...], \
                      'train_accuracies': [...] \
+                     } \
+            where the metrices values are lists that were filled during training.
+        """
+        return
+
+    @abc.abstractmethod
+    def training_dcgan(
+            self,
+            tproblem,
+            hyperparams,
+            num_epochs,
+            print_train_iter,
+            **training_params
+    ):
+        """Performs the training for the dcgan testproblem and stores the metrices.
+
+            Args:
+                tproblem (deepobs.[tensorflow/pytorch].testproblems.testproblem): The testproblem instance to train on.
+                hyperparams (dict): The optimizer hyperparameters to use for the training.
+                num_epochs (int): The number of training epochs.
+                print_train_iter (bool): Whether to print the training progress at every train_log_interval
+                **training_params (dict): Kwargs for additional training parameters that are implemented by subclass.
+
+            Returns:
+                dict: The logged metrices. Is of the form: \
+                    {'g_losses' : [...], \
+                    'd_losses': [...], \
                      } \
             where the metrices values are lists that were filled during training.
         """

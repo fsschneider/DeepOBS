@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from .afhq_dcgan import afhq_dcgan
 from .cifar10_3c3d import cifar10_3c3d
 from .cifar10_vgg16 import cifar10_vgg16
 from .cifar100_3c3d import cifar100_3c3d

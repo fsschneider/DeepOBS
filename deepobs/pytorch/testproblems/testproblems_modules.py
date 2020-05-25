@@ -649,6 +649,7 @@ class net_cifar100_allcnnc(nn.Sequential):
                 nn.init.constant_(module.bias, 0.1)
                 nn.init.xavier_normal_(module.weight)
 
+
 # Initialize nz: input noise vector for G, ngf= size of feature maps G
 class dcgan_g(nn.Module):
     def __init__(self, num_channels, nz=100, ngf=64):
@@ -664,11 +665,11 @@ class dcgan_g(nn.Module):
             nn.BatchNorm2d(ngf * 4),
             nn.ReLU(True),
             # state size. (ngf*4) x 8 x 8
-            nn.ConvTranspose2d( ngf * 4, ngf * 2, 4, 2, 1, bias=False),
+            nn.ConvTranspose2d(ngf * 4, ngf * 2, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ngf * 2),
             nn.ReLU(True),
             # state size. (ngf*2) x 16 x 16
-            nn.ConvTranspose2d( ngf * 2, ngf, 4, 2, 1, bias=False),
+            nn.ConvTranspose2d(ngf * 2, ngf, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ngf),
             nn.ReLU(True),
             # state size. (ngf) x 32 x 32
@@ -679,10 +680,6 @@ class dcgan_g(nn.Module):
 
     def forward(self, input):
         return self.main(input)
-
-
-
-
 
 
 # ndf: size of feature maps in discriminator
@@ -716,11 +713,9 @@ class dcgan_d(nn.Module):
         return self.main(input)
 
 
-
-
 class net_wrn(nn.Sequential):
     def __init__(
-        self, num_residual_blocks, widening_factor, num_outputs, bn_momentum=0.9
+            self, num_residual_blocks, widening_factor, num_outputs, bn_momentum=0.9
     ):
         super(net_wrn, self).__init__()
 

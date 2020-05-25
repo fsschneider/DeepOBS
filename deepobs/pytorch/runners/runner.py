@@ -37,6 +37,15 @@ class PTRunner(Runner):
         **training_params
     ):
         return
+    @abc.abstractmethod
+    def training_dcgan(
+            self,
+            tproblem,
+            hyperparams,
+            num_epochs,
+            **training_params
+    ):
+        return
 
     @staticmethod
     def create_testproblem(testproblem, batch_size, l2_reg, random_seed):
@@ -293,6 +302,67 @@ class StandardRunner(PTRunner):
         }
 
         return output
+
+    def training_dcgan(
+            self,
+            tproblem,
+            hyperparams,
+            num_epochs
+    ):
+        opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
+
+        # Lists to log train/test loss, accuracy and the images.
+        img_list = []
+        G_losses = []
+        D_losses = []
+        D_acc_real = []
+        D_acc_fake = []
+
+        global_step = 0
+
+        for epoch_count in range(num_epochs + 1):
+            # Evaluate at beginning of epoch.
+            self.evaluate_all(
+                epoch_count,
+                num_epochs,
+                tproblem,
+                G_losses,
+                D_losses,
+                D_acc_real,
+                D_acc_fake,
+            )
+
+            # Break from train loop after the last round of evaluation
+            if epoch_count == num_epochs:
+                break
+
+            ### Training ###
+
+            # set to training mode
+            tproblem.train_init_op()
+            batch_count = 0
+            while True:
+                try:
+
+
+                    batch_count += 1
+                    global_step += 1
+
+                except StopIteration:
+                    break
+
+
+
+
+        output = {
+            "generator_loss": G_losses,
+            "discriminator_loss": D_losses,
+            "discriminator_accuracy_real": D_acc_real,
+            "discriminator_accuracy_fake": D_acc_fake,
+        }
+
+        return output
+
 
 
 class LearningRateScheduleRunner(PTRunner):

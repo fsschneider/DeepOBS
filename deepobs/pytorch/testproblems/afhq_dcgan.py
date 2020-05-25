@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
-"""The DCGAN architecture for F-MNIST."""
+"""The DCGAN architecture for Animal Faces HQ."""
 import warnings
 import torch
 from torch import nn
 
 from deepobs.pytorch.testproblems import testproblem
 
-from ..datasets.fmnist import fmnist
+from ..datasets.afhq import afhq
 from .testproblem import UnregularizedTestproblem, TestProblem
 from .testproblems_modules import dcgan_g, dcgan_d
 from .testproblems_utils import weights_init
 
 
 
-class fmnist_dcgan(UnregularizedTestproblem):
+class afhq_dcgan(UnregularizedTestproblem):
     """DeepOBS test problem class for the Generative
-    Adversarial Network DC architecture for Fashion-MNIST
+    Adversarial Network DC architecture for Animal Faces HQ
     No regularization is used
 
     Args:
@@ -25,19 +25,19 @@ class fmnist_dcgan(UnregularizedTestproblem):
 
 
     Attributes:
-    data: The DeepOBS data set class for Fashion-MNIST.
+    data: The DeepOBS data set class for Animal Faces HQ.
     loss_function: The loss function for this testproblem
     net:
     """
     def __init__(self, batch_size, l2_reg=None):
-        """Create a new DCGAN test problem instance on Fashion-MNIST
+        """Create a new DCGAN test problem instance on Animal Faces HQ
 
         Args:
           batch_size (int): Batch size to use.
           l2_reg (float): No L2-Regularization (weight decay) is used in this
               test problem. Defaults to ``None`` and any input here is ignored.
         """
-        super(fmnist_dcgan, self).__init__(batch_size,l2_reg)
+        super(afhq_dcgan, self).__init__(batch_size,l2_reg)
         if l2_reg is not None:
             warnings.warn(
                 "L2-Regularization is non-zero but no L2-regularization is used for this model.",
@@ -45,11 +45,11 @@ class fmnist_dcgan(UnregularizedTestproblem):
             )
 
     def set_up(self):
-        """Set up the DCGAN test problem on F-MNIST"""
-        self.data = fmnist(self._batch_size, resize_images=True, train_eval_size=1)
+        """Set up the DCGAN test problem on Animal Faces HQ"""
+        self.data = afhq(self._batch_size, resize_images=True, train_eval_size=1)
         self.loss_function = nn.BCELoss()
-        self.generator = dcgan_g(num_channels=1)
-        self.net = dcgan_d(num_channels=1)
+        self.generator = dcgan_g(num_channels=3)
+        self.net = dcgan_d(num_channels=3)
         self.generator.to(self._device)
         self.net.to(self._device)
         self.generator.apply(weights_init)

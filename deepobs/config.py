@@ -18,6 +18,8 @@ DATA_SET_NAMING = {
     "svhn": "SVHN",
     "imagenet": "ImageNet",
     "tolstoi": "Tolstoi",
+    "celeba": "CelebA",
+    "afhq": "AFHQ",
 }
 TP_NAMING = {
     "d_beale": "Beale",
@@ -36,6 +38,7 @@ TP_NAMING = {
     "wrn404": "Wide ResNet 40-4",
     "inception_v3": "Inception-v3",
     "char_rnn": "Char RNN",
+    "dcgan": "DCGAN",
 }
 DATA_DIR = "data_deepobs"
 
