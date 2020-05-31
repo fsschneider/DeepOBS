@@ -38,11 +38,15 @@ class PTRunner(Runner):
     ):
         return
     @abc.abstractmethod
-    def training_dcgan(
+    def training_gan(
             self,
             tproblem,
             hyperparams,
             num_epochs,
+            print_train_iter,
+            train_log_interval,
+            tb_log,
+            tb_log_dir,
             **training_params
     ):
         return
@@ -141,6 +145,48 @@ class PTRunner(Runner):
 
         return loss, accuracy
 
+    @staticmethod
+    def evaluate_gan(tproblem):
+        """Evaluates the performance of the current state of the model
+                of the testproblem instance.
+                Has to be called in the beggining of every epoch within the
+                training method. Returns the losses and accuracies.
+
+                Args:
+                    tproblem (testproblem): The testproblem instance to evaluate
+                Returns:
+                    float: The loss of the current state of generator and discriminator.
+                    float: The accuracy of the current state of the discriminator.
+
+                """
+        tproblem.train_eval_init_op()
+
+        loss_d = 0.0
+        loss_g = 0.0
+        accuracy_real = 0.0
+        accuracy_fake = 0.0
+        batchCount = 0.0
+
+        while True:
+            try:
+
+                batchCount += 1.0
+
+            except StopIteration:
+                break
+
+
+
+
+        if accuracy_real != 0.0 and accuracy_fake != 0.0:
+            print("{0:s} loss_d {1:g}, loss_g {2:g}, acc_real {3:f}, acc_fake {4:f}".format(loss_d, loss_g, accuracy_real, accuracy_fake))
+        else:
+            print("{0:s} loss_d {1:g}, loss_g {2:g}".format(loss_d, loss_g))
+
+        return loss_d, loss_g, accuracy_real, accuracy_fake
+        # TODO: Fill evaluation process for gan testproblem class
+
+
     def evaluate_all(
         self,
         epoch_count,
@@ -174,6 +220,28 @@ class PTRunner(Runner):
         test_accuracies.append(acc_)
 
         print("********************************")
+
+
+    def evaluate_all_gan(self,
+        epoch_count,
+        num_epochs,
+        tproblem,
+        img_list,
+        G_losses,
+        D_losses,
+        D_acc_real,
+        D_acc_fake,
+    ):
+        print("********************************")
+        print(
+            "Evaluating after {0:d} of {1:d} epochs...".format(
+                epoch_count, num_epochs
+            )
+        )
+
+
+        print("********************************")
+        return
 
 
 class StandardRunner(PTRunner):
@@ -303,13 +371,19 @@ class StandardRunner(PTRunner):
 
         return output
 
-    def training_dcgan(
+    def training_gan(
             self,
             tproblem,
             hyperparams,
-            num_epochs
+            num_epochs,
+            print_train_iter,
+            train_log_interval,
+            tb_log,
+            tb_log_dir,
     ):
-        opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
+        opt_d = self._optimizer_class(tproblem.net.parameters(), betas=(0.5, 0.999), **hyperparams)
+        opt_g = self._optimizer_class(tproblem.generator.parameters(), betas=(0.5, 0.999), **hyperparams)
+        next_batch = next(iter(tproblem.data._train_dataloader))
 
         # Lists to log train/test loss, accuracy and the images.
         img_list = []
@@ -318,19 +392,35 @@ class StandardRunner(PTRunner):
         D_acc_real = []
         D_acc_fake = []
 
+        if tb_log:
+            try:
+                from torch.utils.tensorboard import SummaryWriter
+
+                summary_writer = SummaryWriter(log_dir=tb_log_dir)
+            except ImportError as e:
+                warnings.warn(
+                    "Not possible to use tensorboard for pytorch. Reason: " + e.msg,
+                    RuntimeWarning,
+                )
+                tb_log = False
         global_step = 0
+
+        real_label = 1
+        fake_label = 0
 
         for epoch_count in range(num_epochs + 1):
             # Evaluate at beginning of epoch.
-            self.evaluate_all(
+            """
+                self.evaluate_all_gan(
                 epoch_count,
                 num_epochs,
                 tproblem,
+                img_list,
                 G_losses,
                 D_losses,
                 D_acc_real,
                 D_acc_fake,
-            )
+            )"""
 
             # Break from train loop after the last round of evaluation
             if epoch_count == num_epochs:
@@ -343,7 +433,74 @@ class StandardRunner(PTRunner):
             batch_count = 0
             while True:
                 try:
+                    ############################
+                    # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
+                    ############################
+                    # Train with all-real batch
+                    tproblem.net.zero_grad()
+                    # Format batch
+                    real_cpu = next_batch[0].to(config.DEFAULT_DEVICE)
+                    b_size = real_cpu.size(0)
+                    label = torch.full((b_size,), real_label, device=config.DEFAULT_DEVICE)
+                    # Forward pass real batch through D
+                    output = tproblem.net(real_cpu).view(-1)
+                    # Calculate loss on all-real batch
+                    loss_d_real = tproblem.loss_function(output, label)
+                    # Calculate gradients for D in backward pass
+                    loss_d_real.backward()
+                    accuracy_real = output.mean().item()
 
+                    # Train with all-fake batch
+                    # Generate batch of latent vectors
+                    noise = torch.randn(b_size, tproblem.generator.noise_size, 1, 1, device=config.DEFAULT_DEVICE)
+                    # Generate fake image batch with G
+                    fake = tproblem.generator(noise)
+                    label.fill_(fake_label)
+                    # Classify all fake batch with D
+                    output = tproblem.net(fake.detach()).view(-1)
+                    # Calculate D's loss on the all-fake batch
+                    loss_d_fake = tproblem.loss_function(output, label)
+                    # Calculate the gradients for this batch
+                    loss_d_fake.backward()
+                    D_G_z1 = output.mean().item()
+                    # Add the gradients from the all-real and all-fake batches
+                    loss_d = loss_d_real + loss_d_fake
+                    # Update D
+                    opt_d.step()
+
+                    ############################
+                    # (2) Update G network: maximize log(D(G(z)))
+                    ###########################
+                    tproblem.generator.zero_grad()
+                    label.fill_(real_label)  # fake labels are real for generator cost
+                    # Since we just updated D, perform another forward pass of all-fake batch through D
+                    output = tproblem.net(fake).view(-1)
+                    # Calculate G's loss based on this output
+                    loss_g = tproblem.loss_function(output, label)
+                    # Calculate gradients for G
+                    loss_g.backward()
+                    accuracy_fake = output.mean().item()
+                    # Update G
+                    opt_g.step()
+
+                    if batch_count % train_log_interval == 0:
+                        G_losses.append(loss_g.item())
+                        D_losses.append(loss_d.item())
+                        D_acc_real.append(accuracy_real)
+                        D_acc_fake.append(accuracy_fake)
+                        if print_train_iter:
+                            print(
+                                "Epoch {0:d}, step {1:d}: loss_d {2:g}, loss_g {3:g}".format(
+                                    epoch_count, batch_count, loss_d.item(), loss_g.item()
+                                )
+                            )
+                        if tb_log:
+                            summary_writer.add_scalar(
+                                "loss_d", loss_d.item(), global_step
+                            )
+                            summary_writer.add_scalar(
+                                "loss_g", loss_d.item(), global_step
+                            )
 
                     batch_count += 1
                     global_step += 1
@@ -351,8 +508,21 @@ class StandardRunner(PTRunner):
                 except StopIteration:
                     break
 
+            if not np.isfinite(loss_d.item()):
+                self._abort_routine(
+                    epoch_count,
+                    num_epochs,
+                    D_losses,
+                    G_losses,
+                    D_acc_real,
+                    D_acc_fake,
+                )
+                break
+            else:
+                continue
 
-
+        if tb_log:
+            summary_writer.close()
 
         output = {
             "generator_loss": G_losses,

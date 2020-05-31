@@ -617,7 +617,8 @@ class net_cifar100_allcnnc(nn.Sequential):
         self.add_module("dropout3", nn.Dropout(p=0.5))
 
         self.add_module(
-            "conv7", tfconv2d(in_channels=192, out_channels=192, kernel_size=3)
+            "conv7",
+            tfconv2d(in_channels=192, out_channels=192, kernel_size=3)
         )
         self.add_module("relu7", nn.ReLU())
         self.add_module(
@@ -650,63 +651,98 @@ class net_cifar100_allcnnc(nn.Sequential):
                 nn.init.xavier_normal_(module.weight)
 
 
-# Initialize nz: input noise vector for G, ngf= size of feature maps G
 class dcgan_g(nn.Module):
-    def __init__(self, num_channels, nz=100, ngf=64):
+    def __init__(self, num_channels, noise_size=100, fm_size=64):
         super(dcgan_g, self).__init__()
-        self.nz = nz
+        self.noise_size = noise_size
         self.main = nn.Sequential(
-            # input is Z, going into a transposed convolution
-            nn.ConvTranspose2d(nz, ngf * 8, 4, 1, 0, bias=False),
-            nn.BatchNorm2d(ngf * 8),
+            nn.ConvTranspose2d(
+                noise_size,
+                fm_size * 8,
+                4, 1, 0,
+                bias=False,
+            ),
+            nn.BatchNorm2d(fm_size * 8),
             nn.ReLU(True),
-            # state size. (ngf*8) x 4 x 4
-            nn.ConvTranspose2d(ngf * 8, ngf * 4, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ngf * 4),
+            nn.ConvTranspose2d(
+                fm_size * 8,
+                fm_size * 4,
+                4, 2, 1,
+                bias=False,
+            ),
+            nn.BatchNorm2d(fm_size * 4),
             nn.ReLU(True),
-            # state size. (ngf*4) x 8 x 8
-            nn.ConvTranspose2d(ngf * 4, ngf * 2, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ngf * 2),
+            nn.ConvTranspose2d(
+                fm_size * 4,
+                fm_size * 2,
+                4, 2, 1,
+                bias=False,
+            ),
+            nn.BatchNorm2d(fm_size * 2),
             nn.ReLU(True),
-            # state size. (ngf*2) x 16 x 16
-            nn.ConvTranspose2d(ngf * 2, ngf, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ngf),
+            nn.ConvTranspose2d(
+                fm_size * 2,
+                fm_size,
+                4, 2, 1,
+                bias=False,
+            ),
+            nn.BatchNorm2d(fm_size),
             nn.ReLU(True),
-            # state size. (ngf) x 32 x 32
-            nn.ConvTranspose2d(ngf, num_channels, 4, 2, 1, bias=False),
+            nn.ConvTranspose2d(
+                fm_size,
+                num_channels,
+                4, 2, 1,
+                bias=False,
+            ),
             nn.Tanh()
-            # state size. (num_channels) x 64 x 64
         )
 
     def forward(self, input):
         return self.main(input)
 
-
-# ndf: size of feature maps in discriminator
-
 class dcgan_d(nn.Module):
-    def __init__(self, num_channels, ndf=64):
+    def __init__(self, num_channels, fm_size=64):
         super(dcgan_d, self).__init__()
         self.main = nn.Sequential(
-            # input is (nc) x 64 x 64
-            nn.Conv2d(num_channels, ndf, 4, 2, 1, bias=False),
+            nn.Conv2d(
+                num_channels,
+                fm_size,
+                4, 2, 1,
+                bias=False,
+            ),
             nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf) x 32 x 32
-            nn.Conv2d(ndf, ndf * 2, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 2),
+            nn.Conv2d(
+                fm_size,
+                fm_size * 2,
+                4, 2, 1,
+                bias=False,
+            ),
+            nn.BatchNorm2d(fm_size * 2),
             nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf*2) x 16 x 16
-            nn.Conv2d(ndf * 2, ndf * 4, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 4),
+            # state size. (fm_size*2) x 16 x 16
+            nn.Conv2d(
+                fm_size * 2,
+                fm_size * 4,
+                4, 2, 1,
+                bias=False,
+            ),
+            nn.BatchNorm2d(fm_size * 4),
             nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf*4) x 8 x 8
-            nn.Conv2d(ndf * 4, ndf * 8, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 8),
+            nn.Conv2d(
+                fm_size * 4,
+                fm_size * 8,
+                4, 2, 1,
+                bias=False,
+            ),
+            nn.BatchNorm2d(fm_size * 8),
             nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf*8) x 4 x 4
-            nn.Conv2d(ndf * 8, 1, 4, 1, 0, bias=False),
+            nn.Conv2d(
+                fm_size * 8,
+                1,
+                4, 1, 0,
+                bias=False,
+            ),
             nn.Sigmoid()
-            # state size. 1
         )
 
     def forward(self, input):

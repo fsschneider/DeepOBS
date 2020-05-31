@@ -211,11 +211,15 @@ class Runner(abc.ABC):
             testproblem, batch_size, l2_reg, random_seed
         )
 
-        if "_dcgan" in str(testproblem):
-            output = self.training_dcgan(
+        if "gan" in str(testproblem):
+            output = self.training_gan(
                 tproblem,
                 hyperparams,
                 num_epochs,
+                print_train_iter,
+                train_log_interval,
+                tb_log,
+                tb_log_dir,
                 **training_params
             )
         else:
@@ -387,22 +391,27 @@ class Runner(abc.ABC):
         return
 
     @abc.abstractmethod
-    def training_dcgan(
+    def training_gan(
             self,
             tproblem,
             hyperparams,
             num_epochs,
             print_train_iter,
+            train_log_interval,
+            tb_log,
+            tb_log_dir,
             **training_params
     ):
-        """Performs the training for the dcgan testproblem and stores the metrices.
+        """Performs the training for the gan testproblem class and stores the metrices.
 
             Args:
                 tproblem (deepobs.[tensorflow/pytorch].testproblems.testproblem): The testproblem instance to train on.
                 hyperparams (dict): The optimizer hyperparameters to use for the training.
                 num_epochs (int): The number of training epochs.
                 print_train_iter (bool): Whether to print the training progress at every train_log_interval
-                **training_params (dict): Kwargs for additional training parameters that are implemented by subclass.
+                train_log_interval (int): Mini-batch interval for logging.
+                tb_log (bool): Whether to use tensorboard logging or not
+                tb_log_dir (str): The path where to save tensorboard events.**training_params (dict): Kwargs for additional training parameters that are implemented by subclass.
 
             Returns:
                 dict: The logged metrices. Is of the form: \
@@ -416,6 +425,10 @@ class Runner(abc.ABC):
     @staticmethod
     @abc.abstractmethod
     def evaluate(*args, **kwargs):
+        pass
+    @staticmethod
+    @abc.abstractmethod
+    def evaluate_gan(*args, **kwargs):
         pass
 
     @staticmethod
