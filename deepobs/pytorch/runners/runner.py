@@ -438,34 +438,23 @@ class StandardRunner(PTRunner):
                     ############################
                     # Train with all-real batch
                     tproblem.net.zero_grad()
-                    # Format batch
                     real_cpu = next_batch[0].to(config.DEFAULT_DEVICE)
                     b_size = real_cpu.size(0)
                     label = torch.full((b_size,), real_label, device=config.DEFAULT_DEVICE)
-                    # Forward pass real batch through D
                     output = tproblem.net(real_cpu).view(-1)
-                    # Calculate loss on all-real batch
                     loss_d_real = tproblem.loss_function(output, label)
-                    # Calculate gradients for D in backward pass
                     loss_d_real.backward()
                     accuracy_real = output.mean().item()
 
                     # Train with all-fake batch
-                    # Generate batch of latent vectors
                     noise = torch.randn(b_size, tproblem.generator.noise_size, 1, 1, device=config.DEFAULT_DEVICE)
-                    # Generate fake image batch with G
                     fake = tproblem.generator(noise)
                     label.fill_(fake_label)
-                    # Classify all fake batch with D
                     output = tproblem.net(fake.detach()).view(-1)
-                    # Calculate D's loss on the all-fake batch
                     loss_d_fake = tproblem.loss_function(output, label)
-                    # Calculate the gradients for this batch
                     loss_d_fake.backward()
                     D_G_z1 = output.mean().item()
-                    # Add the gradients from the all-real and all-fake batches
                     loss_d = loss_d_real + loss_d_fake
-                    # Update D
                     opt_d.step()
 
                     ############################
@@ -473,14 +462,10 @@ class StandardRunner(PTRunner):
                     ###########################
                     tproblem.generator.zero_grad()
                     label.fill_(real_label)  # fake labels are real for generator cost
-                    # Since we just updated D, perform another forward pass of all-fake batch through D
                     output = tproblem.net(fake).view(-1)
-                    # Calculate G's loss based on this output
                     loss_g = tproblem.loss_function(output, label)
-                    # Calculate gradients for G
                     loss_g.backward()
                     accuracy_fake = output.mean().item()
-                    # Update G
                     opt_g.step()
 
                     if batch_count % train_log_interval == 0:
