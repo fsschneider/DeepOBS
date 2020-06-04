@@ -11,6 +11,8 @@ from random import seed
 import numpy as np
 import torch
 
+import torchvision.utils as vutils
+
 from deepobs import config as global_config
 from deepobs.abstract_runner.abstract_runner import Runner
 
@@ -146,7 +148,7 @@ class PTRunner(Runner):
         return loss, accuracy
 
     @staticmethod
-    def evaluate_gan(tproblem):
+    def evaluate_gan(tproblem, fixed_noise):
         """Evaluates the performance of the current state of the model
                 of the testproblem instance.
                 Has to be called in the beggining of every epoch within the
@@ -159,33 +161,16 @@ class PTRunner(Runner):
                     float: The accuracy of the current state of the discriminator.
 
                 """
-        tproblem.train_eval_init_op()
-
-        loss_d = 0.0
-        loss_g = 0.0
-        accuracy_real = 0.0
-        accuracy_fake = 0.0
-        batchCount = 0.0
-
         while True:
             try:
-
-                batchCount += 1.0
+                fid=0.0
+                # Fill evaluation process for gan testproblem class
 
             except StopIteration:
                 break
 
 
-
-
-        if accuracy_real != 0.0 and accuracy_fake != 0.0:
-            print("{0:s} loss_d {1:g}, loss_g {2:g}, acc_real {3:f}, acc_fake {4:f}".format(loss_d, loss_g, accuracy_real, accuracy_fake))
-        else:
-            print("{0:s} loss_d {1:g}, loss_g {2:g}".format(loss_d, loss_g))
-
-        return loss_d, loss_g, accuracy_real, accuracy_fake
-        # TODO: Fill evaluation process for gan testproblem class
-
+        return
 
     def evaluate_all(
         self,
@@ -231,6 +216,7 @@ class PTRunner(Runner):
         D_losses,
         D_acc_real,
         D_acc_fake,
+        fixed_noise,
     ):
         print("********************************")
         print(
@@ -239,6 +225,9 @@ class PTRunner(Runner):
             )
         )
 
+        with torch.no_grad():
+            fake = tproblem.generator(fixed_noise).detach().cpu()
+        img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
 
         print("********************************")
         return
@@ -383,6 +372,9 @@ class StandardRunner(PTRunner):
     ):
         opt_d = self._optimizer_class(tproblem.net.parameters(), betas=(0.5, 0.999), **hyperparams)
         opt_g = self._optimizer_class(tproblem.generator.parameters(), betas=(0.5, 0.999), **hyperparams)
+
+        # Input vector for G
+        fixed_noise = torch.randn(64, tproblem.generator.noise_size, 1, 1, device=config.DEFAULT_DEVICE)
         next_batch = next(iter(tproblem.data._train_dataloader))
 
         # Lists to log train/test loss, accuracy and the images.
@@ -404,14 +396,14 @@ class StandardRunner(PTRunner):
                 )
                 tb_log = False
         global_step = 0
+        iters = 0
 
         real_label = 1
         fake_label = 0
 
         for epoch_count in range(num_epochs + 1):
             # Evaluate at beginning of epoch.
-            """
-                self.evaluate_all_gan(
+            self.evaluate_all_gan(
                 epoch_count,
                 num_epochs,
                 tproblem,
@@ -420,7 +412,8 @@ class StandardRunner(PTRunner):
                 D_losses,
                 D_acc_real,
                 D_acc_fake,
-            )"""
+                fixed_noise
+            )
 
             # Break from train loop after the last round of evaluation
             if epoch_count == num_epochs:
@@ -431,67 +424,64 @@ class StandardRunner(PTRunner):
             # set to training mode
             tproblem.train_init_op()
             batch_count = 0
-            while True:
-                try:
-                    ############################
-                    # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
-                    ############################
-                    # Train with all-real batch
-                    tproblem.net.zero_grad()
-                    real_cpu = next_batch[0].to(config.DEFAULT_DEVICE)
-                    b_size = real_cpu.size(0)
-                    label = torch.full((b_size,), real_label, device=config.DEFAULT_DEVICE)
-                    output = tproblem.net(real_cpu).view(-1)
-                    loss_d_real = tproblem.loss_function(output, label)
-                    loss_d_real.backward()
-                    accuracy_real = output.mean().item()
+            for i, data in enumerate(tproblem.data._train_dataloader, 0):
+                ############################
+                # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
+                ############################
+                # Train with all-real batch
+                tproblem.net.zero_grad()
+                real_cpu = next_batch[0].to(config.DEFAULT_DEVICE)
+                b_size = real_cpu.size(0)
+                label = torch.full((b_size,), real_label, device=config.DEFAULT_DEVICE)
+                output = tproblem.net(real_cpu).view(-1)
+                loss_d_real = tproblem.loss_function(output, label)
+                loss_d_real.backward()
+                accuracy_real = output.mean().item()
 
-                    # Train with all-fake batch
-                    noise = torch.randn(b_size, tproblem.generator.noise_size, 1, 1, device=config.DEFAULT_DEVICE)
-                    fake = tproblem.generator(noise)
-                    label.fill_(fake_label)
-                    output = tproblem.net(fake.detach()).view(-1)
-                    loss_d_fake = tproblem.loss_function(output, label)
-                    loss_d_fake.backward()
-                    D_G_z1 = output.mean().item()
-                    loss_d = loss_d_real + loss_d_fake
-                    opt_d.step()
+                # Train with all-fake batch
+                noise = torch.randn(b_size, tproblem.generator.noise_size, 1, 1, device=config.DEFAULT_DEVICE)
+                fake = tproblem.generator(noise)
+                label.fill_(fake_label)
+                output = tproblem.net(fake.detach()).view(-1)
+                loss_d_fake = tproblem.loss_function(output, label)
+                loss_d_fake.backward()
+                D_G_z1 = output.mean().item()
+                loss_d = loss_d_real + loss_d_fake
+                opt_d.step()
 
-                    ############################
-                    # (2) Update G network: maximize log(D(G(z)))
-                    ###########################
-                    tproblem.generator.zero_grad()
-                    label.fill_(real_label)  # fake labels are real for generator cost
-                    output = tproblem.net(fake).view(-1)
-                    loss_g = tproblem.loss_function(output, label)
-                    loss_g.backward()
-                    accuracy_fake = output.mean().item()
-                    opt_g.step()
+                ############################
+                # (2) Update G network: maximize log(D(G(z)))
+                ###########################
+                tproblem.generator.zero_grad()
+                label.fill_(real_label)  # fake labels are real for generator cost
+                output = tproblem.net(fake).view(-1)
+                loss_g = tproblem.loss_function(output, label)
+                loss_g.backward()
+                accuracy_fake = output.mean().item()
+                opt_g.step()
 
-                    if batch_count % train_log_interval == 0:
-                        G_losses.append(loss_g.item())
-                        D_losses.append(loss_d.item())
-                        D_acc_real.append(accuracy_real)
-                        D_acc_fake.append(accuracy_fake)
-                        if print_train_iter:
-                            print(
-                                "Epoch {0:d}, step {1:d}: loss_d {2:g}, loss_g {3:g}".format(
-                                    epoch_count, batch_count, loss_d.item(), loss_g.item()
-                                )
+                if batch_count % train_log_interval == 0:
+                    G_losses.append(loss_g.item())
+                    D_losses.append(loss_d.item())
+                    D_acc_real.append(accuracy_real)
+                    D_acc_fake.append(accuracy_fake)
+                    if print_train_iter:
+                        print(
+                            "Epoch {0:d}, step {1:d}: loss_d {2:g}, loss_g {3:g}, accuracy_real {4:g}, accuracy_fake {5:g}".format(
+                                epoch_count, batch_count, loss_d.item(), loss_g.item(), accuracy_real, accuracy_fake
                             )
-                        if tb_log:
-                            summary_writer.add_scalar(
-                                "loss_d", loss_d.item(), global_step
-                            )
-                            summary_writer.add_scalar(
-                                "loss_g", loss_d.item(), global_step
-                            )
+                        )
+                    if tb_log:
+                        summary_writer.add_scalar(
+                            "loss_d", loss_d.item(), global_step
+                        )
+                        summary_writer.add_scalar(
+                            "loss_g", loss_d.item(), global_step
+                        )
 
-                    batch_count += 1
-                    global_step += 1
-
-                except StopIteration:
-                    break
+                batch_count += 1
+                global_step += 1
+                iters += 1
 
             if not np.isfinite(loss_d.item()):
                 self._abort_routine(
