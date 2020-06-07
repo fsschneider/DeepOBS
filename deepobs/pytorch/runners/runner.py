@@ -11,7 +11,11 @@ from random import seed
 import numpy as np
 import torch
 
+import matplotlib.pyplot as plt
+
 import torchvision.utils as vutils
+import torchvision.models as models
+
 
 from deepobs import config as global_config
 from deepobs.abstract_runner.abstract_runner import Runner
@@ -39,6 +43,7 @@ class PTRunner(Runner):
         **training_params
     ):
         return
+
     @abc.abstractmethod
     def training_gan(
             self,
@@ -148,7 +153,7 @@ class PTRunner(Runner):
         return loss, accuracy
 
     @staticmethod
-    def evaluate_gan(tproblem, fixed_noise):
+    def evaluate_gan(tproblem):
         """Evaluates the performance of the current state of the model
                 of the testproblem instance.
                 Has to be called in the beggining of every epoch within the
@@ -157,19 +162,44 @@ class PTRunner(Runner):
                 Args:
                     tproblem (testproblem): The testproblem instance to evaluate
                 Returns:
-                    float: The loss of the current state of generator and discriminator.
-                    float: The accuracy of the current state of the discriminator.
+                    FID (Fréchet inception score): Distance between distribution of real and fake image
+
+        from numpy import asarray, cov, trace, iscomplexobj
+        from numpy.random import shuffle
+        from scipy.linalg import sqrtm
+        from skimage.transform import resize
+
+        inception = models.inception_v3(pretrained=True, progress=True)
+
+        # scale an array of images to a new size
+        def scale_images(img_list, new_shape):
+            new_img_list = []
+            for image in img_list:
+                # resize with nearest neighbor interpolation
+                new_image = resize(image, new_shape, 0)
+                new_img_list.append(new_image)
+            return asarray(new_img_list)
+
+        # calculate frechet inception distance
+        def calculate_fid(images1, images2):
+            # calculate activations
+            act1 = gan_eval_inception.inception.predict(images1)
+            act2 = gan_eval_inception.inception.predict(images2)
+            # calculate mean and covariance statistics
+            mu1, sigma1 = act1.mean(axis=0), cov(act1, rowvar=False)
+            mu2, sigma2 = act2.mean(axis=0), cov(act2, rowvar=False)
+            # calculate sum squared difference between means
+            ssdiff = np.sum((mu1 - mu2) ** 2.0)
+            # calculate sqrt of product between cov
+            covmean = sqrtm(sigma1.dot(sigma2))
+            # check and correct imaginary numbers from sqrt
+            if iscomplexobj(covmean):
+                covmean = covmean.real
+            # calculate score
+            fid = ssdiff + trace(sigma1 + sigma2 - 2.0 * covmean)
+            return fid
 
                 """
-        while True:
-            try:
-                fid=0.0
-                # Fill evaluation process for gan testproblem class
-
-            except StopIteration:
-                break
-
-
         return
 
     def evaluate_all(
@@ -212,11 +242,12 @@ class PTRunner(Runner):
         num_epochs,
         tproblem,
         img_list,
-        G_losses,
-        D_losses,
-        D_acc_real,
-        D_acc_fake,
+        g_losses,
+        d_losses,
+        d_acc_real,
+        d_acc_fake,
         fixed_noise,
+        next_batch,
     ):
         print("********************************")
         print(
@@ -228,6 +259,11 @@ class PTRunner(Runner):
         with torch.no_grad():
             fake = tproblem.generator(fixed_noise).detach().cpu()
         img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
+        plt.figure(figsize=(15, 15))
+        plt.axis("off")
+        plt.title("Fake image G(z)")
+        plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
+        plt.savefig('results/images/testproblem_[num_epochs_' + str(num_epochs) + '_batch_size_' + str(len(next_batch[0])) + ']')
 
         print("********************************")
         return
@@ -370,19 +406,20 @@ class StandardRunner(PTRunner):
             tb_log,
             tb_log_dir,
     ):
-        opt_d = self._optimizer_class(tproblem.net.parameters(), betas=(0.5, 0.999), **hyperparams)
-        opt_g = self._optimizer_class(tproblem.generator.parameters(), betas=(0.5, 0.999), **hyperparams)
+        opt_d = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
+        opt_g = self._optimizer_class(tproblem.generator.parameters(), **hyperparams)
 
         # Input vector for G
         fixed_noise = torch.randn(64, tproblem.generator.noise_size, 1, 1, device=config.DEFAULT_DEVICE)
+
         next_batch = next(iter(tproblem.data._train_dataloader))
 
         # Lists to log train/test loss, accuracy and the images.
         img_list = []
-        G_losses = []
-        D_losses = []
-        D_acc_real = []
-        D_acc_fake = []
+        g_losses = []
+        d_losses = []
+        d_acc_real = []
+        d_acc_fake = []
 
         if tb_log:
             try:
@@ -401,18 +438,19 @@ class StandardRunner(PTRunner):
         real_label = 1
         fake_label = 0
 
-        for epoch_count in range(num_epochs + 1):
+        for epoch_count in range(num_epochs+1):
             # Evaluate at beginning of epoch.
             self.evaluate_all_gan(
                 epoch_count,
                 num_epochs,
                 tproblem,
                 img_list,
-                G_losses,
-                D_losses,
-                D_acc_real,
-                D_acc_fake,
-                fixed_noise
+                g_losses,
+                d_losses,
+                d_acc_real,
+                d_acc_fake,
+                fixed_noise,
+                next_batch
             )
 
             # Break from train loop after the last round of evaluation
@@ -424,34 +462,30 @@ class StandardRunner(PTRunner):
             # set to training mode
             tproblem.train_init_op()
             batch_count = 0
-            for i, data in enumerate(tproblem.data._train_dataloader, 0):
-                ############################
-                # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
-                ############################
+            for i, data in enumerate(next_batch[0], 0):
+                # (1) Update D network
+
                 # Train with all-real batch
                 tproblem.net.zero_grad()
                 real_cpu = next_batch[0].to(config.DEFAULT_DEVICE)
-                b_size = real_cpu.size(0)
-                label = torch.full((b_size,), real_label, device=config.DEFAULT_DEVICE)
+                label = torch.full((len(next_batch[0]),), real_label, device=config.DEFAULT_DEVICE)
                 output = tproblem.net(real_cpu).view(-1)
                 loss_d_real = tproblem.loss_function(output, label)
                 loss_d_real.backward()
                 accuracy_real = output.mean().item()
 
                 # Train with all-fake batch
-                noise = torch.randn(b_size, tproblem.generator.noise_size, 1, 1, device=config.DEFAULT_DEVICE)
+                noise = torch.randn(len(next_batch[0]), tproblem.generator.noise_size, 1, 1, device=config.DEFAULT_DEVICE)
                 fake = tproblem.generator(noise)
                 label.fill_(fake_label)
                 output = tproblem.net(fake.detach()).view(-1)
                 loss_d_fake = tproblem.loss_function(output, label)
                 loss_d_fake.backward()
-                D_G_z1 = output.mean().item()
                 loss_d = loss_d_real + loss_d_fake
                 opt_d.step()
 
-                ############################
-                # (2) Update G network: maximize log(D(G(z)))
-                ###########################
+                # (2) Update G network
+
                 tproblem.generator.zero_grad()
                 label.fill_(real_label)  # fake labels are real for generator cost
                 output = tproblem.net(fake).view(-1)
@@ -461,10 +495,10 @@ class StandardRunner(PTRunner):
                 opt_g.step()
 
                 if batch_count % train_log_interval == 0:
-                    G_losses.append(loss_g.item())
-                    D_losses.append(loss_d.item())
-                    D_acc_real.append(accuracy_real)
-                    D_acc_fake.append(accuracy_fake)
+                    g_losses.append(loss_g.item())
+                    d_losses.append(loss_d.item())
+                    d_acc_real.append(accuracy_real)
+                    d_acc_fake.append(accuracy_fake)
                     if print_train_iter:
                         print(
                             "Epoch {0:d}, step {1:d}: loss_d {2:g}, loss_g {3:g}, accuracy_real {4:g}, accuracy_fake {5:g}".format(
@@ -487,10 +521,10 @@ class StandardRunner(PTRunner):
                 self._abort_routine(
                     epoch_count,
                     num_epochs,
-                    D_losses,
-                    G_losses,
-                    D_acc_real,
-                    D_acc_fake,
+                    g_losses,
+                    d_losses,
+                    d_acc_real,
+                    d_acc_fake,
                 )
                 break
             else:
@@ -500,14 +534,13 @@ class StandardRunner(PTRunner):
             summary_writer.close()
 
         output = {
-            "generator_loss": G_losses,
-            "discriminator_loss": D_losses,
-            "discriminator_accuracy_real": D_acc_real,
-            "discriminator_accuracy_fake": D_acc_fake,
+            "generator_loss": g_losses,
+            "discriminator_loss": d_losses,
+            "discriminator_accuracy_real": d_acc_real,
+            "discriminator_accuracy_fake": d_acc_fake,
         }
 
         return output
-
 
 
 class LearningRateScheduleRunner(PTRunner):

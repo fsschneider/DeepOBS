@@ -2,15 +2,8 @@
 """Utility functions for running optimizers."""
 
 import numpy as np
-import torchvision.models as models
 
-from torch import nn
 from torch.optim import lr_scheduler
-from numpy import asarray, cov, trace, iscomplexobj
-from numpy.random import shuffle
-from scipy.linalg import sqrtm
-from skimage.transform import resize
-
 
 
 def make_lr_schedule(optimizer, lr_sched_epochs=None, lr_sched_factors=None):
@@ -51,41 +44,4 @@ def make_lr_schedule(optimizer, lr_sched_epochs=None, lr_sched_factors=None):
 
     sched = lr_scheduler.LambdaLR(optimizer, determine_lr)
     return sched
-
-
-class gan_eval_inception(nn.Module):
-    def __init__(self, img_list):
-        super(gan_eval_inception, self).__init__()
-
-   # inception = models.inception_v3(pretrained=True, progress=True)
-
-    # scale an array of images to a new size
-    def scale_images(img_list, new_shape):
-        new_img_list = []
-        for image in img_list:
-            # resize with nearest neighbor interpolation
-            new_image = resize(image, new_shape, 0)
-            new_img_list.append(new_image)
-        return asarray(new_img_list)
-
-    # calculate frechet inception distance
-    def calculate_fid(images1, images2):
-        # calculate activations
-        act1 = gan_eval_inception.inception.predict(images1)
-        act2 = gan_eval_inception.inception.predict(images2)
-        # calculate mean and covariance statistics
-        mu1, sigma1 = act1.mean(axis=0), cov(act1, rowvar=False)
-        mu2, sigma2 = act2.mean(axis=0), cov(act2, rowvar=False)
-        # calculate sum squared difference between means
-        ssdiff = np.sum((mu1 - mu2) ** 2.0)
-        # calculate sqrt of product between cov
-        covmean = sqrtm(sigma1.dot(sigma2))
-        # check and correct imaginary numbers from sqrt
-        if iscomplexobj(covmean):
-            covmean = covmean.real
-        # calculate score
-        fid = ssdiff + trace(sigma1 + sigma2 - 2.0 * covmean)
-        return fid
-
-    pass
 
