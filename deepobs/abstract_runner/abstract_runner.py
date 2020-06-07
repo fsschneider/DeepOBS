@@ -7,7 +7,9 @@ import json
 import os
 import time
 import warnings
+
 from copy import deepcopy
+
 
 from deepobs import config as global_config
 
@@ -411,7 +413,8 @@ class Runner(abc.ABC):
                 print_train_iter (bool): Whether to print the training progress at every train_log_interval
                 train_log_interval (int): Mini-batch interval for logging.
                 tb_log (bool): Whether to use tensorboard logging or not
-                tb_log_dir (str): The path where to save tensorboard events.**training_params (dict): Kwargs for additional training parameters that are implemented by subclass.
+                tb_log_dir (str): The path where to save tensorboard events.
+                **training_params (dict): Kwargs for additional training parameters that are implemented by subclass.
 
             Returns:
                 dict: The logged metrices. Is of the form: \
@@ -426,6 +429,7 @@ class Runner(abc.ABC):
     @abc.abstractmethod
     def evaluate(*args, **kwargs):
         pass
+
     @staticmethod
     @abc.abstractmethod
     def evaluate_gan(*args, **kwargs):

@@ -263,7 +263,10 @@ class PTRunner(Runner):
         plt.axis("off")
         plt.title("Fake image G(z)")
         plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
-        plt.savefig('results/images/testproblem_[num_epochs_' + str(num_epochs) + '_batch_size_' + str(len(next_batch[0])) + ']')
+        plt.savefig('results/'+str(type(tproblem).__name__)+'/'
+            + str(self._optimizer_class.__name__)
+            +'/num_epochs__' + str(num_epochs)
+            + '__batch_size__' + str(len(next_batch[0])))
 
         print("********************************")
         return
