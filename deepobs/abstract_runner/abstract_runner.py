@@ -222,7 +222,7 @@ class Runner(abc.ABC):
                 train_log_interval,
                 tb_log,
                 tb_log_dir,
-                **training_params
+                ** training_params
             )
         else:
             output = self.training(
