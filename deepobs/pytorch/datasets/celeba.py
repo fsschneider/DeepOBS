@@ -45,9 +45,8 @@ class celeba(dataset.DataSet):
 
     def _make_train_and_valid_dataloader(self):
 
-        train_dataset = datasets.CelebA(
-            root=config.get_data_dir(),
-            split='train',
+        train_dataset = datasets.ImageFolder(
+            root="data_deepobs/celeba/img_align_celeba",
             transform=transforms.Compose(
                 [transforms.Resize(64),
                  transforms.CenterCrop(64),
@@ -55,11 +54,9 @@ class celeba(dataset.DataSet):
                  transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                  ]
             ),
-            download=True,
         )
-        valid_dataset = datasets.CelebA(
-            root=config.get_data_dir(),
-            split='train',
+        valid_dataset = datasets.ImageFolder(
+            root="data_deepobs/celeba/img_align_celeba",
             transform=transforms.Compose(
                 [transforms.Resize(64),
                  transforms.CenterCrop(64),
@@ -67,7 +64,6 @@ class celeba(dataset.DataSet):
                  transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                  ]
             ),
-            download=True,
         )
         train_loader, valid_loader = self._make_train_and_valid_dataloader_helper(
             train_dataset, valid_dataset
@@ -76,10 +72,8 @@ class celeba(dataset.DataSet):
 
     def _make_test_dataloader(self):
         transform = transforms.ToTensor()
-        test_dataset = datasets.CelebA(
-            root=config.get_data_dir(),
-            split='train',
-            download=True,
+        test_dataset = datasets.ImageFolder(
+            root="data_deepobs/celeba/img_align_celeba",
             transform=transform,
         )
         return self._make_dataloader(test_dataset, sampler=None)

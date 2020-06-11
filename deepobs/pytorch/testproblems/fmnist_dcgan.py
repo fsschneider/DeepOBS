@@ -46,7 +46,7 @@ class fmnist_dcgan(UnregularizedTestproblem):
 
     def set_up(self):
         """Set up the DCGAN test problem on F-MNIST"""
-        self.data = fmnist(self._batch_size, resize_images=True, train_eval_size=10000)
+        self.data = fmnist(self._batch_size, resize_images=True, train_eval_size=10)
         self.loss_function = nn.BCELoss()
         self.generator = dcgan_g(num_channels=1)
         self.net = dcgan_d(num_channels=1)
