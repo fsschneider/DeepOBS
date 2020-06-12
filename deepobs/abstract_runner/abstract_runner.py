@@ -10,7 +10,6 @@ import warnings
 
 from copy import deepcopy
 
-
 from deepobs import config as global_config
 
 from .abstract_runner_utils import _add_hp_to_argparse, float2str
@@ -64,22 +63,22 @@ class Runner(abc.ABC):
         self._file_name = None
 
     def run(
-        self,
-        testproblem=None,
-        hyperparams=None,
-        batch_size=None,
-        num_epochs=None,
-        random_seed=None,
-        data_dir=None,
-        output_dir=None,
-        l2_reg=None,
-        no_logs=None,
-        train_log_interval=None,
-        print_train_iter=None,
-        tb_log=None,
-        tb_log_dir=None,
-        skip_if_exists=False,
-        **training_params
+            self,
+            testproblem=None,
+            hyperparams=None,
+            batch_size=None,
+            num_epochs=None,
+            random_seed=None,
+            data_dir=None,
+            output_dir=None,
+            l2_reg=None,
+            no_logs=None,
+            train_log_interval=None,
+            print_train_iter=None,
+            tb_log=None,
+            tb_log_dir=None,
+            skip_if_exists=False,
+            **training_params
     ):
         """Runs a testproblem with the optimizer_class. Has the following tasks:
             1. setup testproblem
@@ -133,7 +132,6 @@ class Runner(abc.ABC):
         )
 
         require_run = not (exists and skip_if_exists)
-
         if require_run:
             args = self.parse_args(
                 testproblem,
@@ -157,21 +155,21 @@ class Runner(abc.ABC):
             print("Found output file(s): {}\nSkipping run.".format(matches))
 
     def _run(
-        self,
-        testproblem=None,
-        hyperparams=None,
-        batch_size=None,
-        num_epochs=None,
-        random_seed=None,
-        data_dir=None,
-        output_dir=None,
-        l2_reg=None,
-        no_logs=None,
-        train_log_interval=None,
-        print_train_iter=None,
-        tb_log=None,
-        tb_log_dir=None,
-        **training_params
+            self,
+            testproblem=None,
+            hyperparams=None,
+            batch_size=None,
+            num_epochs=None,
+            random_seed=None,
+            data_dir=None,
+            output_dir=None,
+            l2_reg=None,
+            no_logs=None,
+            train_log_interval=None,
+            print_train_iter=None,
+            tb_log=None,
+            tb_log_dir=None,
+            **training_params
     ):
 
         # Creates a backup copy of the initial parameters. Users might change the dicts during training.
@@ -222,7 +220,9 @@ class Runner(abc.ABC):
                 train_log_interval,
                 tb_log,
                 tb_log_dir,
-                ** training_params
+                run_dir=self._run_directory,
+                file_name=self._file_name,
+                **training_params
             )
         else:
             output = self.training(
@@ -253,21 +253,21 @@ class Runner(abc.ABC):
         return output
 
     def run_exists(
-        self,
-        testproblem=None,
-        hyperparams=None,
-        batch_size=None,
-        num_epochs=None,
-        random_seed=None,
-        data_dir=None,
-        output_dir=None,
-        l2_reg=None,
-        no_logs=None,
-        train_log_interval=None,
-        print_train_iter=None,
-        tb_log=None,
-        tb_log_dir=None,
-        **training_params
+            self,
+            testproblem=None,
+            hyperparams=None,
+            batch_size=None,
+            num_epochs=None,
+            random_seed=None,
+            data_dir=None,
+            output_dir=None,
+            l2_reg=None,
+            no_logs=None,
+            train_log_interval=None,
+            print_train_iter=None,
+            tb_log=None,
+            tb_log_dir=None,
+            **training_params
     ):
         """Return whether output file for this run already exists.
 
@@ -298,21 +298,21 @@ class Runner(abc.ABC):
         return self._run_exists(**args)
 
     def _run_exists(
-        self,
-        testproblem=None,
-        hyperparams=None,
-        batch_size=None,
-        num_epochs=None,
-        random_seed=None,
-        data_dir=None,
-        output_dir=None,
-        l2_reg=None,
-        no_logs=None,
-        train_log_interval=None,
-        print_train_iter=None,
-        tb_log=None,
-        tb_log_dir=None,
-        **training_params
+            self,
+            testproblem=None,
+            hyperparams=None,
+            batch_size=None,
+            num_epochs=None,
+            random_seed=None,
+            data_dir=None,
+            output_dir=None,
+            l2_reg=None,
+            no_logs=None,
+            train_log_interval=None,
+            print_train_iter=None,
+            tb_log=None,
+            tb_log_dir=None,
+            **training_params
     ):
 
         batch_size = self._use_default_batch_size_if_missing(
@@ -357,15 +357,15 @@ class Runner(abc.ABC):
 
     @abc.abstractmethod
     def training(
-        self,
-        tproblem,
-        hyperparams,
-        num_epochs,
-        print_train_iter,
-        train_log_interval,
-        tb_log,
-        tb_log_dir,
-        **training_params
+            self,
+            tproblem,
+            hyperparams,
+            num_epochs,
+            print_train_iter,
+            train_log_interval,
+            tb_log,
+            tb_log_dir,
+            **training_params
     ):
         """Performs the training and stores the metrices.
 
@@ -477,7 +477,7 @@ class Runner(abc.ABC):
                     )
 
     def _add_training_params_to_output_dir_name(
-        self, training_params, run_folder_name
+            self, training_params, run_folder_name
     ):
         """Overwrite this method to specify how your
         runner should format additional training_parameters in the run folder name.
@@ -500,7 +500,7 @@ class Runner(abc.ABC):
         return run_folder_name
 
     def _add_hyperparams_to_output_dir_name(
-        self, optimizer_hyperparams, run_folder_name
+            self, optimizer_hyperparams, run_folder_name
     ):
         """Overwrite this method to specify how your
         runner should format optimizer hyper_parameters in the run folder name.
@@ -524,21 +524,21 @@ class Runner(abc.ABC):
         return run_folder_name
 
     def parse_args(
-        self,
-        testproblem,
-        hyperparams,
-        batch_size,
-        num_epochs,
-        random_seed,
-        data_dir,
-        output_dir,
-        l2_reg,
-        no_logs,
-        train_log_interval,
-        print_train_iter,
-        tb_log,
-        tb_log_dir,
-        training_params,
+            self,
+            testproblem,
+            hyperparams,
+            batch_size,
+            num_epochs,
+            random_seed,
+            data_dir,
+            output_dir,
+            l2_reg,
+            no_logs,
+            train_log_interval,
+            print_train_iter,
+            tb_log,
+            tb_log_dir,
+            training_params,
     ):
         """Constructs an argparse.ArgumentParser and parses the arguments from command line.
 
@@ -705,22 +705,22 @@ class Runner(abc.ABC):
         return args
 
     def generate_output_directory_name(
-        self,
-        testproblem,
-        batch_size,
-        num_epochs,
-        l2_reg,
-        random_seed,
-        output_dir,
-        optimizer_hyperparams,
-        **training_params
+            self,
+            testproblem,
+            batch_size,
+            num_epochs,
+            l2_reg,
+            random_seed,
+            output_dir,
+            optimizer_hyperparams,
+            **training_params
     ):
         # add everything mandatory to the name
         run_folder_name = (
-            "num_epochs__"
-            + str(num_epochs)
-            + "__batch_size__"
-            + str(batch_size)
+                "num_epochs__"
+                + str(num_epochs)
+                + "__batch_size__"
+                + str(batch_size)
         )
         if l2_reg is not None:
             run_folder_name += "__l2_reg__{0:s}".format(
@@ -751,15 +751,15 @@ class Runner(abc.ABC):
         return "random_seed__{0:d}__".format(random_seed)
 
     def _post_process_output(
-        self,
-        output,
-        testproblem,
-        batch_size,
-        num_epochs,
-        random_seed,
-        l2_reg,
-        hyperparams,
-        **training_params
+            self,
+            output,
+            testproblem,
+            batch_size,
+            num_epochs,
+            random_seed,
+            l2_reg,
+            hyperparams,
+            **training_params
     ):
         """Ensures that for both frameworks the structure of the output is the same"""
 
@@ -797,21 +797,21 @@ class Runner(abc.ABC):
             file_name (str): The file name where the output is written to.
         """
         with open(
-            os.path.join(self._run_directory, self._file_name + ".json"), "w"
+                os.path.join(self._run_directory, self._file_name + ".json"), "w"
         ) as f:
             json.dump(output, f, indent=4)
 
     @staticmethod
     def _abort_routine(
-        epoch_count,
-        num_epochs,
-        train_losses,
-        valid_losses,
-        test_losses,
-        train_accuracies,
-        valid_accuracies,
-        test_accuracies,
-        minibatch_train_losses,
+            epoch_count,
+            num_epochs,
+            train_losses,
+            valid_losses,
+            test_losses,
+            train_accuracies,
+            valid_accuracies,
+            test_accuracies,
+            minibatch_train_losses,
     ):
         """A routine that is executed if a training run is aborted (loss is NaN or Inf)."""
 

@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 
+import os
 import abc
 import importlib
 import warnings
@@ -15,7 +16,6 @@ import matplotlib.pyplot as plt
 
 import torchvision.utils as vutils
 import torchvision.models as models
-
 
 from deepobs import config as global_config
 from deepobs.abstract_runner.abstract_runner import Runner
@@ -32,15 +32,15 @@ class PTRunner(Runner):
 
     @abc.abstractmethod
     def training(
-        self,
-        tproblem,
-        hyperparams,
-        num_epochs,
-        print_train_iter,
-        train_log_interval,
-        tb_log,
-        tb_log_dir,
-        **training_params
+            self,
+            tproblem,
+            hyperparams,
+            num_epochs,
+            print_train_iter,
+            train_log_interval,
+            tb_log,
+            tb_log_dir,
+            **training_params
     ):
         return
 
@@ -153,16 +153,16 @@ class PTRunner(Runner):
         return loss, accuracy
 
     def evaluate_all(
-        self,
-        epoch_count,
-        num_epochs,
-        tproblem,
-        train_losses,
-        valid_losses,
-        test_losses,
-        train_accuracies,
-        valid_accuracies,
-        test_accuracies,
+            self,
+            epoch_count,
+            num_epochs,
+            tproblem,
+            train_losses,
+            valid_losses,
+            test_losses,
+            train_accuracies,
+            valid_accuracies,
+            test_accuracies,
     ):
 
         print("********************************")
@@ -238,16 +238,16 @@ class PTRunner(Runner):
         return
 
     def evaluate_all_gan(
-        self,
-        epoch_count,
-        num_epochs,
-        tproblem,
-        img_list,
-        g_losses,
-        d_losses,
-        d_acc_real,
-        d_acc_fake,
-        fixed_noise,
+            self,
+            epoch_count,
+            num_epochs,
+            tproblem,
+            img_list,
+            g_losses,
+            d_losses,
+            d_acc_real,
+            d_acc_fake,
+            fixed_noise,
     ):
         print("********************************")
         print(
@@ -263,7 +263,12 @@ class PTRunner(Runner):
         plt.axis("off")
         plt.title("Fake image G(z)")
         plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
-        #plt.savefig(tproblem._run_directory + '/' + tproblem._file_name)
+        if not os.path.isdir(self._run_directory):
+            os.makedirs(self._run_directory, exist_ok=True)
+        plt.savefig(self._run_directory + '/' + self._file_name + ".png")
+        # TODO: Save images only every 10th epoch
+        # TODO: Add animation of the saved images to visualize the progress
+        # TODO: Create figure with real and fake images side by side, when training is over
 
         print("********************************")
         return
@@ -280,14 +285,14 @@ class StandardRunner(PTRunner):
         )
 
     def training(
-        self,
-        tproblem,
-        hyperparams,
-        num_epochs,
-        print_train_iter,
-        train_log_interval,
-        tb_log,
-        tb_log_dir,
+            self,
+            tproblem,
+            hyperparams,
+            num_epochs,
+            print_train_iter,
+            train_log_interval,
+            tb_log,
+            tb_log_dir,
     ):
 
         opt = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
@@ -405,6 +410,8 @@ class StandardRunner(PTRunner):
             train_log_interval,
             tb_log,
             tb_log_dir,
+            run_dir=None,
+            file_name=None,
     ):
         opt_d = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
         opt_g = self._optimizer_class(tproblem.generator.parameters(), **hyperparams)
@@ -435,8 +442,9 @@ class StandardRunner(PTRunner):
         real_label = 1
         fake_label = 0
 
-        for epoch_count in range(num_epochs+1):
+        for epoch_count in range(num_epochs + 1):
             # Evaluate at beginning of epoch.
+
             self.evaluate_all_gan(
                 epoch_count,
                 num_epochs,
@@ -586,17 +594,17 @@ class LearningRateScheduleRunner(PTRunner):
             )
 
     def training(
-        self,
-        tproblem,
-        hyperparams,
-        num_epochs,
-        print_train_iter,
-        train_log_interval,
-        tb_log,
-        tb_log_dir,
-        # the following are the training_params
-        lr_sched_epochs=None,
-        lr_sched_factors=None,
+            self,
+            tproblem,
+            hyperparams,
+            num_epochs,
+            print_train_iter,
+            train_log_interval,
+            tb_log,
+            tb_log_dir,
+            # the following are the training_params
+            lr_sched_epochs=None,
+            lr_sched_factors=None,
     ):
         """Performs the training and stores the metrices.
 
