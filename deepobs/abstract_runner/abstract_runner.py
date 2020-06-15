@@ -78,6 +78,7 @@ class Runner(abc.ABC):
             tb_log=None,
             tb_log_dir=None,
             skip_if_exists=False,
+            eval_interval=None,
             **training_params
     ):
         """Runs a testproblem with the optimizer_class. Has the following tasks:
@@ -100,6 +101,7 @@ class Runner(abc.ABC):
             tb_log (bool): Whether to use tensorboard logging or not
             tb_log_dir (str): The path where to save tensorboard events.
             skip_if_exists (bool): Skip training if the output already exists.
+            eval_interval (int): Evaluation interval for generated images by a gan.
             training_params (dict): Kwargs for the training method.
 
         Returns:
@@ -128,6 +130,7 @@ class Runner(abc.ABC):
             print_train_iter=print_train_iter,
             tb_log=tb_log,
             tb_log_dir=tb_log_dir,
+            eval_interval=eval_interval,
             **training_params
         )
 
@@ -147,6 +150,7 @@ class Runner(abc.ABC):
                 print_train_iter,
                 tb_log,
                 tb_log_dir,
+                eval_interval,
                 training_params,
             )
 
@@ -169,6 +173,7 @@ class Runner(abc.ABC):
             print_train_iter=None,
             tb_log=None,
             tb_log_dir=None,
+            eval_interval=None,
             **training_params
     ):
 
@@ -220,8 +225,7 @@ class Runner(abc.ABC):
                 train_log_interval,
                 tb_log,
                 tb_log_dir,
-                run_dir=self._run_directory,
-                file_name=self._file_name,
+                eval_interval,
                 **training_params
             )
         else:
@@ -267,6 +271,7 @@ class Runner(abc.ABC):
             print_train_iter=None,
             tb_log=None,
             tb_log_dir=None,
+            eval_interval=None,
             **training_params
     ):
         """Return whether output file for this run already exists.
@@ -293,6 +298,7 @@ class Runner(abc.ABC):
             print_train_iter,
             tb_log,
             tb_log_dir,
+            eval_interval,
             training_params,
         )
         return self._run_exists(**args)
@@ -312,6 +318,7 @@ class Runner(abc.ABC):
             print_train_iter=None,
             tb_log=None,
             tb_log_dir=None,
+            eval_interval=None,
             **training_params
     ):
 
@@ -402,6 +409,7 @@ class Runner(abc.ABC):
             train_log_interval,
             tb_log,
             tb_log_dir,
+            eval_interval,
             **training_params
     ):
         """Performs the training for the gan testproblem class and stores the metrices.
@@ -414,6 +422,7 @@ class Runner(abc.ABC):
                 train_log_interval (int): Mini-batch interval for logging.
                 tb_log (bool): Whether to use tensorboard logging or not
                 tb_log_dir (str): The path where to save tensorboard events.
+                eval_interval (int): Evaluation interval for generated images by a gan.
                 **training_params (dict): Kwargs for additional training parameters that are implemented by subclass.
 
             Returns:
@@ -538,6 +547,7 @@ class Runner(abc.ABC):
             print_train_iter,
             tb_log,
             tb_log_dir,
+            eval_interval,
             training_params,
     ):
         """Constructs an argparse.ArgumentParser and parses the arguments from command line.
@@ -556,6 +566,7 @@ class Runner(abc.ABC):
                 print_train_iter (bool): Whether to print the training progress at each train_log_interval.
                 tb_log (bool): Whether to use tensorboard logging or not
                 tb_log_dir (str): The path where to save tensorboard events.
+                eval_interval (int): Evaluation interval for generated images by a gan.
                 training_params (dict): Kwargs for the training method.
 
         Returns:
@@ -688,6 +699,16 @@ class Runner(abc.ABC):
             )
         else:
             args["tb_log_dir"] = tb_log_dir
+
+        if "gan" in str(testproblem) and eval_interval is None:
+            parser.add_argument(
+                "--eval_interval",
+                type=int,
+                default=10,
+                help="""Interval of steps at which to save images from the generator.""",
+            )
+        else:
+            args["eval_interval"] = eval_interval
 
         # add hyperparams and training params
         self._add_hyperparams_to_argparse(parser, args, hyperparams)

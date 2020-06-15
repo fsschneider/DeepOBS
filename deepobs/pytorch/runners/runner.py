@@ -13,6 +13,7 @@ import numpy as np
 import torch
 
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 import torchvision.utils as vutils
 import torchvision.models as models
@@ -54,6 +55,7 @@ class PTRunner(Runner):
             train_log_interval,
             tb_log,
             tb_log_dir,
+            eval_interval,
             **training_params
     ):
         return
@@ -248,6 +250,7 @@ class PTRunner(Runner):
             d_acc_real,
             d_acc_fake,
             fixed_noise,
+            eval_interval,
     ):
         print("********************************")
         print(
@@ -255,20 +258,44 @@ class PTRunner(Runner):
                 epoch_count, num_epochs
             )
         )
+        if epoch_count % eval_interval == 0:
+            with torch.no_grad():
+                fake = tproblem.generator(fixed_noise).detach().cpu()
+            img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
+            plt.figure(figsize=(15, 15))
+            plt.axis("off")
+            plt.title("Generated images")
+            plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
+            if not os.path.isdir(self._run_directory):
+                os.makedirs(self._run_directory + '/images/', exist_ok=True)
+            plt.savefig(self._run_directory + '/images/' + str(epoch_count) + '._' + self._file_name + '.png')
 
-        with torch.no_grad():
-            fake = tproblem.generator(fixed_noise).detach().cpu()
-        img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
-        plt.figure(figsize=(15, 15))
-        plt.axis("off")
-        plt.title("Fake image G(z)")
-        plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
-        if not os.path.isdir(self._run_directory):
-            os.makedirs(self._run_directory, exist_ok=True)
-        plt.savefig(self._run_directory + '/' + self._file_name + ".png")
-        # TODO: Save images only every 10th epoch
+        # Create image to compare real with fake
+        if epoch_count == num_epochs:
+            # Plot the real images
+            # TODO: Use train_eval.. data for training evaluation
+            next_batch = next(iter(tproblem.data._train_dataloader))
+            plt.figure(figsize=(15, 15))
+            plt.subplot(1, 2, 1)
+            plt.axis("off")
+            plt.title("Real Images")
+            plt.imshow(np.transpose(vutils.make_grid(next_batch[0].to(config.get_default_device())[:64],
+                                                     padding=5, normalize=True).cpu(), (1, 2, 0)))
+            # Plot the fake images from the last epoch
+            plt.subplot(1, 2, 2)
+            plt.axis("off")
+            plt.title("Fake Images")
+            plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
+            plt.savefig(self._run_directory + '/images/Compare_' + self._file_name +'.png')
+
+            # %%capture
+            # fig = plt.figure(figsize=(8, 8))
+            # plt.axis("off")
+            # ims = [[plt.imshow(np.transpose(i, (1, 2, 0)), animated=True)] for i in img_list]
+            # ani = animation.ArtistAnimation(fig, ims, interval=1000, repeat_delay=1000, blit=True)
+            # plt.show()
+            # ani.save('', writer=writer, savefig_kwargs=self._run_directory)
         # TODO: Add animation of the saved images to visualize the progress
-        # TODO: Create figure with real and fake images side by side, when training is over
 
         print("********************************")
         return
@@ -410,8 +437,7 @@ class StandardRunner(PTRunner):
             train_log_interval,
             tb_log,
             tb_log_dir,
-            run_dir=None,
-            file_name=None,
+            eval_interval,
     ):
         opt_d = self._optimizer_class(tproblem.net.parameters(), **hyperparams)
         opt_g = self._optimizer_class(tproblem.generator.parameters(), **hyperparams)
@@ -444,7 +470,6 @@ class StandardRunner(PTRunner):
 
         for epoch_count in range(num_epochs + 1):
             # Evaluate at beginning of epoch.
-
             self.evaluate_all_gan(
                 epoch_count,
                 num_epochs,
@@ -455,6 +480,7 @@ class StandardRunner(PTRunner):
                 d_acc_real,
                 d_acc_fake,
                 fixed_noise,
+                eval_interval,
             )
 
             # Break from train loop after the last round of evaluation
@@ -524,6 +550,7 @@ class StandardRunner(PTRunner):
                     break
 
             if not np.isfinite(loss_d.item()):
+                # TODO: Take a look at the function below: does gan training need that?
                 self._abort_routine(
                     epoch_count,
                     num_epochs,
