@@ -4,11 +4,10 @@ import warnings
 import torch
 from torch import nn
 
-from deepobs.pytorch.testproblems import testproblem
 
 from ..datasets.fmnist import fmnist
-from .testproblem import UnregularizedTestproblem, TestProblem
-from .testproblems_modules import dcgan_g, dcgan_d
+from .testproblem import UnregularizedTestproblem
+from .testproblems_modules import net_dcgan_g, net_dcgan_d
 from .testproblems_utils import weights_init
 
 
@@ -27,8 +26,8 @@ class fmnist_dcgan(UnregularizedTestproblem):
     Attributes:
     data: The DeepOBS data set class for Fashion-MNIST.
     loss_function: The loss function for this testproblem
-    net:
-    """
+    net: The DeepOBS subclass of torch.nn.Module that is trained for this tesproblem (net_dcgan_d)
+    generator: The DeepOBS subclass of torch.nn.Module that is trained for this testproblem (net_dcgan_g)    """
     def __init__(self, batch_size, l2_reg=None):
         """Create a new DCGAN test problem instance on Fashion-MNIST
 
@@ -46,10 +45,10 @@ class fmnist_dcgan(UnregularizedTestproblem):
 
     def set_up(self):
         """Set up the DCGAN test problem on F-MNIST"""
-        self.data = fmnist(self._batch_size, resize_images=True, train_eval_size=128)
+        self.data = fmnist(self._batch_size, resize_images=True, train_eval_size=2000)
         self.loss_function = nn.BCELoss()
-        self.generator = dcgan_g(num_channels=1)
-        self.net = dcgan_d(num_channels=1)
+        self.generator = net_dcgan_g(num_channels=1)
+        self.net = net_dcgan_d(num_channels=1)
         self.generator.to(self._device)
         self.net.to(self._device)
         self.generator.apply(weights_init)

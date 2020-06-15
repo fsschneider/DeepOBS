@@ -1,16 +1,11 @@
 # -*- coding: utf-8 -*-
 """AFHQ DeepOBS dataset."""
 
-from __future__ import print_function
-
-from torch.utils import data as dat
-from torchvision.transforms import transforms
 from torchvision import datasets, transforms
 
 from deepobs import config
 
 from . import dataset
-from .datasets_utils import train_eval_sampler
 
 
 transform_images_resize = transforms.Compose(
@@ -61,11 +56,11 @@ class afhq(dataset.DataSet):
             transform = transform_images_no_resize
 
         train_dataset = datasets.ImageFolder(
-            root=config.get_data_dir(),
+            root="data_deepobs/afhq",
             transform=transform,
         )
         valid_dataset = datasets.ImageFolder(
-            root=config.get_data_dir(),
+            root="data_deepobs/afhq",
             transform=transform,
         )
         train_loader, valid_loader = self._make_train_and_valid_dataloader_helper(
@@ -74,9 +69,12 @@ class afhq(dataset.DataSet):
         return train_loader, valid_loader
 
     def _make_test_dataloader(self):
-        transform = transform_images_no_resize
+        if self._resize_images:
+            transform = transform_images_resize
+        else:
+            transform = transform_images_no_resize
         test_dataset = datasets.ImageFolder(
-            root=config.get_data_dir(),
+            root="data_deepobs/afhq",
             transform=transform,
         )
         return self._make_dataloader(test_dataset, sampler=None)

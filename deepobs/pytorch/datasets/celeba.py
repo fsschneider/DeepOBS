@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 """CelebA DeepOBS dataset."""
 
-from __future__ import print_function
-
-from torch.utils import data as dat
 from torchvision.transforms import transforms
 from torchvision import datasets, transforms
 # from torchvision.datasets.celeb import CelebA
@@ -11,7 +8,20 @@ from torchvision import datasets, transforms
 from deepobs import config
 
 from . import dataset
-from .datasets_utils import train_eval_sampler
+
+
+transform_images_resize = transforms.Compose(
+                [transforms.Resize(64),
+                 transforms.CenterCrop(64),
+                 transforms.ToTensor(),
+                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+                 ]
+            )
+
+transform_images_no_resize = transforms.Compose(
+    [transforms.ToTensor()
+     ]
+)
 
 
 class celeba(dataset.DataSet):
@@ -29,7 +39,7 @@ class celeba(dataset.DataSet):
         Defaults to ``26 000`` the size of the test set.
   """
 
-    def __init__(self, batch_size, train_eval_size=10000):
+    def __init__(self, batch_size, resize_images=False, train_eval_size=10000):
         """Creates a new CelebA instance.
 
            Args:
@@ -40,30 +50,24 @@ class celeba(dataset.DataSet):
                  Defaults to ``10 000`` the size of the test set.
            """
         self._name = "celeba"
+        self._resize_images = resize_images
         self._train_eval_size = train_eval_size
         super(celeba, self).__init__(batch_size)
 
     def _make_train_and_valid_dataloader(self):
 
+        if self._resize_images:
+            transform = transform_images_resize
+        else:
+            transform = transform_images_no_resize
+
         train_dataset = datasets.ImageFolder(
-            root="data_deepobs/celeba/img_align_celeba",
-            transform=transforms.Compose(
-                [transforms.Resize(64),
-                 transforms.CenterCrop(64),
-                 transforms.ToTensor(),
-                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-                 ]
-            ),
+            root="data_deepobs/celeba",
+            transform=transform,
         )
         valid_dataset = datasets.ImageFolder(
-            root="data_deepobs/celeba/img_align_celeba",
-            transform=transforms.Compose(
-                [transforms.Resize(64),
-                 transforms.CenterCrop(64),
-                 transforms.ToTensor(),
-                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-                 ]
-            ),
+            root="data_deepobs/celeba",
+            transform=transform,
         )
         train_loader, valid_loader = self._make_train_and_valid_dataloader_helper(
             train_dataset, valid_dataset
@@ -71,9 +75,13 @@ class celeba(dataset.DataSet):
         return train_loader, valid_loader
 
     def _make_test_dataloader(self):
-        transform = transforms.ToTensor()
+        if self._resize_images:
+            transform = transform_images_resize
+        else:
+            transform = transform_images_no_resize
+
         test_dataset = datasets.ImageFolder(
-            root="data_deepobs/celeba/img_align_celeba",
+            root="data_deepobs/celeba",
             transform=transform,
         )
         return self._make_dataloader(test_dataset, sampler=None)

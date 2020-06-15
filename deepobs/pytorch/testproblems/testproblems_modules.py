@@ -651,9 +651,9 @@ class net_cifar100_allcnnc(nn.Sequential):
                 nn.init.xavier_normal_(module.weight)
 
 
-class dcgan_g(nn.Module):
+class net_dcgan_g(nn.Module):
     def __init__(self, num_channels, noise_size=100, fm_size=64):
-        super(dcgan_g, self).__init__()
+        super(net_dcgan_g, self).__init__()
         self.noise_size = noise_size
         self.main = nn.Sequential(
             nn.ConvTranspose2d(
@@ -700,9 +700,9 @@ class dcgan_g(nn.Module):
     def forward(self, input):
         return self.main(input)
 
-class dcgan_d(nn.Module):
+class net_dcgan_d(nn.Module):
     def __init__(self, num_channels, fm_size=64):
-        super(dcgan_d, self).__init__()
+        super(net_dcgan_d, self).__init__()
         self.main = nn.Sequential(
             nn.Conv2d(
                 num_channels,
