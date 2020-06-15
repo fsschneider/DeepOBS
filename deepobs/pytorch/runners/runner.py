@@ -258,23 +258,23 @@ class PTRunner(Runner):
                 epoch_count, num_epochs
             )
         )
+        # Save generated images according to the given eval_interval
         if epoch_count % eval_interval == 0:
             with torch.no_grad():
                 fake = tproblem.generator(fixed_noise).detach().cpu()
             img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
             plt.figure(figsize=(15, 15))
             plt.axis("off")
-            plt.title("Generated images")
+            plt.title("Generated Images")
             plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
             if not os.path.isdir(self._run_directory):
                 os.makedirs(self._run_directory + '/images/', exist_ok=True)
-            plt.savefig(self._run_directory + '/images/' + str(epoch_count) + '._' + self._file_name + '.png')
+            plt.savefig(self._run_directory + '/images/' + str(epoch_count) + '_epoch_' + self._file_name + '.png')
 
         # Create image to compare real with fake
         if epoch_count == num_epochs:
             # Plot the real images
-            # TODO: Use train_eval.. data for training evaluation
-            next_batch = next(iter(tproblem.data._train_dataloader))
+            next_batch = next(iter(tproblem.data._train_eval_dataloader))
             plt.figure(figsize=(15, 15))
             plt.subplot(1, 2, 1)
             plt.axis("off")
@@ -284,7 +284,7 @@ class PTRunner(Runner):
             # Plot the fake images from the last epoch
             plt.subplot(1, 2, 2)
             plt.axis("off")
-            plt.title("Fake Images")
+            plt.title("Generated Images")
             plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
             plt.savefig(self._run_directory + '/images/Compare_' + self._file_name +'.png')
 
