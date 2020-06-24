@@ -45,9 +45,9 @@ class cifar10_vgg19(TestProblem):
     def set_up(self):
         """Set up the VGG 19 test problem on Cifar-10."""
         self.data = cifar10(self._batch_size)
+        self.loss_function = nn.CrossEntropyLoss
         self.net = net_vgg(num_outputs=10, variant=19)
-        self.net = net_vgg(num_outputs=10,variant=19)
-        self.net = net_vgg(num_outputs=10, variant=19)
+        self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
 
     def get_regularization_groups(self):
