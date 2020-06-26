@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """CelebA DeepOBS dataset."""
 
+import os
 from torchvision.transforms import transforms
 from torchvision import datasets, transforms
 # from torchvision.datasets.celeb import CelebA
@@ -62,11 +63,11 @@ class celeba(dataset.DataSet):
             transform = transform_images_no_resize
 
         train_dataset = datasets.ImageFolder(
-            root="data_deepobs/celeba",
+            root=os.path.join(config.get_data_dir(), "celeba"),
             transform=transform,
         )
         valid_dataset = datasets.ImageFolder(
-            root="data_deepobs/celeba",
+            root=os.path.join(config.get_data_dir(), "celeba"),
             transform=transform,
         )
         train_loader, valid_loader = self._make_train_and_valid_dataloader_helper(
@@ -81,7 +82,7 @@ class celeba(dataset.DataSet):
             transform = transform_images_no_resize
 
         test_dataset = datasets.ImageFolder(
-            root="data_deepobs/celeba",
+            root=os.path.join(config.get_data_dir(), "celeba"),
             transform=transform,
         )
         return self._make_dataloader(test_dataset, sampler=None)
