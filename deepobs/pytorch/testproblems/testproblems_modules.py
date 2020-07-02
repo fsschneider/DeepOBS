@@ -166,7 +166,7 @@ class net_mnist_2c2d(nn.Sequential):
 
 
 class net_vae(nn.Module):
-    """  A basic VAE for (Faschion-)MNIST. The network has been adapted from the `here\
+    """  A basic VAE for (Fashion-)MNIST. The network has been adapted from the `here\
   <https://towardsdatascience.com/teaching-a-variational-autoencoder-vae-to-draw-mnist-characters-978675c95776>`_
   and consists of an encoder:
 

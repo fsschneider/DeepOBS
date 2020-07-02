@@ -74,10 +74,14 @@ class fmnist(dataset.DataSet):
         return train_loader, valid_loader
 
     def _make_test_dataloader(self):
+        if self._resize_images:
+            transform = transform_images_resize
+        else:
+            transform = transform_images_no_resize
         test_dataset = datasets.FashionMNIST(
             root=config.get_data_dir(),
             train=False,
             download=True,
-            transform=transform_images_no_resize,
+            transform=transform,
         )
         return self._make_dataloader(test_dataset, sampler=None)

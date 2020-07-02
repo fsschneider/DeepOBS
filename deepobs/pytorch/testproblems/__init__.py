@@ -17,6 +17,7 @@ from .fmnist_logreg import fmnist_logreg
 from .fmnist_mlp import fmnist_mlp
 from .fmnist_vae import fmnist_vae
 from .mnist_2c2d import mnist_2c2d
+from .mnist_dcgan import mnist_dcgan
 from .mnist_logreg import mnist_logreg
 from .mnist_mlp import mnist_mlp
 from .mnist_vae import mnist_vae

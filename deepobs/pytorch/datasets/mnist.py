@@ -11,6 +11,18 @@ from deepobs import config
 from . import dataset
 from .datasets_utils import train_eval_sampler
 
+transform_images_resize = transforms.Compose(
+    [transforms.Resize(64),
+     transforms.ToTensor(),
+     transforms.Normalize((0.5,), (0.5,)),
+     ]
+)
+
+transform_images_no_resize = transforms.Compose(
+    [transforms.ToTensor()
+     ]
+)
+
 
 class mnist(dataset.DataSet):
     """DeepOBS data set class for the `MNIST\
@@ -27,7 +39,7 @@ class mnist(dataset.DataSet):
       _make_dataloader: A helper that is shared by all three data loader methods.
   """
 
-    def __init__(self, batch_size, train_eval_size=10000):
+    def __init__(self, batch_size, resize_images=False, train_eval_size=10000):
         """Creates a new MNIST instance.
 
     Args:
@@ -38,11 +50,15 @@ class mnist(dataset.DataSet):
           Defaults to ``10 000`` the size of the test set.
     """
         self._name = "mnist"
+        self._resize_images = resize_images
         self._train_eval_size = train_eval_size
         super(mnist, self).__init__(batch_size)
 
     def _make_train_and_valid_dataloader(self):
-        transform = transforms.ToTensor()
+        if self._resize_images:
+            transform = transform_images_resize
+        else:
+            transform = transform_images_no_resize
         train_dataset = datasets.MNIST(
             root=config.get_data_dir(),
             train=True,
@@ -61,7 +77,10 @@ class mnist(dataset.DataSet):
         return train_loader, valid_loader
 
     def _make_test_dataloader(self):
-        transform = transforms.ToTensor()
+        if self._resize_images:
+            transform = transform_images_resize
+        else:
+            transform = transform_images_no_resize
         test_dataset = datasets.MNIST(
             root=config.get_data_dir(),
             train=False,
