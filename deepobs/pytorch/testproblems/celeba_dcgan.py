@@ -17,6 +17,12 @@ class celeba_dcgan(UnregularizedTestproblem):
     Adversarial Network DC architecture for CelebA
     No regularization is used
 
+    Training settings recommended in the `original paper`_:
+  ``batch size = 128``, using the Adam optimizer
+  with : ``beta1 = 0.5`` and an initial learning rate of ``0.0002``
+
+  .. _original paper: https://arxiv.org/abs/1511.06434
+
     Args:
     batch_size (int): Batch size to use.
     l2_reg (float): No L2-Regularization (weight decay) is used in this
@@ -46,7 +52,7 @@ class celeba_dcgan(UnregularizedTestproblem):
 
     def set_up(self):
         """Set up the DCGAN test problem on CelebA"""
-        self.data = celeba(self._batch_size, resize_images=True, train_eval_size=2000)
+        self.data = celeba(self._batch_size, resize_images=True, train_eval_size=2048)
         self.loss_function = nn.BCELoss()
         self.generator = net_dcgan_g(num_channels=3)
         self.net = net_dcgan_d(num_channels=3)

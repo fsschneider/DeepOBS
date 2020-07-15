@@ -852,3 +852,34 @@ class Runner(abc.ABC):
             valid_accuracies.append(valid_accuracies[0])
             test_accuracies.append(test_accuracies[0])
             minibatch_train_losses.append(minibatch_train_losses[0])
+
+
+    @staticmethod
+    def _abort_routine_gan(
+            epoch_count,
+            num_epochs,
+            g_losses,
+            d_losses,
+            d_acc_real,
+            d_acc_fake,
+            loss_g,
+            loss_d,
+            accuracy_real,
+            accuracy_fake,
+    ):
+        """A routine that is executed if a training run is aborted (loss is NaN or Inf)."""
+
+        warnings.warn(
+            "Breaking from run after epoch "
+            + str(epoch_count)
+            + "due to wrongly calibrated optimization (Loss is Nan or Inf). The metrices for the remaining epochs will be filled with the initial performance values.",
+            RuntimeWarning,
+        )
+
+        # fill the rest of the metrices with initial observations
+        for i in range(epoch_count, num_epochs):
+            g_losses.append(loss_g.item()[0])
+            d_losses.append(loss_d.item()[0])
+            d_acc_real.append(accuracy_real[0])
+            d_acc_fake.append(accuracy_fake[0])
+

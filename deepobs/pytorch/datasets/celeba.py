@@ -31,13 +31,12 @@ class celeba(dataset.DataSet):
 
   Args:
     batch_size (int): The mini-batch size to use. Note that, if ``batch_size``
-        is not a divider of the dataset size (``73 000`` for train, ``26 000``
-        for test) the remainder is dropped in each epoch (after shuffling).
+        is not a divider of the dataset size (``200 000``) the remainder is dropped in each epoch (after shuffling).
     resize_images (bool): If ``True`` some data augmentation operations
         (random crop window, lighting augmentation) are applied to the
         training data (but not the test data).
     train_eval_size (int): Size of the train eval dataset.
-        Defaults to ``26 000`` the size of the test set.
+        Defaults to ``10 000`` the size.
   """
 
     def __init__(self, batch_size, resize_images=False, train_eval_size=10000):
@@ -45,10 +44,9 @@ class celeba(dataset.DataSet):
 
            Args:
              batch_size (int): The mini-batch size to use. Note that, if ``batch_size``
-                 is not a divider of the dataset size (``60 000`` for train, ``10 000``
-                 for test) the remainder is dropped in each epoch (after shuffling).
+                 is not a divider of the dataset size (``200 000´´) the remainder is dropped in each epoch (after shuffling).
              train_eval_size (int): Size of the train eval data set.
-                 Defaults to ``10 000`` the size of the test set.
+                 Defaults to ``10 000``.
            """
         self._name = "celeba"
         self._resize_images = resize_images

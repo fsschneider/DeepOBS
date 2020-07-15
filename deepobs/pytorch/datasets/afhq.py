@@ -24,15 +24,15 @@ transform_images_no_resize = transforms.Compose(
 
 
 class afhq(dataset.DataSet):
-    """DeepOBS data set class for the `\
-    <Put link here>`_ data set.
+    """DeepOBS data set class for the Animal Faces-HQ`\
+    <https://github.com/clovaai/stargan-v2/blob/master/README.md#animal-faces-hq-dataset-afhq>`_ data set.
 
   Args:
     batch_size (int): The mini-batch size to use. Note that, if ``batch_size``
-        is not a divider of the dataset size (``73 000`` for train, ``26 000``
+        is not a divider of the dataset size (``14 633`` for train, ``1503``
         for test) the remainder is dropped in each epoch (after shuffling).
     train_eval_size (int): Size of the train eval dataset.
-        Defaults to ``26 000`` the size of the test set.
+        Defaults to ``10 000``.
   """
 
     def __init__(self, batch_size, resize_images=False, train_eval_size=10000):
@@ -40,10 +40,10 @@ class afhq(dataset.DataSet):
 
            Args:
              batch_size (int): The mini-batch size to use. Note that, if ``batch_size``
-                 is not a divider of the dataset size (``60 000`` for train, ``10 000``
+                 is not a divider of the dataset size (``14 633`` for train, ``10 000``
                  for test) the remainder is dropped in each epoch (after shuffling).
              train_eval_size (int): Size of the train eval data set.
-                 Defaults to ``10 000`` the size of the test set.
+                 Defaults to ``10 000``.
            """
         self._name = "afhq"
         self._resize_images = resize_images

@@ -124,7 +124,7 @@ DEFAULT_TEST_PROBLEMS_SETTINGS = {
     "mnist_logreg": {"batch_size": 128, "num_epochs": 50},
     "mnist_dcgan": {"batch_size": 128, "num_epochs": 20},
     "fmnist_logreg": {"batch_size": 128, "num_epochs": 50},
-    "fmnist_dcgan": {"batch_size": 128, "num_epochs": 10},
+    "fmnist_dcgan": {"batch_size": 128, "num_epochs": 20},
     "afhq_dcgan": {"batch_size": 128, "num_epochs": 50},
     "celeba_dcgan": {"batch_size": 128, "num_epochs": 10},
 

@@ -13,10 +13,7 @@ import numpy as np
 import torch
 
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-
 import torchvision.utils as vutils
-import torchvision.models as models
 
 from deepobs import config as global_config
 from deepobs.abstract_runner.abstract_runner import Runner
@@ -188,57 +185,6 @@ class PTRunner(Runner):
 
         print("********************************")
 
-    @staticmethod
-    def evaluate_gan(tproblem):
-        """Evaluates the performance of the current state of the model
-                of the testproblem instance.
-                Has to be called in the beggining of every epoch within the
-                training method. Returns the Fréchet Inception Score.
-
-                Args:
-                    tproblem (testproblem): The testproblem instance to evaluate
-                Returns:
-                    FID (Fréchet inception score): Distance between distribution of real and fake images
-
-        Required imports:
-        from numpy import asarray, cov, trace, iscomplexobj
-        from numpy.random import shuffle
-        from scipy.linalg import sqrtm
-        from skimage.transform import resize
-
-        inception = models.inception_v3(pretrained=True, progress=True)
-
-        # scale an array of images to a new size
-        def scale_images(img_list, new_shape):
-            new_img_list = []
-            for image in img_list:
-                # resize with nearest neighbor interpolation
-                new_image = resize(image, new_shape, 0)
-                new_img_list.append(new_image)
-            return asarray(new_img_list)
-
-        # calculate frechet inception distance
-        def calculate_fid(images1, images2):
-            # calculate activations
-            act1 = gan_eval_inception.inception.predict(images1)
-            act2 = gan_eval_inception.inception.predict(images2)
-            # calculate mean and covariance statistics
-            mu1, sigma1 = act1.mean(axis=0), cov(act1, rowvar=False)
-            mu2, sigma2 = act2.mean(axis=0), cov(act2, rowvar=False)
-            # calculate sum squared difference between means
-            ssdiff = np.sum((mu1 - mu2) ** 2.0)
-            # calculate sqrt of product between cov
-            covmean = sqrtm(sigma1.dot(sigma2))
-            # check and correct imaginary numbers from sqrt
-            if iscomplexobj(covmean):
-                covmean = covmean.real
-            # calculate score
-            fid = ssdiff + trace(sigma1 + sigma2 - 2.0 * covmean)
-            return fid
-
-                """
-        return
-
     def evaluate_all_gan(
             self,
             epoch_count,
@@ -258,6 +204,7 @@ class PTRunner(Runner):
                 epoch_count, num_epochs
             )
         )
+
         # Save generated images according to the given eval_interval
         if epoch_count % eval_interval == 0:
             with torch.no_grad():
@@ -269,11 +216,31 @@ class PTRunner(Runner):
             plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
             if not os.path.isdir(self._run_directory):
                 os.makedirs(self._run_directory + '/images/', exist_ok=True)
-            plt.savefig(self._run_directory + '/images/' + str(epoch_count) + '_epoch_' + self._file_name + '.png')
+            plt.savefig(self._run_directory + '/images/epoch_' + str(epoch_count) + '_' + self._file_name + '.png')
 
         # Create image to compare real with fake
         if epoch_count == num_epochs:
-            # Plot the real images
+            # plot loss
+            plt.figure(figsize=(15, 15))
+            plt.title("Generator and Discriminator Loss ")
+            plt.plot(g_losses, label="G")
+            plt.plot(d_losses, label="D")
+            plt.xlabel("Iteration")
+            plt.ylabel("Loss")
+            plt.legend()
+            os.makedirs(self._run_directory + '/plots/', exist_ok=True)
+            plt.savefig(self._run_directory + '/plots/Loss_' + self._file_name + '.png')
+            # plot accuracy
+            plt.figure(figsize=(15, 15))
+            plt.title("Discriminator accuracy for real and fake")
+            plt.plot(d_acc_real, label="acc(D(x))")
+            plt.plot(d_acc_fake, label="acc(D(G(z)))")
+            plt.xlabel("Iterations")
+            plt.ylabel("Accuracy")
+            plt.legend()
+            plt.savefig(self._run_directory + '/plots/Accuracy_' + self._file_name + '.png')
+
+            # Create comparison image
             next_batch = next(iter(tproblem.data._train_eval_dataloader))
             plt.figure(figsize=(15, 15))
             plt.subplot(1, 2, 1)
@@ -281,21 +248,11 @@ class PTRunner(Runner):
             plt.title("Real Images")
             plt.imshow(np.transpose(vutils.make_grid(next_batch[0].to(config.get_default_device())[:64],
                                                      padding=5, normalize=True).cpu(), (1, 2, 0)))
-            # Plot the fake images from the last epoch
             plt.subplot(1, 2, 2)
             plt.axis("off")
             plt.title("Generated Images")
             plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
-            plt.savefig(self._run_directory + '/images/Compare_' + self._file_name +'.png')
-
-            # %%capture
-            # fig = plt.figure(figsize=(8, 8))
-            # plt.axis("off")
-            # ims = [[plt.imshow(np.transpose(i, (1, 2, 0)), animated=True)] for i in img_list]
-            # ani = animation.ArtistAnimation(fig, ims, interval=1000, repeat_delay=1000, blit=True)
-            # plt.show()
-            # ani.save('', writer=writer, savefig_kwargs=self._run_directory)
-        # TODO: Add animation of the saved images to visualize the progress
+            plt.savefig(self._run_directory + '/images/compared_' + self._file_name + '.png')
 
         print("********************************")
         return
@@ -443,7 +400,7 @@ class StandardRunner(PTRunner):
         opt_g = self._optimizer_class(tproblem.generator.parameters(), **hyperparams)
 
         # Input vector for G
-        fixed_noise = torch.randn(64, tproblem.generator.noise_size, 1, 1, device=config.DEFAULT_DEVICE)
+        fixed_noise = torch.randn(2048, tproblem.generator.noise_size, 1, 1, device=config.DEFAULT_DEVICE)
 
         # Lists to log train/test loss, accuracy and the images.
         img_list = []
@@ -498,9 +455,9 @@ class StandardRunner(PTRunner):
                     # (1) Update D network
                     tproblem.net.zero_grad()
                     inputs, _ = tproblem._get_next_batch()
-                    real_cpu = inputs.to(config.DEFAULT_DEVICE)
+                    real_data = inputs.to(config.DEFAULT_DEVICE)
                     label = torch.full((len(inputs),), real_label, device=config.DEFAULT_DEVICE)
-                    output = tproblem.net(real_cpu).view(-1)
+                    output = tproblem.net(real_data).view(-1)
                     loss_d_real = tproblem.loss_function(output, label)
                     loss_d_real.backward()
                     accuracy_real = output.mean().item()
@@ -516,7 +473,6 @@ class StandardRunner(PTRunner):
                     opt_d.step()
 
                     # (2) Update G network
-
                     tproblem.generator.zero_grad()
                     label.fill_(real_label)  # fake labels are real for generator cost
                     output = tproblem.net(fake).view(-1)
@@ -532,7 +488,8 @@ class StandardRunner(PTRunner):
                         d_acc_fake.append(accuracy_fake)
                         if print_train_iter:
                             print(
-                                "Epoch {0:d}, step {1:d}: loss_d {2:g}, loss_g {3:g}, accuracy_real {4:g}, accuracy_fake {5:g}".format(
+                                "Epoch {0:d}, step {1:d}: loss_d {2:g}, loss_g {3:g},"
+                                " accuracy_real {4:g}, accuracy_fake {5:g}".format(
                                     epoch_count, batch_count, loss_d.item(), loss_g.item(), accuracy_real, accuracy_fake
                                 )
                             )
@@ -549,15 +506,18 @@ class StandardRunner(PTRunner):
                 except StopIteration:
                     break
 
-            if not np.isfinite(loss_d.item()):
-                # TODO: Take a look at the function below: does gan training need that?
-                self._abort_routine(
+            if not np.isfinite(d_losses[batch_count-1]) or not np.isfinite(g_losses[batch_count-1]):
+                self._abort_routine_gan(
                     epoch_count,
                     num_epochs,
                     g_losses,
                     d_losses,
                     d_acc_real,
                     d_acc_fake,
+                    loss_g,
+                    loss_d,
+                    accuracy_real,
+                    accuracy_fake,
                 )
                 break
             else:
