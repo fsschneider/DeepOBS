@@ -74,6 +74,10 @@ class Quadratic_DeepTest(unittest.TestCase):
         check_hessian = torch.einsum("ij,kj->ik", (sqrt, sqrt))
         assert torch.allclose(hessian, check_hessian, rtol=1e-6, atol=1e-6)
 
+    def test_hessian_deterministic(self):
+        hessian1 = self.quadratic_deep._make_hessian()
+        hessian2 = self.quadratic_deep._make_hessian()
+        assert torch.allclose(hessian1, hessian2)
 
 
 if __name__ == "__main__":
