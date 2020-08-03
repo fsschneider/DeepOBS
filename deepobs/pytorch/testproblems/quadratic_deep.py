@@ -8,10 +8,8 @@ from ..datasets.quadratic import quadratic
 from .testproblem import UnregularizedTestproblem
 from .testproblems_modules import net_quadratic_deep
 
-rng = np.random.RandomState(42)
 
-
-def random_rotation(D):
+def random_rotation(D, rng=None):
     """Produces a rotation matrix R in SO(D) (the special orthogonal
     group SO(D), or orthogonal matrices with unit determinant, drawn uniformly
     from the Haar measure.
@@ -22,11 +20,14 @@ def random_rotation(D):
 
     Args:
         D (int): Dimensionality of the matrix.
+        rng (numpy.random.RandomState, optional): A random number generator.
 
     Returns:
         np.array: Random rotation matrix ``R``.
 
     """
+    if rng is None:
+        rng = np.random.RandomState(42)
     assert D >= 2
     D = int(D)  # make sure that the dimension is an integer
 
@@ -100,7 +101,7 @@ class quadratic_deep(UnregularizedTestproblem):
             0., 1., eigvals_small), rng.uniform(30., 60., eigvals_large)),
                                      axis=0)
         D = np.diag(eigenvalues)
-        R = random_rotation(D.shape[0])
+        R = random_rotation(D.shape[0], rng=rng)
         Hessian = np.matmul(np.transpose(R), np.matmul(D, R))
         return torch.from_numpy(Hessian).to(torch.float32)
 
