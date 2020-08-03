@@ -24,12 +24,12 @@ class Cifar100_WRN404Test(unittest.TestCase):
         """Sets up CIFAR-100 dataset for the tests."""
         self.batch_size = 100
         self.cifar100_wrn404 = testproblems.cifar100_wrn404(self.batch_size)
+        torch.manual_seed(42)
+        self.cifar100_wrn404.set_up()
+        self.cifar100_wrn404.train_init_op()
 
     def test_num_param(self):
         """Tests the number of parameters."""
-        torch.manual_seed(42)
-        self.cifar100_wrn404.set_up()
-
         num_param = []
         for parameter in self.cifar100_wrn404.net.parameters():
             num_param.append(parameter.numel())
@@ -154,6 +154,11 @@ class Cifar100_WRN404Test(unittest.TestCase):
         ]
 
         self.assertEqual(num_param, expected_num_param)
+
+    def test_forward_pass_with_regularization(self):
+        loss, _ = self.cifar100_wrn404.get_batch_loss_and_accuracy(
+            add_regularization_if_available=True
+        )
 
 
 if __name__ == "__main__":
