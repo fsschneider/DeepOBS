@@ -54,7 +54,7 @@ class mnist_2c2d(TestProblem):
         """
         super(mnist_2c2d, self).__init__(batch_size, l2_reg)
 
-        if l2_reg is not None:
+        if l2_reg is not None and l2_reg != 0.0:
             print(
                 "WARNING: L2-Regularization is non-zero but no L2-regularization is used",
                 "for this model.",

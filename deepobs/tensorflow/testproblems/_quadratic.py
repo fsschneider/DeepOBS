@@ -6,6 +6,7 @@ Created on Thu Dec 20 10:07:47 2018
 """
 
 import numpy as np
+
 import tensorflow as tf
 
 from ..datasets.quadratic import quadratic
@@ -54,7 +55,7 @@ class _quadratic_base(TestProblem):
         """
         super(_quadratic_base, self).__init__(batch_size, l2_reg)
         self._hessian = hessian
-        if l2_reg is not None:
+        if l2_reg is not None and l2_reg != 0.0:
             print(
                 "WARNING: L2-Regularization is non-zero but no L2-regularization is used",
                 "for this model.",

@@ -2,6 +2,7 @@
 """A simple 2D Noisy Branin Loss Function."""
 
 import numpy as np
+
 import tensorflow as tf
 
 from ..datasets.two_d import two_d
@@ -53,7 +54,7 @@ class two_d_branin(TestProblem):
         """
         super(two_d_branin, self).__init__(batch_size, l2_reg)
 
-        if l2_reg is not None:
+        if l2_reg is not None and l2_reg != 0.0:
             print(
                 "WARNING: L2-Regularization is non-zero but no L2-regularization is used",
                 "for this model.",
