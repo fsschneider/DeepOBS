@@ -12,8 +12,7 @@
 [![License: MIT](https://img.shields.io/github/license/fsschneider/deepobs?style=flat-square)](https://opensource.org/licenses/MIT)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/deepobs?style=flat-square)
 [![PyPI version](https://img.shields.io/pypi/v/deepobs.svg?style=flat-square)](https://pypi.org/project/deepobs)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/deepobs?style=flat-square)
-![Codacy branch grade](https://img.shields.io/codacy/grade/0b6cb61af02745af8ed9126c7d0779e6/develop?logo=Codacy&style=flat-square)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/deepobs?style=flat-square) <!--- ![Codacy branch grade](https://img.shields.io/codacy/grade/0b6cb61af02745af8ed9126c7d0779e6/develop?logo=Codacy&style=flat-square) -->
 [![Documentation Status](https://readthedocs.org/projects/deepobs/badge/?version=v1.2.0-beta0_a&style=flat-square)](https://deepobs.readthedocs.io/en/v1.2.0-beta0_a/?badge=v1.2.0-beta0_a)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
@@ -89,11 +88,11 @@ Other versions of Python and TensorFlow (>= 1.4.0) might work, and we plan to ex
 
 If you want to create a local and modifiable version of DeepOBS, you can do this directly from this repo via
 
-    pip install -e git+https://github.com/fsschneider/DeepOBS.git#egg=DeepOBS
+    pip install -e 'git+https://github.com/fsschneider/DeepOBS.git#egg=DeepOBS'
 
 for the latest stable version, or
 
-    pip install -e git+https://github.com/fsschneider/DeepOBS.git@v1.2.0-beta0#egg=DeepOBS
+    pip install -e 'git+https://github.com/fsschneider/DeepOBS.git@v1.2.0-beta0#egg=DeepOBS'
 
 to get the preview of DeepOBS 1.2.0.
 

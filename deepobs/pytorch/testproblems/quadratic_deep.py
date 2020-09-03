@@ -8,10 +8,8 @@ from ..datasets.quadratic import quadratic
 from .testproblem import UnregularizedTestproblem
 from .testproblems_modules import net_quadratic_deep
 
-rng = np.random.RandomState(42)
 
-
-def random_rotation(D):
+def random_rotation(D, rng=None):
     """Produces a rotation matrix R in SO(D) (the special orthogonal
     group SO(D), or orthogonal matrices with unit determinant, drawn uniformly
     from the Haar measure.
@@ -22,11 +20,14 @@ def random_rotation(D):
 
     Args:
         D (int): Dimensionality of the matrix.
+        rng (numpy.random.RandomState, optional): A random number generator.
 
     Returns:
         np.array: Random rotation matrix ``R``.
 
     """
+    if rng is None:
+        rng = np.random.RandomState(42)
     assert D >= 2
     D = int(D)  # make sure that the dimension is an integer
 
@@ -84,35 +85,25 @@ class quadratic_deep(UnregularizedTestproblem):
         """
         super(quadratic_deep, self).__init__(batch_size, l2_reg)
 
-    def quadratic_deep_loss_function_factory(self, reduction="mean"):
-        def quadratic_deep_loss_function(inputs):
-            batched_loss = self.net(inputs)
-            if reduction == "mean":
-                return batched_loss.mean()
-            elif reduction == "sum":
-                return torch.sum(batched_loss)
-            elif reduction == "none":
-                return batched_loss
-            else:
-                raise NotImplementedError("Reduction " + reduction + " not implemented")
-
-        return quadratic_deep_loss_function
-
     def set_up(self):
-        rng = np.random.RandomState(42)
-        eigenvalues = np.concatenate(
-            (rng.uniform(0.0, 1.0, 90), rng.uniform(30.0, 60.0, 10)), axis=0
-        )
-        D = np.diag(eigenvalues)
-        R = random_rotation(D.shape[0])
-        Hessian = np.matmul(np.transpose(R), np.matmul(D, R))
-        Hessian = torch.from_numpy(Hessian).to(self._device, torch.float32)
-        self.net = net_quadratic_deep(100, Hessian)
-
+        hessian = self._make_hessian()
+        self._hessian = hessian
+        self.net = net_quadratic_deep(hessian)
         self.data = quadratic(self._batch_size)
         self.net.to(self._device)
-        self.loss_function = self.quadratic_deep_loss_function_factory
+        self.loss_function = torch.nn.MSELoss
         self.regularization_groups = self.get_regularization_groups()
+
+    @staticmethod
+    def _make_hessian(eigvals_small=90, eigvals_large=10):
+        rng = np.random.RandomState(42)
+        eigenvalues = np.concatenate((rng.uniform(
+            0., 1., eigvals_small), rng.uniform(30., 60., eigvals_large)),
+                                     axis=0)
+        D = np.diag(eigenvalues)
+        R = random_rotation(D.shape[0], rng=rng)
+        Hessian = np.matmul(np.transpose(R), np.matmul(D, R))
+        return torch.from_numpy(Hessian).to(torch.float32)
 
     def get_batch_loss_and_accuracy_func(
         self, reduction="mean", add_regularization_if_available=True
@@ -128,16 +119,20 @@ class quadratic_deep(UnregularizedTestproblem):
             callable:  The function that calculates the loss/accuracy on the current batch.
         """
 
-        inputs = self._get_next_batch()[0]
+        inputs, labels = self._get_next_batch()
         inputs = inputs.to(self._device)
+        labels = labels.to(self._device)
 
         def forward_func():
             # in evaluation phase is no gradient needed
             if self.phase in ["train_eval", "test", "valid"]:
                 with torch.no_grad():
-                    loss = self.loss_function(reduction=reduction)(inputs)
+                    outputs = self.net(inputs)
+                    loss = self.loss_function(reduction=reduction)(outputs,
+                                                                   labels)
             else:
-                loss = self.loss_function(reduction=reduction)(inputs)
+                outputs = self.net(inputs)
+                loss = self.loss_function(reduction=reduction)(outputs, labels)
 
             accuracy = 0.0
 

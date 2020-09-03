@@ -11,13 +11,11 @@ from matplotlib import pyplot as plt
 
 from ..tuner.tuner_utils import generate_tuning_summary
 from .analyze_utils import _preprocess_path, _rescale_ax
-from .shared_utils import (
-    _check_output_structure,
-    _check_setting_folder_is_not_empty,
-    _determine_available_metric,
-    _get_optimizer_name_and_testproblem_from_path,
-    create_setting_analyzer_ranking,
-)
+from .shared_utils import (_check_output_structure,
+                           _check_setting_folder_is_not_empty,
+                           _determine_available_metric,
+                           _get_optimizer_name_and_testproblem_from_path,
+                           create_setting_analyzer_ranking)
 
 sns.set()
 sns.set_style(
@@ -548,7 +546,9 @@ def _plot_optimizer_performance(
         ax (matplotlib.axes.Axes): The axes to plot the trainig curves for all metrices. Must have 4 subaxes.
         mode (str): The mode by which to decide the best setting.
         metric (str): The metric by which to decide the best setting.
-        which (str): ['mean_and_std', 'median_and_quartiles'] Solid plot mean or median, shaded plots standard deviation or lower/upper quartiles.
+        which (str): ['mean_and_std', 'median_and_quartiles', 'mean_and_std_log']
+            - Solid plot mean or median or exponentiated mean of log
+            - Shaded plots standard deviation or lower/upper quartiles or exponentiated std of log
 
     Returns:
         matplotlib.axes.Axes: The axes with the plots.
@@ -570,7 +570,7 @@ def _plot_optimizer_performance(
         setting = setting_analyzer_ranking[0]
 
         optimizer_name = os.path.basename(optimizer_path)
-        for idx, _metric in enumerate(metrices):
+        for idx, _metric in enumerate(metrics):
             if _metric in setting.aggregate:
 
                 if which == "mean_and_std":
