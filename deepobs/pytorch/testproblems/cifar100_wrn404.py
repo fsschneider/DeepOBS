@@ -66,4 +66,4 @@ class cifar100_wrn404(TestProblem):
                 group_dict[l2].append(parameters)
             else:
                 group_dict[no].append(parameters)
-
+        return group_dict
