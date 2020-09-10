@@ -1,3 +1,7 @@
+### DeepOBS ###
+**/results
+**/data_deepobs
+
 ### OSX ###
 *.DS_Store
 .AppleDouble
