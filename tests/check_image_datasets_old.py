@@ -2,14 +2,15 @@
 """Script to visualize images from DeepOBS datasets."""
 
 import os
-import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
-import tensorflow as tf
 
 import deepobs.config as config
+import tensorflow as tf
 from deepobs.tensorflow import datasets
+
+# import sys
 
 
 def denormalize_image(img):
@@ -76,9 +77,7 @@ def load_label_dict(dataset):
             label_dict = lookup_file.readlines()
     elif dataset == "cifar100":
         with open(
-            os.path.join(
-                config.get_data_dir(), "cifar-100/fine_label_names.txt"
-            )
+            os.path.join(config.get_data_dir(), "cifar-100/fine_label_names.txt")
         ) as lookup_file:
             label_dict = lookup_file.readlines()
     elif dataset == "fmnist":
@@ -98,9 +97,7 @@ def load_label_dict(dataset):
         )
     elif dataset == "imagenet":
         label_file = os.path.join(
-            os.path.realpath(
-                os.path.join(os.getcwd(), os.path.dirname(__file__))
-            ),
+            os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__))),
             "imagenet_labels.txt",
         )
         # Read from text file

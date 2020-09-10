@@ -16,7 +16,10 @@ from .testproblems_utils import (
 
 
 class net_mnist_logreg(nn.Sequential):
+    """Logistic Regression for MNIST."""
+
     def __init__(self, num_outputs):
+        """Create the net."""
         super(net_mnist_logreg, self).__init__()
 
         self.add_module("flatten", nn.Flatten())
@@ -28,16 +31,23 @@ class net_mnist_logreg(nn.Sequential):
 
 
 class net_cifar10_3c3d(nn.Sequential):
-    """  Basic conv net for cifar10/100. The network consists of
+    """Basic conv net for cifar10/100.
+
+    The network consists of
     - three conv layers with ReLUs, each followed by max-pooling
     - two fully-connected layers with ``512`` and ``256`` units and ReLU activation
     - output layer with softmax
-  The weight matrices are initialized using Xavier initialization and the biases
-  are initialized to ``0.0``."""
+
+    The weight matrices are initialized using Xavier initialization and the biases
+    are initialized to ``0.0``.
+    """
 
     def __init__(self, num_outputs):
-        """Args:
-            num_outputs (int): The numer of outputs (i.e. target classes)."""
+        """Create the net.
+
+        Args:
+            num_outputs (int): The numer of outputs (i.e. target classes).
+        """
         super(net_cifar10_3c3d, self).__init__()
 
         self.add_module(
@@ -87,20 +97,25 @@ class net_cifar10_3c3d(nn.Sequential):
 
 
 class net_mnist_2c2d(nn.Sequential):
-    """  Basic conv net for (Fashion-)MNIST. The network has been adapted from the `TensorFlow tutorial\
-  <https://www.tensorflow.org/tutorials/estimators/cnn>`_ and consists of
+    """Basic conv net for (Fashion-)MNIST.
+
+    The network has been adapted from the `TensorFlow tutorial
+    <https://www.tensorflow.org/tutorials/estimators/cnn>`_ and consists of
 
     - two conv layers with ReLUs, each followed by max-pooling
     - one fully-connected layers with ReLUs
     - output layer with softmax
 
-  The weight matrices are initialized with truncated normal (standard deviation
-  of ``0.05``) and the biases are initialized to ``0.05``."""
+    The weight matrices are initialized with truncated normal (standard deviation
+    of ``0.05``) and the biases are initialized to ``0.05``.
+    """
 
     def __init__(self, num_outputs):
-        """Args:
-            num_outputs (int): The numer of outputs (i.e. target classes)."""
+        """Create the net.
 
+        Args:
+            num_outputs (int): The numer of outputs (i.e. target classes).
+        """
         super(net_mnist_2c2d, self).__init__()
         self.add_module(
             "conv1",
@@ -147,25 +162,30 @@ class net_mnist_2c2d(nn.Sequential):
 
 
 class net_vae(nn.Module):
-    """  A basic VAE for (Faschion-)MNIST. The network has been adapted from the `here\
-  <https://towardsdatascience.com/teaching-a-variational-autoencoder-vae-to-draw-mnist-characters-978675c95776>`_
-  and consists of an encoder:
+    r"""A basic VAE for (Faschion-)MNIST.
+
+    The network has been adapted from the `here
+    <https://towardsdatascience.com/teaching-a-variational-autoencoder-vae-to-draw-mnist-characters-978675c95776>`_
+    and consists of an encoder:
 
     - With three convolutional layers with each ``64`` filters.
     - Using a leaky ReLU activation function with :math:`\\alpha = 0.3`
     - Dropout layers after each convolutional layer with a rate of ``0.2``.
 
-  and an decoder:
+    and an decoder:
 
     - With two dense layers with ``24`` and ``49`` units and leaky ReLU activation.
     - With three deconvolutional layers with each ``64`` filters.
     - Dropout layers after the first two deconvolutional layer with a rate of ``0.2``.
     - A final dense layer with ``28 x 28`` units and sigmoid activation.
-"""
+    """
 
     def __init__(self, n_latent):
-        """Args:
-            n_latent (int): Size of the latent space."""
+        """Create the net.
+
+        Args:
+            n_latent (int): Size of the latent space.
+        """
         super(net_vae, self).__init__()
         self.n_latent = n_latent
 
@@ -247,6 +267,14 @@ class net_vae(nn.Module):
                 nn.init.xavier_uniform_(module.weight)
 
     def encode(self, x):
+        """Build the encoder of the VAE.
+
+        Args:
+            x (torch.Tensor): Input to the encoder.
+
+        Returns:
+            tuple: `z`, `mean` and `std_dev` output of the encoder.
+        """
         x = F.leaky_relu(self.conv1(x), negative_slope=0.3)
         x = self.dropout1(x)
 
@@ -266,6 +294,14 @@ class net_vae(nn.Module):
         return z, mean, std_dev
 
     def decode(self, z):
+        """Build the decoder of the VAE.
+
+        Args:
+            z (torch.Tensor): Input to the decoder.
+
+        Returns:
+            torch.Tensor: A batch of created images.
+        """
         x = F.leaky_relu(self.dense3(z), negative_slope=0.3)
         x = F.leaky_relu(self.dense4(x), negative_slope=0.3)
 
@@ -289,6 +325,14 @@ class net_vae(nn.Module):
         return images
 
     def forward(self, x):
+        """Build forward pass of the model.
+
+        Args:
+            x (torch.Tensor): Input to the encoder
+
+        Returns:
+            tuple: `image`, `mean` and `std_dev` of the VAE.
+        """
         z, mean, std_dev = self.encode(x)
 
         image = self.decode(z)
@@ -700,6 +744,7 @@ class net_quadratic_deep(nn.Sequential):
     zero-mean normal.
     The parameters are initialized to 1.
 """
+
     def __init__(self, hessian):
         """Args:
             hessian (np.array): The matrix for the quadratic form."""
@@ -713,7 +758,7 @@ class net_quadratic_deep(nn.Sequential):
         self.add_module("scale", nn.Linear(dim, dim, bias=False))
 
         # init
-        self.shift.weight.data = - torch.eye(dim, dim)
+        self.shift.weight.data = -torch.eye(dim, dim)
         self.shift.weight.requires_grad = False
         nn.init.ones_(self.shift.bias)
 

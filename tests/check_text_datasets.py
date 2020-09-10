@@ -3,14 +3,15 @@
 
 import os
 import pickle
-import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
-import tensorflow as tf
 
 import deepobs.config as config
+import tensorflow as tf
 from deepobs.tensorflow import datasets
+
+# import sys
 
 
 def display_text(dataset_cls, grid_size=5, phase="train"):
@@ -47,12 +48,8 @@ def display_text(dataset_cls, grid_size=5, phase="train"):
         input_txt = "".join([label_dict[char] for char in np.squeeze(x_[i])])
         output_txt = "".join([label_dict[char] for char in np.squeeze(y_[i])])
         # Next Batch, to check if text continues
-        input_next_txt = "".join(
-            [label_dict[char] for char in np.squeeze(x_next[i])]
-        )
-        output_next_txt = "".join(
-            [label_dict[char] for char in np.squeeze(y_next[i])]
-        )
+        input_next_txt = "".join([label_dict[char] for char in np.squeeze(x_next[i])])
+        output_next_txt = "".join([label_dict[char] for char in np.squeeze(y_next[i])])
         txt = (
             "*INPUT* \n"
             + input_txt

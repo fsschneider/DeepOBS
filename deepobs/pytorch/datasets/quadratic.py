@@ -9,38 +9,38 @@ from . import dataset
 
 
 class quadratic(dataset.DataSet):
-    """DeepOBS data set class to create an n dimensional stochastic quadratic\
-    testproblem.
+    """DeepOBS data set to create an n dimensional stochastic quadratic testproblem.
 
     This toy data set consists of a fixed number (``train_size``) of iid draws
     from a zero-mean normal distribution in ``dim`` dimensions with isotropic
     covariance specified by ``noise_level``.
 
-  Args:
-    batch_size (int): The mini-batch size to use. Note that, if ``batch_size``
-        is not a divider of the dataset size (``1000`` for train and test) the
-        remainder is dropped in each epoch (after shuffling).
-    dim (int): Dimensionality of the quadratic. Defaults to ``100``.
-    train_size (int): Size of the dataset; will be used for train, train eval and
-        test datasets. Defaults to ``1000``.
-    noise_level (float): Standard deviation of the data points around the mean.
-        The data points are drawn from a Gaussian distribution.
-        Defaults to ``0.6``.
-        """
-    def __init__(self, batch_size, dim=100, train_size=1000, noise_level=0.6):
-        """Creates a new Quadratic instance.
-
     Args:
-      batch_size (int): The mini-batch size to use. Note that, if ``batch_size``
-          is not a divider of the dataset size (``1000`` for train and test) the
-          remainder is dropped in each epoch (after shuffling).
-      dim (int): Dimensionality of the quadratic. Defaults to ``100``.
-      train_size (int): Size of the dataset; will be used for train, train eval
-          and test datasets. Defaults to ``1000``.
-      noise_level (float): Standard deviation of the data points around the mean.
-          The data points are drawn from a Gaussian distribution.
-          Defaults to ``0.6``.
+        batch_size (int): The mini-batch size to use. Note that, if ``batch_size``
+            is not a divider of the dataset size (``1000`` for train and test) the
+            remainder is dropped in each epoch (after shuffling).
+        dim (int): Dimensionality of the quadratic. Defaults to ``100``.
+        train_size (int): Size of the dataset; will be used for train, train eval and
+            test datasets. Defaults to ``1000``.
+        noise_level (float): Standard deviation of the data points around the mean.
+            The data points are drawn from a Gaussian distribution.
+            Defaults to ``0.6``.
     """
+
+    def __init__(self, batch_size, dim=100, train_size=1000, noise_level=0.6):
+        """Create a new Quadratic instance.
+
+        Args:
+            batch_size (int): The mini-batch size to use. Note that, if ``batch_size``
+                is not a divider of the dataset size (``1000`` for train and test) the
+                remainder is dropped in each epoch (after shuffling).
+            dim (int): Dimensionality of the quadratic. Defaults to ``100``.
+            train_size (int): Size of the dataset; will be used for train, train eval
+                and test datasets. Defaults to ``1000``.
+            noise_level (float): Standard deviation of the data points around the mean.
+                The data points are drawn from a Gaussian distribution.
+                Defaults to ``0.6``.
+        """
         self._name = "quadratic"
         self._dim = dim
         self._train_size = train_size
@@ -53,8 +53,11 @@ class quadratic(dataset.DataSet):
         return torch.from_numpy(np_labels)
 
     def _make_data(self, seed):
-        """Draw data from a random generator with a fixed seed to always get
-        the same data. Add noise"""
+        """Draw data.
+
+        We draw the data from a random generator with a fixed seed to always get
+        the same data and add noise.
+        """
         rng = np.random.RandomState(seed)
         X = rng.normal(0.0, self._noise_level, (self._train_size, self._dim))
         X = np.float32(X)

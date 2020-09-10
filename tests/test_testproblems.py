@@ -4,22 +4,18 @@ Raises:
     ValueError: If we want to test an unknown framework
         (besides PyTorch and TensorFlow)
 """
-import os
+# import os
 
 import numpy as np
 import pytest
-import tensorflow as tf
 import torch
 
 import deepobs.pytorch.testproblems as torch_testproblems
 import deepobs.tensorflow.testproblems as tf_testproblems
-from deepobs.pytorch.config import get_default_device, set_default_device
+import tensorflow as tf
+from deepobs.pytorch.config import set_default_device
 
-from .utils.utils_tests import (
-    check_lists,
-    get_number_of_parameters,
-    get_testproblems,
-)
+from .utils.utils_tests import check_lists, get_number_of_parameters, get_testproblems
 
 # Basic Settings of the Test
 BATCH_SIZE = 8
@@ -94,7 +90,7 @@ def _check_forward_pass(tproblem, framework, device):
             init_op()
             losses, acc = tproblem.get_batch_loss_and_accuracy(reduction="none")
             loss = torch.mean(losses).item()
-            check_losses_acc(losses, loss, acc)
+            _check_losses_acc(losses, loss, acc)
     elif framework == "tensorflow":
         if device == "cpu":
             config = tf.ConfigProto(device_count={"GPU": 0})
@@ -154,8 +150,6 @@ def _check_parameters(tproblem, framework):
         for parameter in tproblem.net.parameters():
             num_param.append(parameter.numel())
     elif framework == "tensorflow":
-        num_param = [
-            np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()
-        ]
+        num_param = [np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()]
 
     assert check_lists(num_param, get_number_of_parameters(tproblem))

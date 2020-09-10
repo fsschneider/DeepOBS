@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+"""Config file for DeepOBS."""
+
 FRAMEWORK = "pytorch"
 BASELINE_DIR = "baselines_deepobs"
 SMALL_TEST_SET = ["quadratic_deep", "mnist_vae", "fmnist_2c2d", "cifar10_3c3d"]
@@ -39,70 +41,6 @@ TP_NAMING = {
 }
 DATA_DIR = "data_deepobs"
 
-
-def get_data_dir():
-    return DATA_DIR
-
-
-def set_data_dir(data_dir):
-    """Sets the data directory.
-
-    Args:
-        data_dir (str): Path to the data folder.
-    """
-    global DATA_DIR
-    DATA_DIR = data_dir
-
-
-def get_framework():
-    return FRAMEWORK
-
-
-def set_framework(framework):
-    """Sets the current used framework. This is relevant for the higher level Tuner module of DeepOBS.
-
-    Args:
-        framework (str): Can be 'pytorch' or 'tensorflow'
-    """
-    global FRAMEWORK
-    FRAMEWORK = framework
-
-
-def get_baseline_dir():
-    return BASELINE_DIR
-
-
-def set_baseline_dir(baseline_dir):
-    global BASELINE_DIR
-    BASELINE_DIR = baseline_dir
-
-
-def get_small_test_set():
-    return SMALL_TEST_SET
-
-
-def set_small_test_set(testset):
-    global SMALL_TEST_SET
-    SMALL_TEST_SET = testset
-
-
-def get_large_test_set():
-    return LARGE_TEST_SET
-
-
-def set_large_test_set(testset):
-    global LARGE_TEST_SET
-    LARGE_TEST_SET = testset
-
-
-def get_data_set_naming():
-    return DATA_SET_NAMING
-
-
-def get_tp_naming():
-    return TP_NAMING
-
-
 DEFAULT_TEST_PROBLEMS_SETTINGS = {
     "quadratic_deep": {"batch_size": 128, "num_epochs": 100},
     "mnist_vae": {"batch_size": 64, "num_epochs": 50},
@@ -110,8 +48,8 @@ DEFAULT_TEST_PROBLEMS_SETTINGS = {
     "cifar10_3c3d": {"batch_size": 128, "num_epochs": 100},
     "fmnist_vae": {"batch_size": 64, "num_epochs": 100},
     "cifar100_allcnnc": {"batch_size": 256, "num_epochs": 350},
-    "cifar100_wrn164":{"batch_size":128, "num_epochs":160},
-    "cifar100_wrn404":{"batch_size":128, "num_epochs":160},
+    "cifar100_wrn164": {"batch_size": 128, "num_epochs": 160},
+    "cifar100_wrn404": {"batch_size": 128, "num_epochs": 160},
     "svhn_3c3d": {"batch_size": 128, "num_epochs": 100},
     "svhn_wrn164": {"batch_size": 128, "num_epochs": 160},
     "tolstoi_char_rnn": {"batch_size": 50, "num_epochs": 200},
@@ -123,16 +61,132 @@ DEFAULT_TEST_PROBLEMS_SETTINGS = {
 }
 
 
+def get_data_dir():
+    """Get the current data directory.
+
+    Returns:
+        str: Path to the data folder
+    """
+    return DATA_DIR
+
+
+def set_data_dir(data_dir):
+    """Set the data directory.
+
+    Args:
+        data_dir (str): Path to the data folder
+    """
+    global DATA_DIR
+    DATA_DIR = data_dir
+
+
+def get_framework():
+    """Get the current used framework. This is relevent for the Tuner module.
+
+    Returns:
+        str: The framework. Can be `pytorch` or `tensorflow`
+    """
+    return FRAMEWORK
+
+
+def set_framework(framework):
+    """Set the current used framework. This is relevant for the Tuner module.
+
+    Args:
+        framework (str): Can be `pytorch` or `tensorflow`
+    """
+    global FRAMEWORK
+    FRAMEWORK = framework
+
+
+def get_baseline_dir():
+    """Get the directory of the baselines.
+
+    Returns:
+        str: Path to the baseline folder
+    """
+    return BASELINE_DIR
+
+
+def set_baseline_dir(baseline_dir):
+    """Set the directory of the baseliens.
+
+    Args:
+        baseline_dir (str): Path to the baseline folder
+    """
+    global BASELINE_DIR
+    BASELINE_DIR = baseline_dir
+
+
+def get_small_test_set():
+    """Return the small test set of DeepOBS.
+
+    Returns:
+        [str]: A list of testproblem names making up the small test set.
+    """
+    return SMALL_TEST_SET
+
+
+def set_small_test_set(testset):
+    """Set the small test set.
+
+    Args:
+        testset ([str]): Overwrite the small test of DeepOBS with this list of
+            testproblem names.
+    """
+    global SMALL_TEST_SET
+    SMALL_TEST_SET = testset
+
+
+def get_large_test_set():
+    """Return the large test set of DeepOBS.
+
+    Returns:
+        [str]: A list of testproblem names making up the large test set.
+    """
+    return LARGE_TEST_SET
+
+
+def set_large_test_set(testset):
+    """Set the large test set.
+
+    Args:
+        testset ([str]): Overwrite the large test of DeepOBS with this list of
+            testproblem names.
+    """
+    global LARGE_TEST_SET
+    LARGE_TEST_SET = testset
+
+
+def get_data_set_naming():
+    """Get clean names of the DeepOBS data sets.
+
+    Returns:
+        dict: A dict where the keys are the internal data set names such as `cifar10`
+            and the values are clean names such as `CIFAR-10`.
+    """
+    return DATA_SET_NAMING
+
+
+def get_tp_naming():
+    """Get clean names of the DeepOBS testproblems.
+
+    Returns:
+        dict: A dict where the keys are the internal testproblem names such as `wrn164`
+            and the values are clean names such as `Wide ResNet 16-4`.
+    """
+    return TP_NAMING
+
+
 def get_testproblem_default_setting(testproblem):
-    """Returns default settings for the ``batch_size`` and the ``num_epochs`` for ``testproblem`` (if available).
+    """Return default settings for the ``testproblem`` (if available).
 
     Args:
         testproblem (str): Test problem for which to return the default setting.
 
     Returns:
         dict: A dictionary with the default values for ``batch_size`` and ``num_epochs``
-        """
-
+    """
     try:
         return DEFAULT_TEST_PROBLEMS_SETTINGS[testproblem]
     except KeyError:

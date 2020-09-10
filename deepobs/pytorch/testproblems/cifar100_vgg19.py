@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """VGG 19 architecture for CIFAR-100."""
+
 from torch import nn
 
 from ..datasets.cifar100 import cifar100

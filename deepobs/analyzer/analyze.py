@@ -11,11 +11,13 @@ from matplotlib import pyplot as plt
 
 from ..tuner.tuner_utils import generate_tuning_summary
 from .analyze_utils import _preprocess_path, _rescale_ax
-from .shared_utils import (_check_output_structure,
-                           _check_setting_folder_is_not_empty,
-                           _determine_available_metric,
-                           _get_optimizer_name_and_testproblem_from_path,
-                           create_setting_analyzer_ranking)
+from .shared_utils import (
+    _check_output_structure,
+    _check_setting_folder_is_not_empty,
+    _determine_available_metric,
+    _get_optimizer_name_and_testproblem_from_path,
+    create_setting_analyzer_ranking,
+)
 
 sns.set()
 sns.set_style(
@@ -32,7 +34,25 @@ sns.set_style(
         "ytick.color": ".5",
     },
 )
-colors = ["#feae34","#193c3e","#733e39","#3e2731","#a22633","#e43b44","#f77622","#63c74d","#265c42","#124e89","#0099db","#5a6988","#68386c","#b55088","#f6757a","#181425","#75580f"]
+colors = [
+    "#feae34",
+    "#193c3e",
+    "#733e39",
+    "#3e2731",
+    "#a22633",
+    "#e43b44",
+    "#f77622",
+    "#63c74d",
+    "#265c42",
+    "#124e89",
+    "#0099db",
+    "#5a6988",
+    "#68386c",
+    "#b55088",
+    "#f6757a",
+    "#181425",
+    "#75580f",
+]
 sns.set_palette(colors)
 
 
@@ -340,7 +360,7 @@ def plot_hyperparameter_sensitivity_2d(
     param_values2 = np.array([d["params"][param2] for d in tuning_summary])
 
     target_means = np.array([d[metric + "_mean"] for d in tuning_summary])
-    target_stds = [d[metric + "_std"] for d in tuning_summary]
+    # target_stds = [d[metric + "_std"] for d in tuning_summary]
 
     fig, ax = plt.subplots()
 
@@ -553,7 +573,7 @@ def _plot_optimizer_performance(
     Returns:
         matplotlib.axes.Axes: The axes with the plots.
         """
-    metrices = [
+    metrics = [
         "test_losses",
         "train_losses",
         "test_accuracies",

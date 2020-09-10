@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""Wide ResNet 16-4 architecture for SVHN."""
+
 from torch import nn
 
 from ..datasets.svhn import svhn

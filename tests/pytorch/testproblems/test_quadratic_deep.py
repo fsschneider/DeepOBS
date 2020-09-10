@@ -5,7 +5,6 @@ import os
 import sys
 import unittest
 
-import numpy as np
 import torch
 
 from deepobs.pytorch import testproblems
@@ -19,12 +18,12 @@ class Quadratic_DeepTest(unittest.TestCase):
     """Tests for the deep quadratic loss function."""
 
     def setUp(self):
-        """Sets up the quadratic dataset for the tests."""
+        """Set up the quadratic dataset for the tests."""
         self.batch_size = 10
         self.quadratic_deep = testproblems.quadratic_deep(self.batch_size)
 
     def test_num_param(self):
-        """Tests the number of parameters."""
+        """Test the number of parameters."""
         torch.manual_seed(42)
         self.quadratic_deep.set_up()
         for parameter in self.quadratic_deep.net.parameters():
@@ -32,6 +31,7 @@ class Quadratic_DeepTest(unittest.TestCase):
                 self.assertEqual(parameter.numel(), 100)
 
     def test_forward(self):
+        """Test the forward pass of the model."""
         quadratic_deep = testproblems.quadratic_deep(self.batch_size)
         # prob = self.quadratic_deep
         prob = quadratic_deep
@@ -50,31 +50,34 @@ class Quadratic_DeepTest(unittest.TestCase):
         # manual re-computation of the model output
         shifted = -inputs + net.shift.bias.data
         sqrt = testproblems.testproblems_modules.net_quadratic_deep._compute_sqrt(
-            prob._hessian)
-        outputs_check = torch.einsum('ji,bj->bi', (sqrt, shifted))
+            prob._hessian
+        )
+        outputs_check = torch.einsum("ji,bj->bi", (sqrt, shifted))
         assert torch.allclose(outputs, outputs_check, atol=1e-6, rtol=1e-6)
 
         # check Hessian initialization
         hessian_check = torch.einsum(
-            "ki,kj->ij", (net.scale.weight.data, net.scale.weight.data))
-        assert torch.allclose(prob._hessian,
-                              hessian_check,
-                              atol=1e-6,
-                              rtol=1e-6)
+            "ki,kj->ij", (net.scale.weight.data, net.scale.weight.data)
+        )
+        assert torch.allclose(prob._hessian, hessian_check, atol=1e-6, rtol=1e-6)
 
         # manual recomputation of the loss
-        loss_check = torch.einsum(
-            "bi,ij,bj", (shifted, prob._hessian, shifted)) / num_inputs
+        loss_check = (
+            torch.einsum("bi,ij,bj", (shifted, prob._hessian, shifted)) / num_inputs
+        )
         assert torch.allclose(loss, loss_check)
 
     def test_hessian_sqrt(self):
+        """Test the Hessian."""
         hessian = testproblems.quadratic_deep._make_hessian()
         sqrt = testproblems.testproblems_modules.net_quadratic_deep._compute_sqrt(
-            hessian)
+            hessian
+        )
         check_hessian = torch.einsum("ij,kj->ik", (sqrt, sqrt))
         assert torch.allclose(hessian, check_hessian, rtol=1e-6, atol=1e-6)
 
     def test_hessian_deterministic(self):
+        """Test whether creating the Hessian is deterministic."""
         hessian1 = self.quadratic_deep._make_hessian()
         hessian2 = self.quadratic_deep._make_hessian()
         assert torch.allclose(hessian1, hessian2)

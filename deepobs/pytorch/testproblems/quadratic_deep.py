@@ -10,9 +10,12 @@ from .testproblems_modules import net_quadratic_deep
 
 
 def random_rotation(D, rng=None):
-    """Produces a rotation matrix R in SO(D) (the special orthogonal
-    group SO(D), or orthogonal matrices with unit determinant, drawn uniformly
-    from the Haar measure.
+    """Produce a rotation matrix R.
+
+    The rotation matrix R is in SO(D) (the special orthogonal group SO(D), or
+    orthogonal matrices with unit determinant, drawn uniformly from the Haar
+    measure.
+
     The algorithm used is the subgroup algorithm as originally proposed by
     P. Diaconis & M. Shahshahani, "The subgroup algorithm for generating
     uniform random variables". Probability in the Engineering and
@@ -52,13 +55,14 @@ def random_rotation(D, rng=None):
 
 
 class quadratic_deep(UnregularizedTestproblem):
-    r"""DeepOBS test problem class for a stochastic quadratic test problem ``100``\
-    dimensions. The 90 % of the eigenvalues of the Hessian are drawn from the\
-    interval :math:`(0.0, 1.0)` and the other 10 % are from :math:`(30.0, 60.0)` \
-    simulating an eigenspectrum which has been reported for Deep Learning \
-    https://arxiv.org/abs/1611.01838.
+    r"""DeepOBS test problem class for a stochastic quadratic test problem.
 
-    This creatis a loss functions of the form
+    The problem has ``100`` dimensions. 90 % of the eigenvalues of the Hessian
+    are drawn from the interval :math:`(0.0, 1.0)` and the other 10 % are from
+    :math:`(30.0, 60.0)` simulating an eigenspectrum which has been reported for
+    Deep Learning https://arxiv.org/abs/1611.01838.
+
+    This creates a loss functions of the form
 
     :math:`0.5* (\theta - x)^T * Q * (\theta - x)`
 
@@ -69,11 +73,12 @@ class quadratic_deep(UnregularizedTestproblem):
       batch_size (int): Batch size to use.
       l2_reg (float): No L2-Regularization (weight decay) is used in this
           test problem. Defaults to ``None`` and any input here is ignored.
+
     Attributes:
         data: The DeepOBS data set class for the quadratic problem.
         loss_function: None. The output of the model is the loss.
         net: The DeepOBS subclass of torch.nn.Module that is trained for this tesproblem (net_quadratic_deep).
-          """
+    """
 
     def __init__(self, batch_size, l2_reg=None):
         """Create a new quadratic deep test problem instance.
@@ -86,6 +91,7 @@ class quadratic_deep(UnregularizedTestproblem):
         super(quadratic_deep, self).__init__(batch_size, l2_reg)
 
     def set_up(self):
+        """Set up the quadratic test problem."""
         hessian = self._make_hessian()
         self._hessian = hessian
         self.net = net_quadratic_deep(hessian)
@@ -97,9 +103,13 @@ class quadratic_deep(UnregularizedTestproblem):
     @staticmethod
     def _make_hessian(eigvals_small=90, eigvals_large=10):
         rng = np.random.RandomState(42)
-        eigenvalues = np.concatenate((rng.uniform(
-            0., 1., eigvals_small), rng.uniform(30., 60., eigvals_large)),
-                                     axis=0)
+        eigenvalues = np.concatenate(
+            (
+                rng.uniform(0.0, 1.0, eigvals_small),
+                rng.uniform(30.0, 60.0, eigvals_large),
+            ),
+            axis=0,
+        )
         D = np.diag(eigenvalues)
         R = random_rotation(D.shape[0], rng=rng)
         Hessian = np.matmul(np.transpose(R), np.matmul(D, R))
@@ -108,17 +118,17 @@ class quadratic_deep(UnregularizedTestproblem):
     def get_batch_loss_and_accuracy_func(
         self, reduction="mean", add_regularization_if_available=True
     ):
-        """Get new batch and create forward function that calculates loss and accuracy (if available)
-        on that batch.
+        """Get new batch and create forward function that calculates loss on that batch.
 
         Args:
-            reduction (str): The reduction that is used for returning the loss. Can be 'mean', 'sum' or 'none' in which \
-            case each indivual loss in the mini-batch is returned as a tensor.
+            reduction (str): The reduction that is used for returning the loss.
+                Can be 'mean', 'sum' or 'none' in which case each indivual loss
+                in the mini-batch is returned as a tensor.
             add_regularization_if_available (bool): If true, regularization is added to the loss.
+
         Returns:
             callable:  The function that calculates the loss/accuracy on the current batch.
         """
-
         inputs, labels = self._get_next_batch()
         inputs = inputs.to(self._device)
         labels = labels.to(self._device)
@@ -128,8 +138,7 @@ class quadratic_deep(UnregularizedTestproblem):
             if self.phase in ["train_eval", "test", "valid"]:
                 with torch.no_grad():
                     outputs = self.net(inputs)
-                    loss = self.loss_function(reduction=reduction)(outputs,
-                                                                   labels)
+                    loss = self.loss_function(reduction=reduction)(outputs, labels)
             else:
                 outputs = self.net(inputs)
                 loss = self.loss_function(reduction=reduction)(outputs, labels)

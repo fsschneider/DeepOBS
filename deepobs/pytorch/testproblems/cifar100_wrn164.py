@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""Wide ResNet 16-4 architecture for CIFAR-100."""
+
 from torch import nn
 
 from ..datasets.cifar100 import cifar100
@@ -6,29 +9,28 @@ from .testproblems_modules import net_wrn
 
 
 class cifar100_wrn164(TestProblem):
-    """DeepOBS test problem class for the Wide Residual Network 16-4 architecture\
-    for Cifar-100.
+    r"""DeepOBS test problem for the Wide ResNet 16-4 architecture for Cifar-100.
 
-  Details about the architecture can be found in the `original paper`_.
-  L2-Regularization is used on the weights (but not the biases)
-  which defaults to ``5e-4``.
+    Details about the architecture can be found in the `original paper`_.
+    L2-Regularization is used on the weights (but not the biases)
+    which defaults to ``5e-4``.
 
-  Training settings recommended in the `original paper`_:
-  ``batch size = 128``, ``num_epochs = 160`` using the Momentum optimizer
-  with :math:`\\mu = 0.9` and an initial learning rate of ``0.01`` with a decrease by
-  ``0.1`` after ``80`` and ``120`` epochs.
+    Training settings recommended in the `original paper`_:
+    ``batch size = 128``, ``num_epochs = 160`` using the Momentum optimizer
+    with :math:`\\mu = 0.9` and an initial learning rate of ``0.01`` with a
+    decrease by ``0.1`` after ``80`` and ``120`` epochs.
 
-  .. _original paper: https://arxiv.org/abs/1605.07146
+    .. _original paper: https://arxiv.org/abs/1605.07146
 
-  Args:
+    Args:
     batch_size (int): Batch size to use.
     l2_reg (float): L2-regularization factor. L2-Regularization (weight decay)
         is used on the weights but not the biases.
         Defaults to ``5e-4``.
-  """
+    """
 
     def __init__(self, batch_size, l2_reg=0.0005):
-        """Create a new WRN 16-4 test problem instance on Cifar-100
+        """Create a new WRN 16-4 test problem instance on Cifar-100.
 
         Args:
           batch_size (int): Batch size to use.
@@ -42,15 +44,13 @@ class cifar100_wrn164(TestProblem):
         """Set up the Wide ResNet 16-4 test problem on Cifar-100."""
         self.data = cifar100(self._batch_size)
         self.loss_function = nn.CrossEntropyLoss
-        self.net = net_wrn(
-            num_outputs=100, num_residual_blocks=2, widening_factor=4
-        )
+        self.net = net_wrn(num_outputs=100, num_residual_blocks=2, widening_factor=4)
         self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
 
     # TODO: Refactor, use WeightRegularizedTestproblem
     def get_regularization_groups(self):
-        """Creates regularization groups for the parameters.
+        """Create regularization groups for the parameters.
 
         Returns:
             dict: A dictionary where the key is the regularization factor and the value is a list of parameters.
