@@ -3,11 +3,11 @@
 from torch import nn
 
 from ..datasets.cifar100 import cifar100
-from .testproblem import TestProblem
+from .testproblem import WeightRegularizedTestproblem
 from .testproblems_modules import net_vgg
 
 
-class cifar100_vgg19(TestProblem):
+class cifar100_vgg19(WeightRegularizedTestproblem):
     """DeepOBS test problem class for the VGG 19 network on Cifar-100.
 
   The CIFAR-100 images are resized to ``224`` by ``224`` to fit the input
@@ -50,20 +50,3 @@ class cifar100_vgg19(TestProblem):
         self.net = net_vgg(num_outputs=100, variant=19)
         self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
-
-    def get_regularization_groups(self):
-        """Creates regularization groups for the parameters.
-
-        Returns:
-            dict: A dictionary where the key is the regularization factor and the value is a list of parameters.
-        """
-        no, l2 = 0.0, self._l2_reg
-        group_dict = {no: [], l2: []}
-
-        for parameters_name, parameters in self.net.named_parameters():
-            # penalize only the non bias layer parameters
-            if "bias" not in parameters_name:
-                group_dict[l2].append(parameters)
-            else:
-                group_dict[no].append(parameters)
-        return group_dict
