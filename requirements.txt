@@ -2,5 +2,6 @@ argparse
 numpy
 pandas
 matplotlib
-matplotlib2tikz
+tikzplotlib
 seaborn
+bayesian-optimization

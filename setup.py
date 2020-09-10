@@ -1,20 +1,25 @@
 # -*- coding: utf-8 -*-
-"""Setup for the DeepOBS package"""
+"""Setup for the DeepOBS package."""
 
 import setuptools
 
 install_requires_list = [
     "argparse",
+    "bayesian-optimization",
+    "matplotlib",
     "numpy",
     "pandas",
-    "matplotlib",
-    "tikzplotlib",
     "seaborn",
-    "bayesian-optimization",
+    "tikzplotlib",
 ]
 
 
 def readme():
+    """Read the Readme file.
+
+    Returns:
+        str: Content of the README.md file
+    """
     with open("README.md") as f:
         return f.read()
 
