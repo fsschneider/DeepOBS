@@ -521,7 +521,7 @@ def get_performance_dictionary(
 
     Returns:
         dict: A dictionary that holds the best setting and it's performance on the test set.
-        """
+    """
     metric = _determine_available_metric(optimizer_path, metric)
     setting_analyzers_ranking = create_setting_analyzer_ranking(
         optimizer_path, mode, metric
