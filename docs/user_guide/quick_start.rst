@@ -16,17 +16,18 @@ You can install the latest try-out version of DeepOBS using `pip`:
 
 .. code-block:: bash
 
-   pip install -e git+https://github.com/abahde/DeepOBS.git@master#egg=DeepOBS
+   pip install -e 'git+https://github.com/fsschneider/DeepOBS.git@develop#egg=deepobs'
 
 .. NOTE::
   The package requires the following packages:
 
   - argparse
+  - bayesian-optimization
+  - matplotlib
   - numpy
   - pandas
-  - matplotlib
-  - tikzplotlib
   - seaborn
+  - tikzplotlib
 
   TensorFlow is not a required package to allow for both the CPU and GPU version. Make sure that one of those is installed. Additionally, you have to install torch/torchvision if you want to use the PyTorch framework.
 

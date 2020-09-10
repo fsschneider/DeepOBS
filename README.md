@@ -26,18 +26,18 @@
 ## 📇 Table of Contents
 
 - [DeepOBS - A Deep Learning Optimizer Benchmark Suite.](#deepobs---a-deep-learning-optimizer-benchmark-suite)
-  - [📇 Table of Contents](#%f0%9f%93%87-table-of-contents)
-  - [📦 Introduction](#%f0%9f%93%a6-introduction)
-  - [🆕 News](#%f0%9f%86%95-news)
-  - [💻 Getting Started](#%f0%9f%92%bb-getting-started)
+  - [📇 Table of Contents](#-table-of-contents)
+  - [📦 Introduction](#-introduction)
+  - [🆕 News](#-news)
+  - [💻 Getting Started](#-getting-started)
     - [Installation](#installation)
     - [Quick Start Guide](#quick-start-guide)
       - [Download Data Sets](#download-data-sets)
       - [Run your Optimizer](#run-your-optimizer)
       - [Further Steps](#further-steps)
-  - [🏅 Leaderboard & Baselines](#%f0%9f%8f%85-leaderboard--baselines)
-  - [👨‍👨‍👧‍👦 Contributors](#%f0%9f%91%a8%e2%80%8d%f0%9f%91%a8%e2%80%8d%f0%9f%91%a7%e2%80%8d%f0%9f%91%a6-contributors)
-  - [📝 Citation](#%f0%9f%93%9d-citation)
+  - [🏅 Leaderboard & Baselines](#-leaderboard--baselines)
+  - [👨‍👨‍👧‍👦 Contributors](#-contributors)
+  - [📝 Citation](#-citation)
 
 ## 📦 Introduction
 
@@ -81,20 +81,23 @@ Many thanks to [Aaron Bahde](https://github.com/abahde) for spearheading the dev
 
 ### Installation
 
+You can install DeepOBS by simply running
+
     pip install deepobs
 
-We tested the package with Python 3.6, TensorFlow version 1.12, Torch version 1.1.0 and Torchvision version 0.3.0.
-Other versions of Python and TensorFlow (>= 1.4.0) might work, and we plan to expand compatibility in the future.
+This will install the latest proper release (currently 1.1.2).
+
+You can also get the latest stable (pre-release) by running
+
+    pip install 'git+https://github.com/fsschneider/DeepOBS.git@v1.2.0-beta0#egg=DeepOBS'
+
+to get the preview of DeepOBS 1.2.0. Note, this version also includes support for **PyTorch**.
 
 If you want to create a local and modifiable version of DeepOBS, you can do this directly from this repo via
 
-    pip install -e 'git+https://github.com/fsschneider/DeepOBS.git#egg=DeepOBS'
+    pip install -e 'git+https://github.com/fsschneider/DeepOBS.git@develop#egg=deepobs'
 
-for the latest stable version, or
-
-    pip install -e 'git+https://github.com/fsschneider/DeepOBS.git@v1.2.0-beta0#egg=DeepOBS'
-
-to get the preview of DeepOBS 1.2.0.
+which would give you the latest development version of DeepOBS.
 
 ### Quick Start Guide
 
