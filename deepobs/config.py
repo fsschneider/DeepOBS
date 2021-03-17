@@ -1,64 +1,10 @@
-# -*- coding: utf-8 -*-
-"""Config file for DeepOBS."""
+"""Configuration file for DeepOBS."""
 
-FRAMEWORK = "pytorch"
-BASELINE_DIR = "baselines_deepobs"
-SMALL_TEST_SET = ["quadratic_deep", "mnist_vae", "fmnist_2c2d", "cifar10_3c3d"]
-LARGE_TEST_SET = [
-    "fmnist_vae",
-    "cifar100_allcnnc",
-    "svhn_wrn164",
-    "tolstoi_char_rnn",
-]
-DATA_SET_NAMING = {
-    "two": "2D",
-    "quadratic": "Quadratic",
-    "mnist": "MNIST",
-    "fmnist": "F-MNIST",
-    "cifar10": "CIFAR-10",
-    "cifar100": "CIFAR-100",
-    "svhn": "SVHN",
-    "imagenet": "ImageNet",
-    "tolstoi": "Tolstoi",
-}
-TP_NAMING = {
-    "d_beale": "Beale",
-    "d_branin": "Branin",
-    "d_rosenbrock": "Rosenbrock",
-    "deep": "Deep",
-    "logreg": "Log. Reg.",
-    "mlp": "MLP",
-    "2c2d": "2c2d",
-    "3c3d": "3c3d",
-    "vae": "VAE",
-    "vgg_16": "VGG 16",
-    "vgg_19": "VGG 19",
-    "allcnnc": "All-CNN-C",
-    "wrn164": "Wide ResNet 16-4",
-    "wrn404": "Wide ResNet 40-4",
-    "inception_v3": "Inception-v3",
-    "char_rnn": "Char RNN",
-}
 DATA_DIR = "data_deepobs"
 
-DEFAULT_TEST_PROBLEMS_SETTINGS = {
-    "quadratic_deep": {"batch_size": 128, "num_epochs": 100},
-    "mnist_vae": {"batch_size": 64, "num_epochs": 50},
-    "fmnist_2c2d": {"batch_size": 128, "num_epochs": 100},
-    "cifar10_3c3d": {"batch_size": 128, "num_epochs": 100},
-    "fmnist_vae": {"batch_size": 64, "num_epochs": 100},
-    "cifar100_allcnnc": {"batch_size": 256, "num_epochs": 350},
-    "cifar100_wrn164": {"batch_size": 128, "num_epochs": 160},
-    "cifar100_wrn404": {"batch_size": 128, "num_epochs": 160},
-    "svhn_3c3d": {"batch_size": 128, "num_epochs": 100},
-    "svhn_wrn164": {"batch_size": 128, "num_epochs": 160},
-    "tolstoi_char_rnn": {"batch_size": 50, "num_epochs": 200},
-    "mnist_2c2d": {"batch_size": 128, "num_epochs": 100},
-    "mnist_mlp": {"batch_size": 128, "num_epochs": 100},
-    "fmnist_mlp": {"batch_size": 128, "num_epochs": 100},
-    "mnist_logreg": {"batch_size": 128, "num_epochs": 50},
-    "fmnist_logreg": {"batch_size": 128, "num_epochs": 50},
-}
+DEVICE = "cuda"
+DETERMINISTIC_COMPUTATION = True
+NUM_DATA_WORKERS = 0
 
 
 def get_data_dir():
@@ -80,118 +26,60 @@ def set_data_dir(data_dir):
     DATA_DIR = data_dir
 
 
-def get_framework():
-    """Get the current used framework. This is relevent for the Tuner module.
+def get_default_device():
+    """Get the default device for the computation, which by default is "cuda".
 
     Returns:
-        str: The framework. Can be `pytorch` or `tensorflow`
+        str: Device on which the Problems are run.
     """
-    return FRAMEWORK
+    return DEVICE
 
 
-def set_framework(framework):
-    """Set the current used framework. This is relevant for the Tuner module.
+def set_default_device(device):
+    """Sets the device on which the experiments are run.
 
     Args:
-        framework (str): Can be `pytorch` or `tensorflow`
+        device (str): Device on which to run the problems. E.g. 'cuda' or 'cpu'.
     """
-    global FRAMEWORK
-    FRAMEWORK = framework
+    global DEVICE
+    DEVICE = device
 
 
-def get_baseline_dir():
-    """Get the directory of the baselines.
+def get_deterministic_computation():
+    """Check whether computation should be deterministic, which it is by default.
 
     Returns:
-        str: Path to the baseline folder
+        bool: Whether computation should be performed (almost) deterministicly.
     """
-    return BASELINE_DIR
+    return DETERMINISTIC_COMPUTATION
 
 
-def set_baseline_dir(baseline_dir):
-    """Set the directory of the baseliens.
+def set_deterministic_computation(compute_deterministic):
+    """Set whether computation should be deterministic.
 
     Args:
-        baseline_dir (str): Path to the baseline folder
+        compute_deterministic (bool): If ``True``, then try to compute deterministicly.
+            This involves setting flags such as ``torch.backends.cudnn.deterministic``,
+            depending on the framework.
     """
-    global BASELINE_DIR
-    BASELINE_DIR = baseline_dir
+    global DETERMINISTIC_COMPUTATION
+    DETERMINISTIC_COMPUTATION = compute_deterministic
 
 
-def get_small_test_set():
-    """Return the small test set of DeepOBS.
+def get_num_workers():
+    """Get the number of workers used for the Data Loaders.
 
     Returns:
-        [str]: A list of testproblem names making up the small test set.
+        int: The number of workers that are used for data loading.
     """
-    return SMALL_TEST_SET
+    return NUM_DATA_WORKERS
 
 
-def set_small_test_set(testset):
-    """Set the small test set.
+def set_num_workers(num_workers):
+    """Sets the number of workers that are used for the Data Loaders.
 
     Args:
-        testset ([str]): Overwrite the small test of DeepOBS with this list of
-            testproblem names.
+        num_workers (int): The number of workers that are used for data loading.
     """
-    global SMALL_TEST_SET
-    SMALL_TEST_SET = testset
-
-
-def get_large_test_set():
-    """Return the large test set of DeepOBS.
-
-    Returns:
-        [str]: A list of testproblem names making up the large test set.
-    """
-    return LARGE_TEST_SET
-
-
-def set_large_test_set(testset):
-    """Set the large test set.
-
-    Args:
-        testset ([str]): Overwrite the large test of DeepOBS with this list of
-            testproblem names.
-    """
-    global LARGE_TEST_SET
-    LARGE_TEST_SET = testset
-
-
-def get_data_set_naming():
-    """Get clean names of the DeepOBS data sets.
-
-    Returns:
-        dict: A dict where the keys are the internal data set names such as `cifar10`
-            and the values are clean names such as `CIFAR-10`.
-    """
-    return DATA_SET_NAMING
-
-
-def get_tp_naming():
-    """Get clean names of the DeepOBS testproblems.
-
-    Returns:
-        dict: A dict where the keys are the internal testproblem names such as `wrn164`
-            and the values are clean names such as `Wide ResNet 16-4`.
-    """
-    return TP_NAMING
-
-
-def get_testproblem_default_setting(testproblem):
-    """Return default settings for the ``testproblem`` (if available).
-
-    Args:
-        testproblem (str): Test problem for which to return the default setting.
-
-    Returns:
-        dict: A dictionary with the default values for ``batch_size`` and ``num_epochs``
-    """
-    try:
-        return DEFAULT_TEST_PROBLEMS_SETTINGS[testproblem]
-    except KeyError:
-        raise RuntimeError(
-            "There are no default settings for batch_size and num_epochs for testproblem "
-            + testproblem
-            + ". Please set num_epochs and batch_size in the run."
-        )
+    global NUM_DATA_WORKERS
+    NUM_DATA_WORKERS = num_workers

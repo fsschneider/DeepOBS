@@ -12,13 +12,13 @@ PATCHES will not affect the benchmark results
 
 All results obtained with the same MAJOR.MINOR version of DEEPOBS will be directly comparable.
 
-## [Beta] - Version 1.2.0-beta0
+## [1.2.0] - 2021-04-01
 
 ### Added
 
 - Changelog, documenting all current and future changes.
 - Version info available via `deepobs.__version__`
-- PyTorch support (currently not all test problems).
+- PyTorch support.
 - A Tuning module automating the hyperparamter tuning process.
 - Added a separate hold-out validation set for hyperparameter tuning. This reduces the size of the training data.
 
@@ -37,11 +37,6 @@ All results obtained with the same MAJOR.MINOR version of DEEPOBS will be direct
 - The runner with a learning rate schedule is now an extra class.
 - Extra folder with extensive examples.
 - Switched from `matplotlib2tikz` (discontinued) to `tikzplotlib`.
-
-### Removed
-
-- Currently no baselines! Changes to the training data set (smaller, due to the validation set) and other changed require us to recompute the baselines. We are currently doing a more extensive generation of the baseline, with many more optimizers.
-- Currently no LaTeX Output
 
 ### Fixed
 

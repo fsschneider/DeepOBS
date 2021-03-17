@@ -1,79 +1,75 @@
+# MAKEFILE
+
 .PHONY: help
-.PHONY: black black-check flake8
-.PHONY: install install-dev install-devtools install-test install-lint
-.PHONY: test
-.PHONY: conda-env
+.PHONY: clean-all clean-pyc clean-test
 
-.DEFAULT: help
+.PHONY: lint, flake8, black, pydocstyle, darglint, isort
+
+.PHONY: build-docs
+
+.PHONY: conda_env
+
 help:
-	@echo "test"
-	@echo "        Run pytest on the project and report coverage"
-	@echo "black"
-	@echo "        Run black on the project"
-	@echo "black-check"
-	@echo "        Check if black would change files"
-	@echo "flake8"
-	@echo "        Run flake8 on the project"
-	@echo "install"
-	@echo "        Install deepobs and dependencies"
-	@echo "install-dev"
-	@echo "        Install all development tools"
-	@echo "install-lint"
-	@echo "        Install only the linter tools (included in install-dev)"
-	@echo "install-test"
-	@echo "        Install only the testing tools (included in install-dev)"
-	@echo "conda-env"
-	@echo "        Create conda environment 'deepobs' with dev setup"
-###
-# Test coverage
-test:
-	@pytest -vx --cov=deepobs .
+	@echo "**clean-all"
+	@echo "  Removes all unnecessary files."
+	@echo " *clean-pyc"
+	@echo "  Removes all Python file artifacts, e.g. *.pyc files."
+	@echo " *clean-test"
+	@echo "  Removes all Python testing artifcats, e.g. .pytest_cache."
+	@echo "**lint"
+	@echo "  Checks the whole code for formatting and linting errors via flake8, black, pydocstyle, darglint and isort."
+	@echo " *black"
+	@echo "  Run Black formatter to check whether it would change files."
+	@echo " *flake8"
+	@echo "  Run Flake8."
+	@echo " *pydocstyle"
+	@echo "  Run Pydocstyle."
+	@echo " *darglint"
+	@echo "  Run darglint."
+	@echo " *isort"
+	@echo "  Run isort."
+	@echo "**build-docs"
+	@echo "  Build the docs."
+	@echo "**conda_env"
+	@echo "  Create the conda environment for the project."
 
-###
-# Linter and autoformatter
+### CLEAN ###
+clean-all: clean-pyc clean-test
 
-# Uses black.toml config instead of pyproject.toml to avoid pip issues. See
-# - https://github.com/psf/black/issues/683
-# - https://github.com/pypa/pip/pull/6370
-# - https://pip.pypa.io/en/stable/reference/pip/#pep-517-and-518-support
+# Removes all pyc and __pycach__ files
+clean-pyc:
+	@find . -name '*.pyc' -delete
+	@find . -name '*.pyo' -delete
+	@find . -name '*~' -delete
+	@find . -type d -name "__pycache__" -delete
+
+# Removes the pytest_cache and benchmark directories
+clean-test:
+	@rm -fr .pytest_cache/
+	@rm -fr .benchmarks/
+
+### LINTING ###
+lint: black flake8 pydocstyle
+
 black:
-	@black . --config=black.toml
-
-black-check:
-	@black . --config=black.toml --check
+	@black . --check
 
 flake8:
-	@flake8 .
+	@flake8
 
-###
-# Installation
+pydocstyle:
+	@pydocstyle --count .
 
-install:
-	@pip install -r requirements.txt
-	@pip install .
+darglint:
+	@darglint --verbosity 2
 
-install-lint:
-	@pip install -r requirements/lint.txt
+isort:
+	@isort . --check
 
-install-test:
-	@pip install -r requirements/test.txt
+### DOCS ###
+build-docs:
+	@cd docs && make clean && make html
 
-install-devtools:
-	@echo "Install dev tools..."
-	@pip install -r requirements-dev.txt
-	@pip install -r requirements_doc.txt
-
-install-dev: install-devtools
-	@echo "Install dependencies..."
-	@pip install -r requirements.txt
-	@echo "Uninstall existing version of deepobs..."
-	@pip uninstall deepobs
-	@echo "Install deepobs in editable mode..."
-	@pip install -e .
-	@echo "Install pre-commit hooks..."
-	@pre-commit install
-
-###
-# Conda environment
+### CONDA ###
 conda-env:
 	@conda env create --file .conda_env.yml

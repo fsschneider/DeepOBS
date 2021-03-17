@@ -1,15 +1,23 @@
 name: deepobs
-channels:
-  - pytorch
-  - defaults
 dependencies:
-  - cudatoolkit=9.2=0
-  - pip=19.3.1
-  - python=3.7.6
-  - pytorch=1.3.1=py3.7_cuda9.2.148_cudnn7.6.3_0
-  - torchvision=0.4.2=py37_cu92
+  - pip
+  - python
+  - tensorflow-gpu
+  - pytorch::pytorch
+  - pytorch::torchvision
+  - conda-forge::black
+  - conda-forge::flake8
+  - conda-forge::flake8-bugbear
+  - conda-forge::flake8-comprehensions
+  - conda-forge::isort
+  - conda-forge::palettable
+  - conda-forge::pytest
+  - conda-forge::pytest-cov
+  - conda-forge::m2r2
+  - conda-forge::sphinx
+  - conda-forge::sphinx-automodapi
+  - conda-forge::sphinx_rtd_theme
   - pip:
-    - -r requirements.txt
-    - -r requirements-dev.txt
-    - -r requirements_doc.txt
+    - graphviz
+    - pre-commit
     - -e .

@@ -1,49 +1,36 @@
-<p align="center"><img src="https://raw.githubusercontent.com/fsschneider/DeepOBS/master/docs/deepobs_banner.png" /></p>
+<!-- PROJECT LOGO -->
+<br />
+<p align="center">
+<a href="#"><img src="docs/source/assets/deepobs_banner.png" alt="Banner"/></a>
+  <h3 align="center">A Deep Learning Optimizer Benchmark Suite</h3>
 
-# DeepOBS - A Deep Learning Optimizer Benchmark Suite.
+  <p align="center">
+    Simplifying, automating and improving empirical evaluation of deep learning optimziers.
+  </p>
+</p>
 
-[**Install Guide**](#installation)
-| [**Documentation**](https://deepobs.readthedocs.io/en/v1.2.0-beta0_a/)
-| [**Examples**](https://deepobs.readthedocs.io/en/v1.2.0-beta0_a/user_guide/tutorial.html)
-| [**Paper**](https://openreview.net/forum?id=rJg6ssC5Y7)
-| [**Leaderboard**](https://deepobs.github.io/#Leaderboard)
-| [**Baselines**](https://github.com/fsschneider/DeepOBS_Baselines)
+<p align="center">
+  <a href="#installation">Installation</a> •
+  <a href="https://deepobs.readthedocs.io/en/new_release">Docs</a> •
+  <a href="https://deepobs.readthedocs.io/en/new_release/user_guide/quick_start.html/">User Guide</a> •
+  <a href="https://openreview.net/forum?id=rJg6ssC5Y7">Paper</a> •
+  <a href="https://deepobs.github.io/#Leaderboard">Leaderboard</a> •
+  <a href="https://github.com/SirRob1997/Crowded-Valley---Results">Baselines</a> •
+  <a href="#license">License</a> •
+  <a href="#citation">Citation</a>
+</p>
 
-[![License: MIT](https://img.shields.io/github/license/fsschneider/deepobs?style=flat-square)](https://opensource.org/licenses/MIT)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/deepobs?style=flat-square)
-[![PyPI version](https://img.shields.io/pypi/v/deepobs.svg?style=flat-square)](https://pypi.org/project/deepobs)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/deepobs?style=flat-square) <!--- ![Codacy branch grade](https://img.shields.io/codacy/grade/0b6cb61af02745af8ed9126c7d0779e6/develop?logo=Codacy&style=flat-square) -->
-[![Documentation Status](https://readthedocs.org/projects/deepobs/badge/?version=v1.2.0-beta0_a&style=flat-square)](https://deepobs.readthedocs.io/en/v1.2.0-beta0_a/?badge=v1.2.0-beta0_a)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+[![CI](https://github.com/fsschneider/deepobs/actions/workflows/CI.yml/badge.svg?branch=new_release)](https://github.com/fsschneider/deepobs/actions/workflows/CI.yml)
+[![Lint](https://github.com/fsschneider/deepobs/actions/workflows/Lint.yml/badge.svg?branch=new_release)](https://github.com/fsschneider/deepobs/actions/workflows/Lint.yml)
+[![Docs](https://img.shields.io/readthedocs/deepobs/new_release?logo=read%20the%20docs&logoColor=white&label=Docs)](https://deepobs.readthedocs.io/en/new_release)
+[![PyPI](https://img.shields.io/pypi/v/deepobs.svg?label=PyPI&logo=pypi&logoColor=white)](https://pypi.org/project/deepobs)
+[![Downloads](https://pepy.tech/badge/deepobs)](https://pepy.tech/project/deepobs)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/fsschneider/deepobs/blob/master/LICENSE)
+[![arXiv](https://img.shields.io/static/v1?logo=arxiv&logoColor=white&label=Preprint&message=1903.05499&color=B31B1B)](https://arxiv.org/abs/1903.05499)
 
---------------------------------------------------------------------------------
+---
 
-> ⚠️ **This branch contains the beta of version 1.2.0**
->
-> It contains the latest changes planned for the release of DeepOBS 1.2.0, including support for **PyTorch**. Not all features are implemented and most notably we currently don't provide baselines for this version. We continuously make changes to this version, so things can break if you update. If you want a more stable preview, check out our pre-releases.
-
-## 📇 Table of Contents
-
-- [DeepOBS - A Deep Learning Optimizer Benchmark Suite.](#deepobs---a-deep-learning-optimizer-benchmark-suite)
-  - [📇 Table of Contents](#-table-of-contents)
-  - [📦 Introduction](#-introduction)
-  - [🆕 News](#-news)
-  - [💻 Getting Started](#-getting-started)
-    - [Installation](#installation)
-    - [Quick Start Guide](#quick-start-guide)
-      - [Download Data Sets](#download-data-sets)
-      - [Run your Optimizer](#run-your-optimizer)
-      - [Further Steps](#further-steps)
-  - [🏅 Leaderboard & Baselines](#-leaderboard--baselines)
-  - [👨‍👨‍👧‍👦 Contributors](#-contributors)
-  - [📝 Citation](#-citation)
-
-## 📦 Introduction
-
-**DeepOBS** is a python framework for automatically benchmarking deep learning optimizers. Its goal is to drastically simplify, automate and improve the evaluation of deep learning optimizers.
-
-It can:
+**DeepOBS is a Python framework for automatically benchmarking deep learning optimizers.** Its goal is to drastically simplify, automate and improve the evaluation of deep learning optimizers. It can:
 
 - evaluate the performance of new optimizers on more than **25 real-world test problems**, such as training Residual Networks for image classification or LSTMs for character prediction.
 - automatically compare the results with **realistic baselines** (without having to run them again!)
@@ -56,172 +43,59 @@ DeepOBS automates several steps when benchmarking deep learning optimizers:
 - Comparing your results to the newest baseline results of other optimizers.
 - Reporting and visualizing the results of the optimizer benchmark as ready-to-include ``.tex`` files.
 
-![DeepOBS Output](https://raw.githubusercontent.com/fsschneider/DeepOBS/develop/docs/deepobs.jpg "DeepOBS_output")
+---
 
-The code for the current implementation working with **TensorFlow** can be found on [Github](https://github.com/fsschneider/DeepOBS).
-A PyTorch version is currently developed (see News section below).
+![DeepOBSTeaser](docs/source/assets/deepobs_teaser.jpg "DeepOBS Teaser")
 
-The documentation of the beta version is available on [readthedocs](https://deepobs.readthedocs.io/en/v1.2.0-beta0_a/).
+<!-- Installation -->
+## Installation
 
-The [paper describing DeepOBS](https://openreview.net/forum?id=rJg6ssC5Y7) has been accepted for ICLR 2019.
+To install **DeepOBS** simply run
 
-**If you find any bugs in DeepOBS, or find it hard to use, please let us know. We are always interested in feedback and ways to improve DeepOBS.**
-
-## 🆕 News
-
-We are currently working on a new and improved version of DeepOBS, version 1.2.0.
-It will support **PyTorch** in addition to TensorFlow, has an easier interface, and
-many bugs ironed out. You can find the latest version of it in [this branch](https://github.com/fsschneider/DeepOBS/tree/v1.2.0-beta0).
-
-A pre-release is currently available and a full release will be available in the coming weeks.
-
-Many thanks to [Aaron Bahde](https://github.com/abahde) for spearheading the development of DeepOBS 1.2.0.
-
-## 💻 Getting Started
-
-### Installation
-
-You can install DeepOBS by simply running
-
-    pip install deepobs
-
-This will install the latest proper release (currently 1.1.2).
-
-You can also get the latest stable (pre-release) by running
-
-    pip install 'git+https://github.com/fsschneider/DeepOBS.git@v1.2.0-beta0#egg=DeepOBS'
-
-to get the preview of DeepOBS 1.2.0. Note, this version also includes support for **PyTorch**.
-
-If you want to create a local and modifiable version of DeepOBS, you can do this directly from this repo via
-
-    pip install -e 'git+https://github.com/fsschneider/DeepOBS.git@develop#egg=deepobs'
-
-which would give you the latest development version of DeepOBS.
-
-### Quick Start Guide
-
-#### Download Data Sets
-
-If you use TensorFlow, you have to download the data sets for the test problems. This can be done by simply running the Prepare Data script:
-
-    deepobs_prepare_data.sh
-
-#### Run your Optimizer
-
-The easiest way to use **DeepOBS** with your new optimizer is to write a run script for it. You will only need to write 6 lines of code, specifying which optimizer you want to use and what hyperparameters it has. That is all.
-
-Here is an example using the momentum optimizer in PyTorch:
-
-```python
-"""Example run script for PyTorch and the momentum optimizer."""
-
-from torch.optim import SGD
-from deepobs import pytorch as pt
-
-optimizer_class = SGD
-hyperparams = {"lr": {"type": float},
-               "momentum": {"type": float, "default": 0.99},
-               "nesterov": {"type": bool, "default": False}}
-
-runner = pt.runners.StandardRunner(optimizer_class, hyperparams)
-runner.run(testproblem='quadratic_deep', hyperparams={'lr': 1e-2}, num_epochs=10)
+```bash
+pip install deepobs
 ```
 
-Now you are ready to run your optimzier on all test problems of **DeepOBS**, for example to run it on a simple noisy quadratic problem try
+> To use DeepOBS with PyTorch or TensorFlow, the respective framework needs to be installed. These frameworks are not declared as dependencies because not everyone wants to use and thus install all of themZ. Besides that, all essential dependencies are automatically installed.
 
-    python example_runner.py quadratic_deep --learning_rate 1e-2
+<details>
+<summary>Alternatives</summary>
+You can also install the latest version directly from source:
 
-#### Further Steps
+```bash
+pip install 'git+https://github.com/fsschneider/DeepOBS.git'
+```
 
-The next steps in the tutorial and a full recommended step-by-step protocol for benchmarking deep learning optimizers can be found in the [documentation](https://deepobs.readthedocs.io/).
+> If you want to install from one of the branches, use `pip install 'git+https://github.com/fsschneider/DeepOBS.git@{branch}'`. If you want a local and modifiable version of **DeepOBS**, for exmaple, to add custom test problems, add the `-e` option to `pip install`.
 
-## 🏅 Leaderboard & Baselines
+</details>
 
-We keep an [online leaderboard](https://deepobs.github.io/#Leaderboard) of our benchmark sets. All entries in the leaderboard are automatically available for comparisons via our [baselines](https://github.com/fsschneider/DeepOBS_Baselines).
+<!-- Documentation -->
+## Documentation
 
-ℹ️ If you have an optimizer that you believe should be in the leaderboard let us know!
+The [documentation](https://deepobs.readthedocs.io/en/new_release) provides a full tutorial on how to get started using **DeepOBS** as well as a detailed documentation of its API.
 
-![Leaderboard](https://raw.githubusercontent.com/fsschneider/DeepOBS/develop/docs/Leaderboard.png "Leaderboard")
+## Leaderboard & Baselines
 
-## 👨‍👨‍👧‍👦 Contributors
+We keep an [online leaderboard](https://deepobs.github.io/#Leaderboard) for our benchmark sets. All entries in the leaderboard are automatically available for comparisons.
 
-ℹ️ We are always looking for additional support. We hope that **DeepOBS** is the start of a community effort to improve the quality of deep learning optimizer benchmarks. If you find any bugs, stumbling blocks or missing interesting test problems feel free to contact us, create an issue or add a pull request. If you created a new optimizer and tested it with **DeepOBS** please notify us, so that we can include your results in the leaderboard and our baselines.
+> If you have an optimizer that you believe should be in the leaderboard let us know!
 
-Many people have contributed to **DeepOBS** and were essential during its development. The list is roughly in chronological order and does not represent the amount of effort put in.
+![Leaderboard](docs/source/assets/leaderboard.png "Leaderboard")
 
-<table>
-  <tr>
-    <th><a href="https://github.com/lballes"><img alt="Lukas Balles" src="https://avatars0.githubusercontent.com/u/8748569?s=460&amp;v=4" class="contrib" style="border-radius: 50%;"></a>
-    <th><a href="https://github.com/philipphennig"><img alt="Philipp Hennigs" src="https://avatars0.githubusercontent.com/u/44397767?s=400&amp;v=4" class="contrib" style="border-radius: 50%;"></a>
-    <th><a href="https://github.com/fsschneider"><img alt="Frank Schneider" src="https://avatars0.githubusercontent.com/u/12153723?s=420&amp;v=4" class="contrib" style="border-radius: 50%;"></a>
-    <th><a href="https://github.com/abahde"><img alt="Aaron Bahde" src="https://avatars0.githubusercontent.com/u/44397767?s=400&amp;v=4" class="contrib" style="border-radius: 50%;"></a>
-    <th><a href="https://github.com/f-dangel"><img alt="Felix Dangel" src="https://avatars0.githubusercontent.com/u/48687646?s=400&amp;v=4" class="contrib" style="border-radius: 50%;"></a>
-    <th><a href="https://github.com/prabhuteja12"><img alt="Prabhu Teja Sivaprasad" src="https://avatars0.githubusercontent.com/u/11191577?s=400&amp;v=4" class="contrib" style="border-radius: 50%;"></a>
-    <th><a href="https://github.com/florianmai"><img alt="Florian Mai" src="https://avatars0.githubusercontent.com/u/4035329?s=420&amp;v=4" class="contrib" style="border-radius: 50%;"></a>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://github.com/lballes">Lukas Balles</a></td>
-    <td align="center"><a href="https://github.com/philipphennig">Philipp Hennig</a></td>
-    <td align="center"><a href="https://github.com/fsschneider">Frank Schneider</a></td>
-    <td align="center"><a href="https://github.com/abahde">Aaron Bahde</a></td>
-    <td align="center"><a href="https://github.com/f-dangel">Felix Dangel</a></td>
-    <td align="center"><a href="https://github.com/prabhuteja12">Prabhu Teja Sivaprasad</a></td>
-    <td align="center"><a href="https://github.com/florianmai">Florian Mai</a></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://www.is.mpg.de/en">MPI-IS Tübingen</a>, <a href="https://uni-tuebingen.de/en/faculties/faculty-of-science/departments/computer-science/lehrstuehle/methods-of-machine-learning/start/">University of Tübingen</a></td>
-    <td align="center"><a href="https://www.is.mpg.de/en">MPI-IS Tübingen</a>, <a href="https://uni-tuebingen.de/en/faculties/faculty-of-science/departments/computer-science/lehrstuehle/methods-of-machine-learning/start/">University of Tübingen</a></td>
-    <td align="center"><a href="https://www.is.mpg.de/en">MPI-IS Tübingen</a>, <a href="https://uni-tuebingen.de/en/faculties/faculty-of-science/departments/computer-science/lehrstuehle/methods-of-machine-learning/start/">University of Tübingen</a></td>
-    <td align="center"> <a href="https://uni-tuebingen.de/en/faculties/faculty-of-science/departments/computer-science/lehrstuehle/methods-of-machine-learning/start/">University of Tübingen</a></td>
-    <td align="center"><a href="https://uni-tuebingen.de/en/faculties/faculty-of-science/departments/computer-science/lehrstuehle/methods-of-machine-learning/start/">University of Tübingen</a></td>
-    <td align="center"><a href="https://www.idiap.ch/en">Idiap Research Institute</a>, <a href="https://www.epfl.ch/en/">EPFL, Switzerland</a></td>
-    <td align="center"><a href="https://www.idiap.ch/en">Idiap Research Institute</a>, <a href="https://www.epfl.ch/en/">EPFL, Switzerland</a></td>
-  </tr>
-  <tr>
-    <th>
-    <th>
-    <th>
-    <th>
-    <th>
-    <th>
-    <th>
-  </tr>
-  <tr>
-    <th><a href="https://github.com/SirRob1997"><img alt="Robin Schmidt" src="https://avatars0.githubusercontent.com/u/20804972?s=400&v=4" class="contrib" style="border-radius: 50%;"></a>
-    <th>
-    <th>
-    <th>
-    <th>
-    <th>
-    <th>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://github.com/SirRob1997">Robin Schmidt</a></td>
-    <td align="center"></td>
-    <td align="center"></td>
-    <td align="center"></td>
-    <td align="center"></td>
-    <td align="center"></td>
-    <td align="center"></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://uni-tuebingen.de/en/faculties/faculty-of-science/departments/computer-science/lehrstuehle/methods-of-machine-learning/start/">University of Tübingen</a></td>
-    <td align="center"></td>
-    <td align="center"></td>
-    <td align="center"></td>
-    <td align="center"></td>
-    <td align="center"></td>
-    <td align="center"></td>
-  </tr>
-</table>
+In a separate [paper](https://arxiv.org/abs/2007.01547), we compared fifteen popular deep learning optimizers using **DeepOBS**. You can access all of the results (including the full tuning results) via its [repository](https://github.com/SirRob1997/Crowded-Valley---Results) if you want to use them as baselines for your comparison.
 
-<!-- Add List with images of contributors (Frank, Lukas,Philipp, Aaron, Felix, Florian Mai, etc.) in chronological order. Also add list of "borrowed sources" (where we got the test problems from):
-Here is a list of all authors on relevant research papers that Kaolin borrows code from. Without the efforts of these folks (and their willingness to release their implementations under permissable copyleft licenses), Kaolin would not have been possible.-->
+![Leaderboard](docs/source/assets/crowded_valley_teaser.png "Crowded Valley Teaser")
 
-## 📝 Citation
+<!-- LICENSE -->
+## License
 
-If you use DeepOBS in your work, we would appreciate a reference to our ICLR paper:
+Distributed under the MIT License. See [`LICENSE`](LICENSE) for more information.
+
+<!-- Citation -->
+## Citation
+
+If you use **DeepOBS** in your work, we would appreciate a reference to our ICLR paper:
 
 > [Frank Schneider, Lukas Balles, Philipp Hennig<br/>
 > **DeepOBS: A Deep Learning Optimizer Benchmark Suite**<br/>
