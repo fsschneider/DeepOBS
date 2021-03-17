@@ -92,7 +92,7 @@ class DataSet(ABC):
         pass
 
     def _make_train_eval_dataloader(self):
-        """Creates the training evaluation data loader.
+        """Helper function to create the training evaluation data loader.
 
         Returns:
           DataLoader: A DataLoader instance with batches of training eval data.
@@ -152,7 +152,7 @@ class DataSet(ABC):
     def _make_train_and_valid_dataloader_helper(
         self, train_dataset, valid_dataset, shuffle_dataset
     ):
-        """Split the (full) training data set into a train and validation set.
+        """Helper function to split the (full) train data into a train and valid set.
 
         Args:
             train_dataset (Dataset): Data to use for the train set. Usually this
@@ -178,7 +178,7 @@ class DataSet(ABC):
 
 
 class _train_eval_sampler(Sampler):
-    """A subclass of torch Sampler to easily draw the train eval set."""
+    """A helper subclass of torch Sampler to easily draw the train eval set."""
 
     def __init__(self, size, sub_size):
         """Initialize the train eval sampler.

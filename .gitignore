@@ -130,6 +130,10 @@ dmypy.json
 
 ###### CUSTOM
 
+### DeepOBS
+**/results
+**/data_deepobs
+
 # VS Code
 .vscode/
 .vscode/*
