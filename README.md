@@ -56,7 +56,15 @@ To install **DeepOBS** simply run
 pip install deepobs
 ```
 
-> To use DeepOBS with PyTorch or TensorFlow, the respective framework needs to be installed. These frameworks are not declared as dependencies because not everyone wants to use and thus install all of themZ. Besides that, all essential dependencies are automatically installed.
+<br>
+
+> To use DeepOBS with PyTorch or TensorFlow, the respective framework needs to be installed. These frameworks are not declared as dependencies because you don't have to install both of them. But you will need at least one of them:
+>
+> - **TensorFlow:** Both variants, with and without GPU support are viable.
+>
+> - **PyTorch:** We expect *torchvision* and *torchtext* alongside any *PyTorch* installation.
+>
+> Besides that, all essential dependencies are automatically installed.
 
 <details>
 <summary>Alternatives</summary>
