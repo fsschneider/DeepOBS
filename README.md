@@ -21,7 +21,7 @@
 </p>
 
 [![CI](https://github.com/fsschneider/deepobs/actions/workflows/CI.yml/badge.svg?branch=new_release)](https://github.com/fsschneider/deepobs/actions/workflows/CI.yml)
-[![Lint](https://github.com/fsschneider/deepobs/actions/workflows/Lint.yml/badge.svg?branch=new_release)](https://github.com/fsschneider/deepobs/actions/workflows/Lint.yml)
+[![Lint](https://github.com/fsschneider/deepobs/actions/workflows/linting.yml/badge.svg?branch=new_release)](https://github.com/fsschneider/deepobs/actions/workflows/Lint.yml)
 [![Docs](https://img.shields.io/readthedocs/deepobs/new_release?logo=read%20the%20docs&logoColor=white&label=Docs)](https://deepobs.readthedocs.io/en/new_release)
 [![PyPI](https://img.shields.io/pypi/v/deepobs.svg?label=PyPI&logo=pypi&logoColor=white)](https://pypi.org/project/deepobs)
 [![Downloads](https://pepy.tech/badge/deepobs)](https://pepy.tech/project/deepobs)
