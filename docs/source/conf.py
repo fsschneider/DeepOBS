@@ -75,6 +75,7 @@ def setup(app):
 
     Args:
         app ([type]): Where to apply the css file.
+
     """
     app.add_css_file("stylefile.css")
 

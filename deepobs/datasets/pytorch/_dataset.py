@@ -50,7 +50,6 @@ class DataSet(ABC):
             batch_size (int): The mini-batch size to use.
             train_eval_size (int): Size of the train eval data set.
         """
-        super().__init__()
         self._batch_size = batch_size
         self._train_eval_size = train_eval_size
         self._name = self.__class__.__name__
@@ -107,7 +106,6 @@ class DataSet(ABC):
         Args:
             dataset (Dataset): dataset from which to load the data.
             sampler (Sampler or None, optional): Defines the strategy to draw samples
-                from the data set. Defaults to None.
             shuffle (bool, optional): set to ``True`` to reshuffle at every epoch.
                 Defaults to False.
 
