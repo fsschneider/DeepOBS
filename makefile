@@ -3,7 +3,9 @@
 .PHONY: help
 .PHONY: clean-all clean-pyc clean-test
 
-.PHONY: lint, flake8, black, pydocstyle, darglint, isort
+.PHONY: test test-light
+
+.PHONY: lint flake8 black pydocstyle darglint isort
 
 .PHONY: build-docs
 
@@ -16,6 +18,10 @@ help:
 	@echo "  Removes all Python file artifacts, e.g. *.pyc files."
 	@echo " *clean-test"
 	@echo "  Removes all Python testing artifcats, e.g. .pytest_cache."
+	@echo "**test"
+	@echo "  Run pytest on the project and report coverage"
+	@echo "**test-light"
+	@echo "  Run pytest for all fast test that do not require extensive downloads."
 	@echo "**lint"
 	@echo "  Checks the whole code for formatting and linting errors via flake8, black, pydocstyle, darglint and isort."
 	@echo " *black"
@@ -48,8 +54,15 @@ clean-test:
 	@rm -fr .pytest_cache/
 	@rm -fr .benchmarks/
 
+### TESTING ###
+test:
+	@pytest -svx --cov=deepobs --cov-report term-missing --ignore=data_deepobs
+
+test-light:
+	@pytest -svx --cov=deepobs --ignore=data_deepobs -m "not slow"
+
 ### LINTING ###
-lint: black flake8 pydocstyle
+lint: black flake8 pydocstyle isort darglint
 
 black:
 	@black . --check
