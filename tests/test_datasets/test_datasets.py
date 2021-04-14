@@ -4,7 +4,7 @@ import pytest
 
 import deepobs.datasets.pytorch as pytorch_datasets
 import deepobs.datasets.tensorflow as tensorflow_datasets
-from tests.test_datasets import utils_datasets
+from deepobs.datasets import info
 
 # Basic Settings of the Test
 BATCH_SIZE = 8
@@ -58,7 +58,7 @@ def test_dataset(framework, dataset):
     """
     # Load DataSet
     data = getattr(globals()[fw + "_datasets"], dataset)(BATCH_SIZE)
-    dataset_info = getattr(utils_datasets, dataset.upper())
+    dataset_info = getattr(info, dataset.upper())
 
     # Run the correct check function
     globals()["_check_" + dataset_info["type"] + "_" + framework](data, dataset_info)

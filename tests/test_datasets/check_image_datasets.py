@@ -5,8 +5,9 @@ import random
 import matplotlib.pyplot as plt
 import numpy as np
 
-import deepobs.datasets.pytorch as pytorch_datasets
-import deepobs.datasets.tensorflow as tensorflow_datasets
+import deepobs.datasets.pytorch as pytorch_datasets  # noqa
+import deepobs.datasets.tensorflow as tensorflow_datasets  # noqa
+from deepobs.datasets import info
 from tests.test_datasets import utils_datasets
 
 # Basic Settings of the Test
@@ -26,11 +27,7 @@ for fw in FRAMEWORKS:
     datasets = globals()[fw + "_datasets"].__all__
     # Only show data sets that include images!
     SCENARIOS.extend(
-        [
-            (fw, ds)
-            for ds in datasets
-            if "image" in getattr(utils_datasets, ds.upper())["type"]
-        ]
+        [(fw, ds) for ds in datasets if "image" in getattr(info, ds.upper())["type"]]
     )
     SCENARIO_IDS.extend([fw + ":" + ds for ds in datasets])
 
@@ -43,7 +40,7 @@ def display_images(framework, dataset):
         dataset (str): String of the data set to visualize.
     """
     data = getattr(globals()[fw + "_datasets"], dataset)(BATCH_SIZE)
-    dataset_info = getattr(utils_datasets, dataset.upper())
+    dataset_info = getattr(info, dataset.upper())
 
     # Create Figure harness
     fig = plt.figure(figsize=(8, 8))
