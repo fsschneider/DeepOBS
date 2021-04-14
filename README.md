@@ -23,6 +23,7 @@
 [![CI](https://github.com/fsschneider/deepobs/actions/workflows/CI.yml/badge.svg?branch=new_release)](https://github.com/fsschneider/deepobs/actions/workflows/CI.yml)
 [![Lint](https://github.com/fsschneider/deepobs/actions/workflows/linting.yml/badge.svg?branch=new_release)](https://github.com/fsschneider/deepobs/actions/workflows/Lint.yml)
 [![Docs](https://img.shields.io/readthedocs/deepobs/new_release?logo=read%20the%20docs&logoColor=white&label=Docs)](https://deepobs.readthedocs.io/en/new_release)
+[![Coverage](https://coveralls.io/repos/github/fsschneider/DeepOBS/badge.svg?branch=new_release)](https://coveralls.io/github/fsschneider/DeepOBS?branch=new_release)
 [![PyPI](https://img.shields.io/pypi/v/deepobs.svg?label=PyPI&logo=pypi&logoColor=white)](https://pypi.org/project/deepobs)
 [![Downloads](https://pepy.tech/badge/deepobs)](https://pepy.tech/project/deepobs)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/fsschneider/deepobs/blob/master/LICENSE)

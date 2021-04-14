@@ -31,3 +31,7 @@ jobs:
       - name: Run pytest
         run: |
           make test-light
+      - name: Test coveralls
+        run: coveralls --service=github
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
