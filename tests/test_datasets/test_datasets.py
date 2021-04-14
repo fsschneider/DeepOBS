@@ -8,6 +8,7 @@ from tests.test_datasets import utils_datasets
 
 # Basic Settings of the Test
 BATCH_SIZE = 8
+MODES = ["train", "train_eval", "valid", "test"]
 # DEVICES = ["cpu", "cuda:0"] if torch.cuda.is_available() else ["cpu"]
 FRAMEWORKS = [
     "pytorch",
@@ -51,9 +52,6 @@ def test_number_datasets_per_framework():
 def test_dataset(framework, dataset):
     """Test the data set.
 
-    This includes verifying:
-
-
     Args:
         framework (str): String of the framework to test.
         dataset (str): String of the dataset to test.
@@ -68,8 +66,7 @@ def test_dataset(framework, dataset):
 
 def _check_toy_problem_pytorch(data, dataset_info):
     # check for all four interal "data sets"
-    modes = ["train", "valid", "test", "train_eval"]
-    for m in modes:
+    for m in MODES:
         dataloader = getattr(data, "_" + m + "_dataloader")
         iterator = iter(dataloader)
         inputs, labels = next(iterator)
@@ -93,8 +90,7 @@ def _check_toy_problem_pytorch(data, dataset_info):
 
 def _check_image_classification_pytorch(data, dataset_info):
     # check for all four interal "data sets"
-    modes = ["train", "valid", "test", "train_eval"]
-    for m in modes:
+    for m in MODES:
         dataloader = getattr(data, "_" + m + "_dataloader")
         iterator = iter(dataloader)
         inputs, labels = next(iterator)
@@ -115,8 +111,7 @@ def _check_image_classification_pytorch(data, dataset_info):
 
 def _check_image_attributes_pytorch(data, dataset_info):
     # check for all four interal "data sets"
-    modes = ["train", "valid", "test", "train_eval"]
-    for m in modes:
+    for m in MODES:
         dataloader = getattr(data, "_" + m + "_dataloader")
         iterator = iter(dataloader)
         inputs, labels = next(iterator)
