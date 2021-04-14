@@ -75,26 +75,25 @@ class DataSet(ABC):
     def _make_train_and_valid_dataloader(self):
         """Creates the training and validation DataLoader.
 
-        Returns:
-          DataLoader: A DataLoader instance with batches of training data.
-          DataLoader: A DataLoader instance with batches of validation data.
+        Raises:
+            NotImplementedError: If not implemented. Should be defined by subclass.
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def _make_test_dataloader(self):
         """Creates the test DataLoader.
 
-        Returns:
-          DataLoader: A DataLoader instance with batches of test data.
+        Raises:
+            NotImplementedError: If not implemented. Should be defined by subclass.
         """
-        pass
+        raise NotImplementedError
 
     def _make_train_eval_dataloader(self):
         """Helper function to create the training evaluation data loader.
 
         Returns:
-          DataLoader: A DataLoader instance with batches of training eval data.
+            DataLoader: A DataLoader instance with batches of training eval data.
         """
         size = len(self._train_dataloader.dataset)
         sampler = _train_eval_sampler(size, self._train_eval_size)

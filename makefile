@@ -20,7 +20,7 @@ help:
 	@echo "  Removes all Python testing artifcats, e.g. .pytest_cache."
 	@echo "**test"
 	@echo "  Run pytest on the project and report coverage"
-	@echo "**test-light"
+	@echo " *test-light"
 	@echo "  Run pytest for all fast test that do not require extensive downloads."
 	@echo "**lint"
 	@echo "  Checks the whole code for formatting and linting errors via flake8, black, pydocstyle, darglint and isort."
@@ -68,13 +68,13 @@ black:
 	@black . --check
 
 flake8:
-	@flake8
+	@flake8 .
 
 pydocstyle:
 	@pydocstyle --count .
 
 darglint:
-	@darglint --verbosity 2
+	@darglint --verbosity 2 .
 
 isort:
 	@isort . --check
