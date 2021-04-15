@@ -133,7 +133,7 @@ class VGG(nn.Sequential):
             num_outputs (int, optional): The numer of outputs (i.e. target classes).
                 Defaults to ``100``.
             variant (int, optional): The variant of VGG network to use. Can be
-            one of ``16`` or ``19``. Defaults to ``16``.
+                one of ``16`` or ``19``. Defaults to ``16``.
         """
         super(VGG, self).__init__()
 
