@@ -8,7 +8,7 @@ import numpy as np
 import deepobs.datasets.pytorch as pytorch_datasets  # noqa
 import deepobs.datasets.tensorflow as tensorflow_datasets  # noqa
 from deepobs.datasets import info
-from tests.test_datasets import utils_datasets
+from tests.test_datasets import _utils
 
 # Basic Settings of the Test
 BATCH_SIZE = 4
@@ -68,7 +68,7 @@ def display_images(framework, dataset):
             elif "attributes" in dataset_info["type"]:
                 attribute_indx = [i for i, x in enumerate(labels[n_image]) if x == 1]
                 label = dataset_info["labels"][random.choice(attribute_indx)]
-            img_ax.imshow(utils_datasets.denormalize_image(image))
+            img_ax.imshow(_utils.denormalize_image(image))
             img_ax.set_title(label, y=-0.2)
             img_ax.axis("off")
 
