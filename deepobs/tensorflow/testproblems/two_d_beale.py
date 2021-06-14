@@ -75,11 +75,11 @@ class two_d_beale(TestProblem):
         starting_point = [-4.5, 4.5]
 
         # Set model weights
-        u = tf.get_variable(
-            "weight", shape=(), initializer=tf.constant_initializer(starting_point[0]),
+        u = tf.compat.v1.get_variable(
+            "weight", shape=(), initializer=tf.compat.v1.constant_initializer(starting_point[0]),
         )
-        v = tf.get_variable(
-            "bias", shape=(), initializer=tf.constant_initializer(starting_point[1]),
+        v = tf.compat.v1.get_variable(
+            "bias", shape=(), initializer=tf.compat.v1.constant_initializer(starting_point[1]),
         )
 
         self.losses = (
@@ -92,4 +92,4 @@ class two_d_beale(TestProblem):
             + v * y
         )
 
-        self.regularizer = tf.losses.get_regularization_loss()
+        self.regularizer = tf.compat.v1.losses.get_regularization_loss()

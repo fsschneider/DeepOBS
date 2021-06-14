@@ -11,31 +11,31 @@ import tensorflow as tf
 def _3c3d(x, num_outputs, l2_reg):
     def conv2d(inputs, filters, kernel_size=3, padding="same"):
         """Convenience wrapper for conv layers."""
-        return tf.layers.conv2d(
+        return tf.compat.v1.layers.conv2d(
             inputs,
             filters,
             kernel_size,
             (1, 1),
             padding,
             activation=tf.nn.relu,
-            bias_initializer=tf.initializers.constant(0.0),
-            kernel_initializer=tf.keras.initializers.glorot_normal(),
-            kernel_regularizer=tf.contrib.layers.l2_regularizer(l2_reg),
+            bias_initializer=tf.compat.v1.initializers.constant(0.0),
+            kernel_initializer=tf.compat.v1.keras.initializers.glorot_normal(),
+            kernel_regularizer=tf.keras.regularizers.l2(0.5 * (l2_reg)),
         )
 
     def max_pool(inputs):
         """Convenience wrapper for max pool layers."""
-        return tf.layers.max_pooling2d(inputs, pool_size=3, strides=2, padding="same")
+        return tf.compat.v1.layers.max_pooling2d(inputs, pool_size=3, strides=2, padding="same")
 
     def dense(inputs, units, activation):
         """Convenience wrapper for max pool layers."""
-        return tf.layers.dense(
+        return tf.compat.v1.layers.dense(
             inputs,
             units,
             activation,
-            kernel_initializer=tf.initializers.glorot_uniform(),
-            bias_initializer=tf.initializers.constant(0.0),
-            kernel_regularizer=tf.contrib.layers.l2_regularizer(l2_reg),
+            kernel_initializer=tf.compat.v1.initializers.glorot_uniform(),
+            bias_initializer=tf.compat.v1.initializers.constant(0.0),
+            kernel_regularizer=tf.keras.regularizers.l2(0.5 * (l2_reg)),
         )
 
     x = conv2d(x, 64, 5, "valid")

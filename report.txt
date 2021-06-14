@@ -1,0 +1,1424 @@
+TensorFlow 2.0 Upgrade Script
+-----------------------------
+Converted 114 files
+Detected 21 issues that require attention
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+File: deepobs\scripts\_tolstoi_preprocess.py
+--------------------------------------------------------------------------------
+deepobs\scripts\_tolstoi_preprocess.py:65:4: WARNING: *.save requires manual check. (This warning is only applicable if the code saves a tf.Keras model) Keras model.save now saves to the Tensorflow SavedModel format by default, instead of HDF5. To continue saving to HDF5, add the argument save_format='h5' to the save() function.
+deepobs\scripts\_tolstoi_preprocess.py:66:4: WARNING: *.save requires manual check. (This warning is only applicable if the code saves a tf.Keras model) Keras model.save now saves to the Tensorflow SavedModel format by default, instead of HDF5. To continue saving to HDF5, add the argument save_format='h5' to the save() function.
+--------------------------------------------------------------------------------
+File: deepobs\tensorflow\testproblems\tolstoi_char_rnn.py
+--------------------------------------------------------------------------------
+deepobs\tensorflow\testproblems\tolstoi_char_rnn.py:89:20: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+deepobs\tensorflow\testproblems\tolstoi_char_rnn.py:90:17: WARNING: tf.nn.embedding_lookup requires manual check. `partition_strategy` has been removed from tf.nn.embedding_lookup.  The 'div' strategy will be used by default.
+deepobs\tensorflow\testproblems\tolstoi_char_rnn.py:102:19: WARNING: Using member tf.contrib.rnn.DropoutWrapper in deprecated module tf.contrib.rnn. (Manual edit required) tf.contrib.rnn.* has been deprecated, and widely used cells/functions will be moved to tensorflow/addons repository. Please check it there and file Github issues if necessary.
+deepobs\tensorflow\testproblems\tolstoi_char_rnn.py:102:19: ERROR: Using member tf.contrib.rnn.DropoutWrapper in deprecated module tf.contrib. tf.contrib.rnn.DropoutWrapper cannot be converted automatically. tf.contrib will not be distributed with TensorFlow 2.0, please consider an alternative in non-contrib TensorFlow, a community-maintained repository such as tensorflow/addons, or fork the required code.
+deepobs\tensorflow\testproblems\tolstoi_char_rnn.py:132:24: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+deepobs\tensorflow\testproblems\tolstoi_char_rnn.py:133:24: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+deepobs\tensorflow\testproblems\tolstoi_char_rnn.py:142:22: WARNING: Using member tf.contrib.seq2seq.sequence_loss in deprecated module tf.contrib.seq2seq. (Manual edit required) tf.contrib.seq2seq.* have been migrated to `tfa.seq2seq.*` in TensorFlow Addons. Please see https://github.com/tensorflow/addons for more info.
+deepobs\tensorflow\testproblems\tolstoi_char_rnn.py:142:22: ERROR: Using member tf.contrib.seq2seq.sequence_loss in deprecated module tf.contrib. tf.contrib.seq2seq.sequence_loss cannot be converted automatically. tf.contrib will not be distributed with TensorFlow 2.0, please consider an alternative in non-contrib TensorFlow, a community-maintained repository such as tensorflow/addons, or fork the required code.
+--------------------------------------------------------------------------------
+File: deepobs\tensorflow\testproblems\two_d_beale.py
+--------------------------------------------------------------------------------
+deepobs\tensorflow\testproblems\two_d_beale.py:78:12: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+deepobs\tensorflow\testproblems\two_d_beale.py:81:12: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+--------------------------------------------------------------------------------
+File: deepobs\tensorflow\testproblems\two_d_branin.py
+--------------------------------------------------------------------------------
+deepobs\tensorflow\testproblems\two_d_branin.py:80:12: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+deepobs\tensorflow\testproblems\two_d_branin.py:83:12: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+--------------------------------------------------------------------------------
+File: deepobs\tensorflow\testproblems\two_d_rosenbrock.py
+--------------------------------------------------------------------------------
+deepobs\tensorflow\testproblems\two_d_rosenbrock.py:77:12: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+deepobs\tensorflow\testproblems\two_d_rosenbrock.py:80:12: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+--------------------------------------------------------------------------------
+File: deepobs\tensorflow\testproblems\_inception_v3.py
+--------------------------------------------------------------------------------
+deepobs\tensorflow\testproblems\_inception_v3.py:287:16: ERROR: Using member tf.contrib.layers.flatten in deprecated module tf.contrib. tf.contrib.layers.flatten cannot be converted automatically. tf.contrib will not be distributed with TensorFlow 2.0, please consider an alternative in non-contrib TensorFlow, a community-maintained repository such as tensorflow/addons, or fork the required code.
+deepobs\tensorflow\testproblems\_inception_v3.py:299:12: ERROR: Using member tf.contrib.layers.flatten in deprecated module tf.contrib. tf.contrib.layers.flatten cannot be converted automatically. tf.contrib will not be distributed with TensorFlow 2.0, please consider an alternative in non-contrib TensorFlow, a community-maintained repository such as tensorflow/addons, or fork the required code.
+--------------------------------------------------------------------------------
+File: deepobs\tensorflow\testproblems\_quadratic.py
+--------------------------------------------------------------------------------
+deepobs\tensorflow\testproblems\_quadratic.py:76:16: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+--------------------------------------------------------------------------------
+File: deepobs\tensorflow\testproblems\_vae.py
+--------------------------------------------------------------------------------
+deepobs\tensorflow\testproblems\_vae.py:77:16: ERROR: Using member tf.contrib.layers.flatten in deprecated module tf.contrib. tf.contrib.layers.flatten cannot be converted automatically. tf.contrib will not be distributed with TensorFlow 2.0, please consider an alternative in non-contrib TensorFlow, a community-maintained repository such as tensorflow/addons, or fork the required code.
+deepobs\tensorflow\testproblems\_vae.py:117:16: ERROR: Using member tf.contrib.layers.flatten in deprecated module tf.contrib. tf.contrib.layers.flatten cannot be converted automatically. tf.contrib will not be distributed with TensorFlow 2.0, please consider an alternative in non-contrib TensorFlow, a community-maintained repository such as tensorflow/addons, or fork the required code.
+================================================================================
+Detailed log follows:
+
+================================================================================
+================================================================================
+Input tree: 'deepobs'
+================================================================================
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\config.py'
+ outputting to 'deepobs_v2\\config.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\version.py'
+ outputting to 'deepobs_v2\\version.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\__init__.py'
+ outputting to 'deepobs_v2\\__init__.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\abstract_runner\\abstract_runner.py'
+ outputting to 'deepobs_v2\\abstract_runner\\abstract_runner.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\abstract_runner\\abstract_runner_utils.py'
+ outputting to 'deepobs_v2\\abstract_runner\\abstract_runner_utils.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\abstract_runner\\__init__.py'
+ outputting to 'deepobs_v2\\abstract_runner\\__init__.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\analyzer\\analyze.py'
+ outputting to 'deepobs_v2\\analyzer\\analyze.py'
+--------------------------------------------------------------------------------
+
+145:30: INFO: Renamed 'tf.train.GradientDescentOptimizer' to 'tf.compat.v1.train.GradientDescentOptimizer'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\analyzer\\analyze_utils.py'
+ outputting to 'deepobs_v2\\analyzer\\analyze_utils.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\analyzer\\shared_utils.py'
+ outputting to 'deepobs_v2\\analyzer\\shared_utils.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\analyzer\\__init__.py'
+ outputting to 'deepobs_v2\\analyzer\\__init__.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\config.py'
+ outputting to 'deepobs_v2\\pytorch\\config.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\__init__.py'
+ outputting to 'deepobs_v2\\pytorch\\__init__.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\datasets\\cifar10.py'
+ outputting to 'deepobs_v2\\pytorch\\datasets\\cifar10.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\datasets\\cifar100.py'
+ outputting to 'deepobs_v2\\pytorch\\datasets\\cifar100.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\datasets\\dataset.py'
+ outputting to 'deepobs_v2\\pytorch\\datasets\\dataset.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\datasets\\datasets_utils.py'
+ outputting to 'deepobs_v2\\pytorch\\datasets\\datasets_utils.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\datasets\\fmnist.py'
+ outputting to 'deepobs_v2\\pytorch\\datasets\\fmnist.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\datasets\\mnist.py'
+ outputting to 'deepobs_v2\\pytorch\\datasets\\mnist.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\datasets\\quadratic.py'
+ outputting to 'deepobs_v2\\pytorch\\datasets\\quadratic.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\datasets\\svhn.py'
+ outputting to 'deepobs_v2\\pytorch\\datasets\\svhn.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\datasets\\tolstoi.py'
+ outputting to 'deepobs_v2\\pytorch\\datasets\\tolstoi.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\datasets\\__init__.py'
+ outputting to 'deepobs_v2\\pytorch\\datasets\\__init__.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\runners\\runner.py'
+ outputting to 'deepobs_v2\\pytorch\\runners\\runner.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\runners\\runner_utils.py'
+ outputting to 'deepobs_v2\\pytorch\\runners\\runner_utils.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\runners\\__init__.py'
+ outputting to 'deepobs_v2\\pytorch\\runners\\__init__.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\cifar100_3c3d.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\cifar100_3c3d.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\cifar100_allcnnc.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\cifar100_allcnnc.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\cifar100_vgg16.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\cifar100_vgg16.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\cifar100_vgg19.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\cifar100_vgg19.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\cifar100_wrn164.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\cifar100_wrn164.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\cifar100_wrn404.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\cifar100_wrn404.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\cifar10_3c3d.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\cifar10_3c3d.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\cifar10_vgg16.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\cifar10_vgg16.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\cifar10_vgg19.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\cifar10_vgg19.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\fmnist_2c2d.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\fmnist_2c2d.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\fmnist_logreg.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\fmnist_logreg.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\fmnist_mlp.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\fmnist_mlp.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\fmnist_vae.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\fmnist_vae.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\mnist_2c2d.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\mnist_2c2d.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\mnist_logreg.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\mnist_logreg.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\mnist_mlp.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\mnist_mlp.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\mnist_vae.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\mnist_vae.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\quadratic_deep.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\quadratic_deep.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\svhn_3c3d.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\svhn_3c3d.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\svhn_wrn164.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\svhn_wrn164.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\testproblem.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\testproblem.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\testproblems_modules.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\testproblems_modules.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\testproblems_utils.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\testproblems_utils.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\pytorch\\testproblems\\__init__.py'
+ outputting to 'deepobs_v2\\pytorch\\testproblems\\__init__.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\scripts\\deepobs_plot_results.py'
+ outputting to 'deepobs_v2\\scripts\\deepobs_plot_results.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\scripts\\_svhn_preprocess.py'
+ outputting to 'deepobs_v2\\scripts\\_svhn_preprocess.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\scripts\\_tolstoi_preprocess.py'
+ outputting to 'deepobs_v2\\scripts\\_tolstoi_preprocess.py'
+--------------------------------------------------------------------------------
+
+65:4: WARNING: *.save requires manual check. (This warning is only applicable if the code saves a tf.Keras model) Keras model.save now saves to the Tensorflow SavedModel format by default, instead of HDF5. To continue saving to HDF5, add the argument save_format='h5' to the save() function.
+66:4: WARNING: *.save requires manual check. (This warning is only applicable if the code saves a tf.Keras model) Keras model.save now saves to the Tensorflow SavedModel format by default, instead of HDF5. To continue saving to HDF5, add the argument save_format='h5' to the save() function.
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\scripts\\__init__.py'
+ outputting to 'deepobs_v2\\scripts\\__init__.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\config.py'
+ outputting to 'deepobs_v2\\tensorflow\\config.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\__init__.py'
+ outputting to 'deepobs_v2\\tensorflow\\__init__.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\datasets\\cifar10.py'
+ outputting to 'deepobs_v2\\tensorflow\\datasets\\cifar10.py'
+--------------------------------------------------------------------------------
+
+88:32: INFO: Renamed 'tf.decode_raw' to 'tf.io.decode_raw'
+94:28: INFO: Added keywords to args of function 'tf.transpose'
+98:24: INFO: Renamed 'tf.image.resize_image_with_crop_or_pad' to 'tf.image.resize_with_crop_or_pad'
+101:24: INFO: Renamed 'tf.random_crop' to 'tf.image.random_crop'
+107:24: INFO: Renamed 'tf.image.resize_image_with_crop_or_pad' to 'tf.image.resize_with_crop_or_pad'
+113:13: INFO: `name` passed to `name_scope`. Because you may be re-entering an existing scope, it is not safe to convert automatically,  the v2 name_scope does not support re-entering scopes by name.
+
+113:13: INFO: Renamed 'tf.name_scope' to 'tf.compat.v1.name_scope'
+143:13: INFO: `name` passed to `name_scope`. Because you may be re-entering an existing scope, it is not safe to convert automatically,  the v2 name_scope does not support re-entering scopes by name.
+
+143:13: INFO: Renamed 'tf.name_scope' to 'tf.compat.v1.name_scope'
+145:28: INFO: Renamed 'tf.matching_files' to 'tf.io.matching_files'
+146:28: INFO: Renamed 'tf.random_shuffle' to 'tf.random.shuffle'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\datasets\\cifar100.py'
+ outputting to 'deepobs_v2\\tensorflow\\datasets\\cifar100.py'
+--------------------------------------------------------------------------------
+
+88:32: INFO: Renamed 'tf.decode_raw' to 'tf.io.decode_raw'
+94:28: INFO: Added keywords to args of function 'tf.transpose'
+98:24: INFO: Renamed 'tf.image.resize_image_with_crop_or_pad' to 'tf.image.resize_with_crop_or_pad'
+101:24: INFO: Renamed 'tf.random_crop' to 'tf.image.random_crop'
+107:24: INFO: Renamed 'tf.image.resize_image_with_crop_or_pad' to 'tf.image.resize_with_crop_or_pad'
+113:13: INFO: `name` passed to `name_scope`. Because you may be re-entering an existing scope, it is not safe to convert automatically,  the v2 name_scope does not support re-entering scopes by name.
+
+113:13: INFO: Renamed 'tf.name_scope' to 'tf.compat.v1.name_scope'
+143:13: INFO: `name` passed to `name_scope`. Because you may be re-entering an existing scope, it is not safe to convert automatically,  the v2 name_scope does not support re-entering scopes by name.
+
+143:13: INFO: Renamed 'tf.name_scope' to 'tf.compat.v1.name_scope'
+145:28: INFO: Renamed 'tf.matching_files' to 'tf.io.matching_files'
+146:28: INFO: Renamed 'tf.random_shuffle' to 'tf.random.shuffle'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\datasets\\dataset.py'
+ outputting to 'deepobs_v2\\tensorflow\\datasets\\dataset.py'
+--------------------------------------------------------------------------------
+
+47:25: INFO: Renamed 'tf.data.Iterator' to 'tf.compat.v1.data.Iterator'
+58:16: INFO: Renamed 'tf.assign' to 'tf.compat.v1.assign'
+65:16: INFO: Renamed 'tf.assign' to 'tf.compat.v1.assign'
+72:16: INFO: Renamed 'tf.assign' to 'tf.compat.v1.assign'
+79:16: INFO: Renamed 'tf.assign' to 'tf.compat.v1.assign'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\datasets\\fmnist.py'
+ outputting to 'deepobs_v2\\tensorflow\\datasets\\fmnist.py'
+--------------------------------------------------------------------------------
+
+73:13: INFO: `name` passed to `name_scope`. Because you may be re-entering an existing scope, it is not safe to convert automatically,  the v2 name_scope does not support re-entering scopes by name.
+
+73:13: INFO: Renamed 'tf.name_scope' to 'tf.compat.v1.name_scope'
+93:13: INFO: `name` passed to `name_scope`. Because you may be re-entering an existing scope, it is not safe to convert automatically,  the v2 name_scope does not support re-entering scopes by name.
+
+93:13: INFO: Renamed 'tf.name_scope' to 'tf.compat.v1.name_scope'
+156:13: INFO: Renamed 'tf.gfile.Open' to 'tf.io.gfile.GFile'
+173:13: INFO: Renamed 'tf.gfile.Open' to 'tf.io.gfile.GFile'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\datasets\\imagenet.py'
+ outputting to 'deepobs_v2\\tensorflow\\datasets\\imagenet.py'
+--------------------------------------------------------------------------------
+
+107:24: INFO: Renamed 'tf.image.resize_image_with_crop_or_pad' to 'tf.image.resize_with_crop_or_pad'
+108:24: INFO: Renamed 'tf.random_crop' to 'tf.image.random_crop'
+110:24: INFO: Renamed 'tf.image.resize_image_with_crop_or_pad' to 'tf.image.resize_with_crop_or_pad'
+132:13: INFO: `name` passed to `name_scope`. Because you may be re-entering an existing scope, it is not safe to convert automatically,  the v2 name_scope does not support re-entering scopes by name.
+
+132:13: INFO: Renamed 'tf.name_scope' to 'tf.compat.v1.name_scope'
+155:13: INFO: `name` passed to `name_scope`. Because you may be re-entering an existing scope, it is not safe to convert automatically,  the v2 name_scope does not support re-entering scopes by name.
+
+155:13: INFO: Renamed 'tf.name_scope' to 'tf.compat.v1.name_scope'
+157:28: INFO: Renamed 'tf.matching_files' to 'tf.io.matching_files'
+158:28: INFO: Renamed 'tf.random_shuffle' to 'tf.random.shuffle'
+246:29: INFO: Renamed 'tf.FixedLenFeature' to 'tf.io.FixedLenFeature'
+247:33: INFO: Renamed 'tf.FixedLenFeature' to 'tf.io.FixedLenFeature'
+250:32: INFO: Renamed 'tf.FixedLenFeature' to 'tf.io.FixedLenFeature'
+255:19: INFO: Added keywords to args of function 'tf.parse_single_example'
+255:19: INFO: Renamed 'tf.parse_single_example' to 'tf.io.parse_single_example'
+269:13: INFO: `name` passed to `name_scope`. Because you may be re-entering an existing scope, it is not safe to convert automatically,  the v2 name_scope does not support re-entering scopes by name.
+
+269:13: INFO: Renamed 'tf.name_scope' to 'tf.compat.v1.name_scope'
+297:16: INFO: Added keywords to args of function 'tf.shape'
+298:17: INFO: Changed tf.to_float call to tf.cast(..., dtype=tf.float32).
+299:16: INFO: Changed tf.to_float call to tf.cast(..., dtype=tf.float32).
+300:23: INFO: Added keywords to args of function 'tf.reduce_min'
+301:47: INFO: Changed tf.to_float call to tf.cast(..., dtype=tf.float32).
+302:21: INFO: Changed tf.to_int32 call to tf.cast(..., dtype=tf.int32).
+303:20: INFO: Changed tf.to_int32 call to tf.cast(..., dtype=tf.int32).
+304:24: INFO: Renamed 'tf.image.resize_images' to 'tf.image.resize'
+318:13: INFO: `name` passed to `name_scope`. Because you may be re-entering an existing scope, it is not safe to convert automatically,  the v2 name_scope does not support re-entering scopes by name.
+
+318:13: INFO: Renamed 'tf.name_scope' to 'tf.compat.v1.name_scope'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\datasets\\mnist.py'
+ outputting to 'deepobs_v2\\tensorflow\\datasets\\mnist.py'
+--------------------------------------------------------------------------------
+
+73:13: INFO: `name` passed to `name_scope`. Because you may be re-entering an existing scope, it is not safe to convert automatically,  the v2 name_scope does not support re-entering scopes by name.
+
+73:13: INFO: Renamed 'tf.name_scope' to 'tf.compat.v1.name_scope'
+93:13: INFO: `name` passed to `name_scope`. Because you may be re-entering an existing scope, it is not safe to convert automatically,  the v2 name_scope does not support re-entering scopes by name.
+
+93:13: INFO: Renamed 'tf.name_scope' to 'tf.compat.v1.name_scope'
+156:13: INFO: Renamed 'tf.gfile.Open' to 'tf.io.gfile.GFile'
+173:13: INFO: Renamed 'tf.gfile.Open' to 'tf.io.gfile.GFile'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\datasets\\quadratic.py'
+ outputting to 'deepobs_v2\\tensorflow\\datasets\\quadratic.py'
+--------------------------------------------------------------------------------
+
+76:13: INFO: `name` passed to `name_scope`. Because you may be re-entering an existing scope, it is not safe to convert automatically,  the v2 name_scope does not support re-entering scopes by name.
+
+76:13: INFO: Renamed 'tf.name_scope' to 'tf.compat.v1.name_scope'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\datasets\\svhn.py'
+ outputting to 'deepobs_v2\\tensorflow\\datasets\\svhn.py'
+--------------------------------------------------------------------------------
+
+88:32: INFO: Renamed 'tf.decode_raw' to 'tf.io.decode_raw'
+98:24: INFO: Renamed 'tf.image.resize_image_with_crop_or_pad' to 'tf.image.resize_with_crop_or_pad'
+101:24: INFO: Renamed 'tf.random_crop' to 'tf.image.random_crop'
+106:24: INFO: Renamed 'tf.image.resize_image_with_crop_or_pad' to 'tf.image.resize_with_crop_or_pad'
+112:13: INFO: `name` passed to `name_scope`. Because you may be re-entering an existing scope, it is not safe to convert automatically,  the v2 name_scope does not support re-entering scopes by name.
+
+112:13: INFO: Renamed 'tf.name_scope' to 'tf.compat.v1.name_scope'
+142:13: INFO: `name` passed to `name_scope`. Because you may be re-entering an existing scope, it is not safe to convert automatically,  the v2 name_scope does not support re-entering scopes by name.
+
+142:13: INFO: Renamed 'tf.name_scope' to 'tf.compat.v1.name_scope'
+144:28: INFO: Renamed 'tf.matching_files' to 'tf.io.matching_files'
+145:28: INFO: Renamed 'tf.random_shuffle' to 'tf.random.shuffle'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\datasets\\tolstoi.py'
+ outputting to 'deepobs_v2\\tensorflow\\datasets\\tolstoi.py'
+--------------------------------------------------------------------------------
+
+93:13: INFO: `name` passed to `name_scope`. Because you may be re-entering an existing scope, it is not safe to convert automatically,  the v2 name_scope does not support re-entering scopes by name.
+
+93:13: INFO: Renamed 'tf.name_scope' to 'tf.compat.v1.name_scope'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\datasets\\two_d.py'
+ outputting to 'deepobs_v2\\tensorflow\\datasets\\two_d.py'
+--------------------------------------------------------------------------------
+
+74:13: INFO: `name` passed to `name_scope`. Because you may be re-entering an existing scope, it is not safe to convert automatically,  the v2 name_scope does not support re-entering scopes by name.
+
+74:13: INFO: Renamed 'tf.name_scope' to 'tf.compat.v1.name_scope'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\datasets\\__init__.py'
+ outputting to 'deepobs_v2\\tensorflow\\datasets\\__init__.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\runners\\runner.py'
+ outputting to 'deepobs_v2\\tensorflow\\runners\\runner.py'
+--------------------------------------------------------------------------------
+
+28:32: INFO: tf.summary.scalar requires manual check. The TF 1.x summary API cannot be automatically migrated to TF 2.0, so symbols have been converted to tf.compat.v1.summary.* and must be migrated manually. Typical usage will only require changes to the summary writing logic, not to individual calls like scalar(). For examples of the new summary API, see the Effective TF 2.0 migration document or check the TF 2.0 TensorBoard tutorials.
+28:32: INFO: Renamed 'tf.summary.scalar' to 'tf.compat.v1.summary.scalar'
+31:25: INFO: Renamed 'tf.GraphKeys' to 'tf.compat.v1.GraphKeys'
+34:21: INFO: tf.summary.scalar requires manual check. The TF 1.x summary API cannot be automatically migrated to TF 2.0, so symbols have been converted to tf.compat.v1.summary.* and must be migrated manually. Typical usage will only require changes to the summary writing logic, not to individual calls like scalar(). For examples of the new summary API, see the Effective TF 2.0 migration document or check the TF 2.0 TensorBoard tutorials.
+34:21: INFO: Renamed 'tf.summary.scalar' to 'tf.compat.v1.summary.scalar'
+37:25: INFO: Renamed 'tf.GraphKeys' to 'tf.compat.v1.GraphKeys'
+39:24: INFO: tf.summary.scalar requires manual check. The TF 1.x summary API cannot be automatically migrated to TF 2.0, so symbols have been converted to tf.compat.v1.summary.* and must be migrated manually. Typical usage will only require changes to the summary writing logic, not to individual calls like scalar(). For examples of the new summary API, see the Effective TF 2.0 migration document or check the TF 2.0 TensorBoard tutorials.
+39:24: INFO: Renamed 'tf.summary.scalar' to 'tf.compat.v1.summary.scalar'
+42:25: INFO: Renamed 'tf.GraphKeys' to 'tf.compat.v1.GraphKeys'
+45:29: INFO: tf.summary.merge_all requires manual check. The TF 1.x summary API cannot be automatically migrated to TF 2.0, so symbols have been converted to tf.compat.v1.summary.* and must be migrated manually. Typical usage will only require changes to the summary writing logic, not to individual calls like scalar(). For examples of the new summary API, see the Effective TF 2.0 migration document or check the TF 2.0 TensorBoard tutorials.
+45:29: INFO: Renamed 'tf.summary.merge_all' to 'tf.compat.v1.summary.merge_all'
+46:30: INFO: tf.summary.merge_all requires manual check. The TF 1.x summary API cannot be automatically migrated to TF 2.0, so symbols have been converted to tf.compat.v1.summary.* and must be migrated manually. Typical usage will only require changes to the summary writing logic, not to individual calls like scalar(). For examples of the new summary API, see the Effective TF 2.0 migration document or check the TF 2.0 TensorBoard tutorials.
+46:30: INFO: Renamed 'tf.summary.merge_all' to 'tf.compat.v1.summary.merge_all'
+47:25: INFO: tf.summary.FileWriter requires manual check. The TF 1.x summary API cannot be automatically migrated to TF 2.0, so symbols have been converted to tf.compat.v1.summary.* and must be migrated manually. Typical usage will only require changes to the summary writing logic, not to individual calls like scalar(). For examples of the new summary API, see the Effective TF 2.0 migration document or check the TF 2.0 TensorBoard tutorials.
+47:25: INFO: Renamed 'tf.summary.FileWriter' to 'tf.compat.v1.summary.FileWriter'
+65:18: INFO: Renamed 'tf.Summary' to 'tf.compat.v1.Summary'
+106:8: INFO: Renamed 'tf.reset_default_graph' to 'tf.compat.v1.reset_default_graph'
+107:8: INFO: Renamed 'tf.set_random_seed' to 'tf.compat.v1.set_random_seed'
+264:15: INFO: Added keywords to args of function 'tf.reduce_mean'
+280:37: INFO: Renamed 'tf.get_collection' to 'tf.compat.v1.get_collection'
+280:55: INFO: Renamed 'tf.GraphKeys' to 'tf.compat.v1.GraphKeys'
+307:17: INFO: Renamed 'tf.ConfigProto' to 'tf.compat.v1.ConfigProto'
+309:15: INFO: Renamed 'tf.Session' to 'tf.compat.v1.Session'
+310:17: INFO: Renamed 'tf.global_variables_initializer' to 'tf.compat.v1.global_variables_initializer'
+476:15: INFO: Added keywords to args of function 'tf.reduce_mean'
+495:37: INFO: Renamed 'tf.get_collection' to 'tf.compat.v1.get_collection'
+495:55: INFO: Renamed 'tf.GraphKeys' to 'tf.compat.v1.GraphKeys'
+522:17: INFO: Renamed 'tf.ConfigProto' to 'tf.compat.v1.ConfigProto'
+524:15: INFO: Renamed 'tf.Session' to 'tf.compat.v1.Session'
+525:17: INFO: Renamed 'tf.global_variables_initializer' to 'tf.compat.v1.global_variables_initializer'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\runners\\runner_utils.py'
+ outputting to 'deepobs_v2\\tensorflow\\runners\\runner_utils.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\runners\\__init__.py'
+ outputting to 'deepobs_v2\\tensorflow\\runners\\__init__.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\cifar100_3c3d.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\cifar100_3c3d.py'
+--------------------------------------------------------------------------------
+
+67:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+71:17: INFO: Added keywords to args of function 'tf.argmax'
+72:20: INFO: Added keywords to args of function 'tf.argmax'
+74:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+76:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+76:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\cifar100_allcnnc.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\cifar100_allcnnc.py'
+--------------------------------------------------------------------------------
+
+70:19: INFO: Renamed 'tf.layers.conv2d' to 'tf.compat.v1.layers.conv2d'
+77:33: INFO: tf.initializers.constant requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+77:33: INFO: Renamed 'tf.initializers.constant' to 'tf.compat.v1.initializers.constant'
+78:35: INFO: tf.keras.initializers.glorot_normal requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+78:35: INFO: Renamed 'tf.keras.initializers.glorot_normal' to 'tf.compat.v1.keras.initializers.glorot_normal'
+79:35: INFO: Multiplying scale arg of tf.contrib.layers.l2_regularizer by half to what tf.keras.regularizers.l2 expects.
+
+85:12: INFO: Renamed 'tf.layers.dropout' to 'tf.compat.v1.layers.dropout'
+91:12: INFO: Renamed 'tf.layers.dropout' to 'tf.compat.v1.layers.dropout'
+97:12: INFO: Renamed 'tf.layers.dropout' to 'tf.compat.v1.layers.dropout'
+103:25: INFO: Added keywords to args of function 'tf.reduce_mean'
+105:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+109:17: INFO: Added keywords to args of function 'tf.argmax'
+110:20: INFO: Added keywords to args of function 'tf.argmax'
+112:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+114:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+114:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\cifar100_vgg16.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\cifar100_vgg16.py'
+--------------------------------------------------------------------------------
+
+69:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+72:17: INFO: Added keywords to args of function 'tf.argmax'
+73:20: INFO: Added keywords to args of function 'tf.argmax'
+75:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+77:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+77:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\cifar100_vgg19.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\cifar100_vgg19.py'
+--------------------------------------------------------------------------------
+
+69:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+72:17: INFO: Added keywords to args of function 'tf.argmax'
+73:20: INFO: Added keywords to args of function 'tf.argmax'
+75:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+77:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+77:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\cifar100_wrn164.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\cifar100_wrn164.py'
+--------------------------------------------------------------------------------
+
+76:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+79:17: INFO: Added keywords to args of function 'tf.argmax'
+80:20: INFO: Added keywords to args of function 'tf.argmax'
+82:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+84:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+84:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\cifar100_wrn404.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\cifar100_wrn404.py'
+--------------------------------------------------------------------------------
+
+76:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+79:17: INFO: Added keywords to args of function 'tf.argmax'
+80:20: INFO: Added keywords to args of function 'tf.argmax'
+82:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+84:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+84:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\cifar10_3c3d.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\cifar10_3c3d.py'
+--------------------------------------------------------------------------------
+
+70:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+74:17: INFO: Added keywords to args of function 'tf.argmax'
+75:20: INFO: Added keywords to args of function 'tf.argmax'
+77:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+79:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+79:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\cifar10_vgg16.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\cifar10_vgg16.py'
+--------------------------------------------------------------------------------
+
+69:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+72:17: INFO: Added keywords to args of function 'tf.argmax'
+73:20: INFO: Added keywords to args of function 'tf.argmax'
+75:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+77:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+77:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\cifar10_vgg19.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\cifar10_vgg19.py'
+--------------------------------------------------------------------------------
+
+69:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+72:17: INFO: Added keywords to args of function 'tf.argmax'
+73:20: INFO: Added keywords to args of function 'tf.argmax'
+75:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+77:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+77:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\fmnist_2c2d.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\fmnist_2c2d.py'
+--------------------------------------------------------------------------------
+
+74:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+78:17: INFO: Added keywords to args of function 'tf.argmax'
+79:20: INFO: Added keywords to args of function 'tf.argmax'
+81:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+83:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+83:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\fmnist_logreg.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\fmnist_logreg.py'
+--------------------------------------------------------------------------------
+
+64:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+68:17: INFO: Added keywords to args of function 'tf.argmax'
+69:20: INFO: Added keywords to args of function 'tf.argmax'
+71:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+73:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+73:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\fmnist_mlp.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\fmnist_mlp.py'
+--------------------------------------------------------------------------------
+
+75:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+79:17: INFO: Added keywords to args of function 'tf.argmax'
+80:20: INFO: Added keywords to args of function 'tf.argmax'
+82:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+84:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+84:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\fmnist_vae.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\fmnist_vae.py'
+--------------------------------------------------------------------------------
+
+82:19: INFO: Added keywords to args of function 'tf.reduce_sum'
+82:33: INFO: Renamed 'tf.squared_difference' to 'tf.math.squared_difference'
+83:29: INFO: Added keywords to args of function 'tf.reduce_sum'
+88:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+88:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\imagenet_inception_v3.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\imagenet_inception_v3.py'
+--------------------------------------------------------------------------------
+
+82:21: INFO: tf.losses.softmax_cross_entropy requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+82:21: INFO: Renamed 'tf.losses.softmax_cross_entropy' to 'tf.compat.v1.losses.softmax_cross_entropy'
+87:22: INFO: Renamed 'tf.losses.Reduction' to 'tf.compat.v1.losses.Reduction'
+89:22: INFO: tf.losses.softmax_cross_entropy requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+89:22: INFO: Renamed 'tf.losses.softmax_cross_entropy' to 'tf.compat.v1.losses.softmax_cross_entropy'
+93:22: INFO: Renamed 'tf.losses.Reduction' to 'tf.compat.v1.losses.Reduction'
+97:22: INFO: Added keywords to args of function 'tf.cond'
+104:17: INFO: Added keywords to args of function 'tf.argmax'
+105:20: INFO: Added keywords to args of function 'tf.argmax'
+107:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+109:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+109:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\imagenet_vgg16.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\imagenet_vgg16.py'
+--------------------------------------------------------------------------------
+
+66:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+69:17: INFO: Added keywords to args of function 'tf.argmax'
+70:20: INFO: Added keywords to args of function 'tf.argmax'
+72:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+74:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+74:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\imagenet_vgg19.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\imagenet_vgg19.py'
+--------------------------------------------------------------------------------
+
+66:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+69:17: INFO: Added keywords to args of function 'tf.argmax'
+70:20: INFO: Added keywords to args of function 'tf.argmax'
+72:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+74:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+74:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\mnist_2c2d.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\mnist_2c2d.py'
+--------------------------------------------------------------------------------
+
+74:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+78:17: INFO: Added keywords to args of function 'tf.argmax'
+79:20: INFO: Added keywords to args of function 'tf.argmax'
+81:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+83:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+83:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\mnist_logreg.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\mnist_logreg.py'
+--------------------------------------------------------------------------------
+
+63:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+67:17: INFO: Added keywords to args of function 'tf.argmax'
+68:20: INFO: Added keywords to args of function 'tf.argmax'
+70:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+72:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+72:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\mnist_mlp.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\mnist_mlp.py'
+--------------------------------------------------------------------------------
+
+73:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+77:17: INFO: Added keywords to args of function 'tf.argmax'
+78:20: INFO: Added keywords to args of function 'tf.argmax'
+80:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+82:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+82:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\mnist_vae.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\mnist_vae.py'
+--------------------------------------------------------------------------------
+
+81:19: INFO: Added keywords to args of function 'tf.reduce_sum'
+81:33: INFO: Renamed 'tf.squared_difference' to 'tf.math.squared_difference'
+82:29: INFO: Added keywords to args of function 'tf.reduce_sum'
+87:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+87:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\quadratic_deep.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\quadratic_deep.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\svhn_3c3d.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\svhn_3c3d.py'
+--------------------------------------------------------------------------------
+
+67:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+71:17: INFO: Added keywords to args of function 'tf.argmax'
+72:20: INFO: Added keywords to args of function 'tf.argmax'
+74:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+76:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+76:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\svhn_wrn164.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\svhn_wrn164.py'
+--------------------------------------------------------------------------------
+
+76:22: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+79:17: INFO: Added keywords to args of function 'tf.argmax'
+80:20: INFO: Added keywords to args of function 'tf.argmax'
+82:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+84:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+84:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\testproblem.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\testproblem.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\tolstoi_char_rnn.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\tolstoi_char_rnn.py'
+--------------------------------------------------------------------------------
+
+77:26: INFO: Added keywords to args of function 'tf.cond'
+82:27: INFO: Added keywords to args of function 'tf.cond'
+89:20: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+89:20: INFO: Renamed 'tf.get_variable' to 'tf.compat.v1.get_variable'
+90:17: INFO: Added keywords to args of function 'tf.nn.embedding_lookup'
+90:17: WARNING: tf.nn.embedding_lookup requires manual check. `partition_strategy` has been removed from tf.nn.embedding_lookup.  The 'div' strategy will be used by default.
+101:19: INFO: Renamed 'tf.contrib.rnn.LSTMCell' to 'tf.compat.v1.nn.rnn_cell.LSTMCell'
+102:19: WARNING: Using member tf.contrib.rnn.DropoutWrapper in deprecated module tf.contrib.rnn. (Manual edit required) tf.contrib.rnn.* has been deprecated, and widely used cells/functions will be moved to tensorflow/addons repository. Please check it there and file Github issues if necessary.
+102:19: ERROR: Using member tf.contrib.rnn.DropoutWrapper in deprecated module tf.contrib. tf.contrib.rnn.DropoutWrapper cannot be converted automatically. tf.contrib will not be distributed with TensorFlow 2.0, please consider an alternative in non-contrib TensorFlow, a community-maintained repository such as tensorflow/addons, or fork the required code.
+108:15: INFO: Renamed 'tf.contrib.rnn.MultiRNNCell' to 'tf.compat.v1.nn.rnn_cell.MultiRNNCell'
+116:30: INFO: Renamed 'tf.nn.static_rnn' to 'tf.compat.v1.nn.static_rnn'
+131:13: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+132:24: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+132:24: INFO: Renamed 'tf.get_variable' to 'tf.compat.v1.get_variable'
+133:24: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+133:24: INFO: Renamed 'tf.get_variable' to 'tf.compat.v1.get_variable'
+142:22: WARNING: Using member tf.contrib.seq2seq.sequence_loss in deprecated module tf.contrib.seq2seq. (Manual edit required) tf.contrib.seq2seq.* have been migrated to `tfa.seq2seq.*` in TensorFlow Addons. Please see https://github.com/tensorflow/addons for more info.
+142:22: ERROR: Using member tf.contrib.seq2seq.sequence_loss in deprecated module tf.contrib. tf.contrib.seq2seq.sequence_loss cannot be converted automatically. tf.contrib will not be distributed with TensorFlow 2.0, please consider an alternative in non-contrib TensorFlow, a community-maintained repository such as tensorflow/addons, or fork the required code.
+150:22: INFO: Added keywords to args of function 'tf.argmax'
+152:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+154:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+154:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+199:16: INFO: Renamed 'tf.contrib.rnn.LSTMStateTuple' to 'tf.nn.rnn_cell.LSTMStateTuple'
+231:15: INFO: Added keywords to args of function 'tf.tuple'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\two_d_beale.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\two_d_beale.py'
+--------------------------------------------------------------------------------
+
+78:12: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+78:12: INFO: Renamed 'tf.get_variable' to 'tf.compat.v1.get_variable'
+79:44: INFO: tf.constant_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+79:44: INFO: Renamed 'tf.constant_initializer' to 'tf.compat.v1.constant_initializer'
+81:12: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+81:12: INFO: Renamed 'tf.get_variable' to 'tf.compat.v1.get_variable'
+82:42: INFO: tf.constant_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+82:42: INFO: Renamed 'tf.constant_initializer' to 'tf.compat.v1.constant_initializer'
+95:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+95:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\two_d_branin.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\two_d_branin.py'
+--------------------------------------------------------------------------------
+
+80:12: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+80:12: INFO: Renamed 'tf.get_variable' to 'tf.compat.v1.get_variable'
+81:44: INFO: tf.constant_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+81:44: INFO: Renamed 'tf.constant_initializer' to 'tf.compat.v1.constant_initializer'
+83:12: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+83:12: INFO: Renamed 'tf.get_variable' to 'tf.compat.v1.get_variable'
+84:42: INFO: tf.constant_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+84:42: INFO: Renamed 'tf.constant_initializer' to 'tf.compat.v1.constant_initializer'
+103:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+103:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\two_d_rosenbrock.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\two_d_rosenbrock.py'
+--------------------------------------------------------------------------------
+
+77:12: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+77:12: INFO: Renamed 'tf.get_variable' to 'tf.compat.v1.get_variable'
+78:44: INFO: tf.constant_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+78:44: INFO: Renamed 'tf.constant_initializer' to 'tf.compat.v1.constant_initializer'
+80:12: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+80:12: INFO: Renamed 'tf.get_variable' to 'tf.compat.v1.get_variable'
+81:42: INFO: tf.constant_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+81:42: INFO: Renamed 'tf.constant_initializer' to 'tf.compat.v1.constant_initializer'
+86:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+86:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\_2c2d.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\_2c2d.py'
+--------------------------------------------------------------------------------
+
+14:15: INFO: Renamed 'tf.layers.conv2d' to 'tf.compat.v1.layers.conv2d'
+20:29: INFO: tf.initializers.constant requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+20:29: INFO: Renamed 'tf.initializers.constant' to 'tf.compat.v1.initializers.constant'
+21:31: INFO: tf.truncated_normal_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+21:31: INFO: Renamed 'tf.truncated_normal_initializer' to 'tf.compat.v1.truncated_normal_initializer'
+26:15: INFO: Renamed 'tf.layers.max_pooling2d' to 'tf.compat.v1.layers.max_pooling2d'
+30:15: INFO: Renamed 'tf.layers.dense' to 'tf.compat.v1.layers.dense'
+34:29: INFO: tf.initializers.constant requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+34:29: INFO: Renamed 'tf.initializers.constant' to 'tf.compat.v1.initializers.constant'
+35:31: INFO: tf.truncated_normal_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+35:31: INFO: Renamed 'tf.truncated_normal_initializer' to 'tf.compat.v1.truncated_normal_initializer'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\_3c3d.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\_3c3d.py'
+--------------------------------------------------------------------------------
+
+14:15: INFO: Renamed 'tf.layers.conv2d' to 'tf.compat.v1.layers.conv2d'
+21:29: INFO: tf.initializers.constant requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+21:29: INFO: Renamed 'tf.initializers.constant' to 'tf.compat.v1.initializers.constant'
+22:31: INFO: tf.keras.initializers.glorot_normal requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+22:31: INFO: Renamed 'tf.keras.initializers.glorot_normal' to 'tf.compat.v1.keras.initializers.glorot_normal'
+23:31: INFO: Multiplying scale arg of tf.contrib.layers.l2_regularizer by half to what tf.keras.regularizers.l2 expects.
+
+28:15: INFO: Renamed 'tf.layers.max_pooling2d' to 'tf.compat.v1.layers.max_pooling2d'
+32:15: INFO: Renamed 'tf.layers.dense' to 'tf.compat.v1.layers.dense'
+36:31: INFO: tf.initializers.glorot_uniform requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+36:31: INFO: Renamed 'tf.initializers.glorot_uniform' to 'tf.compat.v1.initializers.glorot_uniform'
+37:29: INFO: tf.initializers.constant requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+37:29: INFO: Renamed 'tf.initializers.constant' to 'tf.compat.v1.initializers.constant'
+38:31: INFO: Multiplying scale arg of tf.contrib.layers.l2_regularizer by half to what tf.keras.regularizers.l2 expects.
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\_inception_v3.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\_inception_v3.py'
+--------------------------------------------------------------------------------
+
+30:12: INFO: Renamed 'tf.layers.conv2d' to 'tf.compat.v1.layers.conv2d'
+38:31: INFO: Multiplying scale arg of tf.contrib.layers.l2_regularizer by half to what tf.keras.regularizers.l2 expects.
+
+40:12: INFO: Renamed 'tf.layers.batch_normalization' to 'tf.compat.v1.layers.batch_normalization'
+67:13: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+68:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+70:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+71:31: INFO: Renamed 'tf.layers.average_pooling2d' to 'tf.compat.v1.layers.average_pooling2d'
+75:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+78:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+103:13: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+104:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+105:31: INFO: Renamed 'tf.layers.max_pooling2d' to 'tf.compat.v1.layers.max_pooling2d'
+106:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+108:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+142:13: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+143:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+145:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+146:31: INFO: Renamed 'tf.layers.average_pooling2d' to 'tf.compat.v1.layers.average_pooling2d'
+148:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+158:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+193:13: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+194:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+195:31: INFO: Renamed 'tf.layers.max_pooling2d' to 'tf.compat.v1.layers.max_pooling2d'
+196:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+205:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+225:13: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+226:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+228:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+237:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+247:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+248:31: INFO: Renamed 'tf.layers.average_pooling2d' to 'tf.compat.v1.layers.average_pooling2d'
+259:8: INFO: Renamed 'tf.image.resize_images' to 'tf.image.resize'
+261:9: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+265:12: INFO: Added keywords to args of function 'tf.nn.max_pool'
+265:12: INFO: Renamed keyword argument for tf.nn.max_pool from value to input
+265:12: INFO: Renamed 'tf.nn.max_pool' to 'tf.nn.max_pool2d'
+269:12: INFO: Added keywords to args of function 'tf.nn.max_pool'
+269:12: INFO: Renamed keyword argument for tf.nn.max_pool from value to input
+269:12: INFO: Renamed 'tf.nn.max_pool' to 'tf.nn.max_pool2d'
+283:9: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+284:16: INFO: Renamed 'tf.layers.average_pooling2d' to 'tf.compat.v1.layers.average_pooling2d'
+287:16: ERROR: Using member tf.contrib.layers.flatten in deprecated module tf.contrib. tf.contrib.layers.flatten cannot be converted automatically. tf.contrib will not be distributed with TensorFlow 2.0, please consider an alternative in non-contrib TensorFlow, a community-maintained repository such as tensorflow/addons, or fork the required code.
+288:29: INFO: Renamed 'tf.layers.dense' to 'tf.compat.v1.layers.dense'
+295:9: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+296:12: INFO: Renamed 'tf.layers.average_pooling2d' to 'tf.compat.v1.layers.average_pooling2d'
+298:12: INFO: Renamed 'tf.layers.dropout' to 'tf.compat.v1.layers.dropout'
+299:12: ERROR: Using member tf.contrib.layers.flatten in deprecated module tf.contrib. tf.contrib.layers.flatten cannot be converted automatically. tf.contrib will not be distributed with TensorFlow 2.0, please consider an alternative in non-contrib TensorFlow, a community-maintained repository such as tensorflow/addons, or fork the required code.
+301:25: INFO: Renamed 'tf.layers.dense' to 'tf.compat.v1.layers.dense'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\_logreg.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\_logreg.py'
+--------------------------------------------------------------------------------
+
+14:15: INFO: Renamed 'tf.layers.dense' to 'tf.compat.v1.layers.dense'
+18:29: INFO: tf.initializers.constant requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+18:29: INFO: Renamed 'tf.initializers.constant' to 'tf.compat.v1.initializers.constant'
+19:31: INFO: tf.initializers.constant requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+19:31: INFO: Renamed 'tf.initializers.constant' to 'tf.compat.v1.initializers.constant'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\_mlp.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\_mlp.py'
+--------------------------------------------------------------------------------
+
+14:15: INFO: Renamed 'tf.layers.dense' to 'tf.compat.v1.layers.dense'
+18:29: INFO: tf.initializers.constant requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+18:29: INFO: Renamed 'tf.initializers.constant' to 'tf.compat.v1.initializers.constant'
+19:31: INFO: tf.truncated_normal_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+19:31: INFO: Renamed 'tf.truncated_normal_initializer' to 'tf.compat.v1.truncated_normal_initializer'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\_quadratic.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\_quadratic.py'
+--------------------------------------------------------------------------------
+
+75:18: INFO: Added keywords to args of function 'tf.convert_to_tensor'
+76:16: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+76:16: INFO: Renamed 'tf.get_variable' to 'tf.compat.v1.get_variable'
+79:24: INFO: tf.constant_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+79:24: INFO: Renamed 'tf.constant_initializer' to 'tf.compat.v1.constant_initializer'
+86:35: INFO: Added keywords to args of function 'tf.transpose'
+89:27: INFO: tf.losses.get_regularization_loss requires manual check. tf.losses have been replaced with object oriented versions in TF 2.0 and after. The loss function calls have been converted to compat.v1 for backward compatibility. Please update these calls to the TF 2.0 versions.
+89:27: INFO: Renamed 'tf.losses.get_regularization_loss' to 'tf.compat.v1.losses.get_regularization_loss'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\_vae.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\_vae.py'
+--------------------------------------------------------------------------------
+
+14:15: INFO: Renamed 'tf.layers.conv2d' to 'tf.compat.v1.layers.conv2d'
+25:15: INFO: Renamed 'tf.layers.conv2d_transpose' to 'tf.compat.v1.layers.conv2d_transpose'
+65:13: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+69:16: INFO: Renamed 'tf.layers.dropout' to 'tf.compat.v1.layers.dropout'
+72:16: INFO: Renamed 'tf.layers.dropout' to 'tf.compat.v1.layers.dropout'
+75:16: INFO: Renamed 'tf.layers.dropout' to 'tf.compat.v1.layers.dropout'
+77:16: ERROR: Using member tf.contrib.layers.flatten in deprecated module tf.contrib. tf.contrib.layers.flatten cannot be converted automatically. tf.contrib will not be distributed with TensorFlow 2.0, please consider an alternative in non-contrib TensorFlow, a community-maintained repository such as tensorflow/addons, or fork the required code.
+79:19: INFO: Renamed 'tf.layers.dense' to 'tf.compat.v1.layers.dense'
+80:28: INFO: Renamed 'tf.layers.dense' to 'tf.compat.v1.layers.dense'
+81:22: INFO: Renamed 'tf.random_normal' to 'tf.random.normal'
+81:49: INFO: Added keywords to args of function 'tf.shape'
+103:13: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+104:16: INFO: Renamed 'tf.layers.dense' to 'tf.compat.v1.layers.dense'
+105:16: INFO: Renamed 'tf.layers.dense' to 'tf.compat.v1.layers.dense'
+110:16: INFO: Renamed 'tf.layers.dropout' to 'tf.compat.v1.layers.dropout'
+113:16: INFO: Renamed 'tf.layers.dropout' to 'tf.compat.v1.layers.dropout'
+117:16: ERROR: Using member tf.contrib.layers.flatten in deprecated module tf.contrib. tf.contrib.layers.flatten cannot be converted automatically. tf.contrib will not be distributed with TensorFlow 2.0, please consider an alternative in non-contrib TensorFlow, a community-maintained repository such as tensorflow/addons, or fork the required code.
+118:16: INFO: Renamed 'tf.layers.dense' to 'tf.compat.v1.layers.dense'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\_vgg.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\_vgg.py'
+--------------------------------------------------------------------------------
+
+14:15: INFO: Renamed 'tf.layers.conv2d' to 'tf.compat.v1.layers.conv2d'
+21:29: INFO: tf.initializers.constant requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+21:29: INFO: Renamed 'tf.initializers.constant' to 'tf.compat.v1.initializers.constant'
+22:31: INFO: tf.keras.initializers.glorot_normal requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+22:31: INFO: Renamed 'tf.keras.initializers.glorot_normal' to 'tf.compat.v1.keras.initializers.glorot_normal'
+23:31: INFO: Multiplying scale arg of tf.contrib.layers.l2_regularizer by half to what tf.keras.regularizers.l2 expects.
+
+28:15: INFO: Renamed 'tf.layers.max_pooling2d' to 'tf.compat.v1.layers.max_pooling2d'
+33:8: INFO: Renamed 'tf.image.resize_images' to 'tf.image.resize'
+68:8: INFO: Renamed 'tf.layers.flatten' to 'tf.compat.v1.layers.flatten'
+71:8: INFO: Renamed 'tf.layers.dense' to 'tf.compat.v1.layers.dense'
+72:8: INFO: Renamed 'tf.layers.dropout' to 'tf.compat.v1.layers.dropout'
+74:8: INFO: Renamed 'tf.layers.dense' to 'tf.compat.v1.layers.dense'
+75:8: INFO: Renamed 'tf.layers.dropout' to 'tf.compat.v1.layers.dropout'
+77:21: INFO: Renamed 'tf.layers.dense' to 'tf.compat.v1.layers.dense'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\_wrn.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\_wrn.py'
+--------------------------------------------------------------------------------
+
+22:15: INFO: Renamed 'tf.layers.conv2d' to 'tf.compat.v1.layers.conv2d'
+29:31: INFO: tf.initializers.glorot_uniform requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+29:31: INFO: Renamed 'tf.initializers.glorot_uniform' to 'tf.compat.v1.initializers.glorot_uniform'
+30:31: INFO: Multiplying scale arg of tf.contrib.layers.l2_regularizer by half to what tf.keras.regularizers.l2 expects.
+
+35:15: INFO: Renamed 'tf.layers.batch_normalization' to 'tf.compat.v1.layers.batch_normalization'
+55:13: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+63:31: INFO: Renamed 'tf.layers.max_pooling2d' to 'tf.compat.v1.layers.max_pooling2d'
+82:17: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+98:9: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+101:12: INFO: Added keywords to args of function 'tf.reduce_mean'
+104:9: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+107:25: INFO: Renamed 'tf.layers.dense' to 'tf.compat.v1.layers.dense'
+110:31: INFO: tf.initializers.glorot_uniform requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+110:31: INFO: Renamed 'tf.initializers.glorot_uniform' to 'tf.compat.v1.initializers.glorot_uniform'
+111:29: INFO: tf.initializers.constant requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+111:29: INFO: Renamed 'tf.initializers.constant' to 'tf.compat.v1.initializers.constant'
+112:31: INFO: Multiplying scale arg of tf.contrib.layers.l2_regularizer by half to what tf.keras.regularizers.l2 expects.
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tensorflow\\testproblems\\__init__.py'
+ outputting to 'deepobs_v2\\tensorflow\\testproblems\\__init__.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tuner\\bayesian.py'
+ outputting to 'deepobs_v2\\tuner\\bayesian.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tuner\\bayesian_utils.py'
+ outputting to 'deepobs_v2\\tuner\\bayesian_utils.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tuner\\grid_search.py'
+ outputting to 'deepobs_v2\\tuner\\grid_search.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tuner\\random_search.py'
+ outputting to 'deepobs_v2\\tuner\\random_search.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tuner\\tuner.py'
+ outputting to 'deepobs_v2\\tuner\\tuner.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tuner\\tuner_utils.py'
+ outputting to 'deepobs_v2\\tuner\\tuner_utils.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'deepobs\\tuner\\__init__.py'
+ outputting to 'deepobs_v2\\tuner\\__init__.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+

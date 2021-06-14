@@ -70,7 +70,7 @@ class mnist(dataset.DataSet):
         A tf.data.Dataset yielding batches of MNIST data.
     """
 
-        with tf.name_scope("mnist"):
+        with tf.compat.v1.name_scope("mnist"):
             with tf.device("/cpu:0"):
                 if shuffle:
                     data = data.shuffle(buffer_size=20000)
@@ -90,7 +90,7 @@ class mnist(dataset.DataSet):
     """
         X, y = self._read_mnist_data(images_file, labels_file)
 
-        with tf.name_scope(self._name):
+        with tf.compat.v1.name_scope(self._name):
             with tf.device("/cpu:0"):
                 data = tf.data.Dataset.from_tensor_slices((X, y))
 
@@ -153,7 +153,7 @@ class mnist(dataset.DataSet):
 
         """
         # Load images from images_file
-        with tf.gfile.Open(images_file, "rb") as img_file:
+        with tf.io.gfile.GFile(images_file, "rb") as img_file:
             print("Extracting %s" % img_file.name)
             with gzip.GzipFile(fileobj=img_file) as bytestream:
                 magic = self._read32(bytestream)
@@ -170,7 +170,7 @@ class mnist(dataset.DataSet):
                 X = data.reshape(num_images, rows, cols, 1)
                 X = X.astype(np.float32) / 255.0
         # Load labels from labels file
-        with tf.gfile.Open(labels_file, "rb") as f:
+        with tf.io.gfile.GFile(labels_file, "rb") as f:
             print("Extracting %s" % f.name)
             with gzip.GzipFile(fileobj=f) as bytestream:
                 magic = self._read32(bytestream)

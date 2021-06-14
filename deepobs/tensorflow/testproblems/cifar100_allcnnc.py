@@ -67,48 +67,48 @@ class cifar100_allcnnc(TestProblem):
 
         def conv2d(inputs, filters, kernel_size=3, strides=(1, 1), padding="same"):
             """Convenience wrapper for conv layers."""
-            return tf.layers.conv2d(
+            return tf.compat.v1.layers.conv2d(
                 inputs,
                 filters,
                 kernel_size,
                 strides,
                 padding,
                 activation=tf.nn.relu,
-                bias_initializer=tf.initializers.constant(0.1),
-                kernel_initializer=tf.keras.initializers.glorot_normal(),
-                kernel_regularizer=tf.contrib.layers.l2_regularizer(self._l2_reg),
+                bias_initializer=tf.compat.v1.initializers.constant(0.1),
+                kernel_initializer=tf.compat.v1.keras.initializers.glorot_normal(),
+                kernel_regularizer=tf.keras.regularizers.l2(0.5 * (self._l2_reg)),
             )
 
         training = tf.equal(self.dataset.phase, "train")
         x, y = self.dataset.batch
 
-        x = tf.layers.dropout(x, rate=0.2, training=training)
+        x = tf.compat.v1.layers.dropout(x, rate=0.2, training=training)
 
         x = conv2d(x, 96, 3)
         x = conv2d(x, 96, 3)
         x = conv2d(x, 96, 3, strides=(2, 2))
 
-        x = tf.layers.dropout(x, rate=0.5, training=training)
+        x = tf.compat.v1.layers.dropout(x, rate=0.5, training=training)
 
         x = conv2d(x, 192, 3)
         x = conv2d(x, 192, 3)
         x = conv2d(x, 192, 3, strides=(2, 2))
 
-        x = tf.layers.dropout(x, rate=0.5, training=training)
+        x = tf.compat.v1.layers.dropout(x, rate=0.5, training=training)
 
         x = conv2d(x, 192, 3, padding="valid")
         x = conv2d(x, 192, 1)
         x = conv2d(x, 100, 1)
 
-        linear_outputs = tf.reduce_mean(x, axis=[1, 2])
+        linear_outputs = tf.reduce_mean(input_tensor=x, axis=[1, 2])
 
-        self.losses = tf.nn.softmax_cross_entropy_with_logits_v2(
+        self.losses = tf.nn.softmax_cross_entropy_with_logits(
             labels=y, logits=linear_outputs
         )
 
-        y_pred = tf.argmax(linear_outputs, 1)
-        y_correct = tf.argmax(y, 1)
+        y_pred = tf.argmax(input=linear_outputs, axis=1)
+        y_correct = tf.argmax(input=y, axis=1)
         correct_prediction = tf.equal(y_pred, y_correct)
-        self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        self.accuracy = tf.reduce_mean(input_tensor=tf.cast(correct_prediction, tf.float32))
 
-        self.regularizer = tf.losses.get_regularization_loss()
+        self.regularizer = tf.compat.v1.losses.get_regularization_loss()

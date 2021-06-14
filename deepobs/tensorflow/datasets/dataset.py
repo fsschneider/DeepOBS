@@ -44,7 +44,7 @@ class DataSet(object):
 
         # Reinitializable iterator given types and shapes of the outputs
         # (needs to be the same for train and test of course).
-        self._iterator = tf.data.Iterator.from_structure(
+        self._iterator = tf.compat.v1.data.Iterator.from_structure(
             self._train_dataset.output_types, self._train_dataset.output_shapes
         )
         self.batch = self._iterator.get_next()
@@ -55,28 +55,28 @@ class DataSet(object):
         self.train_init_op = tf.group(
             [
                 self._iterator.make_initializer(self._train_dataset),
-                tf.assign(self.phase, "train"),
+                tf.compat.v1.assign(self.phase, "train"),
             ],
             name="train_init_op",
         )
         self.train_eval_init_op = tf.group(
             [
                 self._iterator.make_initializer(self._train_eval_dataset),
-                tf.assign(self.phase, "train_eval"),
+                tf.compat.v1.assign(self.phase, "train_eval"),
             ],
             name="train_eval_init_op",
         )
         self.valid_init_op = tf.group(
             [
                 self._iterator.make_initializer(self._valid_dataset),
-                tf.assign(self.phase, "valid"),
+                tf.compat.v1.assign(self.phase, "valid"),
             ],
             name="valid_init_op",
         )
         self.test_init_op = tf.group(
             [
                 self._iterator.make_initializer(self._test_dataset),
-                tf.assign(self.phase, "test"),
+                tf.compat.v1.assign(self.phase, "test"),
             ],
             name="test_init_op",
         )

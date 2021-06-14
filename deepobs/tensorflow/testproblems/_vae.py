@@ -11,7 +11,7 @@ import tensorflow as tf
 def _vae(x, training, n_latent=8):
     def conv2d(inputs, filters, kernel_size, strides, activation=tf.nn.relu):
         """Convenience wrapper for conv layers."""
-        return tf.layers.conv2d(
+        return tf.compat.v1.layers.conv2d(
             inputs,
             filters,
             kernel_size,
@@ -22,7 +22,7 @@ def _vae(x, training, n_latent=8):
 
     def conv2d_transpose(inputs, filters, kernel_size, strides, activation=tf.nn.relu):
         """Convenience wrapper for conv layers."""
-        return tf.layers.conv2d_transpose(
+        return tf.compat.v1.layers.conv2d_transpose(
             inputs,
             filters,
             kernel_size,
@@ -62,23 +62,23 @@ def _vae(x, training, n_latent=8):
             tupel: Output of the encoder, ``z``, the mean and the standard deviation.
 
         """
-        with tf.variable_scope("encoder", reuse=None):
+        with tf.compat.v1.variable_scope("encoder", reuse=None):
             x = tf.reshape(x, shape=[-1, 28, 28, 1])
 
             x = conv2d(x, 64, 4, 2, activation=lrelu)
-            x = tf.layers.dropout(x, rate=0.2, training=training)
+            x = tf.compat.v1.layers.dropout(x, rate=0.2, training=training)
 
             x = conv2d(x, 64, 4, 2, activation=lrelu)
-            x = tf.layers.dropout(x, rate=0.2, training=training)
+            x = tf.compat.v1.layers.dropout(x, rate=0.2, training=training)
 
             x = conv2d(x, 64, 4, 1, activation=lrelu)
-            x = tf.layers.dropout(x, rate=0.2, training=training)
+            x = tf.compat.v1.layers.dropout(x, rate=0.2, training=training)
 
             x = tf.contrib.layers.flatten(x)
 
-            mean = tf.layers.dense(x, units=n_latent)
-            std_dev = 0.5 * tf.layers.dense(x, units=n_latent)
-            epsilon = tf.random_normal(tf.stack([tf.shape(x)[0], n_latent]))
+            mean = tf.compat.v1.layers.dense(x, units=n_latent)
+            std_dev = 0.5 * tf.compat.v1.layers.dense(x, units=n_latent)
+            epsilon = tf.random.normal(tf.stack([tf.shape(input=x)[0], n_latent]))
             z = tf.add(mean, tf.multiply(epsilon, tf.exp(std_dev)), name="z")
 
             return z, mean, std_dev
@@ -100,22 +100,22 @@ def _vae(x, training, n_latent=8):
                 (``28`` by ``28``).
 
         """
-        with tf.variable_scope("decoder", reuse=None):
-            x = tf.layers.dense(sampled_z, units=24, activation=lrelu)
-            x = tf.layers.dense(x, units=24 * 2 + 1, activation=lrelu)
+        with tf.compat.v1.variable_scope("decoder", reuse=None):
+            x = tf.compat.v1.layers.dense(sampled_z, units=24, activation=lrelu)
+            x = tf.compat.v1.layers.dense(x, units=24 * 2 + 1, activation=lrelu)
 
             x = tf.reshape(x, [-1, 7, 7, 1])
 
             x = conv2d_transpose(x, 64, 4, 2)
-            x = tf.layers.dropout(x, rate=0.2, training=training)
+            x = tf.compat.v1.layers.dropout(x, rate=0.2, training=training)
 
             x = conv2d_transpose(x, 64, 4, 1)
-            x = tf.layers.dropout(x, rate=0.2, training=training)
+            x = tf.compat.v1.layers.dropout(x, rate=0.2, training=training)
 
             x = conv2d_transpose(x, 64, 4, 1)
 
             x = tf.contrib.layers.flatten(x)
-            x = tf.layers.dense(x, units=28 * 28, activation=tf.nn.sigmoid)
+            x = tf.compat.v1.layers.dense(x, units=28 * 28, activation=tf.nn.sigmoid)
 
             img = tf.reshape(x, shape=[-1, 28, 28], name="decoder_op")
 

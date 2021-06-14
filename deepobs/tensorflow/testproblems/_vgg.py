@@ -11,26 +11,26 @@ import tensorflow as tf
 def _vgg(x, training, variant, num_outputs, l2_reg):
     def conv2d(inputs, filters, kernel_size=3, strides=(1, 1)):
         """Convenience wrapper for conv layers."""
-        return tf.layers.conv2d(
+        return tf.compat.v1.layers.conv2d(
             inputs,
             filters,
             kernel_size,
             strides,
             padding="same",
             activation=tf.nn.relu,
-            bias_initializer=tf.initializers.constant(0.0),
-            kernel_initializer=tf.keras.initializers.glorot_normal(),
-            kernel_regularizer=tf.contrib.layers.l2_regularizer(l2_reg),
+            bias_initializer=tf.compat.v1.initializers.constant(0.0),
+            kernel_initializer=tf.compat.v1.keras.initializers.glorot_normal(),
+            kernel_regularizer=tf.keras.regularizers.l2(0.5 * (l2_reg)),
         )
 
     def max_pool(inputs):
         """Convenience wrapper for max pool layers."""
-        return tf.layers.max_pooling2d(
+        return tf.compat.v1.layers.max_pooling2d(
             inputs, pool_size=[2, 2], strides=[2, 2], padding="same"
         )
 
     # for now padd to 224x224 image size for VGG
-    x = tf.image.resize_images(x, size=[224, 224])
+    x = tf.image.resize(x, size=[224, 224])
 
     # conv1_1 and conv1_2
     x = conv2d(x, 64)
@@ -65,15 +65,15 @@ def _vgg(x, training, variant, num_outputs, l2_reg):
     if variant == 19:
         x = conv2d(x, 512)
     x = max_pool(x)
-    x = tf.layers.flatten(x)
+    x = tf.compat.v1.layers.flatten(x)
 
     # fc_1
-    x = tf.layers.dense(x, 4096, activation=tf.nn.relu)
-    x = tf.layers.dropout(x, rate=0.5, training=training)
+    x = tf.compat.v1.layers.dense(x, 4096, activation=tf.nn.relu)
+    x = tf.compat.v1.layers.dropout(x, rate=0.5, training=training)
     # fc_2
-    x = tf.layers.dense(x, 4096, activation=tf.nn.relu)
-    x = tf.layers.dropout(x, rate=0.5, training=training)
+    x = tf.compat.v1.layers.dense(x, 4096, activation=tf.nn.relu)
+    x = tf.compat.v1.layers.dropout(x, rate=0.5, training=training)
     # fc_3
-    linear_outputs = tf.layers.dense(x, num_outputs)
+    linear_outputs = tf.compat.v1.layers.dense(x, num_outputs)
 
     return linear_outputs

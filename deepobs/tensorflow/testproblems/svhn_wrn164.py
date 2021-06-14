@@ -73,12 +73,12 @@ class svhn_wrn164(TestProblem):
             l2_reg=self._l2_reg,
         )
 
-        self.losses = tf.nn.softmax_cross_entropy_with_logits_v2(
+        self.losses = tf.nn.softmax_cross_entropy_with_logits(
             labels=y, logits=linear_outputs
         )
-        y_pred = tf.argmax(linear_outputs, 1)
-        y_correct = tf.argmax(y, 1)
+        y_pred = tf.argmax(input=linear_outputs, axis=1)
+        y_correct = tf.argmax(input=y, axis=1)
         correct_prediction = tf.equal(y_pred, y_correct)
-        self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        self.accuracy = tf.reduce_mean(input_tensor=tf.cast(correct_prediction, tf.float32))
 
-        self.regularizer = tf.losses.get_regularization_loss()
+        self.regularizer = tf.compat.v1.losses.get_regularization_loss()

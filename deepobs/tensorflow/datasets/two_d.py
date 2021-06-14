@@ -71,7 +71,7 @@ class two_d(dataset.DataSet):
         Returns:
             A tf.data.Dataset yielding batches of 2D data.
         """
-        with tf.name_scope(self._name):
+        with tf.compat.v1.name_scope(self._name):
             with tf.device("/cpu:0"):
                 data = tf.data.Dataset.from_tensor_slices((data_x, data_y))
                 if shuffle:

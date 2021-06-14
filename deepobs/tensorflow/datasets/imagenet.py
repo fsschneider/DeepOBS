@@ -104,10 +104,10 @@ class imagenet(dataset.DataSet):
 
             # Crop to 224x224, either randomly or centered according to arguments
             if random_crop:
-                image = tf.image.resize_image_with_crop_or_pad(image, 256, 256)
-                image = tf.random_crop(image, [224, 224, 3])
+                image = tf.image.resize_with_crop_or_pad(image, 256, 256)
+                image = tf.image.random_crop(image, [224, 224, 3])
             else:
-                image = tf.image.resize_image_with_crop_or_pad(image, 224, 224)
+                image = tf.image.resize_with_crop_or_pad(image, 224, 224)
 
             # Optionally perform random flip
             if random_flip_left_right:
@@ -129,7 +129,7 @@ class imagenet(dataset.DataSet):
 
             return image, label
 
-        with tf.name_scope(self._name):
+        with tf.compat.v1.name_scope(self._name):
             with tf.device("/cpu:0"):
                 data = data.map(
                     parse_func,
@@ -152,10 +152,10 @@ class imagenet(dataset.DataSet):
         A tf.data.Dataset yielding ImageNet data.
     """
 
-        with tf.name_scope(self._name):
+        with tf.compat.v1.name_scope(self._name):
             with tf.device("/cpu:0"):
-                filenames = tf.matching_files(binaries_fname_pattern)
-                filenames = tf.random_shuffle(filenames)
+                filenames = tf.io.matching_files(binaries_fname_pattern)
+                filenames = tf.random.shuffle(filenames)
                 data = tf.data.TFRecordDataset(filenames)
 
         return data
@@ -243,16 +243,16 @@ class imagenet(dataset.DataSet):
         """
         # Dense features in Example proto.
         feature_map = {
-            "image/encoded": tf.FixedLenFeature([], dtype=tf.string, default_value=""),
-            "image/class/label": tf.FixedLenFeature(
+            "image/encoded": tf.io.FixedLenFeature([], dtype=tf.string, default_value=""),
+            "image/class/label": tf.io.FixedLenFeature(
                 [1], dtype=tf.int64, default_value=-1
             ),
-            "image/class/text": tf.FixedLenFeature(
+            "image/class/text": tf.io.FixedLenFeature(
                 [], dtype=tf.string, default_value=""
             ),
         }
 
-        features = tf.parse_single_example(example_serialized, feature_map)
+        features = tf.io.parse_single_example(serialized=example_serialized, features=feature_map)
         label = tf.cast(features["image/class/label"], dtype=tf.int32)
 
         return features["image/encoded"], label, features["image/class/text"]
@@ -266,7 +266,7 @@ class imagenet(dataset.DataSet):
         Returns:
           tf.Tensor: 3-D float Tensor with values ranging from [0, 1).
         """
-        with tf.name_scope(
+        with tf.compat.v1.name_scope(
             values=[image_buffer], name=scope, default_name="decode_jpeg"
         ):
             # Decode the string as an RGB JPEG.
@@ -294,14 +294,14 @@ class imagenet(dataset.DataSet):
 
         """
 
-        shape = tf.shape(image)
-        height = tf.to_float(shape[0])
-        width = tf.to_float(shape[1])
-        smaller_side = tf.reduce_min(shape[0:2])
-        scale = tf.divide(target_smaller_side, tf.to_float(smaller_side))
-        new_height = tf.to_int32(tf.round(scale * height))
-        new_width = tf.to_int32(tf.round(scale * width))
-        resized_image = tf.image.resize_images(image, [new_height, new_width])
+        shape = tf.shape(input=image)
+        height = tf.cast(shape[0], dtype=tf.float32)
+        width = tf.cast(shape[1], dtype=tf.float32)
+        smaller_side = tf.reduce_min(input_tensor=shape[0:2])
+        scale = tf.divide(target_smaller_side, tf.cast(smaller_side, dtype=tf.float32))
+        new_height = tf.cast(tf.round(scale * height), dtype=tf.int32)
+        new_width = tf.cast(tf.round(scale * width), dtype=tf.int32)
+        resized_image = tf.image.resize(image, [new_height, new_width])
 
         return resized_image
 
@@ -315,7 +315,7 @@ class imagenet(dataset.DataSet):
         Returns:
           tf.Tensor: The color-distorted image.
         """
-        with tf.name_scope(values=[image], name=scope, default_name="distort_color"):
+        with tf.compat.v1.name_scope(values=[image], name=scope, default_name="distort_color"):
             image = tf.image.random_brightness(image, max_delta=32.0 / 255.0)
             image = tf.image.random_saturation(image, lower=0.5, upper=1.5)
             image = tf.image.random_hue(image, max_delta=0.2)
