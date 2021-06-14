@@ -74,7 +74,7 @@ def _vae(x, training, n_latent=8):
             x = conv2d(x, 64, 4, 1, activation=lrelu)
             x = tf.compat.v1.layers.dropout(x, rate=0.2, training=training)
 
-            x = tf.contrib.layers.flatten(x)
+            x = tf.keras.layers.Flatten()(x)
 
             mean = tf.compat.v1.layers.dense(x, units=n_latent)
             std_dev = 0.5 * tf.compat.v1.layers.dense(x, units=n_latent)
@@ -114,7 +114,7 @@ def _vae(x, training, n_latent=8):
 
             x = conv2d_transpose(x, 64, 4, 1)
 
-            x = tf.contrib.layers.flatten(x)
+            x = tf.keras.layers.Flatten()(x)
             x = tf.compat.v1.layers.dense(x, units=28 * 28, activation=tf.nn.sigmoid)
 
             img = tf.reshape(x, shape=[-1, 28, 28], name="decoder_op")
