@@ -73,7 +73,7 @@ setuptools.setup(
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
     install_requires=install_requires_list,
-    extras_requires={
+    extras_require={
         "doc": docs_requires_list,
         "test": tests_require_list, 
         "lint": lint_require_list,
