@@ -1,29 +1,8 @@
 .PHONY: help
 .PHONY: black black-check flake8
-.PHONY: install install-dev install-devtools install-test install-lint
+.PHONY: install install-tf install-torch install-dev install-doc install-test install-lint
 .PHONY: test
 .PHONY: conda-env
-
-## taking ideas from https://github.com/foodkg/foodkg.github.io/blob/master/src/prep-scripts/Makefile
-
-## pip env
-env = env/$(if $(findstring Windows,$(OS)),Scripts,bin)/activate # crossplatform shenanigans
-python = . $(env); python # source activate script before calling python
-pip = $(python) -m pip # source activate script before calling pip
-
-env: setup.py # create virtual environment - do not use $(python) before env exists!
-	rm -rf env
-	python -m venv env
-	$(pip) install .
-
-
-install: env
-	$(pip) install .
-
-install-dev: env
-	$(pip) install -e .[doc,test,lint,git-hook]
-	pre-commit install
-
 
 .DEFAULT: help
 help:
@@ -37,14 +16,54 @@ help:
 	@echo "        Run flake8 on the project"
 	@echo "install"
 	@echo "        Install deepobs and dependencies"
+	@echo "install-tf"
+	@echo "        Install deepobs, dependencies and tensorflow"
+	@echo "install-torch"
+	@echo "        Install deepobs, dependencies and pytorch"
 	@echo "install-dev"
 	@echo "        Install all development tools"
+	@echo "install-doc"
+	@echo "        Install only the documentation tools (included in install-dev)"
 	@echo "install-lint"
 	@echo "        Install only the linter tools (included in install-dev)"
 	@echo "install-test"
 	@echo "        Install only the testing tools (included in install-dev)"
 	@echo "conda-env"
 	@echo "        Create conda environment 'deepobs' with dev setup"
+
+### 
+# Installation
+## taking ideas from https://github.com/foodkg/foodkg.github.io/blob/master/src/prep-scripts/Makefile
+
+env = env/$(if $(findstring Windows,$(OS)),Scripts,bin)/activate # crossplatform shenanigans
+python = . $(env); python # source activate script before calling python
+pip = $(python) -m pip # source activate script before calling pip
+
+env: # create virtual environment - do not use $(python) before env exists!
+	rm -rf env
+	python -m venv env
+
+install: env setup.py 
+	$(pip) install .
+
+install-tf: env setup.py
+	$(pip) install .[tf]
+
+install-torch: env setup.py
+	$(pip) install .[torch]
+
+# dev includes [doc,test,lint] and "pre-commit"
+install-dev: env setup.py
+	$(pip) install -e .[dev]
+	pre-commit install
+
+install-doc: env setup.py
+	$(pip) install -e .[doc]
+install-test: env setup.py
+	$(pip) install -e .[test]
+install-lint: env setup.py
+	$(pip) install -e .[lint]
+
 ###
 # Test coverage
 test:
@@ -58,29 +77,13 @@ test:
 # - https://github.com/pypa/pip/pull/6370
 # - https://pip.pypa.io/en/stable/reference/pip/#pep-517-and-518-support
 black:
-	@black . --config=black.toml
+	@black .
 
 black-check:
-	@black . --config=black.toml --check
+	@black . --check
 
 flake8:
 	@flake8 .
-
-###
-# Installation
-
-
-install-lint:
-	@pip install -r requirements/lint.txt
-
-install-test:
-	@pip install -r requirements/test.txt
-
-install-devtools:
-	@echo "Install dev tools..."
-	@pip install -r requirements-dev.txt
-	@pip install -r requirements_doc.txt
-
 
 ###
 # Conda environment

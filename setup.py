@@ -4,7 +4,6 @@
 import setuptools
 
 install_requires_list = [
-    "tensorflow~=2.5",
     "argparse",
     "bayesian-optimization",
     "matplotlib",
@@ -14,17 +13,31 @@ install_requires_list = [
     "tikzplotlib",
 ]
 
-docs_requires_list = [
-    "sphinx~=1.8.1",
-    "sphinx-rtd-theme~=0.4.2",
-    "sphinx-argparse~=0.2.3",
+tensorflow_requires_list = [
+    "tensorflow~=1",
 ]
 
-tests_require_list = [
-    "pytest",
-    "pytest-cov",
-    "coveralls",
-]
+pytorch_requires_list = ["torch"]
+
+docs_requires_list = (
+    [
+        "sphinx~=1.8.1",
+        "sphinx-rtd-theme~=0.4.2",
+        "sphinx-argparse~=0.2.3",
+    ]
+    + tensorflow_requires_list
+    + pytorch_requires_list
+)
+
+tests_require_list = (
+    [
+        "pytest",
+        "pytest-cov",
+        "coveralls",
+    ]
+    + tensorflow_requires_list
+    + pytorch_requires_list
+)
 
 lint_require_list = [
     "flake8",
@@ -36,6 +49,10 @@ lint_require_list = [
     "flake8-comprehensions",
     "black",
 ]
+
+dev_require_list = list(
+    set(["pre-commit"] + docs_requires_list + tests_require_list + lint_require_list)
+)
 
 
 def readme():
@@ -74,10 +91,14 @@ setuptools.setup(
     ],
     install_requires=install_requires_list,
     extras_require={
+        "tf": tensorflow_requires_list,
+        "tensorflow": tensorflow_requires_list,
+        "torch": pytorch_requires_list,
+        "pytorch": pytorch_requires_list,
         "doc": docs_requires_list,
-        "test": tests_require_list, 
+        "test": tests_require_list,
         "lint": lint_require_list,
-        "git-hook": ["pre-commit"]
+        "dev": dev_require_list,
     },
     scripts=[
         "deepobs/scripts/deepobs_prepare_data.sh",
