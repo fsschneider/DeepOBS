@@ -4,6 +4,8 @@
 import setuptools
 
 install_requires_list = [
+    "tensorflow~=2.5",
+    "tensorflow-addons~=0.13.0"
     "argparse",
     "bayesian-optimization",
     "matplotlib",

@@ -2,6 +2,7 @@
 """A two-layer LSTM for character-level language modelling on Tolstoi's War and Peace."""
 
 import tensorflow as tf
+import tensorflow_addons as tfa
 
 from ..datasets.tolstoi import tolstoi
 from .testproblem import TestProblem
@@ -99,7 +100,7 @@ class tolstoi_char_rnn(TestProblem):
         cells = []
         for _ in range(num_layers):
             cell = tf.compat.v1.nn.rnn_cell.LSTMCell(rnn_size)
-            cell = tf.contrib.rnn.DropoutWrapper(
+            cell = tf.compat.v1.nn.rnn_cell.DropoutWrapper(
                 cell,
                 input_keep_prob=input_keep_prob,
                 output_keep_prob=output_keep_prob,
@@ -139,7 +140,7 @@ class tolstoi_char_rnn(TestProblem):
         # print "Shape of reshaped logits", reshaped_logits.get_shape()
 
         # Create vector of losses
-        self.losses = tf.contrib.seq2seq.sequence_loss(
+        self.losses = tfa.seq2seq.sequence_loss(
             reshaped_logits,
             y,
             weights=tf.ones([self._batch_size, seq_length], dtype=tf.float32),
