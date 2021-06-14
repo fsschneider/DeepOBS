@@ -4,6 +4,7 @@
 import setuptools
 
 install_requires_list = [
+    "tensorflow~=2.5",
     "argparse",
     "bayesian-optimization",
     "matplotlib",
@@ -13,6 +14,29 @@ install_requires_list = [
     "tikzplotlib",
 ]
 
+docs_requires_list = [
+    "sphinx~=1.8.1",
+    "sphinx-rtd-theme~=0.4.2",
+    "sphinx-argparse~=0.2.3",
+]
+
+tests_require_list = [
+    "pytest",
+    "pytest-cov",
+    "coveralls",
+]
+
+lint_require_list = [
+    "flake8",
+    "mccabe",
+    "pycodestyle",
+    "pyflakes",
+    "pep8-naming",
+    "flake8-bugbear",
+    "flake8-comprehensions",
+    "black",
+]
+
 
 def readme():
     """Read the Readme file.
@@ -20,7 +44,7 @@ def readme():
     Returns:
         str: Content of the README.md file
     """
-    with open("README.md") as f:
+    with open("README.md", mode="r", encoding="utf-8") as f:
         return f.read()
 
 
@@ -49,6 +73,12 @@ setuptools.setup(
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
     install_requires=install_requires_list,
+    extras_requires={
+        "doc": docs_requires_list,
+        "test": tests_require_list, 
+        "lint": lint_require_list,
+        "git-hook": ["pre-commit"]
+    },
     scripts=[
         "deepobs/scripts/deepobs_prepare_data.sh",
         "deepobs/scripts/deepobs_get_baselines.sh",

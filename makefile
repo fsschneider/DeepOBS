@@ -4,6 +4,27 @@
 .PHONY: test
 .PHONY: conda-env
 
+## taking ideas from https://github.com/foodkg/foodkg.github.io/blob/master/src/prep-scripts/Makefile
+
+## pip env
+env = env/$(if $(findstring Windows,$(OS)),Scripts,bin)/activate # crossplatform shenanigans
+python = . $(env); python # source activate script before calling python
+pip = $(python) -m pip # source activate script before calling pip
+
+env: setup.py # create virtual environment - do not use $(python) before env exists!
+	rm -rf env
+	python -m venv env
+	$(pip) install .
+
+
+install: env
+	$(pip) install .
+
+install-dev: env
+	$(pip) install -e .[doc,test,lint,git-hook]
+	pre-commit install
+
+
 .DEFAULT: help
 help:
 	@echo "test"
@@ -48,9 +69,6 @@ flake8:
 ###
 # Installation
 
-install:
-	@pip install -r requirements.txt
-	@pip install .
 
 install-lint:
 	@pip install -r requirements/lint.txt
@@ -63,17 +81,9 @@ install-devtools:
 	@pip install -r requirements-dev.txt
 	@pip install -r requirements_doc.txt
 
-install-dev: install-devtools
-	@echo "Install dependencies..."
-	@pip install -r requirements.txt
-	@echo "Uninstall existing version of deepobs..."
-	@pip uninstall deepobs
-	@echo "Install deepobs in editable mode..."
-	@pip install -e .
-	@echo "Install pre-commit hooks..."
-	@pre-commit install
 
 ###
 # Conda environment
 conda-env:
 	@conda env create --file .conda_env.yml
+
