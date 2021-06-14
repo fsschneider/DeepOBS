@@ -66,7 +66,7 @@ def test_testproblems(problem, framework, device):
         set_default_device(device)
         tproblem = getattr(torch_testproblems, problem)(batch_size=BATCH_SIZE)
     elif framework == "tensorflow":
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
         tproblem = getattr(tf_testproblems, problem)(batch_size=BATCH_SIZE)
     else:
         raise ValueError("Unknown framework in test.")
@@ -93,13 +93,13 @@ def _check_forward_pass(tproblem, framework, device):
             _check_losses_acc(losses, loss, acc)
     elif framework == "tensorflow":
         if device == "cpu":
-            config = tf.ConfigProto(device_count={"GPU": 0})
+            config = tf.compat.v1.ConfigProto(device_count={"GPU": 0})
         else:
-            config = tf.ConfigProto(device_count={"GPU": 1})
+            config = tf.compat.v1.ConfigProto(device_count={"GPU": 1})
             config.gpu_options.allow_growth = True
-        tf_loss = tf.reduce_mean(tproblem.losses) + tproblem.regularizer
-        with tf.Session(config=config) as sess:
-            sess.run(tf.global_variables_initializer())
+        tf_loss = tf.reduce_mean(input_tensor=tproblem.losses) + tproblem.regularizer
+        with tf.compat.v1.Session(config=config) as sess:
+            sess.run(tf.compat.v1.global_variables_initializer())
             for init_op in [
                 tproblem.train_init_op,
                 tproblem.train_eval_init_op,
@@ -150,6 +150,6 @@ def _check_parameters(tproblem, framework):
         for parameter in tproblem.net.parameters():
             num_param.append(parameter.numel())
     elif framework == "tensorflow":
-        num_param = [np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()]
+        num_param = [np.prod(v.get_shape().as_list()) for v in tf.compat.v1.trainable_variables()]
 
     assert check_lists(num_param, get_number_of_parameters(tproblem))
