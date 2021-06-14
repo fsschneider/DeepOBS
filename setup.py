@@ -5,7 +5,7 @@ import setuptools
 
 install_requires_list = [
     "tensorflow~=2.5",
-    "tensorflow-addons~=0.13.0"
+    "tensorflow-addons~=0.13.0",
     "argparse",
     "bayesian-optimization",
     "matplotlib",
@@ -22,7 +22,8 @@ def readme():
     Returns:
         str: Content of the README.md file
     """
-    with open("README.md") as f:
+    # for some reason autodetects "charmap" encoding on windows -> explicit encoding
+    with open("README.md", mode="r", encoding="utf-8") as f:
         return f.read()
 
 
