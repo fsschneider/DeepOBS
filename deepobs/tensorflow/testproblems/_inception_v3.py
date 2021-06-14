@@ -284,7 +284,7 @@ def _inception_v3(x, training, l2_reg):
         x_aux = tf.compat.v1.layers.average_pooling2d(x, 5, (3, 3), "VALID")
         x_aux = conv2d_BN(x_aux, 128, 1, (1, 1), "SAME", training)
         x_aux = conv2d_BN(x_aux, 768, 5, (1, 1), "VALID", training)
-        x_aux = tf.contrib.layers.flatten(x_aux)
+        x_aux = tf.keras.layers.Flatten()(x_aux)
         aux_linear_outputs = tf.compat.v1.layers.dense(x_aux, num_classes, None, True)
 
     x = inception_blockD(x, training, "inception_blockD")
@@ -296,7 +296,7 @@ def _inception_v3(x, training, l2_reg):
         x = tf.compat.v1.layers.average_pooling2d(x, 8, (1, 1), "VALID")
 
         x = tf.compat.v1.layers.dropout(x, 0.8, training)
-        x = tf.contrib.layers.flatten(x)
+        x = tf.keras.layers.Flatten()(x)
 
         linear_outputs = tf.compat.v1.layers.dense(x, num_classes, None, True)
 
