@@ -14,7 +14,7 @@ install_requires_list = [
 ]
 
 tensorflow_requires_list = [
-    "tensorflow~=1",
+    "tensorflow~=1.15.2",
 ]
 
 pytorch_requires_list = ["torch"]

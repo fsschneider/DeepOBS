@@ -67,7 +67,7 @@ install-lint: env setup.py
 ###
 # Test coverage
 test:
-	@pytest -vx --cov=deepobs .
+	@. $(env); pytest -vx --cov=deepobs .
 
 ###
 # Linter and autoformatter
@@ -77,13 +77,13 @@ test:
 # - https://github.com/pypa/pip/pull/6370
 # - https://pip.pypa.io/en/stable/reference/pip/#pep-517-and-518-support
 black:
-	@black .
+	@. $(env); black .
 
 black-check:
-	@black . --check
+	@. $(env); black . --check
 
 flake8:
-	@flake8 .
+	@. $(env); flake8 .
 
 ###
 # Conda environment
