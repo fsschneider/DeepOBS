@@ -72,10 +72,6 @@ test:
 ###
 # Linter and autoformatter
 
-# Uses black.toml config instead of pyproject.toml to avoid pip issues. See
-# - https://github.com/psf/black/issues/683
-# - https://github.com/pypa/pip/pull/6370
-# - https://pip.pypa.io/en/stable/reference/pip/#pep-517-and-518-support
 black:
 	@. $(env); black .
 
