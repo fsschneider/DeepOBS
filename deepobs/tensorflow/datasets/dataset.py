@@ -45,7 +45,8 @@ class DataSet(object):
         # Reinitializable iterator given types and shapes of the outputs
         # (needs to be the same for train and test of course).
         self._iterator = tf.compat.v1.data.Iterator.from_structure(
-            self._train_dataset.output_types, self._train_dataset.output_shapes
+            tf.compat.v1.data.get_output_types(self._train_dataset),
+            tf.compat.v1.data.get_output_shapes(self._train_dataset),
         )
         self.batch = self._iterator.get_next()
 
