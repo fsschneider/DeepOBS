@@ -67,7 +67,7 @@ install-lint: env setup.py
 ###
 # Test coverage
 test: env install-lint
-	@. $(env); pytest -vx --cov=deepobs .
+	@. $(env); pytest -vx --cov=deepobs tests
 
 ###
 # Linter and autoformatter
