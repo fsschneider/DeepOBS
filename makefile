@@ -66,19 +66,19 @@ install-lint: env setup.py
 
 ###
 # Test coverage
-test:
+test: env install-lint
 	@. $(env); pytest -vx --cov=deepobs .
 
 ###
 # Linter and autoformatter
 
-black:
+black: env install-lint
 	@. $(env); black .
 
-black-check:
+black-check: env install-lint
 	@. $(env); black . --check
 
-flake8:
+flake8: env install-lint
 	@. $(env); flake8 .
 
 ###
