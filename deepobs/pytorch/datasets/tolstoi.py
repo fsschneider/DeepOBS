@@ -7,8 +7,8 @@ import numpy as np
 import torch
 from torch.utils import data as dat
 
-from .. import config
 from . import dataset
+from ...config import get_data_dir
 
 
 class tolstoi(dataset.DataSet):
@@ -43,7 +43,7 @@ class tolstoi(dataset.DataSet):
         self._train_eval_size = train_eval_size
         super(tolstoi, self).__init__(batch_size)
 
-    def _make_dataloader(self, filepath):
+    def _make_tolstoi_dataloader(self, filepath):
         # Load the array of character ids, determine the number of batches that
         # can be produced, given batch size and sequence lengh
         arr = np.load(filepath)
@@ -79,8 +79,8 @@ class tolstoi(dataset.DataSet):
         return dataset
 
     def _make_train_dataloader(self):
-        filepath = os.path.join(config.get_data_dir(), "tolstoi", "train.npy")
-        return self._make_dataloader(filepath)
+        filepath = os.path.join(get_data_dir(), "tolstoi", "train.npy")
+        return self._make_tolstoi_dataloader(filepath)
 
     def _make_train_eval_dataloader(self):
         indices = np.arange(
@@ -90,5 +90,13 @@ class tolstoi(dataset.DataSet):
         return dat.TensorDataset(train_eval_set[0], train_eval_set[1])
 
     def _make_test_dataloader(self):
-        filepath = os.path.join(config.get_data_dir(), "tolstoi", "test.npy")
-        return self._make_dataloader(filepath)
+        filepath = os.path.join(get_data_dir(), "tolstoi", "test.npy")
+        return self._make_tolstoi_dataloader(filepath)
+
+    def _make_train_and_valid_dataloader(self):
+        # TODO check whether this is intended usage
+        """return self._make_train_and_valid_dataloader_helper(
+            self._make_train_dataloader(),
+            self._make_train_dataloader(),
+        )"""
+        return self._make_train_dataloader(), self._make_train_dataloader()
