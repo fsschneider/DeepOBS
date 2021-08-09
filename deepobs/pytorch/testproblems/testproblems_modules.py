@@ -725,14 +725,18 @@ class net_char_rnn(nn.Module):
 
     def forward(self, x, state=None):
         """state is a tuple for hidden and cell state for initialisation of the lstm"""
+        print("net_char_rnn:forward()")
+        print(f"x.shape = {x.shape}")
+        # print(f"x={x}")
         x = self.embedding(x)
         # if no state is provided, default the state to zeros
         if state is None:
             x, new_state = self.lstm(x)
         else:
             x, new_state = self.lstm(x, state)
-        x = self.dense(x)
-        return x, new_state
+        output = self.dense(x)
+        print(f"output.shape={output.shape}")
+        return output   # , new_state
 
 
 class net_quadratic_deep(nn.Sequential):
