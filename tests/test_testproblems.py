@@ -147,8 +147,13 @@ def _check_parameters(tproblem, framework):
     num_param = []
 
     if framework == "pytorch":
-        for parameter in tproblem.net.parameters():
-            num_param.append(parameter.numel())
+        for name, parameter in tproblem.net.named_parameters():
+            if "weight_hh_l" in name:
+                num_param[-1] += parameter.numel()
+            elif "bias_hh_l" in name:
+                pass
+            else:
+                num_param.append(parameter.numel())
     elif framework == "tensorflow":
         num_param = [np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()]
 
