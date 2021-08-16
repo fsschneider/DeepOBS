@@ -713,6 +713,7 @@ class net_char_rnn(nn.Module):
         self.embedding = nn.Embedding(
             num_embeddings=vocab_size, embedding_dim=hidden_dim
         )
+        self.dropout = nn.Dropout(p=0.2)
         self.lstm = nn.LSTM(
             input_size=hidden_dim,
             hidden_size=hidden_dim,
@@ -720,22 +721,28 @@ class net_char_rnn(nn.Module):
             dropout=0.2,
             batch_first=True,
         )
+        """new_bias_l0 = torch.zeros_like(self.lstm.bias_ih_l0, device=self.lstm.bias_ih_l0.device)
+        new_bias_l1 = torch.zeros_like(self.lstm.bias_ih_l1, device=self.lstm.bias_ih_l1.device)
+        del self.lstm.bias_ih_l0
+        del self.lstm.bias_ih_l1
+        self.lstm.bias_ih_l0 = new_bias_l0
+        self.lstm.bias_ih_l1 = new_bias_l1"""
+
         self.dense = nn.Linear(in_features=hidden_dim, out_features=vocab_size)
         # TODO init layers?
 
     def forward(self, x, state=None):
         """state is a tuple for hidden and cell state for initialisation of the lstm"""
-        print("net_char_rnn:forward()")
-        print(f"x.shape = {x.shape}")
-        # print(f"x={x}")
         x = self.embedding(x)
         # if no state is provided, default the state to zeros
+        x = self.dropout(x)
         if state is None:
             x, new_state = self.lstm(x)
         else:
             x, new_state = self.lstm(x, state)
+        x = self.dropout(x)
         output = self.dense(x)
-        print(f"output.shape={output.shape}")
+        output = output.transpose(1, 2)
         return output   # , new_state
 
 
