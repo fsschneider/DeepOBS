@@ -12,6 +12,17 @@ class tolstoi_char_rnn(WeightRegularizedTestproblem):
 
     TODO: add some more details how the test problem works
     """
+
+    # TODO check differences compared to tensorflow
+    # - lstm layer has two bias -> "_check_parameters()"
+    # - loss function:
+    #   - tensorflow: mean across time, sum across batch
+    #   - pytorch: mean across all
+    # - lstm parameters counted separately (weight_{ih|hh}_l{i})
+    # - dropout layers
+    #   - tensorflow: dropout before and after each layer with keep=0.8
+    #   - pytorch: dropout in-between LSTM + dropout before and after LSTM
+
     def __init__(self, batch_size, l2_reg=0.0005):
         """Create a new char_rnn test problem instance on Tolstoi.
 
@@ -28,6 +39,6 @@ class tolstoi_char_rnn(WeightRegularizedTestproblem):
         """Set up the Char RNN test problem on Tolstoi."""
         self.data = tolstoi(self._batch_size)
         self.loss_function = nn.CrossEntropyLoss
-        self.net = net_char_rnn(hidden_dim=10, num_layers=2, seq_len=50, vocab_size=100)
+        self.net = net_char_rnn(hidden_dim=128, num_layers=2, seq_len=50, vocab_size=83)
         self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
