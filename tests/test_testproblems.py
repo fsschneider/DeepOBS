@@ -19,7 +19,7 @@ from .utils.utils_tests import check_lists, get_number_of_parameters, get_testpr
 
 # Basic Settings of the Test
 BATCH_SIZE = 8
-NR_PT_TESTPROBLEMS = 20
+NR_PT_TESTPROBLEMS = 21
 NR_TF_TESTPROBLEMS = 27
 DEVICES = ["cpu", "cuda:0"] if torch.cuda.is_available() else ["cpu"]
 FRAMEWORKS = ["pytorch", "tensorflow"]
