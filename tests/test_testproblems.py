@@ -148,10 +148,10 @@ def _check_parameters(tproblem, framework):
 
     if framework == "pytorch":
         for name, parameter in tproblem.net.named_parameters():
-            if "weight_hh_l" in name:
+            if parameter.requires_grad is False:
+                continue
+            elif "weight_hh_l" in name:
                 num_param[-1] += parameter.numel()
-            elif "bias_hh_l" in name:
-                pass
             else:
                 num_param.append(parameter.numel())
     elif framework == "tensorflow":

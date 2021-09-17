@@ -721,15 +721,12 @@ class net_char_rnn(nn.Module):
             dropout=0.2,
             batch_first=True,
         )
-        """new_bias_l0 = torch.zeros_like(self.lstm.bias_ih_l0, device=self.lstm.bias_ih_l0.device)
-        new_bias_l1 = torch.zeros_like(self.lstm.bias_ih_l1, device=self.lstm.bias_ih_l1.device)
-        del self.lstm.bias_ih_l0
-        del self.lstm.bias_ih_l1
-        self.lstm.bias_ih_l0 = new_bias_l0
-        self.lstm.bias_ih_l1 = new_bias_l1"""
+        self.lstm.bias_ih_l0.data = torch.zeros_like(self.lstm.bias_ih_l0, device=self.lstm.bias_ih_l0.device)
+        self.lstm.bias_ih_l1.data = torch.zeros_like(self.lstm.bias_ih_l1, device=self.lstm.bias_ih_l0.device)
+        self.lstm.bias_ih_l0.requires_grad = False
+        self.lstm.bias_ih_l1.requires_grad = False
 
         self.dense = nn.Linear(in_features=hidden_dim, out_features=vocab_size)
-        # TODO init layers?
 
     def forward(self, x, state=None):
         """state is a tuple for hidden and cell state for initialisation of the lstm"""
