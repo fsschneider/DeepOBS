@@ -718,7 +718,7 @@ class net_char_rnn(nn.Module):
             input_size=hidden_dim,
             hidden_size=hidden_dim,
             num_layers=num_layers,
-            dropout=0.2,
+            dropout=0.36, # tensorflow two dropouts with keep=0.8 each -> dropout=1-0.8*0.8=0.36
             batch_first=True,
         )
         self.lstm.bias_ih_l0.data = torch.zeros_like(self.lstm.bias_ih_l0, device=self.lstm.bias_ih_l0.device)
