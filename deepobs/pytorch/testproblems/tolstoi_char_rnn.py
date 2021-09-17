@@ -14,14 +14,10 @@ class tolstoi_char_rnn(WeightRegularizedTestproblem):
     """
 
     # TODO check differences compared to tensorflow
-    # - lstm layer has two bias -> "_check_parameters()"
+    # - often the test on cuda fails: acc is greater than 1.0
     # - loss function:
     #   - tensorflow: mean across time, sum across batch
     #   - pytorch: mean across all
-    # - lstm parameters counted separately (weight_{ih|hh}_l{i})
-    # - dropout layers
-    #   - tensorflow: dropout before and after each layer with keep=0.8
-    #   - pytorch: dropout in-between LSTM + dropout before and after LSTM
 
     def __init__(self, batch_size, l2_reg=0.0005):
         """Create a new char_rnn test problem instance on Tolstoi.
