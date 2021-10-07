@@ -718,9 +718,10 @@ class net_char_rnn(nn.Module):
             input_size=hidden_dim,
             hidden_size=hidden_dim,
             num_layers=num_layers,
-            dropout=0.36, # tensorflow two dropouts with keep=0.8 each -> dropout=1-0.8*0.8=0.36
+            dropout=0.36,  # tensorflow two dropouts with keep=0.8 each -> dropout=1-0.8*0.8=0.36
             batch_first=True,
         )
+        # deactivate redundant bias
         self.lstm.bias_ih_l0.data = torch.zeros_like(self.lstm.bias_ih_l0, device=self.lstm.bias_ih_l0.device)
         self.lstm.bias_ih_l1.data = torch.zeros_like(self.lstm.bias_ih_l1, device=self.lstm.bias_ih_l0.device)
         self.lstm.bias_ih_l0.requires_grad = False
@@ -731,8 +732,8 @@ class net_char_rnn(nn.Module):
     def forward(self, x, state=None):
         """state is a tuple for hidden and cell state for initialisation of the lstm"""
         x = self.embedding(x)
-        # if no state is provided, default the state to zeros
         x = self.dropout(x)
+        # if no state is provided, default the state to zeros
         if state is None:
             x, new_state = self.lstm(x)
         else:

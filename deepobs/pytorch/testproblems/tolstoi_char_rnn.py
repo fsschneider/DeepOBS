@@ -34,18 +34,10 @@ class tolstoi_char_rnn(WeightRegularizedTestproblem):
             Defaults to ``5e-4``.
 
     Attributes:
-        _batch_size: Batch_size for the data of this test problem.
-        _l2_reg: The regularization factor for this test problem
         data: The dataset used by the test problem (datasets.DataSet instance).
         loss_function: The loss function for this test problem.
         net: The torch module (the neural network) that is trained.
     """
-
-    # TODO check differences compared to tensorflow
-    # - often the test on cuda fails: acc is greater than 1.0
-    # - loss function:
-    #   - tensorflow: mean across time, sum across batch
-    #   - pytorch: mean across all
 
     def __init__(self, batch_size, l2_reg=0.0005):
         """Create a new char_rnn test problem instance on Tolstoi.
@@ -56,7 +48,6 @@ class tolstoi_char_rnn(WeightRegularizedTestproblem):
               is used on the weights but not the biases.
               Defaults to ``5e-4``.
         """
-        print(f"batch_size={batch_size}")
         super(tolstoi_char_rnn, self).__init__(batch_size, l2_reg)
 
     def set_up(self):

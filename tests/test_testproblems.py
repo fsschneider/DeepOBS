@@ -150,7 +150,7 @@ def _check_parameters(tproblem, framework):
         for name, parameter in tproblem.net.named_parameters():
             if parameter.requires_grad is False:
                 continue
-            elif "weight_hh_l" in name:
+            elif "weight_hh_l" in name:  # LSTM parameters counted separately in PyTorch
                 num_param[-1] += parameter.numel()
             else:
                 num_param.append(parameter.numel())
