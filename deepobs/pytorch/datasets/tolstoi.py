@@ -43,10 +43,9 @@ class tolstoi(dataset.DataSet):
         self._train_eval_size = train_eval_size
         super(tolstoi, self).__init__(batch_size)
 
-    def _make_tolstoi_dataloader(self, filepath):
-        # Load the array of character ids, determine the number of batches that
-        # can be produced, given batch size and sequence lengh
-        arr = np.load(filepath)
+    def _make_tolstoi_dataloader(self, arr):
+        # determine the number of batches that can be produced, given batch size
+        # and sequence lengh
         num_batches = int(
             np.floor((np.size(arr) - 1) / (self._batch_size * self._seq_length))
         )
@@ -80,7 +79,7 @@ class tolstoi(dataset.DataSet):
 
     def _make_train_dataloader(self):
         filepath = os.path.join(get_data_dir(), "tolstoi", "train.npy")
-        return self._make_tolstoi_dataloader(filepath)
+        return self._make_tolstoi_dataloader(np.load(filepath))
 
     def _make_train_eval_dataloader(self):
         indices = np.arange(
@@ -91,8 +90,11 @@ class tolstoi(dataset.DataSet):
 
     def _make_test_dataloader(self):
         filepath = os.path.join(get_data_dir(), "tolstoi", "test.npy")
-        return self._make_tolstoi_dataloader(filepath)
+        return self._make_tolstoi_dataloader(np.load(filepath))
 
     def _make_train_and_valid_dataloader(self):
-        # TODO validation data set
-        return self._make_train_dataloader(), self._make_train_dataloader()
+        filepath = os.path.join(get_data_dir(), "tolstoi", "train.npy")
+        data = np.load(filepath)
+        valid_data = data[0: self._train_eval_size]
+        train_data = data[self._train_eval_size:]
+        return self._make_tolstoi_dataloader(valid_data), self._make_tolstoi_dataloader(train_data)
