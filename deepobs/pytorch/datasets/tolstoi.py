@@ -94,9 +94,5 @@ class tolstoi(dataset.DataSet):
         return self._make_tolstoi_dataloader(filepath)
 
     def _make_train_and_valid_dataloader(self):
-        # TODO check whether this is intended usage
-        """return self._make_train_and_valid_dataloader_helper(
-            self._make_train_dataloader(),
-            self._make_train_dataloader(),
-        )"""
+        # TODO validation data set
         return self._make_train_dataloader(), self._make_train_dataloader()

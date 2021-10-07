@@ -8,9 +8,37 @@ from ..datasets.tolstoi import tolstoi
 
 
 class tolstoi_char_rnn(WeightRegularizedTestproblem):
-    """DeepOBS test problem class for char_rnn network on Tolstoi.
+    """DeepOBS test problem class for a two-layer LSTM for character-level language
+    modelling (Char RNN) on Tolstoi's War and Peace.
 
-    TODO: add some more details how the test problem works
+    Some network characteristics:
+
+    - ``128`` hidden units per LSTM cell
+    - sequence length ``50``
+    - cell state is automatically stored in variables between subsequent steps
+    - when the phase placeholder switches its value from one step to the next,
+      the cell state is set to its zero value (meaning that we set to zero state
+      after each round of evaluation, it is therefore important to set the
+      evaluation interval such that we evaluate after a full epoch.)
+
+    Working training parameters are:
+
+    - batch size ``50``
+    - ``200`` epochs
+    - SGD with a learning rate of :math:`\\approx 0.1` works
+
+    Args:
+        batch_size (int): Batch size to use.
+        l2_reg (float): L2-regularization factor. L2-Regularization (weight decay)
+            is used on the weights but not the biases.
+            Defaults to ``5e-4``.
+
+    Attributes:
+        _batch_size: Batch_size for the data of this test problem.
+        _l2_reg: The regularization factor for this test problem
+        data: The dataset used by the test problem (datasets.DataSet instance).
+        loss_function: The loss function for this test problem.
+        net: The torch module (the neural network) that is trained.
     """
 
     # TODO check differences compared to tensorflow
