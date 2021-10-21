@@ -13,6 +13,8 @@ from .fmnist_2c2d import fmnist_2c2d
 from .fmnist_logreg import fmnist_logreg
 from .fmnist_mlp import fmnist_mlp
 from .fmnist_vae import fmnist_vae
+from .imagenet_vgg16 import imagenet_vgg16
+from .imagenet_vgg19 import imagenet_vgg19
 from .mnist_2c2d import mnist_2c2d
 from .mnist_logreg import mnist_logreg
 from .mnist_mlp import mnist_mlp

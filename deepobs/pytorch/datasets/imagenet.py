@@ -89,12 +89,12 @@ class imagenet(dataset.DataSet):
 
         train_dataset = datasets.ImageNet(
             root=os.path.join(config.get_data_dir(), "imagenet/pytorch"),
-            split="val",  # TODO Change to train again
+            split="train",
             transform=transform,
         )
         valid_dataset = datasets.ImageNet(
             root=os.path.join(config.get_data_dir(), "imagenet/pytorch"),
-            split="val",  # TODO Change to train again
+            split="train",
             transform=transform,
         )
         train_loader, valid_loader = self._make_train_and_valid_dataloader_helper(
