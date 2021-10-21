@@ -4,7 +4,6 @@
 import os
 
 import tensorflow as tf
-
 from deepobs import config
 
 from . import dataset
@@ -14,50 +13,50 @@ class imagenet(dataset.DataSet):
     """DeepOBS data set class for the `ImageNet\
     <http://www.image-net.org/>`_ data set.
 
-  .. NOTE::
-    We use ``1001`` classes  which includes an additional `background` class,
-    as it is used for example by the inception net.
-
-  Args:
-    batch_size (int): The mini-batch size to use. Note that, if ``batch_size``
-        is not a divider of the dataset size the remainder is dropped in each
-        epoch (after shuffling).
-    data_augmentation (bool): If ``True`` some data augmentation operations
-        (random crop window, horizontal flipping, lighting augmentation) are
-        applied to the training data (but not the test data).
-    train_eval_size (int): Size of the train eval dataset.
-        Defaults to ``10 000``.
-
-  Attributes:
-    batch: A tuple ``(x, y)`` of tensors, yielding batches of ImageNet images
-        (``x`` with shape ``(batch_size, 224, 224, 3)``) and corresponding one-hot
-        label vectors (``y`` with shape ``(batch_size, 1001)``).  Executing these
-        tensors raises a ``tf.errors.OutOfRangeError`` after one epoch.
-    train_init_op: A tensorflow operation initializing the dataset for the
-        training phase.
-    train_eval_init_op: A tensorflow operation initializing the testproblem for
-        evaluating on training data.
-    valid_init_op: A tensorflow operation initializing the testproblem for
-        evaluating on validation data.
-    test_init_op: A tensorflow operation initializing the testproblem for
-        evaluating on test data.
-    phase: A string-value tf.Variable that is set to ``train``, ``train_eval``,
-        ``valid``, or ``test``, depending on the current phase. This can be used
-        by testproblems to adapt their behavior to this phase.
-  """
-
-    def __init__(self, batch_size, data_augmentation=True, train_eval_size=50000):
-        """Creates a new ImageNet instance.
+    .. NOTE::
+        We use ``1001`` classes  which includes an additional `background` class,
+        as it is used for example by the inception net.
 
     Args:
-      batch_size (int): The mini-batch size to use. Note that, if ``batch_size``
-          is not a divider of the dataset size the remainder is dropped in each
-          epoch (after shuffling).
-      data_augmentation (bool): If ``True`` some data augmentation operations
-          (random crop window, horizontal flipping, lighting augmentation) are
-          applied to the training data (but not the test data).
-      train_eval_size (int): Size of the train eval dataset (default: 10k).
+        batch_size (int): The mini-batch size to use. Note that, if ``batch_size``
+            is not a divider of the dataset size the remainder is dropped in each
+            epoch (after shuffling).
+        data_augmentation (bool): If ``True`` some data augmentation operations
+            (random crop window, horizontal flipping, lighting augmentation) are
+            applied to the training data (but not the test data).
+        train_eval_size (int): Size of the train eval dataset.
+            Defaults to ``50 000``.
+
+    Attributes:
+        batch: A tuple ``(x, y)`` of tensors, yielding batches of ImageNet images
+            (``x`` with shape ``(batch_size, 224, 224, 3)``) and corresponding one-hot
+            label vectors (``y`` with shape ``(batch_size, 1001)``).  Executing these
+            tensors raises a ``tf.errors.OutOfRangeError`` after one epoch.
+        train_init_op: A tensorflow operation initializing the dataset for the
+            training phase.
+        train_eval_init_op: A tensorflow operation initializing the testproblem for
+            evaluating on training data.
+        valid_init_op: A tensorflow operation initializing the testproblem for
+            evaluating on validation data.
+        test_init_op: A tensorflow operation initializing the testproblem for
+            evaluating on test data.
+        phase: A string-value tf.Variable that is set to ``train``, ``train_eval``,
+            ``valid``, or ``test``, depending on the current phase. This can be used
+            by testproblems to adapt their behavior to this phase.
     """
+
+    def __init__(self, batch_size, data_augmentation=True, train_eval_size=50000):
+        """Create a new ImageNet instance.
+
+        Args:
+          batch_size (int): The mini-batch size to use. Note that, if ``batch_size``
+              is not a divider of the dataset size the remainder is dropped in each
+              epoch (after shuffling).
+          data_augmentation (bool): If ``True`` some data augmentation operations
+              (random crop window, horizontal flipping, lighting augmentation) are
+              applied to the training data (but not the test data).
+          train_eval_size (int): Size of the train eval dataset (default: 50k).
+        """
         self._name = "imagenet"
         self._data_augmentation = data_augmentation
         self._train_eval_size = train_eval_size
@@ -72,7 +71,7 @@ class imagenet(dataset.DataSet):
         distort_color=False,
         shuffle=True,
     ):
-        """Creates an ImageNet data set (helper used by ``.make_*_datset`` below).
+        """Create an ImageNet data set (helper used by ``.make_*_datset`` below).
 
         Args:
             data (tf.data.Dataset): A tf.data.Dataset with ImageNet (train or test)
@@ -94,9 +93,7 @@ class imagenet(dataset.DataSet):
         num_classes = 1001  # Class 0 is for Background. Therefore we have 1001
 
         def parse_func(example_serialized):
-            """Parse function depending on the above arguments and map the
-            data set through it
-            """
+            """Parse function and map the data set through it."""
             # Parse example proto, decode image and resize while preserving aspect
             image_buffer, label, _ = self._parse_example_proto(example_serialized)
             image = self._decode_jpeg(image_buffer)
@@ -144,13 +141,13 @@ class imagenet(dataset.DataSet):
     def _load_dataset(self, binaries_fname_pattern):
         """Creates an ImageNet data set (helper used by ``.make_*_datset`` below).
 
-    Args:
-        pattern (str): Pattern of the files from which
-            to load images and labels (e.g. ``some/path/train-00000-of-01024``).
+        Args:
+            pattern (str): Pattern of the files from which
+                to load images and labels (e.g. ``some/path/train-00000-of-01024``).
 
-    Returns:
-        A tf.data.Dataset yielding ImageNet data.
-    """
+        Returns:
+            A tf.data.Dataset yielding ImageNet data.
+        """
 
         with tf.name_scope(self._name):
             with tf.device("/cpu:0"):
@@ -162,14 +159,14 @@ class imagenet(dataset.DataSet):
 
     def _make_train_datasets(self):
         """Creates the three ImageNet datasets stemming from the training
-        part of the data set, i.e. the training set, the training
-        evaluation set, and the validation set.
+            part of the data set, i.e. the training set, the training
+            evaluation set, and the validation set.
 
-    Returns:
-      A tf.data.Dataset instance with batches of training data.
-      A tf.data.Dataset instance with batches of training eval data.
-      A tf.data.Dataset instance with batches of validation data.
-    """
+        Returns:
+          A tf.data.Dataset instance with batches of training data.
+          A tf.data.Dataset instance with batches of training eval data.
+          A tf.data.Dataset instance with batches of validation data.
+        """
         pattern = os.path.join(config.get_data_dir(), "imagenet", "train-*")
 
         data = self._load_dataset(pattern)
@@ -200,9 +197,9 @@ class imagenet(dataset.DataSet):
     def _make_test_dataset(self):
         """Creates the ImageNet test dataset.
 
-    Returns:
-      A tf.data.Dataset instance with batches of test data.
-    """
+        Returns:
+          A tf.data.Dataset instance with batches of test data.
+        """
         pattern = os.path.join(config.get_data_dir(), "imagenet", "validation-*")
 
         test_data = self._load_dataset(pattern)
@@ -282,7 +279,7 @@ class imagenet(dataset.DataSet):
             return image
 
     def _aspect_preserving_resize(self, image, target_smaller_side):
-        """"Resize image such that the smaller size has size
+        """ "Resize image such that the smaller size has size
         ``target_smaller_sider`` while preserving the aspect ratio.
 
         Args:
