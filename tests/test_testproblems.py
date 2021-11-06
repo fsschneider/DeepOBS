@@ -19,7 +19,7 @@ from .utils.utils_tests import check_lists, get_number_of_parameters, get_testpr
 
 # Basic Settings of the Test
 BATCH_SIZE = 8
-NR_PT_TESTPROBLEMS = 20
+NR_PT_TESTPROBLEMS = 21
 NR_TF_TESTPROBLEMS = 27
 DEVICES = ["cpu", "cuda:0"] if torch.cuda.is_available() else ["cpu"]
 FRAMEWORKS = ["pytorch", "tensorflow"]
@@ -147,8 +147,13 @@ def _check_parameters(tproblem, framework):
     num_param = []
 
     if framework == "pytorch":
-        for parameter in tproblem.net.parameters():
-            num_param.append(parameter.numel())
+        for name, parameter in tproblem.net.named_parameters():
+            if parameter.requires_grad is False:
+                continue
+            elif "weight_hh_l" in name:  # LSTM parameters counted separately in PyTorch
+                num_param[-1] += parameter.numel()
+            else:
+                num_param.append(parameter.numel())
     elif framework == "tensorflow":
         num_param = [np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()]
 

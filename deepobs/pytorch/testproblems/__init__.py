@@ -23,3 +23,4 @@ from .quadratic_deep import quadratic_deep
 from .svhn_3c3d import svhn_3c3d
 from .svhn_wrn164 import svhn_wrn164
 from .testproblem import TestProblem
+from .tolstoi_char_rnn import tolstoi_char_rnn

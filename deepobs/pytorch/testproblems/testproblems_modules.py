@@ -713,26 +713,35 @@ class net_char_rnn(nn.Module):
         self.embedding = nn.Embedding(
             num_embeddings=vocab_size, embedding_dim=hidden_dim
         )
+        self.dropout = nn.Dropout(p=0.2)
         self.lstm = nn.LSTM(
             input_size=hidden_dim,
             hidden_size=hidden_dim,
             num_layers=num_layers,
-            dropout=0.2,
+            dropout=0.36,  # tensorflow two dropouts with keep=0.8 each -> dropout=1-0.8*0.8=0.36
             batch_first=True,
         )
+        # deactivate redundant bias
+        self.lstm.bias_ih_l0.data = torch.zeros_like(self.lstm.bias_ih_l0, device=self.lstm.bias_ih_l0.device)
+        self.lstm.bias_ih_l1.data = torch.zeros_like(self.lstm.bias_ih_l1, device=self.lstm.bias_ih_l0.device)
+        self.lstm.bias_ih_l0.requires_grad = False
+        self.lstm.bias_ih_l1.requires_grad = False
+
         self.dense = nn.Linear(in_features=hidden_dim, out_features=vocab_size)
-        # TODO init layers?
 
     def forward(self, x, state=None):
         """state is a tuple for hidden and cell state for initialisation of the lstm"""
         x = self.embedding(x)
+        x = self.dropout(x)
         # if no state is provided, default the state to zeros
         if state is None:
             x, new_state = self.lstm(x)
         else:
             x, new_state = self.lstm(x, state)
-        x = self.dense(x)
-        return x, new_state
+        x = self.dropout(x)
+        output = self.dense(x)
+        output = output.transpose(1, 2)
+        return output   # , new_state
 
 
 class net_quadratic_deep(nn.Sequential):

@@ -19,6 +19,10 @@ docs/_build/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+# PyCharm
+.idea/
+.coverage
+
 # Distribution / packaging
 .Python
 env/
