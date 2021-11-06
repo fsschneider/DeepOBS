@@ -108,5 +108,5 @@ You can download the script and use it as a template for further analysis:
 
 Note that you can also select a reference path (here the deepobs baselines for **TensorFlow**) to plot reference results as well. You can download the latest baselines from `GitHub`_
 
-.. _GitHub: https://github.com/abahde/DeepOBS_Baselines
+.. _GitHub: https://github.com/fsschneider/DeepOBS_Baselines
 
