@@ -22,7 +22,7 @@ DeepOBS automates several steps when benchmarking deep learning optimizers:
     deep learning architectures.
   - Running the optimizers on multiple test problems and logging relevant
     metrics.
-  - Reporting and visualization the results of the optimizer benchmark.
+  - Reporting and visualizing the results of the optimizer benchmark.
 
 .. figure:: deepobs.jpg
     :scale: 40%
