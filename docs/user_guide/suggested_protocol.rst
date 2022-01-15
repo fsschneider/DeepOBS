@@ -3,8 +3,8 @@ Suggested Protocol
 ==================
 
 Here we provide a suggested protocol for more rigorously benchmarking deep
-learning optimizer. It follows the same steps as the baseline results presented
-in the `DeepOBS`_ paper
+learning optimizers. It follows the same steps as the baseline results presented
+in the `DeepOBS`_ paper.
 
 .. _DeepOBS: https://openreview.net/forum?id=rJg6ssC5Y7
 
@@ -46,7 +46,7 @@ computational budget.
 Repeated Runs with best Setting
 ===============================
 
-In order to get a sense of the optimziers consistency, we suggest repeating
+In order to get a sense of the optimizer's consistency, we suggest repeating
 runs with the best hyperparameter setting multiple times. This allows an
 assessment of the variance of the optimizer's performance.
 
