@@ -21,7 +21,7 @@ DeepOBS automates several steps when benchmarking deep learning optimizers:
     deep learning architectures.
   - Running the optimizers on multiple test problems and logging relevant
     metrics.
-  - Reporting and visualization the results of the optimizer benchmark.
+  - Reporting and visualizing the results of the optimizer benchmark.
 
 ![DeepOBS Output](docs/deepobs.jpg "DeepOBS_output")
 
@@ -48,7 +48,7 @@ many bugs ironed out. You can find the latest version of it in [this branch](htt
 A [pre-release](https://github.com/fsschneider/DeepOBS/releases/tag/v1.2.0-beta0) is available now. 
 The full release is expected in a few weeks.
 
-Many thanks to [Aaron Bahde](https://github.com/abahde) for spearheading the developement of DeepOBS 1.2.0.
+Many thanks to [Aaron Bahde](https://github.com/abahde) for spearheading the development of DeepOBS 1.2.0.
 
 ## Installation
 
