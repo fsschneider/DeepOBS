@@ -79,31 +79,31 @@ class imagenet_inception_v3(TestProblem):
         # Compute two components of losses
         # reduction=tf.losses.Reduction.None means output will have size
         # ``batch_size``
-        aux_losses = tf.losses.softmax_cross_entropy(
+        aux_losses = tf.compat.v1.losses.softmax_cross_entropy(
             onehot_labels=y,
             logits=aux_linear_outputs,
             weights=0.4,
             label_smoothing=0.1,
-            reduction=tf.losses.Reduction.NONE,
+            reduction=tf.compat.v1.losses.Reduction.NONE,
         )
-        main_losses = tf.losses.softmax_cross_entropy(
+        main_losses = tf.compat.v1.losses.softmax_cross_entropy(
             onehot_labels=y,
             logits=linear_outputs,
             label_smoothing=0.1,
-            reduction=tf.losses.Reduction.NONE,
+            reduction=tf.compat.v1.losses.Reduction.NONE,
         )
 
         # Add main_loss and aux_loss if we are training
         self.losses = tf.cond(
-            training,
-            lambda: tf.add(main_losses, aux_losses),
-            lambda: tf.add(main_losses, 0.0),
+            pred=training,
+            true_fn=lambda: tf.add(main_losses, aux_losses),
+            false_fn=lambda: tf.add(main_losses, 0.0),
             name="losses",
         )
 
-        y_pred = tf.argmax(linear_outputs, 1)
-        y_correct = tf.argmax(y, 1)
+        y_pred = tf.argmax(input=linear_outputs, axis=1)
+        y_correct = tf.argmax(input=y, axis=1)
         correct_prediction = tf.equal(y_pred, y_correct)
-        self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        self.accuracy = tf.reduce_mean(input_tensor=tf.cast(correct_prediction, tf.float32))
 
-        self.regularizer = tf.losses.get_regularization_loss()
+        self.regularizer = tf.compat.v1.losses.get_regularization_loss()

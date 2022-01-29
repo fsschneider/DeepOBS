@@ -1,3 +1,7 @@
+[build-system] # https://setuptools.readthedocs.io/en/latest/build_meta.html
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [tool.black]
 line-length = 88
 target-version = ['py35', 'py36', 'py37']
@@ -13,6 +17,7 @@ exclude = '''
     | docs
     | build
     | dist
+    | env
   )/
 )
 '''

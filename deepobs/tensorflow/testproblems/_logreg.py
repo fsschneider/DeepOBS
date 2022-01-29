@@ -11,12 +11,12 @@ import tensorflow as tf
 def _logreg(x, num_outputs):
     def dense(inputs, units):
         """Convenience wrapper for max pool layers."""
-        return tf.layers.dense(
+        return tf.compat.v1.layers.dense(
             inputs,
             units,
             activation=None,
-            bias_initializer=tf.initializers.constant(0.0),
-            kernel_initializer=tf.initializers.constant(0.0),
+            bias_initializer=tf.compat.v1.initializers.constant(0.0),
+            kernel_initializer=tf.compat.v1.initializers.constant(0.0),
         )
 
     x = tf.reshape(x, [-1, 784])

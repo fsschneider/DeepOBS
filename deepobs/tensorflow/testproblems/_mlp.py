@@ -11,12 +11,12 @@ import tensorflow as tf
 def _mlp(x, num_outputs):
     def dense(inputs, units, activation=tf.nn.relu):
         """Convenience wrapper for max pool layers."""
-        return tf.layers.dense(
+        return tf.compat.v1.layers.dense(
             inputs,
             units,
             activation,
-            bias_initializer=tf.initializers.constant(0.0),
-            kernel_initializer=tf.truncated_normal_initializer(stddev=3e-2),
+            bias_initializer=tf.compat.v1.initializers.constant(0.0),
+            kernel_initializer=tf.compat.v1.truncated_normal_initializer(stddev=3e-2),
         )
 
     x = tf.reshape(x, [-1, 784])

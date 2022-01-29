@@ -79,10 +79,10 @@ class fmnist_vae(TestProblem):
         # Define Loss
         flatten_img = tf.reshape(img, [-1, 28 * 28])
         x_flat = tf.reshape(x, shape=[-1, 28 * 28])
-        img_loss = tf.reduce_sum(tf.squared_difference(flatten_img, x_flat), 1)
+        img_loss = tf.reduce_sum(input_tensor=tf.math.squared_difference(flatten_img, x_flat), axis=1)
         latent_loss = -0.5 * tf.reduce_sum(
-            1.0 + 2.0 * std_dev - tf.square(mean) - tf.exp(2.0 * std_dev), 1
+            input_tensor=1.0 + 2.0 * std_dev - tf.square(mean) - tf.exp(2.0 * std_dev), axis=1
         )
         self.losses = img_loss + latent_loss
 
-        self.regularizer = tf.losses.get_regularization_loss()
+        self.regularizer = tf.compat.v1.losses.get_regularization_loss()

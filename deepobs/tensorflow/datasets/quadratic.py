@@ -73,7 +73,7 @@ class quadratic(dataset.DataSet):
         Returns:
             A tf.data.Dataset yielding batches of quadratic data.
         """
-        with tf.name_scope(self._name):
+        with tf.compat.v1.name_scope(self._name):
             with tf.device("/cpu:0"):
                 data = tf.data.Dataset.from_tensor_slices(X)
                 if shuffle:

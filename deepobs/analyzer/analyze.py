@@ -142,7 +142,7 @@ def estimate_runtime(
         from deepobs import tensorflow as tfobs
         import tensorflow as tf
 
-        optimizer_class_sgd = tf.train.GradientDescentOptimizer
+        optimizer_class_sgd = tf.compat.v1.train.GradientDescentOptimizer
         hp_sgd = {"learning_rate": {"type": float}}
         runner_sgd = tfobs.runners.StandardRunner
         hyperparams_sgd = {"learning_rate": sgd_lr}

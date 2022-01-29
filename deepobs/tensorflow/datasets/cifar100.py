@@ -85,32 +85,32 @@ class cifar100(dataset.DataSet):
         def parse_func(raw_record):
             """Function parsing data from raw binary records."""
             # Decode raw_record.
-            record = tf.reshape(tf.decode_raw(raw_record, tf.uint8), [record_bytes])
+            record = tf.reshape(tf.io.decode_raw(raw_record, tf.uint8), [record_bytes])
             label = tf.cast(tf.slice(record, [label_offset], [label_bytes]), tf.int32)
             depth_major = tf.reshape(
                 tf.slice(record, [label_bytes], [image_bytes]),
                 [depth, image_size, image_size],
             )
-            image = tf.cast(tf.transpose(depth_major, [1, 2, 0]), tf.float32)
+            image = tf.cast(tf.transpose(a=depth_major, perm=[1, 2, 0]), tf.float32)
 
             # Add image pre-processing.
             if data_augmentation:
-                image = tf.image.resize_image_with_crop_or_pad(
+                image = tf.image.resize_with_crop_or_pad(
                     image, image_size + 4, image_size + 4
                 )
-                image = tf.random_crop(image, [32, 32, 3])
+                image = tf.image.random_crop(image, [32, 32, 3])
                 image = tf.image.random_flip_left_right(image)
                 image = tf.image.random_brightness(image, max_delta=63.0 / 255.0)
                 image = tf.image.random_saturation(image, lower=0.5, upper=1.5)
                 image = tf.image.random_contrast(image, lower=0.2, upper=1.8)
             else:
-                image = tf.image.resize_image_with_crop_or_pad(image, 32, 32)
+                image = tf.image.resize_with_crop_or_pad(image, 32, 32)
 
             image = tf.image.per_image_standardization(image)
             label = tf.squeeze(tf.one_hot(label, depth=num_classes))
             return image, label
 
-        with tf.name_scope(self._name):
+        with tf.compat.v1.name_scope(self._name):
             with tf.device("/cpu:0"):
                 data = data.map(
                     parse_func, num_parallel_calls=(8 if data_augmentation else 4),
@@ -140,10 +140,10 @@ class cifar100(dataset.DataSet):
         image_bytes = image_size * image_size * depth
         record_bytes = label_bytes + label_offset + image_bytes
 
-        with tf.name_scope(self._name):
+        with tf.compat.v1.name_scope(self._name):
             with tf.device("/cpu:0"):
-                filenames = tf.matching_files(binaries_fname_pattern)
-                filenames = tf.random_shuffle(filenames)
+                filenames = tf.io.matching_files(binaries_fname_pattern)
+                filenames = tf.random.shuffle(filenames)
                 data = tf.data.FixedLengthRecordDataset(
                     filenames=filenames, record_bytes=record_bytes
                 )

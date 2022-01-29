@@ -30,7 +30,7 @@ def display_images(dataset_cls, grid_size=5, phase="train"):
     phase (str): Images from this phase ('train', 'train_eval', 'test') will be
         displayed.
   """
-    tf.reset_default_graph()
+    tf.compat.v1.reset_default_graph()
     dataset = dataset_cls(batch_size=grid_size * grid_size)
     x, y = dataset.batch
     if phase == "train":
@@ -45,7 +45,7 @@ def display_images(dataset_cls, grid_size=5, phase="train"):
         raise ValueError(
             "Choose 'phase' from ['train', 'train_eval', 'valid', 'test']."
         )
-    with tf.Session() as sess:
+    with tf.compat.v1.Session() as sess:
         sess.run(init_op)
         x_, y_ = sess.run([x, y])
     label_dict = load_label_dict(dataset_cls.__name__)

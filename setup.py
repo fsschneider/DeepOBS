@@ -13,6 +13,48 @@ install_requires_list = [
     "tikzplotlib",
 ]
 
+tensorflow_requires_list = [
+    "tensorflow~=2.5",
+    "tensorflow-addons~=0.13.0",
+]
+
+pytorch_requires_list = ["torch", "torchvision"]
+
+docs_requires_list = (
+    [
+        "sphinx~=1.8.1",
+        "sphinx-rtd-theme~=0.4.2",
+        "sphinx-argparse~=0.2.3",
+    ]
+    + tensorflow_requires_list
+    + pytorch_requires_list
+)
+
+tests_require_list = (
+    [
+        "pytest",
+        "pytest-cov",
+        "coveralls",
+    ]
+    + tensorflow_requires_list
+    + pytorch_requires_list
+)
+
+lint_require_list = [
+    "flake8",
+    "mccabe",
+    "pycodestyle",
+    "pyflakes",
+    "pep8-naming",
+    "flake8-bugbear",
+    "flake8-comprehensions",
+    "black",
+]
+
+dev_require_list = list(
+    set(["pre-commit"] + docs_requires_list + tests_require_list + lint_require_list)
+)
+
 
 def readme():
     """Read the Readme file.
@@ -20,7 +62,8 @@ def readme():
     Returns:
         str: Content of the README.md file
     """
-    with open("README.md") as f:
+    # for some reason autodetects "charmap" encoding on windows -> explicit encoding
+    with open("README.md", mode="r", encoding="utf-8") as f:
         return f.read()
 
 
@@ -49,6 +92,16 @@ setuptools.setup(
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
     install_requires=install_requires_list,
+    extras_require={
+        "tf": tensorflow_requires_list,
+        "tensorflow": tensorflow_requires_list,
+        "torch": pytorch_requires_list,
+        "pytorch": pytorch_requires_list,
+        "doc": docs_requires_list,
+        "test": tests_require_list,
+        "lint": lint_require_list,
+        "dev": dev_require_list,
+    },
     scripts=[
         "deepobs/scripts/deepobs_prepare_data.sh",
         "deepobs/scripts/deepobs_get_baselines.sh",

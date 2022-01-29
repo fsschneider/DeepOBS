@@ -19,20 +19,20 @@ def _wrn(
 ):
     def conv2d(inputs, filters, kernel_size, strides=1):
         """Convenience wrapper for conv layers."""
-        return tf.layers.conv2d(
+        return tf.compat.v1.layers.conv2d(
             inputs,
             filters,
             kernel_size,
             strides,
             padding="same",
             use_bias=False,
-            kernel_initializer=tf.initializers.glorot_uniform(),
-            kernel_regularizer=tf.contrib.layers.l2_regularizer(l2_reg),
+            kernel_initializer=tf.compat.v1.initializers.glorot_uniform(),
+            kernel_regularizer=tf.keras.regularizers.l2(0.5 * (l2_reg)),
         )
 
     def batch_normalization(inputs):
         """Convenience wrapper for batch norm."""
-        return tf.layers.batch_normalization(
+        return tf.compat.v1.layers.batch_normalization(
             inputs, axis=-1, momentum=bn_momentum, epsilon=1e-5, training=training,
         )
 
@@ -52,7 +52,7 @@ def _wrn(
     for i in range(1, 4, 1):
 
         # First residual unit
-        with tf.variable_scope("unit_%d_0" % i):
+        with tf.compat.v1.variable_scope("unit_%d_0" % i):
             x = batch_normalization(x)
             x = tf.nn.relu(x)
             # Shortcut
@@ -60,7 +60,7 @@ def _wrn(
                 if strides[i - 1] == 1:
                     shortcut = tf.identity(x)
                 else:
-                    shortcut = tf.layers.max_pooling2d(
+                    shortcut = tf.compat.v1.layers.max_pooling2d(
                         x, strides[i - 1], strides[i - 1]
                     )
 
@@ -79,7 +79,7 @@ def _wrn(
 
         # further residual units
         for j in range(1, num_residual_units, 1):
-            with tf.variable_scope("unit_%d_%d" % (i, j)):
+            with tf.compat.v1.variable_scope("unit_%d_%d" % (i, j)):
                 # Shortcut
                 shortcut = x
 
@@ -95,21 +95,21 @@ def _wrn(
                 x = x + shortcut
 
     # Last unit
-    with tf.variable_scope("unit_last"):
+    with tf.compat.v1.variable_scope("unit_last"):
         x = batch_normalization(x)
         x = tf.nn.relu(x)
-        x = tf.reduce_mean(x, [1, 2])
+        x = tf.reduce_mean(input_tensor=x, axis=[1, 2])
 
     # Reshaping and final fully-connected layer
-    with tf.variable_scope("fully-connected"):
+    with tf.compat.v1.variable_scope("fully-connected"):
         x_shape = x.get_shape().as_list()
         x = tf.reshape(x, [-1, x_shape[1]])
-        linear_outputs = tf.layers.dense(
+        linear_outputs = tf.compat.v1.layers.dense(
             x,
             num_outputs,
-            kernel_initializer=tf.initializers.glorot_uniform(),
-            bias_initializer=tf.initializers.constant(0.0),
-            kernel_regularizer=tf.contrib.layers.l2_regularizer(l2_reg),
+            kernel_initializer=tf.compat.v1.initializers.glorot_uniform(),
+            bias_initializer=tf.compat.v1.initializers.constant(0.0),
+            kernel_regularizer=tf.keras.regularizers.l2(0.5 * (l2_reg)),
         )
 
     return linear_outputs

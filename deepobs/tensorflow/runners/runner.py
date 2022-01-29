@@ -25,26 +25,26 @@ class TFRunner(Runner):
     def init_summary(loss, learning_rate_var, batch_size, tb_log_dir):
         """Initializes the tensorboard summaries"""
         # per iteration
-        mb_train_loss_summary = tf.summary.scalar(
+        mb_train_loss_summary = tf.compat.v1.summary.scalar(
             "training/minibatch_train_losses",
             loss,
-            collections=[tf.GraphKeys.SUMMARIES, "per_iteration"],
+            collections=[tf.compat.v1.GraphKeys.SUMMARIES, "per_iteration"],
         )
         # per epoch
-        lr_summary = tf.summary.scalar(
+        lr_summary = tf.compat.v1.summary.scalar(
             "hyperparams/learning_rate",
             learning_rate_var,
-            collections=[tf.GraphKeys.SUMMARIES, "per_epoch"],
+            collections=[tf.compat.v1.GraphKeys.SUMMARIES, "per_epoch"],
         )
-        batch_summary = tf.summary.scalar(
+        batch_summary = tf.compat.v1.summary.scalar(
             "hyperparams/batch_size",
             batch_size,
-            collections=[tf.GraphKeys.SUMMARIES, "per_epoch"],
+            collections=[tf.compat.v1.GraphKeys.SUMMARIES, "per_epoch"],
         )
 
-        per_iter_summaries = tf.summary.merge_all(key="per_iteration")
-        per_epoch_summaries = tf.summary.merge_all(key="per_epoch")
-        summary_writer = tf.summary.FileWriter(tb_log_dir)
+        per_iter_summaries = tf.compat.v1.summary.merge_all(key="per_iteration")
+        per_epoch_summaries = tf.compat.v1.summary.merge_all(key="per_epoch")
+        summary_writer = tf.compat.v1.summary.FileWriter(tb_log_dir)
         return per_iter_summaries, per_epoch_summaries, summary_writer
 
     @staticmethod
@@ -62,7 +62,7 @@ class TFRunner(Runner):
             raise NotImplementedError(
                 "Phase " + phase + " not implemented for write_epoch_summary()."
             )
-        summary = tf.Summary()
+        summary = tf.compat.v1.Summary()
         summary.value.add(tag=tag + "loss_", simple_value=loss_)
         summary.value.add(tag=tag + "acc_", simple_value=acc_)
         per_epoch_summary_ = sess.run(per_epoch_summaries)
@@ -103,8 +103,8 @@ class TFRunner(Runner):
             tproblem = testproblem_cls(batch_size)
 
         # Set up the testproblem.
-        tf.reset_default_graph()
-        tf.set_random_seed(random_seed)
+        tf.compat.v1.reset_default_graph()
+        tf.compat.v1.set_random_seed(random_seed)
         tproblem.set_up()
         return tproblem
 
@@ -261,7 +261,7 @@ class StandardRunner(TFRunner):
         tb_log_dir,
     ):
 
-        loss = tf.reduce_mean(tproblem.losses) + tproblem.regularizer
+        loss = tf.reduce_mean(input_tensor=tproblem.losses) + tproblem.regularizer
 
         # Set up the optimizer and create learning rate schedule.
         global_step = tf.Variable(0, trainable=False)
@@ -277,7 +277,7 @@ class StandardRunner(TFRunner):
         # Call optimizer's minimize on loss to update all variables in the
         # TRAINABLE_VARIABLES collection (with a dependency on performing all ops
         # in the collection UPDATE_OPS collection for batch norm, etc).
-        with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
+        with tf.control_dependencies(tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)):
             # Try to pass with global step, otherwise don't pass it
             try:
                 step = opt.minimize(loss, global_step=global_step)
@@ -304,10 +304,10 @@ class StandardRunner(TFRunner):
             summary_writer = None
 
         # Start tensorflow session and initialize variables.
-        config = tf.ConfigProto()
+        config = tf.compat.v1.ConfigProto()
         config.gpu_options.allow_growth = True
-        sess = tf.Session(config=config)
-        sess.run(tf.global_variables_initializer())
+        sess = tf.compat.v1.Session(config=config)
+        sess.run(tf.compat.v1.global_variables_initializer())
 
         # Start of training loop.
         for n in range(num_epochs + 1):
@@ -473,7 +473,7 @@ class LearningRateScheduleRunner(TFRunner):
             where the metrices values are lists that were filled during training.
     """
 
-        loss = tf.reduce_mean(tproblem.losses) + tproblem.regularizer
+        loss = tf.reduce_mean(input_tensor=tproblem.losses) + tproblem.regularizer
 
         # Set up the optimizer and create learning rate schedule.
         global_step = tf.Variable(0, trainable=False)
@@ -492,7 +492,7 @@ class LearningRateScheduleRunner(TFRunner):
         # Call optimizer's minimize on loss to update all variables in the
         # TRAINABLE_VARIABLES collection (with a dependency on performing all ops
         # in the collection UPDATE_OPS collection for batch norm, etc).
-        with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
+        with tf.control_dependencies(tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)):
             # Try to pass with global step, otherwise don't pass it
             try:
                 step = opt.minimize(loss, global_step=global_step)
@@ -519,10 +519,10 @@ class LearningRateScheduleRunner(TFRunner):
             summary_writer = None
 
         # Start tensorflow session and initialize variables.
-        config = tf.ConfigProto()
+        config = tf.compat.v1.ConfigProto()
         config.gpu_options.allow_growth = True
-        sess = tf.Session(config=config)
-        sess.run(tf.global_variables_initializer())
+        sess = tf.compat.v1.Session(config=config)
+        sess.run(tf.compat.v1.global_variables_initializer())
 
         # Start of training loop.
         for n in range(num_epochs + 1):

@@ -90,7 +90,7 @@ class tolstoi(dataset.DataSet):
         X = np.array(x_batches)
         Y = np.array(y_batches)
 
-        with tf.name_scope(self._name):
+        with tf.compat.v1.name_scope(self._name):
             with tf.device("/cpu:0"):
                 data = tf.data.Dataset.from_tensor_slices((X, Y))
                 data = data.prefetch(buffer_size=4)

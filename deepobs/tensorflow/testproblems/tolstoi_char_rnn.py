@@ -2,6 +2,7 @@
 """A two-layer LSTM for character-level language modelling on Tolstoi's War and Peace."""
 
 import tensorflow as tf
+import tensorflow_addons as tfa
 
 from ..datasets.tolstoi import tolstoi
 from .testproblem import TestProblem
@@ -75,19 +76,19 @@ class tolstoi_char_rnn(TestProblem):
         rnn_size = 128
 
         input_keep_prob = tf.cond(
-            tf.equal(self.dataset.phase, tf.constant("train")),
-            lambda: tf.constant(0.8),
-            lambda: tf.constant(1.0),
+            pred=tf.equal(self.dataset.phase, tf.constant("train")),
+            true_fn=lambda: tf.constant(0.8),
+            false_fn=lambda: tf.constant(1.0),
         )
         output_keep_prob = tf.cond(
-            tf.equal(self.dataset.phase, tf.constant("train")),
-            lambda: tf.constant(0.8),
-            lambda: tf.constant(1.0),
+            pred=tf.equal(self.dataset.phase, tf.constant("train")),
+            true_fn=lambda: tf.constant(0.8),
+            false_fn=lambda: tf.constant(1.0),
         )
 
         # Create an embedding matrix, look up embedding of input
-        embedding = tf.get_variable("embedding", [vocab_size, rnn_size])
-        inputs = tf.nn.embedding_lookup(embedding, x)
+        embedding = tf.compat.v1.get_variable("embedding", [vocab_size, rnn_size])
+        inputs = tf.nn.embedding_lookup(params=embedding, ids=x)
 
         # Split batch of input sequences along time, such that inputs[i] is a
         # batch_size x embedding_size representation of the batch of characters
@@ -98,14 +99,14 @@ class tolstoi_char_rnn(TestProblem):
         # Make Multi LSTM cell
         cells = []
         for _ in range(num_layers):
-            cell = tf.contrib.rnn.LSTMCell(rnn_size)
-            cell = tf.contrib.rnn.DropoutWrapper(
+            cell = tf.compat.v1.nn.rnn_cell.LSTMCell(rnn_size)
+            cell = tf.compat.v1.nn.rnn_cell.DropoutWrapper(
                 cell,
                 input_keep_prob=input_keep_prob,
                 output_keep_prob=output_keep_prob,
             )
             cells.append(cell)
-        cell = tf.contrib.rnn.MultiRNNCell(cells, state_is_tuple=True)
+        cell = tf.compat.v1.nn.rnn_cell.MultiRNNCell(cells, state_is_tuple=True)
 
         # Create RNN using the cell defined above, (including operations that store)
         # the state in variables
@@ -113,7 +114,7 @@ class tolstoi_char_rnn(TestProblem):
             self._batch_size, cell
         )
 
-        outputs, new_states = tf.nn.static_rnn(
+        outputs, new_states = tf.compat.v1.nn.static_rnn(
             cell, inputs, initial_state=self.state_variables
         )
         with tf.control_dependencies(outputs):
@@ -128,9 +129,9 @@ class tolstoi_char_rnn(TestProblem):
         # print "Shape of output", output.get_shape()
 
         # Apply softmax layer
-        with tf.variable_scope("rnnlm"):
-            softmax_w = tf.get_variable("softmax_w", [rnn_size, vocab_size])
-            softmax_b = tf.get_variable("softmax_b", [vocab_size])
+        with tf.compat.v1.variable_scope("rnnlm"):
+            softmax_w = tf.compat.v1.get_variable("softmax_w", [rnn_size, vocab_size])
+            softmax_b = tf.compat.v1.get_variable("softmax_b", [vocab_size])
         logits = tf.matmul(output, softmax_w) + softmax_b
         # print logits.get_shape()
 
@@ -139,7 +140,7 @@ class tolstoi_char_rnn(TestProblem):
         # print "Shape of reshaped logits", reshaped_logits.get_shape()
 
         # Create vector of losses
-        self.losses = tf.contrib.seq2seq.sequence_loss(
+        self.losses = tfa.seq2seq.sequence_loss(
             reshaped_logits,
             y,
             weights=tf.ones([self._batch_size, seq_length], dtype=tf.float32),
@@ -147,11 +148,11 @@ class tolstoi_char_rnn(TestProblem):
             average_across_batch=False,
         )
 
-        predictions = tf.argmax(reshaped_logits, 2)
+        predictions = tf.argmax(input=reshaped_logits, axis=2)
         correct_prediction = tf.equal(predictions, y)
-        self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        self.accuracy = tf.reduce_mean(input_tensor=tf.cast(correct_prediction, tf.float32))
 
-        self.regularizer = tf.losses.get_regularization_loss()
+        self.regularizer = tf.compat.v1.losses.get_regularization_loss()
 
         self.train_init_op = tf.group(
             [
@@ -196,7 +197,7 @@ class tolstoi_char_rnn(TestProblem):
         state_variables = []
         for state_c, state_h in zero_state:
             state_variables.append(
-                tf.contrib.rnn.LSTMStateTuple(
+                tf.nn.rnn_cell.LSTMStateTuple(
                     tf.Variable(state_c, trainable=False),
                     tf.Variable(state_h, trainable=False),
                 )
@@ -228,4 +229,4 @@ class tolstoi_char_rnn(TestProblem):
             )
         # Return a tuple in order to combine all update_ops into a single operation.
         # The tuple's actual value should not be used.
-        return tf.tuple(update_ops)
+        return tf.tuple(tensors=update_ops)

@@ -72,18 +72,18 @@ class _quadratic_base(TestProblem):
         self.test_init_op = self.dataset.test_init_op
 
         x = self.dataset.batch
-        hessian = tf.convert_to_tensor(self._hessian, dtype=tf.float32)
-        theta = tf.get_variable(
+        hessian = tf.convert_to_tensor(value=self._hessian, dtype=tf.float32)
+        theta = tf.compat.v1.get_variable(
             "theta",
             shape=(1, hessian.shape[0]),
-            initializer=tf.constant_initializer(1.0),
+            initializer=tf.compat.v1.constant_initializer(1.0),
         )
 
         self.losses = tf.linalg.tensor_diag_part(
             0.5
             * tf.matmul(
                 tf.subtract(theta, x),
-                tf.matmul(hessian, tf.transpose(tf.subtract(theta, x))),
+                tf.matmul(hessian, tf.transpose(a=tf.subtract(theta, x))),
             )
         )
-        self.regularizer = tf.losses.get_regularization_loss()
+        self.regularizer = tf.compat.v1.losses.get_regularization_loss()
