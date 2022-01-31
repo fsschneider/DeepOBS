@@ -7,9 +7,9 @@ from ._quadratic import _quadratic_base
 
 # Random generator with a fixed seed to randomly draw eigenvalues and rotation.
 # These are fixed properties of the test problem and should _not_ be randomized.
-rng = np.random.RandomState(42)
 
-def random_rotation(D):
+
+def random_rotation(D, rng=None):
     """Produces a rotation matrix R in SO(D) (the special orthogonal
     group SO(D), or orthogonal matrices with unit determinant, drawn uniformly
     from the Haar measure.
@@ -25,6 +25,8 @@ def random_rotation(D):
         np.array: Random rotation matrix ``R``.
 
     """
+    if rng is None:
+        rng = np.random.RandomState(42)
     assert D >= 2
     D = int(D)  # make sure that the dimension is an integer
 
@@ -90,9 +92,12 @@ class quadratic_deep(_quadratic_base):
           weight_decay (float): No weight decay (L2-regularization) is used in this
               test problem. Defaults to ``None`` and any input here is ignored.
         """
+
+        rng = np.random.RandomState(42)
+
         eigenvalues = np.concatenate(
             (rng.uniform(0., 1., 90), rng.uniform(30., 60., 10)), axis=0)
         D = np.diag(eigenvalues)
-        R = random_rotation(D.shape[0])
+        R = random_rotation(D.shape[0], rng)
         hessian = np.matmul(np.transpose(R), np.matmul(D, R))
         super(quadratic_deep, self).__init__(batch_size, weight_decay, hessian)

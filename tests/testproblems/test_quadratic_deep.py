@@ -52,6 +52,12 @@ class Quadratic_DeepTest(unittest.TestCase):
                 self.assertEqual(losses_.shape, (self.batch_size, ))
                 self.assertIsInstance(regularizer_, np.float32)
 
+    def test_repeatability(self):
+
+        quadratic_deep_1 = testproblems.quadratic_deep(batch_size = 1)
+        quadratic_deep_2 = testproblems.quadratic_deep(batch_size = 1)
+
+        np.testing.assert_almost_equal(quadratic_deep_1._hessian, quadratic_deep_2._hessian, decimal=5)
 
 if __name__ == "__main__":
     unittest.main()
