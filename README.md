@@ -1,5 +1,12 @@
 # DeepOBS - A Deep Learning Optimizer Benchmark Suite
 
+----
+
+> This package is no longer maintained.
+> It is superseded by the [AlgoPerf benchmark suite](https://github.com/mlcommons/algorithmic-efficiency)
+
+-----
+
 ![DeepOBS](docs/deepobs_banner.png "DeepOBS")
 
 [![PyPI version](https://badge.fury.io/py/deepobs.svg)](https://badge.fury.io/py/deepobs)
